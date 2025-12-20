@@ -1,8 +1,9 @@
+from components.dwh import pd, load_to_postgres, load_to_postgis, get_travel_times_by_region, get_region_borders
+from components.utilities import make_grid_3d_time, generate_name, Earth
+
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
-from dwh import pd, load_to_postgres, load_to_postgis, get_travel_times_by_region, get_region_borders
-from utilities import make_grid_3d_time, generate_name, Earth
 from tqdm import tqdm
 import math
 import json
@@ -164,57 +165,6 @@ def get_travel_times_for_node(
     mask = (dist_events <= r_events) & (dist_stations <= r_stations)
     return df.loc[mask]
 
-# def estimate_ts_tp_ratio(lon, lat, r_events, r_stations, dttm_from, dttm_to):
-#     df = get_tp_ts(lon, lat, r_events, r_stations, dttm_from, dttm_to)
-#     if df.empty:
-#         return {"result": "empty_df"}, None
-
-#     if df.empty:
-#         return {"result": "empty_df_filtered"}, None
-
-    # df["ratio_ts_tp"] = df["delta_t_s"] / df["delta_t_p"]
-
-    # X = df[["delta_t_p"]].values
-    # y = df["delta_t_s"].values
-    # n_points = len(df)
-
-    # # free regression
-    # model_free = LinearRegression()
-    # try:
-    #     model_free.fit(X, y)
-    # except Exception as e:
-    #     return {"error": str(e)}, None
-
-    # k_free = float(model_free.coef_[0])
-    # b_free = float(model_free.intercept_)
-    # y_pred_free = model_free.predict(X)
-    # rmse_free = float(np.sqrt(mean_squared_error(y, y_pred_free)))
-    # r2_free = float(r2_score(y, y_pred_free))
-
-    # # zero-intercept regression
-    # model_zero = LinearRegression(fit_intercept=False)
-    # model_zero.fit(X, y)
-    # k_zero = float(model_zero.coef_[0])
-    # y_pred_zero = model_zero.predict(X)
-    # rmse_zero = float(np.sqrt(mean_squared_error(y, y_pred_zero)))
-    # r2_zero = float(r2_score(y, y_pred_zero))
-
-    # return {
-    #     "n_points": n_points,
-    #     "regression_free": {
-    #         "k": k_free,
-    #         "b": b_free,
-    #         "rmse": rmse_free,
-    #         "r2": r2_free
-    #     },
-    #     "regression_zero_intercept": {
-    #         "k": k_zero,
-    #         "rmse": rmse_zero,
-    #         "r2": r2_zero
-    #     }
-    # }, df
-
-
 def run_experiment_vp_vs(
     region_nm, 
     n_steps_lat, 
@@ -318,4 +268,3 @@ def prepare_events_x_stations_data(df):
     edges_df = df[['event_id', 'station_id']].drop_duplicates()
     
     return events_df, stations_df, edges_df
-

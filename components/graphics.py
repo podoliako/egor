@@ -1,18 +1,17 @@
+from .utilities import generate_name
+
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D, art3d
 import cartopy.crs as ccrs
 from scipy.interpolate import griddata
 import cartopy.feature as cfeature
-from componets.utilities import time, np, generate_name
 from scipy.stats import ttest_ind
-from componets.utilities import pd, np, os
 from pathlib import Path
 
 
 def plot_vels_2d(grid, v_data, file_name='2d_vels.png'):
     fig = plt.figure(figsize=(12, 10))
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
-    # print(grid[0], grid[1], v_data)
     contour = ax.tricontourf(list(grid[0]), list(grid[1]), list(v_data), 
                         levels=20, cmap='viridis', alpha=0.8)
     cbar = plt.colorbar(contour, shrink=0.7, label='Скорость Vs (м/с)')
@@ -348,109 +347,6 @@ def plot_and_compare_stddev_by_date(
             'groupA_y': groupA['y'].values,
             'groupB_y': groupB['y'].values}
 
-
-# def plot_grid_nodes(grid,
-#                     file_name=None,
-#                     ax=None,
-#                     figsize=(10, 8),
-#                     marker='o',
-#                     s=10,
-#                     color='red',
-#                     edgecolor='k',
-#                     alpha=0.8,
-#                     annotate=False,
-#                     annotate_step=1,
-#                     show=True,
-#                     add_coastlines=True):
-
-#     # --- 1. Получаем lats/lons и (при необходимости) ключи ---
-#     keys = None
-#     if isinstance(grid, dict):
-#         # сортируем по ключам (ix,iy) для предсказуемости
-#         items = sorted(grid.items(), key=lambda kv: (kv[0][0], kv[0][1]))
-#         keys = [k for k, v in items]
-#         lats = np.array([v[0] for k, v in items])
-#         lons = np.array([v[1] for k, v in items])
-#     else:
-#         # ожидаем (lats, lons) или numpy array
-#         arr = np.asarray(grid)
-#         if arr.ndim == 2 and arr.shape[1] == 2:
-#             # Nx2: [ [lat, lon], ... ]
-#             lats = arr[:, 0]
-#             lons = arr[:, 1]
-#         elif arr.ndim == 2 and arr.shape[0] == 2:
-#             # 2xN: [ [lats], [lons] ]
-#             lats = arr[0, :]
-#             lons = arr[1, :]
-#         elif isinstance(grid, (list, tuple)) and len(grid) == 2:
-#             lats = np.asarray(grid[0])
-#             lons = np.asarray(grid[1])
-#         else:
-#             raise ValueError("Unsupported grid format. Use dict, (lats, lons), Nx2 or 2xN array.")
-
-#     # --- 2. Создаём фигуру/ось, если нужно ---
-#     created_fig = False
-#     if ax is None:
-#         fig = plt.figure(figsize=figsize)
-#         ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
-#         created_fig = True
-#     else:
-#         fig = ax.get_figure()
-
-#     # --- 3. Рисуем точки ---
-#     sc = ax.scatter(lons, lats,
-#                     transform=ccrs.PlateCarree(),
-#                     s=s, marker=marker,
-#                     edgecolors=edgecolor,
-#                     alpha=alpha,
-#                     zorder=5,
-#                     label='grid nodes',
-#                     facecolors=color)
-
-#     # --- 4. Контекст карты ---
-#     if add_coastlines:
-#         try:
-#             ax.coastlines(resolution='50m')
-#         except Exception:
-#             # в некоторых окружениях высокое разрешение может отсутствовать
-#             ax.coastlines()
-#     # Линии сетки (подписи)
-#     gl = ax.gridlines(crs=ccrs.PlateCarree(), draw_labels=True,
-#                       linewidth=0.4, color='gray', alpha=0.5, linestyle='--')
-#     gl.top_labels = False
-#     gl.right_labels = False
-#     gl.xlabel_style = {'size': 10}
-#     gl.ylabel_style = {'size': 10}
-
-#     # --- 5. Подписи узлов (опционально) ---
-#     if annotate and keys is not None:
-#         for i, (lat, lon) in enumerate(zip(lats, lons)):
-#             if (i % annotate_step) != 0:
-#                 continue
-#             ix, iy = keys[i]
-#             ax.text(lon, lat, f'{ix},{iy}',
-#                     transform=ccrs.PlateCarree(),
-#                     fontsize=6, ha='center', va='center', zorder=6,
-#                     bbox=dict(boxstyle="round,pad=0.1", fc="white", alpha=0.6, lw=0.0))
-
-#     # --- 6. Сохранение файла ---
-#     if file_name is None:
-#         # используем generate_name из utilities (у тебя он есть)
-#         file_name = f'pictures/{generate_name(["grid_nodes"])}.png'
-
-#     os.makedirs(os.path.dirname(file_name), exist_ok=True)
-#     plt.tight_layout()
-#     plt.savefig(file_name, dpi=300, bbox_inches='tight')
-
-#     if show:
-#         plt.show()
-#     else:
-#         # если фигура была создана внутри функции и show=False — закрываем, чтобы не утекла память
-#         if created_fig:
-#             plt.close(fig)
-
-#     return fig, ax
-
 def plot_spatial_distribution(df, param_nm, output_filename,
                                vmin=None, vmax=None,
                                lon_bounds=None, lat_bounds=None,
@@ -509,8 +405,6 @@ def plot_spatial_distribution(df, param_nm, output_filename,
     plt.savefig(output_filename, dpi=dpi, bbox_inches='tight')
     plt.close()
 
-
-
 def plot_delta_t(df, plt_nm=generate_name(['delta_t'])):
     """
     Строит график зависимости delta_t_s от delta_t_p.
@@ -533,13 +427,6 @@ def plot_delta_t(df, plt_nm=generate_name(['delta_t'])):
         s=0.3
     )
 
-    # # Диагональная линия y=x
-    # lims = [
-    #     min(df['delta_t_p'].min(), df['delta_t_s'].min()),
-    #     max(df['delta_t_p'].max(), df['delta_t_s'].max())
-    # ]
-    # plt.plot(lims, lims, 'k--', lw=1)
-
     plt.xlabel("Δt (P-wave), sec")
     plt.ylabel("Δt (S-wave), sec")
     plt.title("Зависимость времени прихода S-волн от P-волн")
@@ -556,7 +443,6 @@ def plot_delta_t(df, plt_nm=generate_name(['delta_t'])):
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.tight_layout()
     plt.savefig(plt_nm)
-
 
 def plot_spatial_distribution_series(df, param_nm, experiment_name,
                                      time_from_col='t_from', time_to_col='t_to',
@@ -609,7 +495,6 @@ def plot_spatial_distribution_series(df, param_nm, experiment_name,
         saved_files.append(fname)
 
     return saved_files
-
 
 def plot_events_stations(events_df, stations_df, edges_df, plot_nm='events-stations.png'):
     """

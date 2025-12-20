@@ -1,14 +1,18 @@
+import sys
+from pathlib import Path
+
+root = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(root))
+
 import psycopg2
 import pandas as pd
 # from utilities import make_grid_2d
-from graphics import plot_spatial_distribution, plot_delta_t, plot_spatial_distribution_series, plot_events_stations
-from dwh import get_experiment, get_tp_ts_by_exp, get_df_by_query, get_travel_times_by_region
-from Vadati.instruments import run_experiment_vp_vs, prepare_events_x_stations_data, get_travel_times_for_node, estimate_vp_vs_ratio
+from components.graphics import plot_spatial_distribution, plot_delta_t, plot_spatial_distribution_series, plot_events_stations
+from components.dwh import get_experiment, get_tp_ts_by_exp, get_df_by_query, get_travel_times_by_region
+from instruments import run_experiment_vp_vs, prepare_events_x_stations_data, get_travel_times_for_node, estimate_vp_vs_ratio
 import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
-
-
 
 
 
@@ -46,24 +50,15 @@ warnings.filterwarnings('ignore')
 
 # plot_delta_t(df)
 
+def plot_node_example():
+    tt_df = get_travel_times_by_region('Kamchatka', '2010-01-01', '2010-12-31')
+    print(tt_df)
 
-tt_df = get_travel_times_by_region('Kamchatka', '2010-01-01', '2010-12-31')
-print(tt_df)
+    node_df = get_travel_times_for_node(tt_df, 160, 53, 75000, 500000, '2010-01-01', '2010-12-31')
+    print(node_df)
 
-node_df = get_travel_times_for_node(tt_df, 160, 53, 75000, 500000, '2010-01-01', '2010-12-31')
-print(node_df)
+    ev_df, st_df, ar_df = prepare_events_x_stations_data(node_df)
+    plot_events_stations(ev_df, st_df, ar_df, 'events-stations_small_R.png')
 
-ev_df, st_df, ar_df = prepare_events_x_stations_data(node_df)
-plot_events_stations(ev_df, st_df, ar_df, 'events-stations_small_R.png')
-
-# result = estimate_vp_vs_ratio(node_df)
-# print(result)
-
-
-
-
-
-# print(df)
-
-# events_df, stations_df, edges_df = prepare_events_x_stations_data(df)
-# plot_events_stations(events_df, stations_df, edges_df, 'events-stations_one_point.png')
+if __name__ == '__main__':
+    plot_node_example()
