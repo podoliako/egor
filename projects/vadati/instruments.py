@@ -268,3 +268,10 @@ def prepare_events_x_stations_data(df):
     edges_df = df[['event_id', 'station_id']].drop_duplicates()
     
     return events_df, stations_df, edges_df
+
+def get_unique_subset(df, uniqe_by, subset_columns=None):
+    if subset_columns is None:
+        subset_columns = uniqe_by
+    unique_combinations = df.drop_duplicates(subset=uniqe_by)
+    result = unique_combinations[subset_columns].reset_index(drop=True)
+    return result

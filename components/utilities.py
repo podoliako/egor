@@ -8,6 +8,7 @@ import re
 import os
 import requests
 import datetime
+from haversine import haversine
 
 class Point:
     def __init__(self, depth, lon, lat):
@@ -100,6 +101,152 @@ class Earth:
         u = t[2][0]*dx + t[2][1]*dy + t[2][2]*dz
 
         return e, n, u
+
+class Grid3DTime:
+    """3D пространственно-временная сетка с удобной индексацией."""
+    
+    def __init__(self, lat_min, lat_max, lon_min, lon_max,
+                 n_steps_lat, n_steps_lon,
+                 dttm_from, dttm_to, n_steps_time):
+        self.n_steps_lat = n_steps_lat
+        self.n_steps_lon = n_steps_lon
+        self.n_steps_time = n_steps_time
+        
+        # Парсим даты
+        if isinstance(dttm_from, str):
+            dttm_from = datetime.datetime.strptime(dttm_from, "%Y-%m-%d")
+        if isinstance(dttm_to, str):
+            dttm_to = datetime.datetime.strptime(dttm_to, "%Y-%m-%d")
+        
+        self.dttm_from = dttm_from
+        self.dttm_to = dttm_to
+        
+        # Предвычисляем сетку
+        self.lat_arr = np.linspace(lat_min, lat_max, n_steps_lat)
+        self.lon_arr = np.linspace(lon_min, lon_max, n_steps_lon)
+        
+        # Массив временных меток
+        total_seconds = (self.dttm_to - self.dttm_from).total_seconds()
+        self.time_arr = [
+            self.dttm_from + datetime.timedelta(seconds=i * total_seconds / (self.n_steps_time - 1))
+            for i in range(self.n_steps_time)
+        ]
+    
+    def __getitem__(self, idx):
+        """Доступ по индексам [x, y, t]."""
+        if isinstance(idx, tuple) and len(idx) == 3:
+            ix, iy, it = idx
+            
+            # Проверка границ
+            if not (0 <= ix < self.n_steps_lat):
+                raise IndexError(f"x индекс {ix} вне диапазона [0, {self.n_steps_lat})")
+            if not (0 <= iy < self.n_steps_lon):
+                raise IndexError(f"y индекс {iy} вне диапазона [0, {self.n_steps_lon})")
+            if not (0 <= it < self.n_steps_time):
+                raise IndexError(f"t индекс {it} вне диапазона [0, {self.n_steps_time})")
+            
+            return {
+                'lat': self.lat_arr[ix],
+                'lon': self.lon_arr[iy],
+                'dttm': self.time_arr[it],
+                'ix': ix,
+                'iy': iy,
+                'it': it
+            }
+        else:
+            raise TypeError("Индекс должен быть кортежем из 3 элементов (x, y, t)")
+    
+    def iter_all(self):
+        """Итератор по всем точкам сетки."""
+        for it in range(self.n_steps_time):
+            for ix in range(self.n_steps_lat):
+                for iy in range(self.n_steps_lon):
+                    yield self[ix, iy, it]
+    
+    def iter_time_slice(self, it):
+        """Итератор по временному срезу."""
+        for ix in range(self.n_steps_lat):
+            for iy in range(self.n_steps_lon):
+                yield self[ix, iy, it]
+    
+    def iter_spatial_point(self, ix, iy):
+        """Итератор по временной эволюции одной точки."""
+        for it in range(self.n_steps_time):
+            yield self[ix, iy, it]
+
+    def find_nodes_in_radius(self, e_lon, e_lat, radius_km):
+        """
+        Находит узлы сетки внутри круга радиуса R от события.
+        Использует библиотеку haversine для расчета расстояний.
+        """
+        # Оценка ограничивающего прямоугольника
+        lat_degree_dist = 111.0
+        lon_degree_dist = 111.0 * np.cos(np.radians(e_lat))
+        
+        delta_lat = radius_km / lat_degree_dist
+        delta_lon = radius_km / lon_degree_dist if lon_degree_dist > 0 else 180
+        
+        ix_min = np.searchsorted(self.lat_arr, e_lat - delta_lat, side='left')
+        ix_max = np.searchsorted(self.lat_arr, e_lat + delta_lat, side='right')
+        iy_min = np.searchsorted(self.lon_arr, e_lon - delta_lon, side='left')
+        iy_max = np.searchsorted(self.lon_arr, e_lon + delta_lon, side='right')
+        
+        ix_min = max(0, ix_min)
+        ix_max = min(self.n_steps_lat, ix_max)
+        iy_min = max(0, iy_min)
+        iy_max = min(self.n_steps_lon, iy_max)
+        
+        ranges = []
+        total_count = 0
+        
+        event_point = (e_lat, e_lon)  # haversine требует (lat, lon)
+        
+        for ix in range(ix_min, ix_max):
+            lat = self.lat_arr[ix]
+            iy_start = None
+            
+            for iy in range(iy_min, iy_max):
+                lon = self.lon_arr[iy]
+                grid_point = (lat, lon)
+                
+                dist = haversine(event_point, grid_point)
+                
+                if dist <= radius_km:
+                    if iy_start is None:
+                        iy_start = iy
+                    iy_end = iy
+                else:
+                    if iy_start is not None:
+                        ranges.append((ix, iy_start, iy_end))
+                        total_count += (iy_end - iy_start + 1)
+                        iy_start = None
+            
+            if iy_start is not None:
+                ranges.append((ix, iy_start, iy_end))
+                total_count += (iy_end - iy_start + 1)
+        
+        return {
+            'ranges': ranges,
+            'count': total_count,
+            'bbox': (ix_min, ix_max, iy_min, iy_max)
+        }
+    
+    @property
+    def shape(self):
+        """Размерность сетки."""
+        return (self.n_steps_lat, self.n_steps_lon, self.n_steps_time)
+    
+    def __repr__(self):
+        return f"Grid3DTime(shape={self.shape}, time_range=[{self.dttm_from}, {self.dttm_to}])"
+
+
+def make_grid_3d_time(lat_min, lat_max, lon_min, lon_max,
+                      n_steps_lat, n_steps_lon,
+                      dttm_from, dttm_to, n_steps_time):
+    """Создает 3D пространственно-временную сетку."""
+    return Grid3DTime(lat_min, lat_max, lon_min, lon_max,
+                     n_steps_lat, n_steps_lon,
+                     dttm_from, dttm_to, n_steps_time)
     
 def get_elevation(points):
     req_string = ''

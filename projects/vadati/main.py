@@ -9,7 +9,7 @@ import pandas as pd
 # from utilities import make_grid_2d
 from components.graphics import plot_spatial_distribution, plot_delta_t, plot_spatial_distribution_series, plot_events_stations
 from components.dwh import get_travel_times_by_region
-from instruments import run_experiment_vp_vs, prepare_events_x_stations_data, get_travel_times_for_node, estimate_vp_vs_ratio
+from instruments import run_experiment_vp_vs, prepare_events_x_stations_data, get_travel_times_for_node, get_unique_subset
 import matplotlib.pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
@@ -60,5 +60,14 @@ def plot_node_example():
     ev_df, st_df, ar_df = prepare_events_x_stations_data(node_df)
     plot_events_stations(ev_df, st_df, ar_df)
 
+def get_travel_times_stations_and_events():
+    tt_df = get_travel_times_by_region('Kamchatka', '2010-01-01', '2010-12-31')
+    events_df = get_unique_subset(tt_df, ['event_id'], ['event_id', 'e_lon', 'e_lat', 'event_dttm'])
+    stations_df = get_unique_subset(tt_df,['station_nm', 'network_nm'], ['station_nm', 'network_nm', 's_lon', 's_lat']) 
+    print(events_df)
+    print(stations_df)
+
+
 if __name__ == '__main__':
-    plot_node_example()
+    get_travel_times_stations_and_events()
+    # plot_node_example()
