@@ -4,6 +4,7 @@ import time
 import pandas as pd
 from pathlib import Path
 import glob
+import json
 import re
 import os
 import requests
@@ -425,3 +426,30 @@ def get_tables_summary(folder_path):
     
     summary_df = pd.DataFrame(summary_list)
     return summary_df
+
+def extract_param(df, param_path):
+    """
+    Извлекает параметр из JSON в отдельную колонку.
+    
+    Parameters:
+    -----------
+    df : pd.DataFrame
+        Датафрейм с колонкой params
+    param_path : str or list
+        Путь к параметру, например 'lon' или ['linear_regression', 'slope']
+    
+    Returns:
+    --------
+    pd.Series с извлеченными значениями
+    """
+    if isinstance(param_path, str):
+        return df['params'].apply(lambda x: x.get(param_path))
+    else:
+        # Для вложенных параметров
+        def get_nested(d, path):
+            for key in path:
+                if d is None:
+                    return None
+                d = d.get(key)
+            return d
+        return df['params'].apply(lambda x: get_nested(x, param_path))

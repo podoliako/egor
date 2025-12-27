@@ -4,6 +4,7 @@ from components.utilities import make_grid_3d_time, generate_name, Earth
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
+from scipy import stats
 from collections import defaultdict
 from tqdm import tqdm
 import math
@@ -329,6 +330,118 @@ def build_grid_travel_times(grid, travel_time_df, events_df, stations_df):
     
     return dict(grid_data)
 
+def build_final_experiment_df(grid, grid_travel_times):
+    """
+    Создает финальный датафрейм эксперимента с индексами узлов
+    и всеми параметрами в JSON.
+    
+    Parameters:
+    -----------
+    grid : Grid3DTime
+        Сетка
+    grid_travel_times : dict
+        Результат build_grid_travel_times_optimized
+    
+    Returns:
+    --------
+    pd.DataFrame с колонками:
+        - ix, iy, it: индексы узла
+        - params: JSON с координатами, временем и статистиками
+    """
+    rows = []
+    
+    for (ix, iy, it), measurements in grid_travel_times.items():
+        # Получаем параметры узла из сетки
+        node = grid[ix, iy, it]
+        
+        # Конвертируем измерения в numpy массив
+        measurements_array = np.array(measurements)
+        delta_t_s_values = measurements_array[:, 0]
+        delta_t_p_values = measurements_array[:, 1]
+        
+        n_measurements = len(measurements)
+        
+        # Собираем все параметры в словарь
+        params = {
+            # Координаты и время узла
+            'lon': float(node['lon']),
+            'lat': float(node['lat']),
+            'dttm': node['dttm'].isoformat(),
+            
+            # Количество измерений
+            'n_measurements': n_measurements,
+            
+            # Статистики по delta_t_s
+            'delta_t_s': {
+                'mean': float(delta_t_s_values.mean()),
+                'std': float(delta_t_s_values.std()),
+                'min': float(delta_t_s_values.min()),
+                'max': float(delta_t_s_values.max()),
+            },
+            
+            # Статистики по delta_t_p
+            'delta_t_p': {
+                'mean': float(delta_t_p_values.mean()),
+                'std': float(delta_t_p_values.std()),
+                'min': float(delta_t_p_values.min()),
+                'max': float(delta_t_p_values.max()),
+            },
+            
+            # Линейная регрессия
+            'linear_regression': {}
+        }
+        
+        # Линейная регрессия: delta_t_p = slope * delta_t_s + intercept
+        if n_measurements >= 2:
+            try:
+                lr_result = stats.linregress(delta_t_p_values, delta_t_s_values)
+                params['linear_regression'] = {
+                    'slope': float(lr_result.slope),
+                    'intercept': float(lr_result.intercept),
+                    'r_value': float(lr_result.rvalue),
+                    'r_squared': float(lr_result.rvalue ** 2),
+                    'p_value': float(lr_result.pvalue),
+                    'stderr': float(lr_result.stderr),
+                    'significant': bool(lr_result.pvalue < 0.05),
+                }
+            except Exception as e:
+                params['linear_regression'] = {
+                    'slope': None,
+                    'intercept': None,
+                    'r_value': None,
+                    'r_squared': None,
+                    'p_value': None,
+                    'stderr': None,
+                    'significant': False,
+                    'error': str(e)
+                }
+        else:
+            params['linear_regression'] = {
+                'slope': None,
+                'intercept': None,
+                'r_value': None,
+                'r_squared': None,
+                'p_value': None,
+                'stderr': None,
+                'significant': False,
+                'error': 'insufficient_data'
+            }
+        
+        rows.append({
+            'ix': ix,
+            'iy': iy,
+            'it': it,
+            'params': params
+        })
+    
+    # Создаем датафрейм
+    df = pd.DataFrame(rows)
+    
+    # Сортируем по индексам для удобства
+    df = df.sort_values(['it', 'ix', 'iy']).reset_index(drop=True)
+    
+    return df
+
 def _ranges_to_set(ranges):
     """Вспомогательная функция: конвертирует ranges в множество (ix, iy)."""
     nodes = set()
@@ -336,3 +449,4 @@ def _ranges_to_set(ranges):
         for iy in range(iy_start, iy_end + 1):
             nodes.add((ix, iy))
     return nodes
+

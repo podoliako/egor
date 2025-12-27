@@ -389,15 +389,15 @@ def plot_spatial_distribution(df, param_nm, filename,
                               vmin=None, vmax=None,
                               lon_bounds=None, lat_bounds=None,
                               interpolation_method='cubic',
-                              figsize=(14, 10), cmap='viridis', dpi=300):
+                              figsize=(14, 10), cmap='viridis', dpi=500):
     """Plot spatial distribution of parameter on a map with interpolation."""
-    df_clean = df[['node_lon', 'node_lat', param_nm]].dropna()
+    df_clean = df[['lon', 'lat', param_nm]].dropna()
     if df_clean.empty:
         print("No data to plot")
         return
 
-    lons = df_clean['node_lon'].values
-    lats = df_clean['node_lat'].values
+    lons = df_clean['lon'].values
+    lats = df_clean['lat'].values
     values = df_clean[param_nm].values
 
     fig = plt.figure(figsize=figsize)
@@ -454,7 +454,7 @@ def plot_spatial_distribution(df, param_nm, filename,
 def plot_spatial_distribution_series(df, param_nm, experiment_name,
                                      time_from_col='t_from', time_to_col='t_to',
                                      interpolation_method='cubic',
-                                     figsize=(14, 10), cmap='viridis', dpi=300):
+                                     figsize=(14, 10), cmap='viridis', dpi=500):
     """
     Plot time series of spatial distributions.
     
