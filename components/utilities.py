@@ -174,6 +174,62 @@ class Grid3DTime:
         for it in range(self.n_steps_time):
             yield self[ix, iy, it]
 
+    def find_time_range(self, event_dttm, time_window_days):
+        """
+        Находит временной диапазон узлов сетки для события.
+        
+        Parameters:
+        -----------
+        event_dttm : datetime
+            Время события
+        time_window_hours : float
+            Временное окно в каждую из сторон (в днях)
+        
+        Returns:
+        --------
+        dict с ключами:
+            'it_start': int - начальный индекс времени
+            'it_end': int - конечный индекс времени  
+            'count': int - количество временных шагов
+        """
+
+        # Парсим дату если строка
+        if isinstance(event_dttm, str):
+            event_dttm = datetime.datetime.strptime(event_dttm, "%Y-%m-%d %H:%M:%S.%f")
+        
+        # Вычисляем временное окно
+        delta = datetime.timedelta(days=time_window_days)
+        time_min = event_dttm - delta
+        time_max = event_dttm + delta
+        
+        # Находим индексы
+        # Используем бинарный поиск по массиву time_arr
+        it_start = 0
+        it_end = self.n_steps_time - 1
+        
+        # Ищем начальный индекс
+        for i, t in enumerate(self.time_arr):
+            if t >= time_min:
+                it_start = i
+                break
+        
+        # Ищем конечный индекс
+        for i in range(len(self.time_arr) - 1, -1, -1):
+            if self.time_arr[i] <= time_max:
+                it_end = i
+                break
+        
+        # Ограничиваем границами сетки
+        it_start = max(0, it_start)
+        it_end = min(self.n_steps_time - 1, it_end)
+        
+        return {
+            'it_start': it_start,
+            'it_end': it_end,
+            'count': it_end - it_start + 1
+        }
+    
+
     def find_nodes_in_radius(self, e_lon, e_lat, radius_km):
         """
         Находит узлы сетки внутри круга радиуса R от события.
@@ -227,17 +283,13 @@ class Grid3DTime:
         
         return {
             'ranges': ranges,
-            'count': total_count,
-            'bbox': (ix_min, ix_max, iy_min, iy_max)
+            'count': total_count
         }
     
     @property
     def shape(self):
         """Размерность сетки."""
         return (self.n_steps_lat, self.n_steps_lon, self.n_steps_time)
-    
-    def __repr__(self):
-        return f"Grid3DTime(shape={self.shape}, time_range=[{self.dttm_from}, {self.dttm_to}])"
 
 
 def make_grid_3d_time(lat_min, lat_max, lon_min, lon_max,
@@ -373,68 +425,3 @@ def get_tables_summary(folder_path):
     
     summary_df = pd.DataFrame(summary_list)
     return summary_df
-
-
-def make_grid_3d_time(lat_min, lat_max, lon_min, lon_max,
-                      n_steps_lat, n_steps_lon,
-                      dttm_from, dttm_to, n_steps_time):
-    
-    n_steps_time += 1
-    dttm_from = datetime.datetime.strptime(dttm_from, "%Y-%m-%d")
-    dttm_to = datetime.datetime.strptime(dttm_to, "%Y-%m-%d")
-
-    Earth_model = Earth()
-
-    lat0 = (lat_min + lat_max) / 2
-    lon0 = (lon_min + lon_max) / 2
-    h0 = 0
-
-    corners = [(lat_min, lon_min),
-               (lat_min, lon_max),
-               (lat_max, lon_min),
-               (lat_max, lon_max)]
-
-    enu_points = []
-    for lat, lon in corners:
-        x, y, z = Earth_model.geodetic_to_ecef(lat, lon, h0)
-        e, n, _ = Earth_model.ecef_to_enu(x, y, z, lat0, lon0, h0)
-        enu_points.append((e, n))
-
-    east_vals  = [p[0] for p in enu_points]
-    north_vals = [p[1] for p in enu_points]
-
-    east_min,  east_max  = min(east_vals),  max(east_vals)
-    north_min, north_max = min(north_vals), max(north_vals)
-
-    step_east  = (east_max  - east_min)  / (n_steps_lat - 1)
-    step_north = (north_max - north_min) / (n_steps_lon - 1)
-
-    # список времён
-    times = [
-        dttm_from + i * (dttm_to - dttm_from) / (n_steps_time - 1)
-        for i in range(n_steps_time)
-    ]
-
-    def generator():
-        for it in range(n_steps_time - 1):
-            t_from = times[it]
-            t_to   = times[it + 1]
-
-            for ix in range(n_steps_lat):
-                e = east_min + ix * step_east
-                for iy in range(n_steps_lon):
-                    n = north_min + iy * step_north
-
-                    x, y, z = Earth_model.enu_to_ecef(e, n, 0, lat0, lon0, h0)
-                    lat, lon, _ = Earth_model.ecef_to_geodetic(x, y, z)
-
-                    yield {
-                        "t_from": t_from,
-                        "t_to": t_to,
-                        "ix": ix,
-                        "iy": iy,
-                        "lat": lat,
-                        "lon": lon
-                    }
-
-    return generator()

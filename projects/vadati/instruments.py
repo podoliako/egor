@@ -4,6 +4,7 @@ from components.utilities import make_grid_3d_time, generate_name, Earth
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
+from collections import defaultdict
 from tqdm import tqdm
 import math
 import json
@@ -275,3 +276,63 @@ def get_unique_subset(df, uniqe_by, subset_columns=None):
     unique_combinations = df.drop_duplicates(subset=uniqe_by)
     result = unique_combinations[subset_columns].reset_index(drop=True)
     return result
+
+def build_grid_travel_times(grid, travel_time_df, events_df, stations_df):
+    """
+    Оптимизированная версия с использованием NumPy массивов.
+    Возвращает разреженное представление данных.
+    """
+    from scipy.sparse import lil_matrix
+    
+    # Размерность сетки
+    n_lat, n_lon, n_time = grid.shape
+    
+    # Словарь для хранения списков измерений
+    grid_data = defaultdict(list)
+    
+    # Создаем индексы для быстрого поиска
+    events_dict = {
+        row['event_id']: (row['geo_ranges']['ranges'], row['time_range'])
+        for _, row in events_df.iterrows()
+    }
+    
+    stations_dict = {
+        row['station_nm']: row['geo_ranges']['ranges']
+        for _, row in stations_df.iterrows()
+    }
+    
+    # Группируем travel_time_df по (event_id, station_nm) для эффективности
+    grouped = travel_time_df.groupby(['event_id', 'station_nm'])
+    
+    for (event_id, station_nm), group in grouped:
+        if event_id not in events_dict or station_nm not in stations_dict:
+            continue
+        
+        event_geo_ranges, event_time_range = events_dict[event_id]
+        station_geo_ranges = stations_dict[station_nm]
+        
+        # Конвертируем ranges в множества для быстрого пересечения
+        event_nodes = _ranges_to_set(event_geo_ranges)
+        station_nodes = _ranges_to_set(station_geo_ranges)
+        common_nodes = event_nodes & station_nodes
+        
+        # Извлекаем все пары (delta_t_s, delta_t_p) для этой группы
+        measurements = list(zip(group['delta_t_s'].values, group['delta_t_p'].values))
+        
+        # Добавляем измерения во все подходящие узлы
+        it_start = event_time_range['it_start']
+        it_end = event_time_range['it_end']
+        
+        for ix, iy in common_nodes:
+            for it in range(it_start, it_end + 1):
+                grid_data[(ix, iy, it)].extend(measurements)
+    
+    return dict(grid_data)
+
+def _ranges_to_set(ranges):
+    """Вспомогательная функция: конвертирует ranges в множество (ix, iy)."""
+    nodes = set()
+    for ix, iy_start, iy_end in ranges:
+        for iy in range(iy_start, iy_end + 1):
+            nodes.add((ix, iy))
+    return nodes
