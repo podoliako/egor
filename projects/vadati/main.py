@@ -1,22 +1,18 @@
-import sys
 from pathlib import Path
-
+import sys
 root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(root))
 
-import psycopg2
-import pandas as pd
-# from utilities import make_grid_2d
-from components.graphics import plot_spatial_distribution, plot_delta_t, plot_spatial_distribution_series, plot_events_stations
+from components.graphics import plot_spatial_distribution, plot_delta_t, create_gif_from_pngs, plot_events_stations
 from components.dwh import get_travel_times_by_region, get_region_borders, get_experiment
-from instruments import run_experiment_vp_vs
 from components.utilities import make_grid_3d_time, extract_param
-import matplotlib.pyplot as plt
+
+from instruments import run_experiment_vp_vs
+
 import warnings
 warnings.filterwarnings('ignore')
 
-
-if __name__ == '__main__':
+def make_pictures():
     exp_params = {
         'region_nm': 'Kamchatka',
         'dttm_from': '2007-01-01', 
@@ -30,8 +26,20 @@ if __name__ == '__main__':
     }
     
     exp_df = get_experiment('exp_Kamchatka_2007-01-01_2011-12-31_20251227180807')
+    exp_df = exp_df.loc[exp_df['n_measurements'] >= 75]
 
-    print(exp_df.info())
+    for i in range(60):
+        frame_df = exp_df.loc[exp_df['it'] == i]
+        plot_spatial_distribution(frame_df, 'slope', vmin=1.5, vmax=1.9, lon_bounds=(156, 165), lat_bounds=(50,57), color_bar=False, title=f'Кадр: {i}', subdir='animation_test')
+    
+def make_gif():
+    folder = '/mnt/disk01/egor/projects/vadati/pictures/animation_test'
+    create_gif_from_pngs(folder)
+
+if __name__ == '__main__':
+    make_gif()
+    
+
     # res = run_experiment_vp_vs(exp_params)
     
     # res['lon'] = extract_param(res, 'lon')
@@ -39,7 +47,7 @@ if __name__ == '__main__':
     # res['n_measurements'] = extract_param(res, 'n_measurements')
     # res['lr_slope'] = extract_param(res, ['linear_regression', 'slope'])
 
-    # res = res.loc[res['n_measurements'] >= 100]
+    
 
     # res = res.loc[(res['lon'] >= 156) & (res['lon'] <= 167) 
     #         & (res['lat'] >= 48.5) & (res['lat'] <= 58)

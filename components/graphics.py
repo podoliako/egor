@@ -7,13 +7,15 @@ import time
 import inspect
 
 from matplotlib import pyplot as plt
+import matplotlib.animation as animation
 from mpl_toolkits.mplot3d import Axes3D, art3d
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from scipy.interpolate import griddata
 from scipy.stats import ttest_ind
+from PIL import Image
 
-from .utilities import generate_name
+from .utilities import generate_name, datetime
 
 
 # Configuration
@@ -37,7 +39,7 @@ def _ensure_pictures_dir():
     return pics_dir
 
 
-def save_figure(fig, filename, dpi=DEFAULT_DPI, **kwargs):
+def save_figure(fig, filename, dpi=DEFAULT_DPI, subdir=None, **kwargs):
     """
     Save matplotlib figure to pictures directory next to calling script.
     
@@ -45,9 +47,15 @@ def save_figure(fig, filename, dpi=DEFAULT_DPI, **kwargs):
         fig: matplotlib figure object
         filename: output filename (can be just name or full path)
         dpi: dots per inch for output
+        subdir: optional subdirectory within pictures dir
         **kwargs: additional arguments for plt.savefig
     """
     pics_dir = _ensure_pictures_dir()
+    
+    # If subdir specified, create it
+    if subdir:
+        pics_dir = pics_dir / subdir
+        pics_dir.mkdir(parents=True, exist_ok=True)
     
     # If filename is just a name, put it in pictures dir
     filepath = Path(filename)
@@ -63,6 +71,8 @@ def save_figure(fig, filename, dpi=DEFAULT_DPI, **kwargs):
     
     plt.savefig(filepath, **save_kwargs)
     print(f"Saved: {filepath}")
+    
+    return filepath
 
 
 def plot_vels_2d(grid, v_data, filename=None):
@@ -389,126 +399,259 @@ def plot_and_compare_stddev_by_date(x, y, cutoff_str='2015-03-01',
     }
 
 
-def plot_spatial_distribution(df, param_nm,
-                              vmin=None, vmax=None,
-                              lon_bounds=None, lat_bounds=None,
-                              interpolation_method='cubic',
-                              figsize=(14, 10), cmap='viridis', filename=None):
-    """Plot spatial distribution of parameter on a map with interpolation."""
+def plot_spatial_distribution(df, param_nm, vmin=None, vmax=None, 
+                              lon_bounds=None, lat_bounds=None, 
+                              interpolation_method='cubic', figsize=(14, 10), 
+                              cmap='viridis', filename=None, title=None,
+                              subdir=None, ax=None, color_bar=True):
+    """
+    Plot spatial distribution of parameter on a map with interpolation.
+    
+    Args:
+        df: DataFrame with 'lon', 'lat', and param_nm columns
+        param_nm: parameter name to plot
+        vmin, vmax: color scale limits
+        lon_bounds, lat_bounds: map extent (auto-calculated if None)
+        interpolation_method: 'cubic', 'linear', or 'nearest'
+        figsize: figure size (ignored if ax is provided)
+        cmap: colormap
+        filename: output filename (if None, auto-generated)
+        title: plot title (if None, uses param_nm)
+        subdir: subdirectory for saving
+        ax: existing axes to plot on (if None, creates new figure)
+        
+    Returns:
+        fig, ax: matplotlib figure and axes objects
+    """
     df_clean = df[['lon', 'lat', param_nm]].dropna()
+    
     if df_clean.empty:
         print("No data to plot")
-        return
-
+        return None, None
+    
     lons = df_clean['lon'].values
     lats = df_clean['lat'].values
     values = df_clean[param_nm].values
-
-    fig = plt.figure(figsize=figsize)
-    ax = plt.axes(projection=ccrs.PlateCarree())
-
+    
+    # Create figure if not provided
+    if ax is None:
+        fig = plt.figure(figsize=figsize)
+        ax = plt.axes(projection=ccrs.PlateCarree())
+        own_fig = True
+    else:
+        fig = ax.get_figure()
+        own_fig = False
+    
+    # Calculate bounds if not provided
     if lon_bounds is None:
         lon_margin = (lons.max() - lons.min()) * 0.1
         lon_bounds = (lons.min() - lon_margin, lons.max() + lon_margin)
-
+    
     if lat_bounds is None:
         lat_margin = (lats.max() - lats.min()) * 0.1
         lat_bounds = (lats.min() - lat_margin, lats.max() + lat_margin)
-
+    
+    # Set map extent and features
     ax.set_extent(
-        [lon_bounds[0], lon_bounds[1], lat_bounds[0], lat_bounds[1]],
+        [lon_bounds[0], lon_bounds[1], lat_bounds[0], lat_bounds[1]], 
         crs=ccrs.PlateCarree()
     )
-
+    
     ax.add_feature(cfeature.LAND, facecolor='lightgray', alpha=0.3)
     ax.add_feature(cfeature.OCEAN, facecolor='lightblue', alpha=0.3)
     ax.add_feature(cfeature.COASTLINE, linewidth=0.5)
     ax.add_feature(cfeature.BORDERS, linewidth=0.5, linestyle='--', alpha=0.5)
     ax.gridlines(draw_labels=True, alpha=0.3, linestyle='--')
-
+    
+    # Interpolation grid
     grid_res = 200
     grid_lon = np.linspace(lon_bounds[0], lon_bounds[1], grid_res)
     grid_lat = np.linspace(lat_bounds[0], lat_bounds[1], grid_res)
     X, Y = np.meshgrid(grid_lon, grid_lat)
-
+    
+    # Interpolate
     try:
         Z = griddata((lons, lats), values, (X, Y), method=interpolation_method)
     except Exception:
         Z = griddata((lons, lats), values, (X, Y), method='linear')
-
+    
+    # Plot contours and points
     cf = ax.contourf(
-        X, Y, Z, levels=20, cmap=cmap, vmin=vmin, vmax=vmax,
+        X, Y, Z, levels=20, cmap=cmap, vmin=vmin, vmax=vmax, 
         alpha=0.7, transform=ccrs.PlateCarree()
     )
-
+    
     ax.scatter(
-        lons, lats, c=values, s=3, cmap=cmap, vmin=vmin, vmax=vmax, alpha=0.9, zorder=5,
-        transform=ccrs.PlateCarree()
+        lons, lats, c=values, s=3, cmap=cmap, vmin=vmin, vmax=vmax, 
+        alpha=0.9, zorder=5, transform=ccrs.PlateCarree()
     )
+    
+    # Colorbar
+    if color_bar is True:
+        cbar = plt.colorbar(cf, ax=ax, orientation='vertical', pad=0.05, shrink=0.8)
+        cbar.set_label(param_nm, fontsize=12)
+    
+    # Title
+    if title:
+        ax.set_title(title, fontsize=14, pad=20)
+    
+    # Save only if we created our own figure
+    if own_fig:
+        plt.tight_layout()
+        fname = filename or generate_name(['spatial_distribution', param_nm]) + '.png'
+        save_figure(fig, fname, subdir=subdir)
+        plt.close()
+    
+    return fig, ax
 
-    cbar = plt.colorbar(cf, ax=ax, orientation='vertical', pad=0.05, shrink=0.8)
-    cbar.set_label(param_nm, fontsize=12)
 
-    plt.tight_layout()
-
-    fname = filename or generate_name(['spatial_distribution', param_nm]) + '.png'
-    save_figure(fig, fname)
-    plt.close()
-
-
-def plot_spatial_distribution_series(df, param_nm, experiment_name,
-                                     time_from_col='t_from', time_to_col='t_to',
-                                     interpolation_method='cubic',
-                                     figsize=(14, 10), cmap='viridis'):
+def plot_spatial_distribution_timeseries(df, param_nm, vmin=None, vmax=None, 
+                                         lon_bounds=None, lat_bounds=None, 
+                                         interpolation_method='cubic', 
+                                         figsize=(14, 10), cmap='viridis',
+                                         output_dir='spatial_timeseries'):
     """
-    Plot time series of spatial distributions.
+    Plot spatial distribution for each date and save frames for GIF creation.
+    
+    Args:
+        df: DataFrame with columns 'lon', 'lat', 'dt', and param_nm
+        param_nm: parameter name to plot
+        vmin, vmax: color scale limits (consistent across all frames)
+        lon_bounds, lat_bounds: map extent
+        interpolation_method: 'cubic', 'linear', or 'nearest'
+        figsize: figure size
+        cmap: colormap
+        output_dir: directory name for saving frames
     
     Returns:
-        list: Paths to saved files
+        Path to output directory with frames
     """
-    pics_dir = _ensure_pictures_dir()
-    out_dir = pics_dir / experiment_name
-    out_dir.mkdir(parents=True, exist_ok=True)
-
-    periods = df[[time_from_col, time_to_col]].drop_duplicates()
-    periods = periods.sort_values(by=time_from_col)
-
-    # Unified color scale
-    vmin = df[param_nm].min()
-    vmax = df[param_nm].max()
-
-    # Unified map bounds
-    lon_min, lon_max = df['node_lon'].min(), df['node_lon'].max()
-    lat_min, lat_max = df['node_lat'].min(), df['node_lat'].max()
-
-    lon_margin = (lon_max - lon_min) * 0.1
-    lat_margin = (lat_max - lat_min) * 0.1
-
-    lon_bounds = (lon_min - lon_margin, lon_max + lon_margin)
-    lat_bounds = (lat_min - lat_margin, lat_max + lat_margin)
-
-    saved_files = []
-
-    for i, row in periods.iterrows():
-        t_from = row[time_from_col]
-        t_to = row[time_to_col]
-
-        df_p = df[(df[time_from_col] == t_from) & (df[time_to_col] == t_to)]
-
-        fname = out_dir / f"{i:03d}_{param_nm}_{t_from}_to_{t_to}.png"
-        fname = Path(str(fname).replace(":", "-"))
-
-        plot_spatial_distribution(
-            df_p, param_nm,
-            vmin=vmin, vmax=vmax,
-            lon_bounds=lon_bounds, lat_bounds=lat_bounds,
+    
+    # Clean data and get unique dates
+    df_clean = df[['lon', 'lat', 'dt', param_nm]].dropna()
+    if df_clean.empty:
+        print("No data to plot")
+        return None
+    
+    dates = sorted(df_clean['dt'].unique())
+    print(f"Creating {len(dates)} frames...")
+    
+    # Calculate global bounds and value ranges if not provided
+    if lon_bounds is None or lat_bounds is None or vmin is None or vmax is None:
+        lons = df_clean['lon'].values
+        lats = df_clean['lat'].values
+        values = df_clean[param_nm].values
+        
+        if lon_bounds is None:
+            lon_margin = (lons.max() - lons.min()) * 0.1
+            lon_bounds = (lons.min() - lon_margin, lons.max() + lon_margin)
+        
+        if lat_bounds is None:
+            lat_margin = (lats.max() - lats.min()) * 0.1
+            lat_bounds = (lats.min() - lat_margin, lats.max() + lat_margin)
+        
+        if vmin is None:
+            vmin = values.min()
+        if vmax is None:
+            vmax = values.max()
+    
+    # Plot each date
+    for i, date in enumerate(dates):
+        df_date = df_clean[df_clean['dt'] == date]
+        
+        if df_date.empty:
+            continue
+        
+        # Use the main plot function
+        fig, ax = plot_spatial_distribution(
+            df_date, 
+            param_nm,
+            vmin=vmin,
+            vmax=vmax,
+            lon_bounds=lon_bounds,
+            lat_bounds=lat_bounds,
             interpolation_method=interpolation_method,
-            figsize=figsize, cmap=cmap
+            figsize=figsize,
+            cmap=cmap,
+            filename=None,  # Don't save yet
+            title=f'{param_nm} - {date}'
         )
+        
+        if fig is None:
+            continue
+        
+        # Save with custom filename in subdirectory
+        filename = f'frame_{i:04d}_{date}.png'
+        save_figure(fig, filename, subdir=output_dir)
+        plt.close(fig)
+        
+        if (i + 1) % 10 == 0:
+            print(f"  Processed {i + 1}/{len(dates)} frames")
+    
+    frames_dir = _ensure_pictures_dir() / output_dir
+    print(f"\nAll frames saved to: {frames_dir}")
+    print(f"\nTo create GIF, run:")
+    print(f"  from PIL import Image")
+    print(f"  import glob")
+    print(f"  frames = [Image.open(f) for f in sorted(glob.glob('{frames_dir}/frame_*.png'))]")
+    print(f"  frames[0].save('{frames_dir.parent}/animation.gif', save_all=True, append_images=frames[1:], duration=200, loop=0)")
+    
+    return frames_dir
 
-        saved_files.append(fname)
-
-    return saved_files
+def create_gif_from_pngs(input_folder, output_path='animation.gif', duration=100, loop=0):
+    """
+    Создает GIF из PNG изображений в папке.
+    
+    Параметры:
+    ----------
+    input_folder : str
+        Путь к папке с PNG изображениями
+    output_path : str, optional
+        Путь для сохранения GIF (по умолчанию 'animation.gif')
+    duration : int, optional
+        Длительность каждого кадра в миллисекундах (по умолчанию 100)
+    loop : int, optional
+        Количество повторений (0 = бесконечно, по умолчанию 0)
+    
+    Возвращает:
+    -----------
+    str : Путь к созданному GIF файлу
+    """
+    
+    # Получаем список PNG файлов
+    folder_path = Path(input_folder)
+    png_files = sorted(folder_path.glob('*.png'))
+    
+    if not png_files:
+        raise ValueError(f"В папке {input_folder} не найдено PNG файлов")
+    
+    # Загружаем изображения
+    images = []
+    for png_file in png_files:
+        img = Image.open(png_file)
+        # Конвертируем в RGB, если нужно (GIF не поддерживает RGBA напрямую)
+        if img.mode == 'RGBA':
+            # Создаем белый фон
+            rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+            rgb_img.paste(img, mask=img.split()[3])  # Используем альфа-канал как маску
+            images.append(rgb_img)
+        else:
+            images.append(img.convert('RGB'))
+    
+    # Сохраняем как GIF
+    images[0].save(
+        output_path,
+        save_all=True,
+        append_images=images[1:],
+        duration=duration,
+        loop=loop,
+        optimize=False
+    )
+    
+    print(f"GIF создан: {output_path}")
+    print(f"Количество кадров: {len(images)}")
+    
+    return output_path
 
 
 def plot_delta_t(df, filename=None):

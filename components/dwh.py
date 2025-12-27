@@ -190,11 +190,11 @@ def get_experiment(experiment_nm):
             ix, 
             iy, 
             it,
-            params->>'lon' as lon,
-            params->>'lat' as lat,
+            (params->>'lon')::float as lon,
+            (params->>'lat')::float as lat,
             (params->>'dttm')::date as dt,
-            params->>'n_measurements' as n_measurements,
-            params->'linear_regression'->>'slope' as slope
+            (params->>'n_measurements')::int as n_measurements,
+            (params->'linear_regression'->>'slope')::float as slope
         from experiment_nodes 
         where experiment_nm = '{experiment_nm}'
         order by it, ix, iy 
