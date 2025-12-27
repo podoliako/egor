@@ -375,7 +375,7 @@ def generate_name(params, with_time=True):
 
     if with_time is True:
         timestr = time.strftime("%Y%m%d%H%M%S")
-        name = timestr + '_' + name
+        name = name + '_' + timestr
     return name
 
 def find_latest_npz(folder):
