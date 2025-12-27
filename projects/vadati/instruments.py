@@ -1,13 +1,9 @@
 from components.dwh import pd, load_to_postgres, load_to_postgis, get_travel_times_by_region, get_region_borders
-from components.utilities import make_grid_3d_time, generate_name, Grid3DTime
+from components.utilities import make_grid_3d_time, generate_name, replace_nan
 
 import numpy as np
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
 from scipy import stats
 from collections import defaultdict
-from tqdm import tqdm
-import math
 import json
 
 
@@ -208,28 +204,25 @@ def build_final_experiment_df(grid, grid_travel_times):
                     'r_squared': float(lr_result.rvalue ** 2),
                     'p_value': float(lr_result.pvalue),
                     'stderr': float(lr_result.stderr),
-                    'significant': bool(lr_result.pvalue < 0.05),
                 }
             except Exception as e:
                 params['linear_regression'] = {
-                    'slope': None,
-                    'intercept': None,
-                    'r_value': None,
-                    'r_squared': None,
-                    'p_value': None,
-                    'stderr': None,
-                    'significant': False,
+                    'slope': 'Nan',
+                    'intercept': 'Nan',
+                    'r_value': 'Nan',
+                    'r_squared': 'Nan',
+                    'p_value': 'Nan',
+                    'stderr': 'Nan',
                     'error': str(e)
                 }
         else:
             params['linear_regression'] = {
-                'slope': None,
-                'intercept': None,
-                'r_value': None,
-                'r_squared': None,
-                'p_value': None,
-                'stderr': None,
-                'significant': False,
+                'slope': 'Nan',
+                'intercept': 'Nan',
+                'r_value': 'Nan',
+                'r_squared': 'Nan',
+                'p_value': 'Nan',
+                'stderr': 'Nan',
                 'error': 'insufficient_data'
             }
         
@@ -272,7 +265,7 @@ def run_experiment_vp_vs(exp_params):
 
     dwh_result = result_df.copy()
     dwh_result['experiment_nm'] = experiment_nm
-    dwh_result['params'] = dwh_result['params'].apply(lambda x: json.dumps(x))
+    dwh_result['params'] = dwh_result['params'].apply(lambda x: json.dumps(replace_nan(x)))
     load_to_postgres(dwh_result, 'experiment_nodes')
 
     return result_df

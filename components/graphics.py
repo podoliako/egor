@@ -65,7 +65,7 @@ def save_figure(fig, filename, dpi=DEFAULT_DPI, **kwargs):
     print(f"Saved: {filepath}")
 
 
-def plot_vels_2d(grid, v_data, filename='2d_vels.png'):
+def plot_vels_2d(grid, v_data, filename=None):
     """Plot 2D velocity distribution on a map."""
     fig = plt.figure(figsize=(12, 10))
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.PlateCarree())
@@ -88,7 +88,9 @@ def plot_vels_2d(grid, v_data, filename='2d_vels.png'):
     gl.ylabel_style = {'size': 10}
 
     plt.tight_layout()
-    save_figure(fig, filename)
+
+    fname = filename or generate_name(['vels_2d']) + '.png'
+    save_figure(fig, fname)
 
 
 def plot_hist(values, trimmed=False, quantile=0.95, filename=None):
@@ -104,7 +106,9 @@ def plot_hist(values, trimmed=False, quantile=0.95, filename=None):
     
     fig = plt.figure()
     plt.hist(values, bins=140)
-    save_figure(fig, filename)
+
+    fname = filename or generate_name(['hist']) + '.png'
+    save_figure(fig, fname)
 
 
 def plot_ray_path(path, start_point, end_point, elev=30, azim=-70, multi_view=True, filename=None):
@@ -137,11 +141,11 @@ def plot_ray_path(path, start_point, end_point, elev=30, azim=-70, multi_view=Tr
         for i in range(-1, 2):
             current_az = i * 70
             ax.view_init(elev=elev, azim=current_az)
-            fname = filename or f'ray_path_{timestr}_{elev}_{current_az}.png'
+            fname = filename or generate_name(['ray_path', {timestr}, {elev}, {current_az}]) + '.png'
             save_figure(fig, fname)
     else:
         ax.view_init(elev=elev, azim=azim)
-        fname = filename or f'ray_path_{timestr}_{elev}_{azim}.png'
+        fname = filename or generate_name(['ray_path', {timestr}, {elev}, {azim}]) + '.png'
         save_figure(fig, fname)
 
 
@@ -169,7 +173,7 @@ def plot_wave_front_points(time_matrix, time_from_origin, dt, filename=None):
     ax.set_zlabel('Z Axis')
     ax.set_title(f'Wave Front at t = {time_from_origin} ± {dt}')
     
-    fname = filename or f'wavefront_{generate_name([time_from_origin, dt])}.png'
+    fname = filename or generate_name(['wavefront', time_from_origin, dt]) + '.png'
     save_figure(fig, fname)
 
 
@@ -221,8 +225,8 @@ def plot_wave_front(time_matrix, time_from_origin, dt, max_points=50_000, filena
     ax.set_title(f'Wavefront at t = {time_from_origin} ± {dt} | {len(x)} cubes')
     
     plt.tight_layout()
-    fname = filename or f'wavefront_{generate_name([time_from_origin, dt])}.png'
-    save_figure(fig, fname, dpi=500)
+    fname = filename or generate_name(['wavefront_cubic', time_from_origin, dt]) + '.png'
+    save_figure(fig, fname)
 
 
 def plot_fat_ray(time_matrix_sx, time_matrix_rx, source_coords, receiver_coords, T, 
@@ -267,7 +271,7 @@ def plot_fat_ray(time_matrix_sx, time_matrix_rx, source_coords, receiver_coords,
         current_az = i * 70
         ax.view_init(elev=30, azim=current_az)
         plt.tight_layout()
-        fname = filename or f'fat_ray_{generate_name([T, current_az])}.png'
+        fname = filename or generate_name(['fat_ray', T, current_az]) + '.png'
         save_figure(fig, fname, dpi=500)
 
 
@@ -275,7 +279,7 @@ def simple_plot(x, y, filename=None):
     """Simple line plot."""
     fig = plt.figure()
     plt.plot(x, y)
-    fname = filename or f"{generate_name(['plot'])}.png"
+    fname = filename or generate_name(['plot']) + '.png'
     save_figure(fig, fname)
 
 
@@ -284,7 +288,7 @@ def simple_scatter(x, y, filename=None):
     fig = plt.figure(dpi=300)
     plt.scatter(x, y, s=2)
     plt.grid()
-    fname = filename or f"{generate_name(['scatter'])}.png"
+    fname = filename or generate_name(['scatter']) + '.png'
     save_figure(fig, fname)
 
 
@@ -385,11 +389,11 @@ def plot_and_compare_stddev_by_date(x, y, cutoff_str='2015-03-01',
     }
 
 
-def plot_spatial_distribution(df, param_nm, filename,
+def plot_spatial_distribution(df, param_nm,
                               vmin=None, vmax=None,
                               lon_bounds=None, lat_bounds=None,
                               interpolation_method='cubic',
-                              figsize=(14, 10), cmap='viridis', dpi=500):
+                              figsize=(14, 10), cmap='viridis', filename=None):
     """Plot spatial distribution of parameter on a map with interpolation."""
     df_clean = df[['lon', 'lat', param_nm]].dropna()
     if df_clean.empty:
@@ -446,14 +450,16 @@ def plot_spatial_distribution(df, param_nm, filename,
     cbar.set_label(param_nm, fontsize=12)
 
     plt.tight_layout()
-    save_figure(fig, filename, dpi=dpi)
+
+    fname = filename or generate_name(['spatial_distribution', param_nm]) + '.png'
+    save_figure(fig, fname)
     plt.close()
 
 
 def plot_spatial_distribution_series(df, param_nm, experiment_name,
                                      time_from_col='t_from', time_to_col='t_to',
                                      interpolation_method='cubic',
-                                     figsize=(14, 10), cmap='viridis', dpi=500):
+                                     figsize=(14, 10), cmap='viridis'):
     """
     Plot time series of spatial distributions.
     
@@ -493,11 +499,11 @@ def plot_spatial_distribution_series(df, param_nm, experiment_name,
         fname = Path(str(fname).replace(":", "-"))
 
         plot_spatial_distribution(
-            df_p, param_nm, filename=fname,
+            df_p, param_nm,
             vmin=vmin, vmax=vmax,
             lon_bounds=lon_bounds, lat_bounds=lat_bounds,
             interpolation_method=interpolation_method,
-            figsize=figsize, cmap=cmap, dpi=dpi
+            figsize=figsize, cmap=cmap
         )
 
         saved_files.append(fname)
@@ -544,11 +550,11 @@ def plot_delta_t(df, filename=None):
     plt.grid(True, linestyle='--', alpha=0.5)
     plt.tight_layout()
     
-    fname = filename or f"{generate_name(['delta_t'])}.png"
+    fname = filename or generate_name(['delta_t']) + '.png'
     save_figure(fig, fname, dpi=500)
 
 
-def plot_events_stations(events_df, stations_df, edges_df, filename='events-stations.png'):
+def plot_events_stations(events_df, stations_df, edges_df, filename=None):
     """Plot events, stations and their connections on a map."""
     fig = plt.figure(figsize=(10, 8), dpi=500)
     ax = plt.axes(projection=ccrs.PlateCarree())
@@ -580,4 +586,5 @@ def plot_events_stations(events_df, stations_df, edges_df, filename='events-stat
 
     ax.legend()
     plt.title("Events, Stations and Connections")
-    save_figure(fig, filename, dpi=500)
+    fname = filename or generate_name(['events_stations']) + '.png'
+    save_figure(fig, fname, dpi=500)

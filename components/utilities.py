@@ -5,6 +5,7 @@ import pandas as pd
 from pathlib import Path
 import glob
 import json
+import math
 import re
 import os
 import requests
@@ -364,7 +365,16 @@ def generate_cells(top_mid_point, cube_side, n_x, n_y, n_depth):
     
     return depths, lons, lats
 
-
+def replace_nan(obj):
+    if isinstance(obj, dict):
+        return {k: replace_nan(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [replace_nan(item) for item in obj]
+    elif isinstance(obj, float) and math.isnan(obj):
+        return "NaN"
+    else:
+        return obj
+    
 def generate_name(params, with_time=True):
     name = ''
     for param in params:

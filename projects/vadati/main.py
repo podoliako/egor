@@ -8,7 +8,7 @@ import psycopg2
 import pandas as pd
 # from utilities import make_grid_2d
 from components.graphics import plot_spatial_distribution, plot_delta_t, plot_spatial_distribution_series, plot_events_stations
-from components.dwh import get_travel_times_by_region, get_region_borders
+from components.dwh import get_travel_times_by_region, get_region_borders, get_experiment
 from instruments import run_experiment_vp_vs
 from components.utilities import make_grid_3d_time, extract_param
 import matplotlib.pyplot as plt
@@ -29,8 +29,10 @@ if __name__ == '__main__':
         'r_time_days': 150
     }
     
+    exp_df = get_experiment('exp_Kamchatka_2007-01-01_2011-12-31_20251227180807')
 
-    res = run_experiment_vp_vs(exp_params)
+    print(exp_df.info())
+    # res = run_experiment_vp_vs(exp_params)
     
     # res['lon'] = extract_param(res, 'lon')
     # res['lat'] = extract_param(res, 'lat')

@@ -186,18 +186,18 @@ def get_all_events(from_dt, to_dt, min_lon=-120.5, min_lat=31.0, max_lon=-113.5,
 def get_experiment(experiment_nm):
     """Get experiment results by experiment name."""
     query = f"""
-        SELECT
-            ST_X(e.geometry) as node_lon,
-            ST_Y(e.geometry) as node_lat,
-            e.t_from,
-            e.t_to, 
-            (e.params::jsonb->>'n_points')::numeric as n_points,
-            ((e.params::jsonb->>'regression_free')::jsonb->>'k')::numeric as k_free,
-            ((e.params::jsonb->>'regression_free')::jsonb->>'r2')::numeric as r2_free,
-            ((e.params::jsonb->>'regression_zero_intercept')::jsonb->>'k')::numeric as k_zero_intercept,
-            ((e.params::jsonb->>'regression_zero_intercept')::jsonb->>'r2')::numeric as r2_k_zero_intercept
-        FROM experiments e
-        WHERE e.experiment_nm = '{experiment_nm}'
+        select 
+            ix, 
+            iy, 
+            it,
+            params->>'lon' as lon,
+            params->>'lat' as lat,
+            (params->>'dttm')::date as dt,
+            params->>'n_measurements' as n_measurements,
+            params->'linear_regression'->>'slope' as slope
+        from experiment_nodes 
+        where experiment_nm = '{experiment_nm}'
+        order by it, ix, iy 
     """
     return execute_query(query)
 
