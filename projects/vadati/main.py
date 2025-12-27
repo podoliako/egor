@@ -97,11 +97,11 @@ if __name__ == '__main__':
         'region_nm': 'Kamchatka',
         'dttm_from': '2007-01-01', 
         'dttm_to': '2008-05-01', 
-        'n_steps_lat': 45, 
-        'n_steps_lon': 60, 
+        'n_steps_lat': 90, 
+        'n_steps_lon': 120, 
         'n_steps_time': 2,
-        'r_events_km': 400,
-        'r_stations_km': 550,
+        'r_events_km': 70,
+        'r_stations_km': 200,
         'r_time_days': 500
     }
 
@@ -130,4 +130,4 @@ if __name__ == '__main__':
 
     res = res.loc[res['it'] == 0]
     print(res)
-    plot_spatial_distribution(res, 'lr_slope', 'spatial_test.png')
+    plot_spatial_distribution(res, 'lr_slope', 'spatial_test_3.png')

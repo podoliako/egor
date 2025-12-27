@@ -438,8 +438,7 @@ def plot_spatial_distribution(df, param_nm, filename,
     )
 
     ax.scatter(
-        lons, lats, c=values, s=30, cmap=cmap, vmin=vmin, vmax=vmax,
-        edgecolors='black', linewidth=0.5, alpha=0.9, zorder=5,
+        lons, lats, c=values, s=3, cmap=cmap, vmin=vmin, vmax=vmax, alpha=0.9, zorder=5,
         transform=ccrs.PlateCarree()
     )
 
