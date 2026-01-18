@@ -9,3 +9,7 @@
 ## Existing research
 - 4D full-waveform inversion detects time-lapse reservoir changes at King Field, Gulf of Mexico, USA, https://pubs.geoscienceworld.org/seg/tle/article-abstract/44/7/540/659326/4D-full-waveform-inversion-detects-time-lapse?redirectedFrom=fulltext
 - Enhanced 4D Seismic Outcomes Through True 4D Processing – Usan Field, https://www.tgs.com/hubfs/2025%20IMAGE%20Preliminary/01%20Enhanced%204D%20Seismic%20Outcomes%20through%20True%204D%20Processing%20-%20Usan%20field_FINAL.pdf
+- (Overview, no methods) The use of passive seismic
+methods for Geothermal
+exploration and
+monitoring, https://www.edp-open.org/images/stories/books/contents/9782759837526-AGAP/9782759837526-AGAP4_10-chap6.pdf
