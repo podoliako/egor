@@ -1,5 +1,5 @@
 ## Key features
-1. Eathquake's parameters correction
+1. Eathquake's parameters are asumed to be latent
 2. Division into geographic blocks and velocity blocks: small geographic blocks for high-quality ray tracing modeling and smaller velocity blocks for more stable inverse problem solving.
 
 ## How to validate
@@ -16,7 +16,7 @@ methods for Geothermal
 exploration and
 monitoring, https://www.edp-open.org/images/stories/books/contents/9782759837526-AGAP/9782759837526-AGAP4_10-chap6.pdf
 
-
+## Main Notes
 19.01.2026
 - EM algorithm could be used in solving
 - Discrepancy is good alternative for validation
