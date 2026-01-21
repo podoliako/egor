@@ -8,7 +8,7 @@
 3. Time-arrival
  
 ## Raytracing
-SPECFEM https://github.com/SPECFEM/specfem3d/wiki should be considered
+--
 
 ## Existing research
 - 4D full-waveform inversion detects time-lapse reservoir changes at King Field, Gulf of Mexico, USA, https://pubs.geoscienceworld.org/seg/tle/article-abstract/44/7/540/659326/4D-full-waveform-inversion-detects-time-lapse?redirectedFrom=fulltext
@@ -22,3 +22,6 @@ monitoring, https://www.edp-open.org/images/stories/books/contents/9782759837526
 19.01.2026
 - EM algorithm could be used in solving
 - Discrepancy is good alternative for validation
+
+## MISC
+SPECFEM https://github.com/SPECFEM/specfem3d/wiki was be considered. Apperantly, it doesn't work with arrivals, but works with waveforms instead 
