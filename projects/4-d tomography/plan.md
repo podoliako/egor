@@ -7,6 +7,8 @@
 2. Visual comparison with CMH-S
 3. Time-arrival
  
+## Raytracing
+SPECFEM https://github.com/SPECFEM/specfem3d/wiki should be considered
 
 ## Existing research
 - 4D full-waveform inversion detects time-lapse reservoir changes at King Field, Gulf of Mexico, USA, https://pubs.geoscienceworld.org/seg/tle/article-abstract/44/7/540/659326/4D-full-waveform-inversion-detects-time-lapse?redirectedFrom=fulltext
