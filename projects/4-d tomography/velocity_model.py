@@ -3,7 +3,40 @@ Seismic velocity model with geographic grid reference.
 """
 import numpy as np
 import json
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional, Callable, Union
+
+
+class GeoGrid:
+    """
+    Refined geometric grid for raytracing.
+    
+    This is generated from VelocityModel by subdividing cells and interpolating.
+    Each cell in the velocity model is split into subdivision^3 geo cells.
+    
+    Attributes:
+    -----------
+    shape : tuple
+        Shape of the geo grid (n_x * subdivision, n_y * subdivision, n_z * subdivision)
+    cell_size : float
+        Size of each geo cell in meters
+    vp : np.ndarray
+        P-wave velocities at geo grid resolution
+    vs : np.ndarray
+        S-wave velocities at geo grid resolution
+    subdivision : int
+        Subdivision factor used to generate this grid
+    """
+    
+    def __init__(self, shape: Tuple[int, int, int], cell_size: float, subdivision: int):
+        self.shape = shape
+        self.cell_size = cell_size
+        self.subdivision = subdivision
+        self.vp = np.zeros(shape, dtype=np.float32)
+        self.vs = np.zeros(shape, dtype=np.float32)
+    
+    def __repr__(self) -> str:
+        return (f"GeoGrid(shape={self.shape}, cell_size={self.cell_size:.2f}m, "
+                f"subdivision={self.subdivision})")
 
 
 class GridGeometry:
@@ -161,6 +194,67 @@ class VelocityGrid:
         return grid
 
 
+# Interpolation strategies
+def trilinear_interpolation(values: np.ndarray, i: int, j: int, k: int, 
+                            di: float, dj: float, dk: float) -> float:
+    """
+    Trilinear interpolation within a cell.
+    
+    Parameters:
+    -----------
+    values : np.ndarray
+        3D array of values (e.g., vp or vs)
+    i, j, k : int
+        Base cell indices
+    di, dj, dk : float
+        Fractional position within cell [0..1]
+    
+    Returns:
+    --------
+    Interpolated value
+    """
+    n_x, n_y, n_z = values.shape
+    
+    # Get the 8 corner values
+    # Handle boundary conditions
+    i1 = min(i + 1, n_x - 1)
+    j1 = min(j + 1, n_y - 1)
+    k1 = min(k + 1, n_z - 1)
+    
+    # 8 corners of the cube
+    c000 = values[i, j, k]
+    c100 = values[i1, j, k]
+    c010 = values[i, j1, k]
+    c110 = values[i1, j1, k]
+    c001 = values[i, j, k1]
+    c101 = values[i1, j, k1]
+    c011 = values[i, j1, k1]
+    c111 = values[i1, j1, k1]
+    
+    # Interpolate along x
+    c00 = c000 * (1 - di) + c100 * di
+    c01 = c001 * (1 - di) + c101 * di
+    c10 = c010 * (1 - di) + c110 * di
+    c11 = c011 * (1 - di) + c111 * di
+    
+    # Interpolate along y
+    c0 = c00 * (1 - dj) + c10 * dj
+    c1 = c01 * (1 - dj) + c11 * dj
+    
+    # Interpolate along z
+    return c0 * (1 - dk) + c1 * dk
+
+
+def nearest_neighbor_interpolation(values: np.ndarray, i: int, j: int, k: int,
+                                   di: float, dj: float, dk: float) -> float:
+    """
+    Nearest neighbor interpolation (no interpolation, just repeat values).
+    
+    Parameters: same as trilinear_interpolation
+    """
+    return values[i, j, k]
+
+
 class VelocityModel:
     """
     Complete velocity model combining geometry and velocity data.
@@ -257,6 +351,91 @@ class VelocityModel:
     def fill_linear_gradient(self, param: str, top_value: float, bottom_value: float):
         """Fill parameter with linear gradient in depth."""
         self.grid.fill_linear_gradient(param, top_value, bottom_value)
+    
+    def get_geo_grid(self, subdivision: int = 1, 
+                     interpolation: Union[str, Callable] = 'trilinear') -> GeoGrid:
+        """
+        Generate refined geometric grid for raytracing.
+        
+        Each velocity model cell is subdivided into subdivision^3 geo cells.
+        Values are interpolated based on the chosen interpolation strategy.
+        
+        Parameters:
+        -----------
+        subdivision : int
+            Subdivision factor (1 = no subdivision, 2 = 8x cells, 3 = 27x cells)
+        interpolation : str or callable
+            Interpolation method:
+            - 'trilinear': Trilinear interpolation (default, smooth)
+            - 'nearest': Nearest neighbor (fast, blocky)
+            - callable: Custom interpolation function with signature
+                       func(values, i, j, k, di, dj, dk) -> float
+        
+        Returns:
+        --------
+        GeoGrid with refined resolution
+        
+        Examples:
+        ---------
+        >>> # 1:1 mapping
+        >>> geo = model.get_geo_grid(subdivision=1)
+        >>> 
+        >>> # 27x refinement with smooth interpolation
+        >>> geo = model.get_geo_grid(subdivision=3)
+        >>> 
+        >>> # Custom interpolation
+        >>> def my_interp(values, i, j, k, di, dj, dk):
+        >>>     return values[i, j, k]  # custom logic
+        >>> geo = model.get_geo_grid(subdivision=2, interpolation=my_interp)
+        """
+        if subdivision < 1:
+            raise ValueError("subdivision must be >= 1")
+        
+        # Select interpolation function
+        if isinstance(interpolation, str):
+            if interpolation == 'trilinear':
+                interp_func = trilinear_interpolation
+            elif interpolation == 'nearest':
+                interp_func = nearest_neighbor_interpolation
+            else:
+                raise ValueError(f"Unknown interpolation method: {interpolation}")
+        elif callable(interpolation):
+            interp_func = interpolation
+        else:
+            raise TypeError("interpolation must be str or callable")
+        
+        # Create geo grid
+        geo_shape = (
+            self.geometry.n_x * subdivision,
+            self.geometry.n_y * subdivision,
+            self.geometry.n_z * subdivision
+        )
+        geo_cell_size = self.geometry.side_size / subdivision
+        geo_grid = GeoGrid(geo_shape, geo_cell_size, subdivision)
+        
+        # Fill geo grid with interpolated values
+        for gi in range(geo_shape[0]):
+            for gj in range(geo_shape[1]):
+                for gk in range(geo_shape[2]):
+                    # Map geo index to velocity model index
+                    i = gi // subdivision
+                    j = gj // subdivision
+                    k = gk // subdivision
+                    
+                    # Fractional position within velocity cell [0..1]
+                    di = (gi % subdivision) / subdivision
+                    dj = (gj % subdivision) / subdivision
+                    dk = (gk % subdivision) / subdivision
+                    
+                    # Interpolate
+                    geo_grid.vp[gi, gj, gk] = interp_func(
+                        self.grid.vp, i, j, k, di, dj, dk
+                    )
+                    geo_grid.vs[gi, gj, gk] = interp_func(
+                        self.grid.vs, i, j, k, di, dj, dk
+                    )
+        
+        return geo_grid
     
     def __repr__(self) -> str:
         return (f"VelocityModel(grid_size=({self.geometry.n_x}, {self.geometry.n_y}, "
