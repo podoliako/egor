@@ -4,6 +4,7 @@ from components.utilities import make_grid_3d_time, generate_name, replace_nan
 import numpy as np
 from scipy import stats
 from collections import defaultdict
+from tqdm import tqdm
 import json
 
 
@@ -85,8 +86,6 @@ def build_grid_travel_times(grid, travel_time_df, events_df, stations_df):
     Оптимизированная версия с использованием NumPy массивов.
     Возвращает разреженное представление данных.
     """
-    from scipy.sparse import lil_matrix
-    
     # Размерность сетки
     n_lat, n_lon, n_time = grid.shape
     
@@ -107,7 +106,10 @@ def build_grid_travel_times(grid, travel_time_df, events_df, stations_df):
     # Группируем travel_time_df по (event_id, station_nm) для эффективности
     grouped = travel_time_df.groupby(['event_id', 'station_nm'])
     
-    for (event_id, station_nm), group in grouped:
+    # Добавляем прогресс-бар
+    for (event_id, station_nm), group in tqdm(grouped, 
+                                                desc="Building grid travel times",
+                                                total=len(grouped)):
         if event_id not in events_dict or station_nm not in stations_dict:
             continue
         

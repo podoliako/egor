@@ -19,7 +19,7 @@ from .utilities import generate_name, datetime
 
 
 # Configuration
-DEFAULT_DPI = 300
+DEFAULT_DPI = 700
 
 
 def _get_pictures_dir():
@@ -401,7 +401,7 @@ def plot_and_compare_stddev_by_date(x, y, cutoff_str='2015-03-01',
 
 def plot_spatial_distribution(df, param_nm, vmin=None, vmax=None, 
                               lon_bounds=None, lat_bounds=None, 
-                              interpolation_method='cubic', figsize=(14, 10), 
+                              interpolation_method='linear', figsize=(14, 10), 
                               cmap='viridis', filename=None, title=None,
                               subdir=None, ax=None, color_bar=True):
     """
@@ -482,7 +482,7 @@ def plot_spatial_distribution(df, param_nm, vmin=None, vmax=None,
     )
     
     ax.scatter(
-        lons, lats, c=values, s=3, cmap=cmap, vmin=vmin, vmax=vmax, 
+        lons, lats, c=values, s=1, cmap=cmap, vmin=vmin, vmax=vmax, 
         alpha=0.9, zorder=5, transform=ccrs.PlateCarree()
     )
     

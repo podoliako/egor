@@ -22,7 +22,10 @@ __pycache__/
 *.h5
 *.nc
 *.mat
+*.gif
+*.png
 
 # OS
 .DS_Store
-Thumbs.db
+Thumbs.db.
+
