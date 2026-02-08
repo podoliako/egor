@@ -10,7 +10,6 @@ import re
 import os
 import requests
 import datetime
-from haversine import haversine
 
 class Point:
     def __init__(self, depth, lon, lat):
@@ -233,6 +232,7 @@ class Grid3DTime:
     
 
     def find_nodes_in_radius(self, e_lon, e_lat, radius_km):
+        from haversine import haversine
         """
         Находит узлы сетки внутри круга радиуса R от события.
         Использует библиотеку haversine для расчета расстояний.
@@ -267,6 +267,7 @@ class Grid3DTime:
                 lon = self.lon_arr[iy]
                 grid_point = (lat, lon)
                 
+
                 dist = haversine(event_point, grid_point)
                 
                 if dist <= radius_km:
