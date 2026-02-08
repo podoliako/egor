@@ -93,9 +93,9 @@ if __name__ == '__main__':
         'height': 50.0,
         'azimuth': 45.0,
         'side_size': 100.0, 
-        'n_x': 10,
-        'n_y': 10,
-        'n_z': 10
+        'n_x': 300,
+        'n_y': 1,
+        'n_z': 50
     }
 
     model = VelocityModel.from_config(config)
@@ -104,16 +104,22 @@ if __name__ == '__main__':
     n_subdivision = 5
     grid = model.get_geo_grid(n_subdivision)
     
-    propogator = WavePropagator(solver='simple')
+    solver = 'skfmm'
+    propogator = WavePropagator(solver=solver)
     times_exp = propogator.compute_from_geo_grid(grid, (0, 0, 0), 'P')
 
     res = homogenius_media_test(grid, 100, times_exp)
 
     print(res)
 
-    x = [item[0] for item in res]
-    y = [item[1] for item in res]
-    simple_scatter(x, y, s=0.2)
+    dist_threshold = 5000
+    x = [item[0] if item[0] > dist_threshold else np.nan for item in res]
+    y = [item[1] if item[0] > dist_threshold else np.nan for item in res]
+    simple_scatter(x, y, s=0.1, 
+                   x_label='distance from (0,0,0), m', 
+                   y_label='err, %', 
+                   title=f'Solver: {solver}, Grid shape: {str(grid.shape)}', 
+                   dpi=700)
 
 
 

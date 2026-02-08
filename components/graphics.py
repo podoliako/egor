@@ -293,11 +293,15 @@ def simple_plot(x, y, filename=None):
     save_figure(fig, fname)
 
 
-def simple_scatter(x, y, filename=None, s=2):
+def simple_scatter(x, y, filename=None, s=2, x_label='x', y_label='y', title=None, dpi=DEFAULT_DPI):
     """Simple scatter plot."""
-    fig = plt.figure(dpi=300)
-    plt.scatter(x, y, s=s)
-    plt.grid()
+    fig, ax = plt.subplots(dpi=dpi)
+    ax.scatter(x, y, s=s)
+    ax.set_ylabel(y_label)
+    ax.set_xlabel(x_label)
+    ax.set_title(title)
+    ax.grid()
+    
     fname = filename or generate_name(['scatter']) + '.png'
     save_figure(fig, fname)
 
