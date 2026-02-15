@@ -23,5 +23,8 @@ monitoring, https://www.edp-open.org/images/stories/books/contents/9782759837526
 - EM algorithm could be used in solving
 - Discrepancy is good alternative for validation
 
+09.02.2026
+- Using 1-D model as an intial with cell-based velocity model brings a slight inaccuracy due to curveness of the surface. However this inaccuracy disapears with iterations of tomography
+
 ## MISC
 SPECFEM https://github.com/SPECFEM/specfem3d/wiki was be considered. Apperantly, it doesn't work with arrivals, but works with waveforms instead 
