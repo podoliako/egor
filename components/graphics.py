@@ -306,6 +306,25 @@ def simple_scatter(x, y, filename=None, s=2, x_label='x', y_label='y', title=Non
     save_figure(fig, fname)
 
 
+def simple_heatmap(matrix_2d, filename=None, x_label='x', y_label='y', title=None, dpi=DEFAULT_DPI):
+    """Simple 2D heatmap."""
+    arr = np.asarray(matrix_2d)
+    if arr.ndim != 2:
+        raise ValueError("matrix_2d must be a 2D array-like object")
+
+    fig, ax = plt.subplots(dpi=dpi)
+    im = ax.imshow(arr, cmap='viridis', origin='lower', aspect='auto')
+    fig.colorbar(im, ax=ax)
+
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
+    ax.set_title(title)
+    ax.grid(False)
+
+    fname = filename or generate_name(['heatmap']) + '.png'
+    save_figure(fig, fname)
+
+
 def plot_and_compare_stddev_by_date(x, y, cutoff_str='2015-03-01',
                                    group_names=('До 2015', 'После 2015'),
                                    xlabel='Дата землетрясения',

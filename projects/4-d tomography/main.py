@@ -6,8 +6,10 @@ sys.path.insert(0, str(root))
 import numpy as np
 from velocity_model import VelocityModel, GridGeometry, VelocityGrid
 from wave_propagation import WavePropagator
+from instruments import compute_pairwise_misfit_matrix_and_sse, compute_epicenter_weight_matrix
+from raytracing import trace_ray_from_timefield, rasterize_path_binary, rasterize_path_lengths
 from math import *
-from components.graphics import simple_scatter
+from components.graphics import simple_scatter, simple_heatmap
 
 def quick_test(model):
     print(f"Vp at surface (0,0,0): {model.get_vp(0, 0, 0):.1f} m/s")
@@ -83,24 +85,7 @@ def homogenius_media_test(grid, velocity, times_exp):
 
     return structured_arr.flatten().flatten()
 
-
-
-
-if __name__ == '__main__':
-    config = {
-        'lon': 37.6173, 
-        'lat': 55.7558,
-        'height': 50.0,
-        'azimuth': 45.0,
-        'side_size': 100.0, 
-        'n_x': 300,
-        'n_y': 1,
-        'n_z': 50
-    }
-
-    model = VelocityModel.from_config(config)
-    model.fill_linear_gradient('vp', top_value=100.0, bottom_value=100.0)
-    
+def big_homogenius_media_test(model):
     n_subdivision = 5
     grid = model.get_geo_grid(n_subdivision)
     
@@ -120,6 +105,73 @@ if __name__ == '__main__':
                    y_label='err, %', 
                    title=f'Solver: {solver}, Grid shape: {str(grid.shape)}', 
                    dpi=700)
+
+def missfit_test(model):
+    n_subdivision = 1
+    grid = model.get_geo_grid(n_subdivision)
+
+    stations = [
+        {'loc':(0,0,0), 'arrival_unix':145}, 
+        {'loc':(99,0,0), 'arrival_unix':50},
+        {'loc':(199,0,0), 'arrival_unix':50},
+        {'loc':(299,0,0), 'arrival_unix':146}]
+
+    miss_matrix = compute_pairwise_misfit_matrix_and_sse(grid, stations, (149,0,25), solver='skfmm')
+    return miss_matrix
+
+
+def weights_test(model, stations):
+    n_subdivision = 1
+    grid = model.get_geo_grid(n_subdivision)
+    
+    return compute_epicenter_weight_matrix(grid, stations, solver='skfmm', abs_misfit_threshold=220)
+
+
+def ray_tracing_G_test(model):
+    n_subdivision = 1
+    grid = model.get_geo_grid(n_subdivision)
+
+    origin = (0, 0, 0)
+    spacing = (1, 1, 1)
+    station = (150, 1, 0)
+    epic = (50, 1, 25)
+
+    solver = 'skfmm'
+    propogator = WavePropagator(solver=solver)
+    T = propogator.compute_from_geo_grid(grid, station, 'P')
+
+    path = trace_ray_from_timefield(T, station, epic, origin, spacing)
+    print(path)
+    # G3 = rasterize_path_binary(path, T.shape, origin, spacing)   # 3D 0/1 matrix
+    G3 = rasterize_path_lengths(path, T.shape, voxel_size=spacing)
+
+    return G3
+
+
+if __name__ == '__main__':
+    modle_config = {
+        'lon': 37.6173, 
+        'lat': 55.7558,
+        'height': 50.0,
+        'azimuth': 45.0,
+        'side_size': 100.0, 
+        'n_x': 300,
+        'n_y': 3,
+        'n_z': 50
+    }
+
+    stations = [
+        {'loc':(0,1,0), 'arrival_unix':0}, 
+        {'loc':(99,1,0), 'arrival_unix':0},
+        {'loc':(199,1,0), 'arrival_unix':100},
+        {'loc':(299,1,0), 'arrival_unix':195}]
+
+    model = VelocityModel.from_config(modle_config)
+    model.fill_linear_gradient('vp', top_value=100.0, bottom_value=100.0)
+
+    res = ray_tracing_G_test(model)
+    print(res)
+    simple_heatmap(res[:,1,:])
 
 
 
