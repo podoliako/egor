@@ -6,10 +6,11 @@ sys.path.insert(0, str(root))
 import numpy as np
 from velocity_model import VelocityModel, GridGeometry, VelocityGrid
 from wave_propagation import WavePropagator
-from instruments import compute_pairwise_misfit_matrix_and_sse, compute_epicenter_weight_matrix
+from instruments import compute_pairwise_misfit_matrix_and_sse, compute_epicenter_weight_matrix, generate_synthetic_arrivals_table
 from raytracing import trace_ray_from_timefield, rasterize_path_binary, rasterize_path_lengths
 from math import *
 from components.graphics import simple_scatter, simple_heatmap
+from tomography import run_tomography_prototype
 
 def quick_test(model):
     print(f"Vp at surface (0,0,0): {model.get_vp(0, 0, 0):.1f} m/s")
@@ -147,6 +148,15 @@ def ray_tracing_G_test(model):
 
     return G3
 
+def synthetic_arrivals(model):
+    events = [(25,1,25), (35,1,35), (66,1,13), (160,1,45), (290,1,25)]
+    stations = [(0,0,0), (50,0,0), (100,0,0), (150,0,0), (200,0,0), (250,0,0)]
+    synth_arrivals = generate_synthetic_arrivals_table(model, event_locs=events, station_locs=stations)
+    return synth_arrivals
+
+def tomography(initial_model, arrivlas):
+    res = run_tomography_prototype(initial_model, arrivlas)
+    return res
 
 if __name__ == '__main__':
     modle_config = {
@@ -166,12 +176,21 @@ if __name__ == '__main__':
         {'loc':(199,1,0), 'arrival_unix':100},
         {'loc':(299,1,0), 'arrival_unix':195}]
 
-    model = VelocityModel.from_config(modle_config)
-    model.fill_linear_gradient('vp', top_value=100.0, bottom_value=100.0)
+    initial_model = VelocityModel.from_config(modle_config)
+    initial_model.fill_linear_gradient('vp', top_value=100.0, bottom_value=100.0)
 
-    res = ray_tracing_G_test(model)
-    print(res)
-    simple_heatmap(res[:,1,:])
+    true_model = VelocityModel.from_config(modle_config)
+    true_model.fill_linear_gradient('vp', top_value=50.0, bottom_value=150.0)
+
+    arr = synthetic_arrivals(true_model)
+    print(arr)
+
+    tm = tomography(initial_model, arr)
+
+    print(tm)
+    # res = ray_tracing_G_test(model)
+    # print(res)
+    # simple_heatmap(res[:,1,:])
 
 
 

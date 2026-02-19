@@ -16,6 +16,11 @@ from wave_propagation import WavePropagator
 
 
 StationArrival = Dict[str, Union[Tuple[int, int, int], float, int]]
+GridPoint = Tuple[int, int, int]
+
+
+SyntheticArrival = Dict[str, Union[GridPoint, float]]
+SyntheticEventArrivals = Dict[str, Union[GridPoint, List[SyntheticArrival]]]
 
 
 def _validate_station(station: StationArrival, idx: int) -> Tuple[Tuple[int, int, int], float]:
@@ -165,6 +170,77 @@ def precompute_station_travel_time_fields(
     return station_fields, observed
 
 
+def generate_synthetic_arrivals_table(
+    model,
+    station_locs: Optional[Sequence[GridPoint]] = None,
+    event_locs: Optional[Sequence[GridPoint]] = None,
+    n_stations: Optional[int] = None,
+    n_events: Optional[int] = None,
+    wave_type: str = 'P',
+    solver: Union[str, object] = 'skfmm',
+    random_seed: Optional[int] = None
+) -> List[SyntheticEventArrivals]:
+    """
+    Build synthetic relative-arrival table from a velocity model (subdivision=1).
+
+    Output format:
+    [
+        {
+            "event_loc": (i, j, k),
+            "arrivals": [
+                {"station_loc": (si, sj, sk), "arrival_rel_s": t_rel},
+                ...
+            ]
+        },
+        ...
+    ]
+
+    You can either pass explicit station/event coordinates or request random
+    placement via n_stations/n_events.
+    """
+    geo_grid = model.get_geo_grid(subdivision=1)
+    shape = tuple(int(v) for v in geo_grid.shape)
+    rng = np.random.default_rng(seed=random_seed)
+
+    stations = _resolve_station_locs(shape, station_locs, n_stations, rng)
+    events = _resolve_event_locs(shape, event_locs, n_events, rng)
+
+    fields = _compute_station_travel_time_fields(
+        grid=geo_grid,
+        station_locs=stations,
+        wave_type=wave_type,
+        solver=solver
+    ).astype(np.float64, copy=False)
+
+    synthetic: List[SyntheticEventArrivals] = []
+    for event_loc in events:
+        i, j, k = event_loc
+        arrivals_abs = fields[:, i, j, k]
+
+        if not np.all(np.isfinite(arrivals_abs)):
+            raise ValueError(
+                f"Non-finite travel times for event {event_loc}. "
+                "Check model/solver settings."
+            )
+
+        t_min = float(np.min(arrivals_abs))
+        arrivals_rel = arrivals_abs - t_min
+
+        event_arrivals: List[SyntheticArrival] = []
+        for station_idx, station_loc in enumerate(stations):
+            event_arrivals.append({
+                'station_loc': station_loc,
+                'arrival_rel_s': float(arrivals_rel[station_idx])
+            })
+
+        synthetic.append({
+            'event_loc': event_loc,
+            'arrivals': event_arrivals
+        })
+
+    return synthetic
+
+
 def compute_cellwise_pairwise_misfit(
     station_fields: np.ndarray,
     observed_arrivals: np.ndarray
@@ -282,6 +358,131 @@ def _weights_from_misfit(
     if total > 0 and not np.isclose(total, 1.0):
         weights /= total
     return weights
+
+
+def _resolve_station_locs(
+    shape: Tuple[int, int, int],
+    station_locs: Optional[Sequence[GridPoint]],
+    n_stations: Optional[int],
+    rng: np.random.Generator
+) -> List[GridPoint]:
+    """Use explicit station locations or sample random stations at k=0."""
+    if station_locs is not None and n_stations is not None:
+        raise ValueError("Provide either station_locs or n_stations, not both")
+
+    if station_locs is not None:
+        stations = _validate_points(station_locs, shape, name='station')
+    else:
+        if n_stations is None:
+            raise ValueError("station_locs or n_stations must be provided")
+        stations = _sample_random_points(shape, int(n_stations), rng, fixed_k=0)
+
+    for idx, loc in enumerate(stations):
+        if loc[2] != 0:
+            raise ValueError(f"Station #{idx} must have k=0, got {loc}")
+
+    if len(stations) == 0:
+        raise ValueError("At least one station is required")
+
+    return stations
+
+
+def _resolve_event_locs(
+    shape: Tuple[int, int, int],
+    event_locs: Optional[Sequence[GridPoint]],
+    n_events: Optional[int],
+    rng: np.random.Generator
+) -> List[GridPoint]:
+    """Use explicit event locations or sample random events in full 3D grid."""
+    if event_locs is not None and n_events is not None:
+        raise ValueError("Provide either event_locs or n_events, not both")
+
+    if event_locs is not None:
+        events = _validate_points(event_locs, shape, name='event')
+    else:
+        if n_events is None:
+            raise ValueError("event_locs or n_events must be provided")
+        events = _sample_random_points(shape, int(n_events), rng, fixed_k=None)
+
+    if len(events) == 0:
+        raise ValueError("At least one event is required")
+
+    return events
+
+
+def _validate_points(
+    points: Sequence[GridPoint],
+    shape: Tuple[int, int, int],
+    name: str
+) -> List[GridPoint]:
+    """Normalize point list to integer tuples and validate bounds."""
+    n_x, n_y, n_z = shape
+    normalized: List[GridPoint] = []
+
+    for idx, point in enumerate(points):
+        if not isinstance(point, tuple) or len(point) != 3:
+            raise ValueError(f"{name.capitalize()} #{idx} must be tuple (i, j, k)")
+
+        try:
+            i, j, k = int(point[0]), int(point[1]), int(point[2])
+        except (TypeError, ValueError):
+            raise ValueError(
+                f"{name.capitalize()} #{idx} must contain integer-like values, got {point}"
+            )
+
+        if not (0 <= i < n_x and 0 <= j < n_y and 0 <= k < n_z):
+            raise ValueError(
+                f"{name.capitalize()} #{idx} location {(i, j, k)} out of bounds for shape {shape}"
+            )
+
+        normalized.append((i, j, k))
+
+    return normalized
+
+
+def _sample_random_points(
+    shape: Tuple[int, int, int],
+    count: int,
+    rng: np.random.Generator,
+    fixed_k: Optional[int]
+) -> List[GridPoint]:
+    """Sample unique random grid points."""
+    if count <= 0:
+        raise ValueError("Random sample count must be > 0")
+
+    n_x, n_y, n_z = shape
+    points: List[GridPoint] = []
+
+    if fixed_k is None:
+        total = n_x * n_y * n_z
+        if count > total:
+            raise ValueError(f"Requested {count} points, but grid has only {total} cells")
+
+        flat_idx = rng.choice(total, size=count, replace=False)
+        for idx in flat_idx.tolist():
+            i = idx // (n_y * n_z)
+            rem = idx % (n_y * n_z)
+            j = rem // n_z
+            k = rem % n_z
+            points.append((int(i), int(j), int(k)))
+        return points
+
+    if not (0 <= fixed_k < n_z):
+        raise ValueError(f"fixed_k={fixed_k} out of bounds for n_z={n_z}")
+
+    total = n_x * n_y
+    if count > total:
+        raise ValueError(
+            f"Requested {count} points at k={fixed_k}, but only {total} unique positions exist"
+        )
+
+    flat_idx = rng.choice(total, size=count, replace=False)
+    for idx in flat_idx.tolist():
+        i = idx // n_y
+        j = idx % n_y
+        points.append((int(i), int(j), int(fixed_k)))
+
+    return points
 
 
 def _extract_observed_and_predicted(
