@@ -125,7 +125,7 @@ def weights_test(model, stations):
     n_subdivision = 1
     grid = model.get_geo_grid(n_subdivision)
     
-    return compute_epicenter_weight_matrix(grid, stations, solver='skfmm', abs_misfit_threshold=220)
+    return compute_epicenter_weight_matrix(grid, stations, solver='skfmm', abs_misfit_threshold=220, temperature=0.05)
 
 
 def ray_tracing_G_test(model):
@@ -149,13 +149,14 @@ def ray_tracing_G_test(model):
     return G3
 
 def synthetic_arrivals(model):
-    events = [(25,1,25), (35,1,35), (66,1,13), (160,1,45), (290,1,25)]
-    stations = [(0,0,0), (50,0,0), (100,0,0), (150,0,0), (200,0,0), (250,0,0)]
+    events = [(25,1,25)]
+            #   , (35,1,35), (66,1,13), (160,1,45), (290,1,25)]
+    stations = [(0,0,0), (10,0,0), (20,0,0), (30,0,0), (40,0,0), (50,0,0), (60,0,0), (70,0,0)]
     synth_arrivals = generate_synthetic_arrivals_table(model, event_locs=events, station_locs=stations)
     return synth_arrivals
 
 def tomography(initial_model, arrivlas):
-    res = run_tomography_prototype(initial_model, arrivlas)
+    res = run_tomography_prototype(initial_model, arrivlas, abs_misfit_threshold=9000, temperature=0.05)
     return res
 
 if __name__ == '__main__':
@@ -175,19 +176,28 @@ if __name__ == '__main__':
         {'loc':(99,1,0), 'arrival_unix':0},
         {'loc':(199,1,0), 'arrival_unix':100},
         {'loc':(299,1,0), 'arrival_unix':195}]
+    
+    # weights_test()
+
 
     initial_model = VelocityModel.from_config(modle_config)
-    initial_model.fill_linear_gradient('vp', top_value=100.0, bottom_value=100.0)
+    initial_model.fill_linear_gradient('vp', top_value=95.0, bottom_value=105.0)
 
     true_model = VelocityModel.from_config(modle_config)
-    true_model.fill_linear_gradient('vp', top_value=50.0, bottom_value=150.0)
+    true_model.fill_linear_gradient('vp', top_value=100.0, bottom_value=100.0)
 
-    arr = synthetic_arrivals(true_model)
-    print(arr)
+    full_arr = synthetic_arrivals(true_model)
+    arr = full_arr[0]['arrivals']
 
-    tm = tomography(initial_model, arr)
+    # weights = weights_test(initial_model, arr)
+    # simple_heatmap(weights[:,1,:])
+    print(full_arr)
 
-    print(tm)
+    tm = tomography(initial_model, full_arr)
+
+    print(tm[0])
+    simple_heatmap(tm[0]['delta_s'][:,1,:])
+
     # res = ray_tracing_G_test(model)
     # print(res)
     # simple_heatmap(res[:,1,:])

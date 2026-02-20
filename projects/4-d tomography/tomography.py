@@ -7,7 +7,7 @@ generate_synthetic_arrivals_table() from instruments.py:
     {
         "event_loc": (i, j, k),
         "arrivals": [
-            {"station_loc": (si, sj, sk), "arrival_rel_s": t_rel},
+            {"loc": (si, sj, sk), "arrival": t_rel},
             ...
         ]
     },
@@ -262,17 +262,17 @@ def _parse_event_arrivals(
             raise ValueError(
                 f"Event #{event_index} station #{station_idx} must be a dictionary"
             )
-        if 'station_loc' not in station_entry:
+        if 'loc' not in station_entry:
             raise ValueError(
-                f"Event #{event_index} station #{station_idx} must contain 'station_loc'"
+                f"Event #{event_index} station #{station_idx} must contain 'loc'"
             )
-        if 'arrival_rel_s' not in station_entry:
+        if 'arrival' not in station_entry:
             raise ValueError(
-                f"Event #{event_index} station #{station_idx} must contain 'arrival_rel_s'"
+                f"Event #{event_index} station #{station_idx} must contain 'arrival'"
             )
 
         station_loc = _normalize_grid_point(
-            station_entry['station_loc'],
+            station_entry['loc'],
             shape,
             f"Event #{event_index} station #{station_idx} station_loc"
         )
@@ -283,13 +283,13 @@ def _parse_event_arrivals(
             )
 
         try:
-            arrival_rel_s = float(station_entry['arrival_rel_s'])
+            arrival_rel_s = float(station_entry['arrival'])
         except (TypeError, ValueError):
             raise ValueError(
                 f"Event #{event_index} station #{station_idx} arrival_rel_s must be numeric"
             )
 
-        stations.append({'loc': station_loc, 'arrival_unix': arrival_rel_s})
+        stations.append({'loc': station_loc, 'arrival': arrival_rel_s})
 
     return event_loc, stations
 

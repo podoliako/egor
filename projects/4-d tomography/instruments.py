@@ -27,11 +27,11 @@ def _validate_station(station: StationArrival, idx: int) -> Tuple[Tuple[int, int
     """Validate one station dictionary and normalize values."""
     if 'loc' not in station:
         raise ValueError(f"Station #{idx} must contain key 'loc'")
-    if 'arrival_unix' not in station:
-        raise ValueError(f"Station #{idx} must contain key 'arrival_unix'")
+    if 'arrival' not in station:
+        raise ValueError(f"Station #{idx} must contain key 'arrival'")
 
     loc = station['loc']
-    arrival_unix = station['arrival_unix']
+    arrival = station['arrival']
 
     if not isinstance(loc, tuple) or len(loc) != 3:
         raise ValueError(f"Station #{idx} 'loc' must be a tuple (i, j, k)")
@@ -42,9 +42,9 @@ def _validate_station(station: StationArrival, idx: int) -> Tuple[Tuple[int, int
         raise ValueError(f"Station #{idx} 'loc' values must be integers")
 
     try:
-        arrival = float(arrival_unix)
+        arrival = float(arrival)
     except (TypeError, ValueError):
-        raise ValueError(f"Station #{idx} 'arrival_unix' must be numeric")
+        raise ValueError(f"Station #{idx} 'arrival' must be numeric")
 
     return (i, j, k), arrival
 
@@ -188,7 +188,7 @@ def generate_synthetic_arrivals_table(
         {
             "event_loc": (i, j, k),
             "arrivals": [
-                {"station_loc": (si, sj, sk), "arrival_rel_s": t_rel},
+                {"station": (si, sj, sk), "arrival": t_rel},
                 ...
             ]
         },
@@ -229,8 +229,8 @@ def generate_synthetic_arrivals_table(
         event_arrivals: List[SyntheticArrival] = []
         for station_idx, station_loc in enumerate(stations):
             event_arrivals.append({
-                'station_loc': station_loc,
-                'arrival_rel_s': float(arrivals_rel[station_idx])
+                'loc': station_loc,
+                'arrival': float(arrivals_rel[station_idx])
             })
 
         synthetic.append({
