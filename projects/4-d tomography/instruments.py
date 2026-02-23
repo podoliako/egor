@@ -178,7 +178,8 @@ def generate_synthetic_arrivals_table(
     n_events: Optional[int] = None,
     wave_type: str = 'P',
     solver: Union[str, object] = 'skfmm',
-    random_seed: Optional[int] = None
+    random_seed: Optional[int] = None,
+    subdivision: Optional[int] = 1,
 ) -> List[SyntheticEventArrivals]:
     """
     Build synthetic relative-arrival table from a velocity model (subdivision=1).
@@ -198,7 +199,7 @@ def generate_synthetic_arrivals_table(
     You can either pass explicit station/event coordinates or request random
     placement via n_stations/n_events.
     """
-    geo_grid = model.get_geo_grid(subdivision=1)
+    geo_grid = model.get_geo_grid(subdivision=subdivision)
     shape = tuple(int(v) for v in geo_grid.shape)
     rng = np.random.default_rng(seed=random_seed)
 
