@@ -1,26 +1,14 @@
 """
 Prototype tomography inversion from arrival tables.
-
-The module expects arrival tables with the same structure as produced by
-generate_synthetic_arrivals_table() from instruments.py:
-[
-    {
-        "event_loc": (i, j, k),
-        "arrivals": [
-            {"loc": (si, sj, sk), "arrival": t_rel},
-            ...
-        ]
-    },
-    ...
-]
 """
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from time import perf_counter
 
-from instruments import compute_epicenter_weight_matrix, precompute_station_travel_time_fields
+from instruments import compute_epicenter_weight_matrix, _compute_station_travel_time_fields
 from raytracing import trace_ray_from_timefield, rasterize_path_lengths
+from components.graphics import simple_heatmap
 
 
 GridPoint = Tuple[int, int, int]
@@ -29,20 +17,49 @@ EventArrivals = Dict[str, Union[GridPoint, List[StationArrival]]]
 TomographyEventResult = Dict[str, Union[int, GridPoint, np.ndarray]]
 
 
-def run_tomography_prototype(
+def run_em(
+    n_cycles,
     initial_model,
     arrivals_table: Sequence[EventArrivals],
+    station_locs,
     wave_type: str = 'P',
     solver: Union[str, object] = 'skfmm',
     lambda_reg: float = 1e-3,
     abs_misfit_threshold: Optional[float] = None,
     temperature: float = 1.0,
     weight_epsilon: float = 0.0,
-    weights_top_n: int = 1,
-    include_intermediate: bool = False,
-    use_upper_triangle_pairs: bool = True,
-    collect_timings: bool = True,
-    print_timings: bool = False
+    weights_top_n: int = 1  
+):
+    model = initial_model
+    for i in range(n_cycles):
+        delta_s = run_tomography_prototype(
+            initial_model,
+            arrivals_table,
+            station_locs,
+            wave_type,
+            solver,
+            lambda_reg,
+            abs_misfit_threshold,
+            temperature,
+            weight_epsilon,
+            weights_top_n
+        )
+        model.set_vp_array(1/(1/(model.get_geo_grid(subdivision=1).vp) + delta_s))
+        print(f"iteration: {i+1}")
+        simple_heatmap(model.get_geo_grid(subdivision=1).vp[:,1,:])
+
+
+def run_tomography_prototype(
+    initial_model,
+    arrivals_table: Sequence[EventArrivals],
+    station_locs,
+    wave_type: str = 'P',
+    solver: Union[str, object] = 'skfmm',
+    lambda_reg: float = 1e-3,
+    abs_misfit_threshold: Optional[float] = None,
+    temperature: float = 1.0,
+    weight_epsilon: float = 0.0,
+    weights_top_n: int = 1
 ) -> Dict[str, Any]:
     """
     Global tomography inversion over all events simultaneously.
@@ -58,147 +75,77 @@ def run_tomography_prototype(
     if weights_top_n is not None and weights_top_n < 1:
         raise ValueError("weights_top_n must be >= 1 or None")
 
-    run_start = perf_counter()
-
     geo_grid = initial_model.get_geo_grid(subdivision=1)
     shape = tuple(int(v) for v in geo_grid.shape)
     voxel_size = (float(geo_grid.cell_size),) * 3
 
-    all_g_rows: List[np.ndarray] = []
-    all_r_vec: List[np.ndarray] = []
-    event_results: List[Dict[str, Any]] = []
+    G = []
+    r = []
 
-    for event_index, event in enumerate(arrivals_table):
-        event_start = perf_counter()
+    station_fields = _compute_station_travel_time_fields(geo_grid, station_locs, wave_type, solver)
 
-        t0 = perf_counter()
-        event_loc, station_obs = _parse_event_arrivals(event, event_index, shape)
-        parse_event_s = perf_counter() - t0
-
-        n_stations = len(station_obs)
-        if n_stations < 2:
-            raise ValueError(f"Event #{event_index} must have at least 2 stations, got {n_stations}")
-
-        t0 = perf_counter()
+    for observed in arrivals_table:
+        observed = np.array(observed)
         weights = compute_epicenter_weight_matrix(
-            grid=geo_grid,
-            stations=station_obs,
-            wave_type=wave_type,
-            solver=solver,
+            station_fields=station_fields,
+            observed=observed,
             abs_misfit_threshold=abs_misfit_threshold,
             temperature=temperature
         )
         weights = _select_top_n_weights(weights, weights_top_n, normolize=True)
-        weights_s = perf_counter() - t0
+        weights_indices = np.argwhere(weights > 0)
+        weights_values = weights[weights > 0] 
+        G_weights = []
+        r_weights = []
+        for weight_idx, weight_val in zip(weights_indices, weights_values):
+            G_stations = []
+            
+            for station_index, station_loc in enumerate(station_locs):
+                g = calculate_G(station_fields, weight_idx, station_loc, station_index, shape, voxel_size)
+                G_stations.append(g)
 
-        t0 = perf_counter()
-        station_fields, observed_arrivals = precompute_station_travel_time_fields(
-            grid=geo_grid,
-            stations=station_obs,
-            wave_type=wave_type,
-            solver=solver
-        )
-        station_fields = station_fields.astype(np.float64, copy=False)
-        observed_arrivals = observed_arrivals.astype(np.float64, copy=False)
-        station_fields_s = perf_counter() - t0
+            G_stations = np.array(G_stations)
+            g_tilda = G_stations[:, np.newaxis, :, :, :] - G_stations[np.newaxis, :, :, :, :]
+            residuals = calculate_residuals(station_fields, observed, weight_idx)
 
-        t0 = perf_counter()
-        g_tilde_prime, r_prime, weighted_cell_count, build_timing = _build_weighted_pairwise_system(
-            weights=weights,
-            station_fields=station_fields,
-            observed_arrivals=observed_arrivals,
-            station_obs=station_obs,
-            voxel_size=voxel_size,
-            weight_epsilon=weight_epsilon
-        )
-        build_weighted_system_s = perf_counter() - t0
+            G_weights.append(g_tilda * weight_val)
+            r_weights.append(residuals * weight_val)
 
-        t0 = perf_counter()
-        g_rows_e, r_vec_e = _pairwise_to_rows(
-            g_tilde_prime=g_tilde_prime,
-            r_prime=r_prime,
-            model_shape=shape,
-            use_upper_triangle_pairs=use_upper_triangle_pairs
-        )
-        rows_build_s = perf_counter() - t0
+        G.append(sum(G_weights))
+        r.append(sum(r_weights))
 
-        all_g_rows.append(g_rows_e)
-        all_r_vec.append(r_vec_e)
+    delta_s = _solve_delta_s(
+        g_tilde_prime=sum(G),
+        r_prime=sum(r),
+        model_shape=shape,
+        lambda_reg=lambda_reg,
+        use_upper_triangle_pairs=True 
+    )
 
-        event_total_s = perf_counter() - event_start
-        event_result: Dict[str, Any] = {
-            "event_index": int(event_index),
-            "event_loc": event_loc,
-            "weighted_cell_count": int(weighted_cell_count),
-            "weights": weights,
-            "n_rows": int(g_rows_e.shape[0]),
-        }
+    return delta_s
 
-        if collect_timings:
-            event_result["timings_s"] = {
-                "parse_event": float(parse_event_s),
-                "weights": float(weights_s),
-                "station_fields": float(station_fields_s),
-                "build_weighted_system": float(build_weighted_system_s),
-                "build_rows": float(rows_build_s),
-                "event_total": float(event_total_s),
-                "build_details": build_timing,
-            }
-
-        if include_intermediate:
-            event_result["r_prime"] = r_prime
-            event_result["g_tilde_prime"] = g_tilde_prime
-
-        event_results.append(event_result)
-
-        if print_timings:
-            print(
-                f"[tomography] event={event_index} cells={weighted_cell_count} rows={g_rows_e.shape[0]} "
-                f"total={event_total_s:.3f}s weights={weights_s:.3f}s "
-                f"fields={station_fields_s:.3f}s build={build_weighted_system_s:.3f}s "
-                f"rows={rows_build_s:.3f}s"
+def calculate_G(station_fields, weight_idx, station_loc, station_index, shape, voxel_size):
+    path = trace_ray_from_timefield(
+                T=station_fields[station_index],
+                station_xyz=station_loc,
+                epic_xyz=weight_idx,
+                spacing_xyz=(1.0, 1.0, 1.0)
             )
 
-    if len(all_g_rows) == 0:
-        raise ValueError("arrivals_table is empty")
-
-    t0 = perf_counter()
-    g_rows_all = np.vstack(all_g_rows)
-    r_vec_all = np.concatenate(all_r_vec)
-    stack_rows_s = perf_counter() - t0
-
-    t0 = perf_counter()
-    delta_s = _solve_delta_s_from_rows(
-        g_rows=g_rows_all,
-        r_vec=r_vec_all,
-        model_shape=shape,
-        lambda_reg=lambda_reg
-    )
-    solve_global_s = perf_counter() - t0
-
-    run_total_s = perf_counter() - run_start
-
-    result: Dict[str, Any] = {
-        "delta_s": delta_s,                         # one global update for all events
-        "event_results": event_results,             # per-event diagnostics
-        "n_events": len(event_results),
-        "n_rows_total": int(g_rows_all.shape[0]),
-    }
-
-    if collect_timings:
-        result["timings_s"] = {
-            "stack_rows": float(stack_rows_s),
-            "solve_global": float(solve_global_s),
-            "run_total": float(run_total_s),
-        }
-
-    if print_timings:
-        print(
-            f"[tomography] global rows={g_rows_all.shape[0]} "
-            f"solve={solve_global_s:.3f}s total={run_total_s:.3f}s"
+    G = rasterize_path_lengths(
+            path_xyz=path,
+            shape=shape,
+            voxel_size=voxel_size,
+            dtype=np.float64
         )
+    return G
 
-    return result
+def calculate_residuals(station_fields, arrivals_table, weight_idx):
+    x, y, z = weight_idx
+    predicted_arrivals = station_fields[:, x, y, z]
+    residual_vector = arrivals_table - predicted_arrivals
+    residual_matrix = residual_vector[:, np.newaxis] - residual_vector[np.newaxis, :]
+    return residual_matrix
 
 
 def _pairwise_to_rows(
@@ -361,6 +308,7 @@ def _solve_delta_s(
     equivalent dual ridge form:
       x = G^T (G G^T + lambda I)^-1 r
     """
+    g_tilde_prime = np.array(g_tilde_prime)
     n_stations = g_tilde_prime.shape[0]
     if n_stations != g_tilde_prime.shape[1]:
         raise ValueError("g_tilde_prime must have shape (n_stations, n_stations, ...)")

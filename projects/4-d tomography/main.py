@@ -10,7 +10,7 @@ from instruments import compute_pairwise_misfit_matrix_and_sse, compute_epicente
 from raytracing import trace_ray_from_timefield, rasterize_path_binary, rasterize_path_lengths
 from math import *
 from components.graphics import simple_scatter, simple_heatmap
-from tomography import run_tomography_prototype
+from tomography import run_tomography_prototype, run_em
 
 import cProfile
 import pstats
@@ -152,17 +152,14 @@ def ray_tracing_G_test(model):
 
     return G3
 
-def synthetic_arrivals(model):
-    events = [(150,1,25), (105,1,35), (115,1,5), (165,1,10), (170,1,30)]
+def synthetic_arrivals(model, stations, n_events):
+    # events = [(150,1,25), (105,1,35), (115,1,5), (165,1,10), (170,1,30)]
             #   , (35,1,35), (66,1,13), (160,1,45), (290,1,25)]
-    stations = [(0,1,0), (10,1,0), (20,1,0), (30,1,0), (40,1,0), (50,1,0), (60,1,0), (70,1,0),
-                (80,1,0), (90,1,0), (100,1,0), (110,1,0), (120,1,0), (130,1,0), (140,1,0), (150,1,0),
-                (160,1,0), (170,1,0), (180,1,0), (190,1,0), (200,1,0), (210,1,0), (220,1,0), (230,1,0)]
-    synth_arrivals = generate_synthetic_arrivals_table(model, n_events=7, station_locs=stations, random_seed=7)
-    return synth_arrivals
+    
+    return generate_synthetic_arrivals_table(model, n_events=n_events, station_locs=stations, random_seed=7)
 
 def tomography(initial_model, arrivlas):
-    res = run_tomography_prototype(initial_model, arrivlas, weights_top_n=1, temperature=0.05, print_timings=True)
+    res = run_tomography_prototype(initial_model, arrivlas, stations, weights_top_n=1, temperature=0.05)
     return res
 
 if __name__ == '__main__':
@@ -180,12 +177,14 @@ if __name__ == '__main__':
         'n_z': 50
     }
 
-    stations = [
-        {'loc':(0,1,0), 'arrival_unix':0}, 
-        {'loc':(99,1,0), 'arrival_unix':0},
-        {'loc':(199,1,0), 'arrival_unix':100},
-        {'loc':(299,1,0), 'arrival_unix':195}]
-    
+    # stations = [
+    #     {'loc':(0,1,0), 'arrival_unix':0}, 
+    #     {'loc':(99,1,0), 'arrival_unix':0},
+    #     {'loc':(199,1,0), 'arrival_unix':100},
+    #     {'loc':(299,1,0), 'arrival_unix':195}]
+    stations = [(0,1,0), (10,1,0), (20,1,0), (30,1,0), (40,1,0), (50,1,0), (60,1,0), (70,1,0),
+                (80,1,0), (90,1,0), (100,1,0), (110,1,0), (120,1,0), (130,1,0), (140,1,0), (150,1,0),
+                (160,1,0), (170,1,0), (180,1,0), (190,1,0), (200,1,0), (210,1,0), (220,1,0), (230,1,0)]
     # weights_test()
 
 
@@ -197,18 +196,19 @@ if __name__ == '__main__':
 
     for i in range(100,200,1):
         for j in range(true_model.grid.vp.shape[1]):
-            for k in range(10,20):
-                true_model.set_vp(i, j, k, 220)
+            for k in range(10,30):
+                true_model.set_vp(i, j, k, 103)
 
     simple_heatmap(true_model.get_geo_grid().vp[:,1,:], filename='true_model_3.png')
     simple_heatmap(initial_model.get_geo_grid().vp[:,1,:], filename='initial_model_3.png')
 
-    full_arr = synthetic_arrivals(true_model)
+    full_arr, events = synthetic_arrivals(true_model, stations, 100)
 
+    print(events)
     X, Y = [], []
-    for arr in full_arr:
-        x = arr['event_loc'][0]
-        y = arr['event_loc'][2]
+    for arr in events:
+        x = arr[0]
+        y = arr[2]
         X.append(x)
         Y.append(y)
     
@@ -219,12 +219,14 @@ if __name__ == '__main__':
 
     # weights = weights_test(initial_model, arr)
     # simple_heatmap(weights[:,1,:])
+
     print(full_arr)
 
-    tm = tomography(initial_model, full_arr)
+    # tm = tomography(initial_model, full_arr)
 
-    print(tm)
-    simple_heatmap(tm['delta_s'][:,1,:])
+    run_em(10, initial_model, full_arr, stations, weights_top_n=10)
+    # print(tm)
+    # simple_heatmap(tm[:,1,:])
 
     profiler.disable()
 

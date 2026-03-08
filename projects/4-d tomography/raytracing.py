@@ -32,7 +32,7 @@ def _grad_at(gradT, p_idx):
 
 
 def trace_ray_from_timefield(
-    T, station_xyz, epic_xyz, origin_xyz, spacing_xyz,
+    T, station_xyz, epic_xyz, spacing_xyz,
     step=None, tol=None, max_steps=50000
 ):
     """
@@ -41,7 +41,7 @@ def trace_ray_from_timefield(
     """
     station = np.asarray(station_xyz, dtype=float)
     x = np.asarray(epic_xyz, dtype=float).copy()
-    origin = np.asarray(origin_xyz, dtype=float)
+    origin = np.asarray((0, 0, 0), dtype=float)
     spacing = np.asarray(spacing_xyz, dtype=float)
 
     if step is None:
@@ -49,7 +49,6 @@ def trace_ray_from_timefield(
     if tol is None:
         tol = step
 
-    # gradT[0]=dT/dx(index0), gradT[1]=dT/dy, gradT[2]=dT/dz
     gradT = np.gradient(T, *spacing, edge_order=1)
 
     path = [x.copy()]

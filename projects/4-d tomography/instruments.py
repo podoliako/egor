@@ -147,7 +147,7 @@ def precompute_station_travel_time_fields(
     grid,
     stations: Sequence[StationArrival],
     wave_type: str = 'P',
-    solver: Union[str, object] = 'simple'
+    solver: Union[str, object] = 'skfmm'
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Precompute travel-time fields from each station to all grid cells.
@@ -229,17 +229,15 @@ def generate_synthetic_arrivals_table(
 
         event_arrivals: List[SyntheticArrival] = []
         for station_idx, station_loc in enumerate(stations):
-            event_arrivals.append({
-                'loc': station_loc,
-                'arrival': float(arrivals_rel[station_idx])
-            })
+            # event_arrivals.append({
+            #     'loc': station_loc,
+            #     'arrival': float(arrivals_rel[station_idx])
+            # })
+            event_arrivals.append(float(arrivals_rel[station_idx]))
 
-        synthetic.append({
-            'event_loc': event_loc,
-            'arrivals': event_arrivals
-        })
+        synthetic.append(event_arrivals)
 
-    return synthetic
+    return synthetic, events
 
 
 def compute_cellwise_pairwise_misfit(
@@ -275,10 +273,8 @@ def compute_cellwise_pairwise_misfit(
 
 
 def compute_epicenter_weight_matrix(
-    grid,
-    stations: Sequence[StationArrival],
-    wave_type: str = 'P',
-    solver: Union[str, object] = 'simple',
+    station_fields,
+    observed,
     abs_misfit_threshold: Optional[float] = None,
     temperature: float = 1.0,
     return_misfit: bool = False
@@ -307,12 +303,6 @@ def compute_epicenter_weight_matrix(
     if abs_misfit_threshold is not None and abs_misfit_threshold < 0:
         raise ValueError("abs_misfit_threshold must be >= 0 when provided")
 
-    station_fields, observed = precompute_station_travel_time_fields(
-        grid=grid,
-        stations=stations,
-        wave_type=wave_type,
-        solver=solver
-    )
     misfit = compute_cellwise_pairwise_misfit(station_fields, observed)
     weights = _weights_from_misfit(misfit, abs_misfit_threshold, temperature)
 
