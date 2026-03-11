@@ -6,11 +6,11 @@ sys.path.insert(0, str(root))
 import numpy as np
 from velocity_model import VelocityModel, GridGeometry, VelocityGrid
 from wave_propagation import WavePropagator
-from instruments import compute_pairwise_misfit_matrix_and_sse, compute_epicenter_weight_matrix, generate_synthetic_arrivals_table
+from instruments import compute_epicenter_weight_matrix, generate_synthetic_arrivals_table
 from raytracing import trace_ray_from_timefield, rasterize_path_binary, rasterize_path_lengths
 from math import *
 from components.graphics import simple_scatter, simple_heatmap
-from tomography import run_tomography_prototype, run_em
+from tomography import make_tomography_step, run_em
 
 import cProfile
 import pstats
@@ -111,19 +111,6 @@ def big_homogenius_media_test(model):
                    title=f'Solver: {solver}, Grid shape: {str(grid.shape)}', 
                    dpi=700)
 
-def missfit_test(model):
-    n_subdivision = 1
-    grid = model.get_geo_grid(n_subdivision)
-
-    stations = [
-        {'loc':(0,0,0), 'arrival_unix':145}, 
-        {'loc':(99,0,0), 'arrival_unix':50},
-        {'loc':(199,0,0), 'arrival_unix':50},
-        {'loc':(299,0,0), 'arrival_unix':146}]
-
-    miss_matrix = compute_pairwise_misfit_matrix_and_sse(grid, stations, (149,0,25), solver='skfmm')
-    return miss_matrix
-
 
 def weights_test(model, stations):
     n_subdivision = 1
@@ -159,7 +146,7 @@ def synthetic_arrivals(model, stations, n_events):
     return generate_synthetic_arrivals_table(model, n_events=n_events, station_locs=stations, random_seed=7)
 
 def tomography(initial_model, arrivlas):
-    res = run_tomography_prototype(initial_model, arrivlas, stations, weights_top_n=1, temperature=0.05)
+    res = make_tomography_step(initial_model, arrivlas, stations, weights_top_n=1, temperature=0.05)
     return res
 
 if __name__ == '__main__':
@@ -194,15 +181,18 @@ if __name__ == '__main__':
     true_model = VelocityModel.from_config(modle_config)
     true_model.fill_linear_gradient('vp', top_value=100.0, bottom_value=100.0)
 
-    for i in range(100,200,1):
+    for i in range(true_model.grid.vp.shape[0]):
         for j in range(true_model.grid.vp.shape[1]):
-            for k in range(10,30):
-                true_model.set_vp(i, j, k, 103)
+            for k in range(true_model.grid.vp.shape[2]):
+                if (i//10 % 2 == 0 and k//10 % 2 != 0) or (i//10 % 2 != 0 and k//10 % 2 == 0):
+                    true_model.set_vp(i, j, k, 103)
+                else:
+                    true_model.set_vp(i, j, k, 97)
 
     simple_heatmap(true_model.get_geo_grid().vp[:,1,:], filename='true_model_3.png')
     simple_heatmap(initial_model.get_geo_grid().vp[:,1,:], filename='initial_model_3.png')
 
-    full_arr, events = synthetic_arrivals(true_model, stations, 100)
+    full_arr, events = synthetic_arrivals(true_model, stations, 10)
 
     print(events)
     X, Y = [], []
@@ -224,7 +214,7 @@ if __name__ == '__main__':
 
     # tm = tomography(initial_model, full_arr)
 
-    run_em(10, initial_model, full_arr, stations, weights_top_n=10)
+    run_em(3, initial_model, full_arr, stations, weights_top_n=1, lambda_reg=0.001)
     # print(tm)
     # simple_heatmap(tm[:,1,:])
 
