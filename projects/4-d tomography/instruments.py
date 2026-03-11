@@ -11,15 +11,48 @@ from wave_propagation import WavePropagator
 StationArrival = Dict[str, Union[Tuple[int, int, int], float, int]]
 GridPoint = Tuple[int, int, int]
 
+# Координаты в метрах от угла сетки (x_m, y_m, z_m)
+MetricPoint = Tuple[float, float, float]
 
 SyntheticArrival = Dict[str, Union[GridPoint, float]]
 SyntheticEventArrivals = Dict[str, Union[GridPoint, List[SyntheticArrival]]]
 
 
+def metric_to_index(metric_point: MetricPoint, cell_size: float) -> GridPoint:
+    """Конвертация метрических координат в индексы сетки с заданным cell_size."""
+    return tuple(int(round(c / cell_size)) for c in metric_point)
+
+
+def coarsen_G(G_fine: np.ndarray, subdivision: int) -> np.ndarray:
+    """
+    Схлопывает матрицу G с fine сетки (nx*sub, ny*sub, nz*sub)
+    до coarse сетки (nx, ny, nz) суммированием по блокам sub×sub×sub.
+
+    Физически корректно: сумма длин путей в под-вокселях = длина пути в крупном вокселе.
+    """
+    if subdivision == 1:
+        return G_fine
+
+    nx_f, ny_f, nz_f = G_fine.shape
+    if nx_f % subdivision != 0 or ny_f % subdivision != 0 or nz_f % subdivision != 0:
+        raise ValueError(
+            f"Fine grid shape {G_fine.shape} not divisible by subdivision={subdivision}"
+        )
+    nx = nx_f // subdivision
+    ny = ny_f // subdivision
+    nz = nz_f // subdivision
+
+    return (
+        G_fine
+        .reshape(nx, subdivision, ny, subdivision, nz, subdivision)
+        .sum(axis=(1, 3, 5))
+    )
+
+
 def generate_synthetic_arrivals_table(
         model,
-        station_locs: Optional[Sequence[GridPoint]] = None,
-        event_locs: Optional[Sequence[GridPoint]] = None,
+        station_locs: Optional[Sequence[MetricPoint]] = None,
+        event_locs: Optional[Sequence[MetricPoint]] = None,
         n_stations: Optional[int] = None,
         n_events: Optional[int] = None,
         wave_type: str = 'P',
@@ -27,23 +60,29 @@ def generate_synthetic_arrivals_table(
         random_seed: Optional[int] = None,
         subdivision: Optional[int] = 1,
     ):
-
+    """
+    station_locs / event_locs задаются в метрах от угла сетки: (x_m, y_m, z_m).
+    При n_stations / n_events — случайная выборка, результирующие координаты
+    также возвращаются в метрах.
+    """
     geo_grid = model.get_geo_grid(subdivision=subdivision)
+    cell_size = float(geo_grid.cell_size)
     shape = tuple(int(v) for v in geo_grid.shape)
     rng = np.random.default_rng(seed=random_seed)
 
-    stations = _resolve_station_locs(shape, station_locs, n_stations, rng)
-    events = _resolve_event_locs(shape, event_locs, n_events, rng)
+    # Разрешаем метрические координаты → индексы fine сетки
+    station_idx = _resolve_station_locs_metric(shape, cell_size, station_locs, n_stations, rng)
+    event_idx   = _resolve_event_locs_metric(shape, cell_size, event_locs, n_events, rng)
 
     fields = compute_station_travel_time_fields(
         grid=geo_grid,
-        station_locs=stations,
+        station_locs=station_idx,
         wave_type=wave_type,
         solver=solver
     ).astype(np.float64, copy=False)
 
     synthetic: List[SyntheticEventArrivals] = []
-    for event_loc in events:
+    for event_loc in event_idx:
         i, j, k = event_loc
         arrivals_abs = fields[:, i, j, k]
 
@@ -57,16 +96,16 @@ def generate_synthetic_arrivals_table(
         arrivals_rel = arrivals_abs - t_min
 
         event_arrivals: List[SyntheticArrival] = []
-        for station_idx, station_loc in enumerate(stations):
-            # event_arrivals.append({
-            #     'loc': station_loc,
-            #     'arrival': float(arrivals_rel[station_idx])
-            # })
-            event_arrivals.append(float(arrivals_rel[station_idx]))
+        for station_idx_i, _ in enumerate(station_idx):
+            event_arrivals.append(float(arrivals_rel[station_idx_i]))
 
         synthetic.append(event_arrivals)
 
-    return synthetic, events
+    # Возвращаем события в метрах (для внешнего использования)
+    event_locs_metric = [
+        tuple(c * cell_size for c in loc) for loc in event_idx
+    ]
+    return synthetic, event_locs_metric
 
 
 def compute_cellwise_pairwise_misfit(
@@ -161,13 +200,110 @@ def _weights_from_misfit(
     return weights
 
 
+# ---------------------------------------------------------------------------
+# Внутренние хелперы — метрические координаты
+# ---------------------------------------------------------------------------
+
+def _resolve_station_locs_metric(
+    shape: Tuple[int, int, int],
+    cell_size: float,
+    station_locs: Optional[Sequence[MetricPoint]],
+    n_stations: Optional[int],
+    rng: np.random.Generator
+) -> List[GridPoint]:
+    """
+    Станции должны быть на поверхности (k=0, т.е. z_m=0).
+    Принимает координаты в метрах, возвращает индексы fine сетки.
+    """
+    if station_locs is not None and n_stations is not None:
+        raise ValueError("Provide either station_locs or n_stations, not both")
+
+    if station_locs is not None:
+        stations = _validate_metric_points(station_locs, shape, cell_size, name='station')
+    else:
+        if n_stations is None:
+            raise ValueError("station_locs or n_stations must be provided")
+        stations = _sample_random_points(shape, int(n_stations), rng, fixed_k=0)
+
+    for idx, loc in enumerate(stations):
+        if loc[2] != 0:
+            raise ValueError(f"Station #{idx} must have k=0, got {loc}")
+
+    if len(stations) == 0:
+        raise ValueError("At least one station is required")
+
+    return stations
+
+
+def _resolve_event_locs_metric(
+    shape: Tuple[int, int, int],
+    cell_size: float,
+    event_locs: Optional[Sequence[MetricPoint]],
+    n_events: Optional[int],
+    rng: np.random.Generator
+) -> List[GridPoint]:
+    """
+    Принимает координаты в метрах, возвращает индексы fine сетки.
+    """
+    if event_locs is not None and n_events is not None:
+        raise ValueError("Provide either event_locs or n_events, not both")
+
+    if event_locs is not None:
+        events = _validate_metric_points(event_locs, shape, cell_size, name='event')
+    else:
+        if n_events is None:
+            raise ValueError("event_locs or n_events must be provided")
+        events = _sample_random_points(shape, int(n_events), rng, fixed_k=None)
+
+    if len(events) == 0:
+        raise ValueError("At least one event is required")
+
+    return events
+
+
+def _validate_metric_points(
+    points: Sequence[MetricPoint],
+    shape: Tuple[int, int, int],
+    cell_size: float,
+    name: str
+) -> List[GridPoint]:
+    """
+    Конвертирует метрические координаты в индексы и проверяет границы.
+    """
+    n_x, n_y, n_z = shape
+    normalized: List[GridPoint] = []
+
+    for idx, point in enumerate(points):
+        if not isinstance(point, (tuple, list)) or len(point) != 3:
+            raise ValueError(f"{name.capitalize()} #{idx} must be tuple (x_m, y_m, z_m)")
+
+        try:
+            i, j, k = (int(round(float(point[0]) / cell_size)),
+                       int(round(float(point[1]) / cell_size)),
+                       int(round(float(point[2]) / cell_size)))
+        except (TypeError, ValueError):
+            raise ValueError(
+                f"{name.capitalize()} #{idx} must contain numeric values, got {point}"
+            )
+
+        if not (0 <= i < n_x and 0 <= j < n_y and 0 <= k < n_z):
+            raise ValueError(
+                f"{name.capitalize()} #{idx} metric {tuple(point)} → index {(i, j, k)} "
+                f"out of bounds for shape {shape} with cell_size={cell_size}"
+            )
+
+        normalized.append((i, j, k))
+
+    return normalized
+
+
 def _resolve_station_locs(
     shape: Tuple[int, int, int],
     station_locs: Optional[Sequence[GridPoint]],
     n_stations: Optional[int],
     rng: np.random.Generator
 ) -> List[GridPoint]:
-    """Use explicit station locations or sample random stations at k=0."""
+    """Оставлено для обратной совместимости. Принимает индексные координаты."""
     if station_locs is not None and n_stations is not None:
         raise ValueError("Provide either station_locs or n_stations, not both")
 
@@ -194,7 +330,7 @@ def _resolve_event_locs(
     n_events: Optional[int],
     rng: np.random.Generator
 ) -> List[GridPoint]:
-    """Use explicit event locations or sample random events in full 3D grid."""
+    """Оставлено для обратной совместимости. Принимает индексные координаты."""
     if event_locs is not None and n_events is not None:
         raise ValueError("Provide either event_locs or n_events, not both")
 

@@ -16,217 +16,92 @@ import cProfile
 import pstats
 from pstats import SortKey
 
-def quick_test(model):
-    print(f"Vp at surface (0,0,0): {model.get_vp(0, 0, 0):.1f} m/s")
-    print(f"Vp at depth (0,0,15): {model.get_vp(0, 0, 15):.1f} m/s")
-    print(f"Vp at depth (0,0,29): {model.get_vp(0, 0, 29):.1f} m/s")
-    
-    print(f"Vs at surface (0,0,0): {model.get_vs(0, 0, 0):.1f} m/s")
-    print(f"Vs at depth (0,0,15): {model.get_vs(0, 0, 15):.1f} m/s")
-    print(f"Vs at depth (0,0,29): {model.get_vs(0, 0, 29):.1f} m/s")
-
-def demo():
-    config = {
-        'lon': 37.6173,  # Москва, например
-        'lat': 55.7558,
-        'height': 50.0,
-        'azimuth': 45.0,  # 45 градусов от севера
-        'side_size': 100.0,  # 100 метров на сторону
-        'n_x': 10,
-        'n_y': 10,
-        'n_z': 10
-    }
-
-    model = VelocityModel.from_config(config)
-
-    # Заполняем градиентом по глубине
-    model.fill_linear_gradient('vp', top_value=100.0, bottom_value=100.0)
-    model.fill_linear_gradient('vs', top_value=1000.0, bottom_value=3000.0)
-
-    n_subdivision = 2
-    grid = model.get_geo_grid(n_subdivision)
-
-    propogator = WavePropagator(solver='skfmm')
-
-    times = propogator.compute_from_geo_grid(grid, (0, 0, 0), 'P')
-    print(times)
-
-    est_time = times[-1,-1,-1]
-    theoretical_time = (3**0.5)*(10*n_subdivision-1)/n_subdivision
-    print(f'Subdivision: {n_subdivision}')
-    print(f"Geo grid shape: {grid.shape}")
-    print(f'Estimated time: {est_time}')
-    print(f'Time from corner to corner: {theoretical_time}')
-    print(f'Error: {round(float(100*abs(theoretical_time-est_time)/theoretical_time), 3)}%')
-
-def calculate_dist_in_grid(grid:GridGeometry, target_point, start_point=(0,0,0)):
-    t = target_point
-    s = start_point
-    dist = grid.cell_size * sqrt(((t[0] - s[0])**2) + ((t[1] - s[1])**2) + ((t[2] - s[2])**2))
-    dist = round(dist, 2)
-    return dist
-
-def calculate_dist_matrix(grid:GridGeometry):
-    shape = grid.shape
-    dists = np.empty(shape)
-
-    for i in range(shape[0]):
-        for j in range(shape[1]):
-            for k in range(shape[2]):
-                dists[i][j][k] = calculate_dist_in_grid(grid, (i, j, k))
-
-    return dists
-
-def homogenius_media_test(grid, velocity, times_exp):
-    dist_martix = calculate_dist_matrix(grid)
-    times_theory = dist_martix / velocity
-    err_matrix = np.round(100 * abs(times_theory - times_exp)/times_theory, 3)
-
-    dtype = [('dist', float), ('err', float)]
-    structured_arr = np.empty(dist_martix.shape, dtype=dtype)
-
-    structured_arr['dist'] = dist_martix
-    structured_arr['err'] = err_matrix
-
-    return structured_arr.flatten().flatten()
-
-def big_homogenius_media_test(model):
-    n_subdivision = 5
-    grid = model.get_geo_grid(n_subdivision)
-    
-    solver = 'skfmm'
-    propogator = WavePropagator(solver=solver)
-    times_exp = propogator.compute_from_geo_grid(grid, (0, 0, 0), 'P')
-
-    res = homogenius_media_test(grid, 100, times_exp)
-
-    print(res)
-
-    dist_threshold = 5000
-    x = [item[0] if item[0] > dist_threshold else np.nan for item in res]
-    y = [item[1] if item[0] > dist_threshold else np.nan for item in res]
-    simple_scatter(x, y, s=0.1, 
-                   x_label='distance from (0,0,0), m', 
-                   y_label='err, %', 
-                   title=f'Solver: {solver}, Grid shape: {str(grid.shape)}', 
-                   dpi=700)
-
-
-def weights_test(model, stations):
-    n_subdivision = 1
-    grid = model.get_geo_grid(n_subdivision)
-    
-    return compute_epicenter_weight_matrix(grid, stations, solver='skfmm', abs_misfit_threshold=220, temperature=0.05)
-
-
-def ray_tracing_G_test(model):
-    n_subdivision = 1
-    grid = model.get_geo_grid(n_subdivision)
-
-    origin = (0, 0, 0)
-    spacing = (1, 1, 1)
-    station = (150, 1, 0)
-    epic = (50, 1, 25)
-
-    solver = 'skfmm'
-    propogator = WavePropagator(solver=solver)
-    T = propogator.compute_from_geo_grid(grid, station, 'P')
-
-    path = trace_ray_from_timefield(T, station, epic, origin, spacing)
-    print(path)
-    # G3 = rasterize_path_binary(path, T.shape, origin, spacing)   # 3D 0/1 matrix
-    G3 = rasterize_path_lengths(path, T.shape, voxel_size=spacing)
-
-    return G3
-
-def synthetic_arrivals(model, stations, n_events):
-    # events = [(150,1,25), (105,1,35), (115,1,5), (165,1,10), (170,1,30)]
-            #   , (35,1,35), (66,1,13), (160,1,45), (290,1,25)]
-    
-    return generate_synthetic_arrivals_table(model, n_events=n_events, station_locs=stations, random_seed=7)
-
-def tomography(initial_model, arrivlas):
-    res = make_tomography_step(initial_model, arrivlas, stations, weights_top_n=1, temperature=0.05)
-    return res
 
 if __name__ == '__main__':
     profiler = cProfile.Profile()
     profiler.enable()
 
-    modle_config = {
-        'lon': 37.6173, 
+
+    CELL_SIZE = 500.0
+    model_config = {
+        'lon': 37.6173,
         'lat': 55.7558,
         'height': 50.0,
         'azimuth': 45.0,
-        'side_size': 100.0, 
-        'n_x': 300,
-        'n_y': 3,
-        'n_z': 50
+        'side_size': CELL_SIZE,  # метров на ячейку (cell_size coarse сетки)
+        'n_x': 10,
+        'n_y': 1,
+        'n_z': 10
     }
 
-    # stations = [
-    #     {'loc':(0,1,0), 'arrival_unix':0}, 
-    #     {'loc':(99,1,0), 'arrival_unix':0},
-    #     {'loc':(199,1,0), 'arrival_unix':100},
-    #     {'loc':(299,1,0), 'arrival_unix':195}]
-    stations = [(0,1,0), (10,1,0), (20,1,0), (30,1,0), (40,1,0), (50,1,0), (60,1,0), (70,1,0),
-                (80,1,0), (90,1,0), (100,1,0), (110,1,0), (120,1,0), (130,1,0), (140,1,0), (150,1,0),
-                (160,1,0), (170,1,0), (180,1,0), (190,1,0), (200,1,0), (210,1,0), (220,1,0), (230,1,0)]
-    # weights_test()
+    # --- Координаты станций в МЕТРАХ (x_m, y_m, z_m) ---
+    # Было: (0,1,0), (10,1,0), ... — это были индексы coarse сетки
+    # Стало: умножаем на cell_size (100 м), поверхность → z_m=0
+    #
+    # cell_size coarse = side_size = 100 м (зависит от вашей модели, уточните)
+    # Пример: индекс i=10 → x_m = 10 * 100 = 1000 м
+  # метров, cell_size coarse сетки при subdivision=1
+
+    n_stations = 10
+    n_events = 15
+    stations_metric = [ (i*CELL_SIZE*model_config['n_x']/n_stations, 0, 0) for i in range(n_stations)]
+    events_metric = [
+        (i * CELL_SIZE * model_config['n_x'] / n_events,
+        0,
+        j * CELL_SIZE * model_config['n_z'] / n_events)
+        for i in range(n_events)
+        for j in range(n_events)
+    ]
+    # Конвертируем: (i, j, k) → (i*cell_size, j*cell_size, k*cell_size) метров
 
 
-    initial_model = VelocityModel.from_config(modle_config)
+    # subdivision для fine сетки при вычислениях
+    SUBDIVISION = 10  # можно менять: 1, 2, 3, ...
+
+    initial_model = VelocityModel.from_config(model_config)
     initial_model.fill_linear_gradient('vp', top_value=100.0, bottom_value=100.0)
 
-    true_model = VelocityModel.from_config(modle_config)
-    true_model.fill_linear_gradient('vp', top_value=100.0, bottom_value=100.0)
+    true_model = VelocityModel.from_config(model_config)
+    # true_model.fill_linear_gradient('vp', top_value=95.0, bottom_value=105.0)
 
     for i in range(true_model.grid.vp.shape[0]):
         for j in range(true_model.grid.vp.shape[1]):
             for k in range(true_model.grid.vp.shape[2]):
-                if (i//10 % 2 == 0 and k//10 % 2 != 0) or (i//10 % 2 != 0 and k//10 % 2 == 0):
-                    true_model.set_vp(i, j, k, 103)
+                if (i % 2 == 0 and k % 2 == 0):
+                    true_model.set_vp(i, j, k, 110)
                 else:
-                    true_model.set_vp(i, j, k, 97)
+                    true_model.set_vp(i, j, k, 90)
 
-    simple_heatmap(true_model.get_geo_grid().vp[:,1,:], filename='true_model_3.png')
-    simple_heatmap(initial_model.get_geo_grid().vp[:,1,:], filename='initial_model_3.png')
+    simple_heatmap(true_model.get_geo_grid().vp[:, 0, :], filename='true_model_3.png')
+    simple_heatmap(initial_model.get_geo_grid().vp[:, 0, :], filename='initial_model_3.png')
 
-    full_arr, events = synthetic_arrivals(true_model, stations, 10)
+    # Генерируем синтетику на true_model с нужным subdivision
+    full_arr, events_metric = generate_synthetic_arrivals_table(
+        true_model,
+        station_locs=stations_metric,
+        event_locs=events_metric,
+        random_seed=7,
+        subdivision=SUBDIVISION,
+    )
 
-    print(events)
-    X, Y = [], []
-    for arr in events:
-        x = arr[0]
-        y = arr[2]
-        X.append(x)
-        Y.append(y)
-    
-    simple_scatter(X,Y)
+    print("Events (metric):", events_metric)
 
-
-    # arr = full_arr[0]['arrivals']
-
-    # weights = weights_test(initial_model, arr)
-    # simple_heatmap(weights[:,1,:])
+    X = [e[0] for e in events_metric]
+    Y = [e[2] for e in events_metric]
+    simple_scatter(X, Y)
 
     print(full_arr)
 
-    # tm = tomography(initial_model, full_arr)
-
-    run_em(3, initial_model, full_arr, stations, weights_top_n=1, lambda_reg=0.001)
-    # print(tm)
-    # simple_heatmap(tm[:,1,:])
+    run_em(
+        5,
+        initial_model,
+        full_arr,
+        stations_metric,
+        weights_top_n=1,
+        lambda_reg=99999,
+        subdivision=SUBDIVISION,
+    )
 
     profiler.disable()
-
     stats = pstats.Stats(profiler).strip_dirs().sort_stats(SortKey.CUMULATIVE)
-    stats.print_stats(30)  # топ-30 строк
-
-
-    # res = ray_tracing_G_test(model)
-    # print(res)
-    # simple_heatmap(res[:,1,:])
-
-
-
+    stats.print_stats(30)

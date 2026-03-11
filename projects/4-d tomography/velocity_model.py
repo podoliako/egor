@@ -293,7 +293,7 @@ class VelocityModel:
         self.grid.fill_linear_gradient(param, top_value, bottom_value)
     
     def get_geo_grid(self, subdivision: int = 1, 
-                     interpolation: Union[str, Callable] = 'trilinear') -> GeoGrid:
+                     interpolation: Union[str, Callable] = 'nearest') -> GeoGrid:
         """
         Generate refined geometric grid for raytracing.
         
