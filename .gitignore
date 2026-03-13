@@ -24,6 +24,7 @@ __pycache__/
 *.mat
 *.gif
 *.png
+runs/
 
 # OS
 .DS_Store

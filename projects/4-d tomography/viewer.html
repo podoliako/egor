@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tomography Viewer</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:     #f2f4f7;
+  --bg1:    #ffffff;
+  --bg2:    #eaecf0;
+  --border: #d0d5dd;
+  --text:   #1e2530;
+  --text2:  #5a6478;
+  --text3:  #9aa3b4;
+  --accent: #4a7fd4;
+  --green:  #2e9e6b;
+  --warn:   #b06010;
+  --ff: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ff-mono: 'Menlo', 'Consolas', monospace;
+}
+
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--ff); font-size: 12px; overflow: hidden; }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+select, input[type=number] {
+  background: var(--bg1); border: 1px solid var(--border); color: var(--text);
+  font-family: var(--ff-mono); font-size: 11px; padding: 2px 5px;
+  border-radius: 4px; outline: none; cursor: pointer;
+}
+select:focus, input[type=number]:focus { border-color: var(--accent); }
+
+input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  height: 3px; background: var(--border); border-radius: 2px; cursor: pointer; outline: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%;
+  background: var(--accent); cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px var(--border);
+}
+input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
+
+button {
+  background: var(--bg1); border: 1px solid var(--border); color: var(--text2);
+  font-family: var(--ff); font-size: 11px; padding: 3px 10px; border-radius: 4px; cursor: pointer;
+}
+button:hover { border-color: var(--accent); color: var(--accent); }
+button.active { border-color: var(--accent); color: var(--accent); background: #eaf0fb; }
+
+/* Layout */
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+#header {
+  height: 44px; min-height: 44px; background: var(--bg1);
+  border-bottom: 1px solid var(--border); display: flex; align-items: center;
+  gap: 10px; padding: 0 14px; flex-shrink: 0;
+}
+
+.logo { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.logo span { color: var(--accent); }
+.vsep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
+.ctrl-group { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+.ctrl-label { color: var(--text3); font-size: 11px; white-space: nowrap; }
+.toggle-row { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.toggle-item { display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--text2); user-select: none; font-size: 11px; }
+.badge { font-family: var(--ff-mono); font-size: 10px; padding: 1px 5px; border-radius: 3px; background: var(--bg2); color: var(--text2); border: 1px solid var(--border); }
+
+#warn-no-grid {
+  display: none; color: var(--warn); font-size: 10px; white-space: nowrap;
+  padding: 2px 7px; border: 1px solid currentColor; border-radius: 3px; background: #fdf5ec;
+}
+
+/* Params bar */
+#params-bar {
+  display: none; background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 5px 14px; flex-shrink: 0; flex-wrap: wrap; gap: 16px; align-items: center;
+}
+#params-bar.open { display: flex; }
+.param-chip { display: flex; gap: 5px; align-items: baseline; }
+.param-k { color: var(--text3); font-size: 10px; }
+.param-v { color: var(--green); font-family: var(--ff-mono); font-size: 10px; }
+
+/* Panels */
+#panels {
+  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+  gap: 1px; background: var(--border); flex: 1; min-height: 0; overflow: hidden;
+}
+.panel { background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
+
+.panel-hdr {
+  background: var(--bg1); border-bottom: 1px solid var(--border);
+  padding: 0 8px; display: flex; align-items: center; gap: 7px;
+  height: 34px; min-height: 34px; flex-shrink: 0;
+  overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+}
+.panel-hdr::-webkit-scrollbar { display: none; }
+
+.panel-title {
+  font-size: 10px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase;
+  color: var(--text3); white-space: nowrap; padding-right: 7px;
+  border-right: 1px solid var(--border);
+}
+.ph-group { display: flex; align-items: center; gap: 4px; flex-shrink: 0; color: var(--text2); font-size: 11px; white-space: nowrap; }
+.y-val { font-family: var(--ff-mono); font-size: 11px; color: var(--accent); min-width: 20px; }
+
+.panel-body { flex: 1; min-height: 0; position: relative; }
+.no-data-msg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 12px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="header">
+  <div class="logo">Tomo<span>Viewer</span></div>
+  <div class="vsep"></div>
+
+  <div class="ctrl-group">
+    <span class="ctrl-label">Run</span>
+    <select id="run-select" style="min-width:160px"><option value="">— loading —</option></select>
+  </div>
+  <div class="vsep"></div>
+
+  <div class="ctrl-group">
+    <span class="ctrl-label">Iter</span>
+    <input type="range" id="iter-slider" min="0" max="0" value="0" style="width:90px">
+    <input type="number" id="iter-num" min="0" max="0" value="0" style="width:48px">
+    <span class="badge" id="iter-max-badge">/ 0</span>
+  </div>
+  <div class="vsep"></div>
+
+  <div class="toggle-row">
+    <label class="toggle-item"><input type="checkbox" id="cb-grid" checked> Grid</label>
+    <label class="toggle-item"><input type="checkbox" id="cb-stations" checked> Stations</label>
+    <label class="toggle-item"><input type="checkbox" id="cb-events" checked> Events</label>
+  </div>
+  <div class="vsep"></div>
+
+  <button id="btn-params">Params ▾</button>
+  <div style="flex:1"></div>
+  <span id="warn-no-grid">⚠ grid_info missing in meta.json — overlays disabled</span>
+</div>
+
+<div id="params-bar"></div>
+
+<div id="panels">
+
+  <!-- Velocity Model -->
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Velocity Model</span>
+      <div class="ph-group">
+        <select id="vel-type">
+          <option value="iter">Iter Model</option>
+          <option value="initial">Initial</option>
+          <option value="true" id="vel-true-opt">True Model</option>
+          <option value="delta_s">ΔS</option>
+        </select>
+      </div>
+      <div class="ph-group"><span class="badge" id="vel-shape-badge">—</span></div>
+      <div class="ph-group">
+        Y <input type="range" id="vel-y" min="0" max="0" value="0" style="width:70px">
+        <span class="y-val" id="vel-y-v">0</span>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="no-data-msg" id="vel-empty">Select a run</div>
+      <div id="plot-vel" style="width:100%;height:100%"></div>
+    </div>
+  </div>
+
+  <!-- Time Fields -->
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Time Fields</span>
+      <div class="ph-group">Station <select id="tf-sta"></select></div>
+      <div class="ph-group">fine <span class="badge" id="tf-shape-badge">—</span></div>
+      <div class="ph-group">
+        Y <input type="range" id="tf-y" min="0" max="0" value="0" style="width:70px">
+        <span class="y-val" id="tf-y-v">0</span>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="no-data-msg" id="tf-empty">Select a run</div>
+      <div id="plot-tf" style="width:100%;height:100%"></div>
+    </div>
+  </div>
+
+  <!-- Hypocenter Weights -->
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Hypocenter Weights</span>
+      <div class="ph-group">Event <select id="wt-ev"></select></div>
+      <div class="ph-group">fine <span class="badge" id="wt-shape-badge">—</span></div>
+      <div class="ph-group">
+        Y <input type="range" id="wt-y" min="0" max="0" value="0" style="width:70px">
+        <span class="y-val" id="wt-y-v">0</span>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="no-data-msg" id="wt-empty">Select a run</div>
+      <div id="plot-wt" style="width:100%;height:100%"></div>
+    </div>
+  </div>
+
+  <!-- G Matrix (fine, per station) -->
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">G Matrix</span>
+      <div class="ph-group">Event <select id="g-ev"></select></div>
+      <div class="ph-group">Station <select id="g-sta"></select></div>
+      <div class="ph-group">fine <span class="badge" id="g-shape-badge">—</span></div>
+      <div class="ph-group">
+        Y <input type="range" id="g-y" min="0" max="0" value="0" style="width:70px">
+        <span class="y-val" id="g-y-v">0</span>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="no-data-msg" id="g-empty">Select a run</div>
+      <div id="plot-G" style="width:100%;height:100%"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+'use strict';
+
+const ST = {
+  run: null, iter: 0, meta: null, info: null,
+  showGrid: true, showStations: true, showEvents: true,
+  vel: { type: 'iter', y: 0 },
+  tf:  { station: 0,   y: 0 },
+  wt:  { event: 0,     y: 0 },
+  G:   { event: 0, station: 0, y: 0 },
+};
+
+const PLY_CFG = {
+  responsive: true, displaylogo: false,
+  modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d'],
+};
+
+function mkLayout(nx, nz, cbTitle) {
+  return {
+    paper_bgcolor: '#ffffff',
+    plot_bgcolor:  '#f8f9fb',
+    font: { color: '#1e2530', size: 9, family: "Menlo, Consolas, monospace" },
+    margin: { l: 40, r: 14, t: 8, b: 38 },
+    xaxis: {
+      title: { text: 'X', font: { size: 9 }, standoff: 2 },
+      showgrid: ST.showGrid, gridcolor: '#dde1ea', zeroline: false,
+      range: [-0.5, nx - 0.5], tickfont: { size: 8 },
+    },
+    yaxis: {
+      title: { text: 'Z (depth ↓)', font: { size: 9 }, standoff: 2 },
+      showgrid: ST.showGrid, gridcolor: '#dde1ea', zeroline: false,
+      autorange: 'reversed', tickfont: { size: 8 },
+    },
+    showlegend: false,
+    coloraxis: {
+      colorbar: {
+        thickness: 8, len: 0.85,
+        tickfont: { size: 8, color: '#5a6478' },
+        title: { text: cbTitle || '', font: { size: 8, color: '#5a6478' } },
+      },
+    },
+  };
+}
+
+async function apiFetch(url) {
+  try { const r = await fetch(url); return r.ok ? r.json() : null; }
+  catch { return null; }
+}
+
+function T(mat) {
+  if (!mat?.length) return [];
+  const nx = mat.length, nz = mat[0].length, out = new Array(nz);
+  for (let z = 0; z < nz; z++) { out[z] = new Array(nx); for (let x = 0; x < nx; x++) out[z][x] = mat[x][z]; }
+  return out;
+}
+
+function cellSize(coarse) {
+  const gi = ST.meta?.grid_info;
+  if (!gi) return null;
+  return coarse ? gi.coarse_cell_size : (gi.fine_cell_size ?? gi.coarse_cell_size);
+}
+
+function stationTraces(hilite, coarse) {
+  if (!ST.showStations) return [];
+  const locs = ST.meta?.station_locs, cs = cellSize(coarse);
+  if (!locs || !cs) return [];
+  return locs.map((loc, i) => ({
+    type: 'scatter', mode: 'markers+text',
+    x: [loc[0] / cs], y: [loc[2] / cs],
+    text: [`S${i}`], textposition: 'top center',
+    textfont: { size: 8, color: i === hilite ? '#1a4ea8' : '#555' },
+    marker: {
+      symbol: 'triangle-up', size: i === hilite ? 13 : 7,
+      color: i === hilite ? '#4a7fd4' : '#90aed0',
+      line: { color: '#fff', width: 1 },
+    },
+    showlegend: false,
+    hovertemplate: `Station ${i}<br>x: ${loc[0].toFixed(0)} m<br>z: ${loc[2].toFixed(0)} m<extra></extra>`,
+  }));
+}
+
+function eventTraces(hilite, coarse) {
+  if (!ST.showEvents) return [];
+  const locs = ST.meta?.event_locs, cs = cellSize(coarse);
+  if (!locs || !cs) return [];
+  return locs.map((loc, i) => ({
+    type: 'scatter', mode: 'markers+text',
+    x: [loc[0] / cs], y: [loc[2] / cs],
+    text: [`E${i}`], textposition: 'top center',
+    textfont: { size: 8, color: i === hilite ? '#a04800' : '#555' },
+    marker: {
+      symbol: 'star', size: i === hilite ? 14 : 7,
+      color: i === hilite ? '#d46820' : '#d4a870',
+      line: { color: '#fff', width: 1 },
+    },
+    showlegend: false,
+    hovertemplate: `Event ${i}<br>x: ${loc[0].toFixed(0)} m<br>z: ${loc[2].toFixed(0)} m<extra></extra>`,
+  }));
+}
+
+function heatTrace(slice, colorscale, zmid) {
+  const t = { type: 'heatmap', z: T(slice), colorscale, showscale: true, coloraxis: 'coloraxis',
+    hovertemplate: 'x=%{x}  z=%{y}  val=%{z:.4g}<extra></extra>' };
+  if (zmid !== undefined) { t.zmid = zmid; t.zauto = false; }
+  return t;
+}
+
+function shapeBadge(id, s) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = s ? s.join('×') : '—';
+}
+
+function showP(pid, eid) {
+  document.getElementById(eid).style.display = 'none';
+  document.getElementById(pid).style.display  = 'block';
+}
+function emptyP(pid, eid, msg) {
+  Plotly.purge(pid);
+  document.getElementById(pid).style.display  = 'none';
+  const el = document.getElementById(eid);
+  el.style.display = 'flex'; el.textContent = msg || 'No data';
+}
+
+function syncY(slId, lblId, ny, stObj) {
+  const sl = document.getElementById(slId);
+  const max = Math.max(0, ny - 1);
+  if (+sl.max !== max) sl.max = max;
+  if (stObj.y > max) stObj.y = 0;
+  sl.value = stObj.y;
+  document.getElementById(lblId).textContent = stObj.y;
+}
+
+/* ── Render ── */
+
+async function renderVel() {
+  if (!ST.run) return;
+  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=${ST.vel.type}&iter=${ST.iter}&y=${ST.vel.y}`);
+  if (!d?.slice) { emptyP('plot-vel', 'vel-empty', 'No data for this selection'); return; }
+  showP('plot-vel', 'vel-empty');
+  syncY('vel-y', 'vel-y-v', d.full_shape[1], ST.vel);
+  shapeBadge('vel-shape-badge', d.full_shape);
+  const isDelta = ST.vel.type === 'delta_s';
+  const cs = isDelta
+    ? [[0,'#3a78c9'],[0.5,'#f5f5f5'],[1,'#c94040']]
+    : 'Viridis';
+  Plotly.react('plot-vel',
+    [heatTrace(d.slice, cs, isDelta ? 0 : undefined),
+     ...stationTraces(-1, true), ...eventTraces(-1, true)],
+    mkLayout(d.shape[0], d.shape[1], isDelta ? 'Δs' : 'Vp'), PLY_CFG);
+}
+
+async function renderTF() {
+  if (!ST.run) return;
+  const sta = ST.tf.station;
+  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=station_field&station=${sta}&iter=${ST.iter}&y=${ST.tf.y}`);
+  if (!d?.slice) { emptyP('plot-tf', 'tf-empty', 'No data for this selection'); return; }
+  showP('plot-tf', 'tf-empty');
+  syncY('tf-y', 'tf-y-v', d.full_shape[1], ST.tf);
+  shapeBadge('tf-shape-badge', d.full_shape);
+  Plotly.react('plot-tf',
+    [heatTrace(d.slice, 'YlOrRd'),
+     ...stationTraces(sta, false), ...eventTraces(-1, false)],
+    mkLayout(d.shape[0], d.shape[1], 'T (s)'), PLY_CFG);
+}
+
+async function renderWt() {
+  if (!ST.run) return;
+  const ev = ST.wt.event;
+  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=weights&event=${ev}&iter=${ST.iter}&y=${ST.wt.y}`);
+  if (!d?.slice) { emptyP('plot-wt', 'wt-empty', 'No data for this selection'); return; }
+  showP('plot-wt', 'wt-empty');
+  syncY('wt-y', 'wt-y-v', d.full_shape[1], ST.wt);
+  shapeBadge('wt-shape-badge', d.full_shape);
+  Plotly.react('plot-wt',
+    [heatTrace(d.slice, [[0,'#f0f4ff'],[0.5,'#6699dd'],[1,'#0a2a7a']]),
+     ...stationTraces(-1, false), ...eventTraces(ev, false)],
+    mkLayout(d.shape[0], d.shape[1], 'w'), PLY_CFG);
+}
+
+async function renderG() {
+  if (!ST.run) return;
+  const { event, station, y } = ST.G;
+  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=G&event=${event}&iter=${ST.iter}&y=${y}&grid=fine&station_a=${station}`);
+  if (!d?.slice) { emptyP('plot-G', 'g-empty', 'No data — check event/station combination'); return; }
+  showP('plot-G', 'g-empty');
+  syncY('g-y', 'g-y-v', d.full_shape[1], ST.G);
+  shapeBadge('g-shape-badge', d.full_shape);
+  const rdbu = [[0,'#3a78c9'],[0.25,'#90b8e8'],[0.5,'#f5f5f5'],[0.75,'#e89090'],[1,'#c94040']];
+  Plotly.react('plot-G',
+    [heatTrace(d.slice, rdbu, 0),
+     ...stationTraces(station, false), ...eventTraces(event, false)],
+    mkLayout(d.shape[0], d.shape[1], 'G'), PLY_CFG);
+}
+
+function renderAll() { renderVel(); renderTF(); renderWt(); renderG(); }
+
+/* ── Selects ── */
+
+function fillSelect(id, count, prefix) {
+  const el = document.getElementById(id), cur = +el.value || 0;
+  el.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const o = document.createElement('option');
+    o.value = i; o.textContent = `${prefix}${i}`; el.appendChild(o);
+  }
+  el.value = Math.min(cur, Math.max(0, count - 1));
+}
+
+function updateParamsBar() {
+  const bar = document.getElementById('params-bar'), p = ST.meta?.run_params;
+  if (!p) { bar.innerHTML = ''; return; }
+  bar.innerHTML = Object.entries(p)
+    .map(([k, v]) => `<div class="param-chip"><span class="param-k">${k}</span><span class="param-v">${v}</span></div>`)
+    .join('');
+}
+
+async function loadRun(rid) {
+  ST.run = rid; ST.iter = 0;
+  ['vel','tf','wt','G'].forEach(k => { ST[k].y = 0; });
+  ['vel-y','tf-y','wt-y','g-y'].forEach(id => { const el = document.getElementById(id); el.value = 0; el.max = 0; });
+
+  const [meta, info] = await Promise.all([
+    apiFetch(`/api/runs/${rid}/meta`),
+    apiFetch(`/api/runs/${rid}/info`),
+  ]);
+  ST.meta = meta || {}; ST.info = info || {};
+
+  document.getElementById('warn-no-grid').style.display =
+    ST.meta?.grid_info?.coarse_cell_size ? 'none' : 'inline';
+
+  const maxIter = ST.info.iterations?.length ? Math.max(...ST.info.iterations) : 0;
+  ['iter-slider','iter-num'].forEach(id => {
+    const el = document.getElementById(id); el.max = maxIter; el.value = 0;
+  });
+  document.getElementById('iter-max-badge').textContent = `/ ${maxIter}`;
+
+  const nSta = ST.info.n_stations || 0, nEv = ST.info.n_events || 0;
+  fillSelect('tf-sta', nSta, 'Sta ');
+  fillSelect('wt-ev',  nEv,  'Ev ');
+  fillSelect('g-ev',   nEv,  'Ev ');
+  fillSelect('g-sta',  nSta, 'Sta ');
+
+  document.getElementById('vel-true-opt').disabled = !ST.info.has_true_model;
+  updateParamsBar();
+  renderAll();
+}
+
+/* ── Wire-up ── */
+
+function setIter(v) {
+  const max = +document.getElementById('iter-slider').max || 0;
+  v = Math.max(0, Math.min(max, +v || 0));
+  ST.iter = v;
+  document.getElementById('iter-slider').value = v;
+  document.getElementById('iter-num').value    = v;
+  renderAll();
+}
+
+document.getElementById('iter-slider').addEventListener('input',  e => setIter(e.target.value));
+document.getElementById('iter-num').addEventListener('change',    e => setIter(e.target.value));
+document.getElementById('run-select').addEventListener('change',  e => { if (e.target.value) loadRun(e.target.value); });
+document.getElementById('cb-grid').addEventListener('change',     e => { ST.showGrid     = e.target.checked; renderAll(); });
+document.getElementById('cb-stations').addEventListener('change', e => { ST.showStations = e.target.checked; renderAll(); });
+document.getElementById('cb-events').addEventListener('change',   e => { ST.showEvents   = e.target.checked; renderAll(); });
+
+document.getElementById('btn-params').addEventListener('click', function() {
+  document.getElementById('params-bar').classList.toggle('open');
+  this.classList.toggle('active');
+  this.textContent = document.getElementById('params-bar').classList.contains('open') ? 'Params ▴' : 'Params ▾';
+});
+
+document.getElementById('vel-type').addEventListener('change', e => { ST.vel.type = e.target.value; renderVel(); });
+document.getElementById('vel-y').addEventListener('input', e => { ST.vel.y = +e.target.value; document.getElementById('vel-y-v').textContent = ST.vel.y; renderVel(); });
+
+document.getElementById('tf-sta').addEventListener('change', e => { ST.tf.station = +e.target.value; renderTF(); });
+document.getElementById('tf-y').addEventListener('input',   e => { ST.tf.y = +e.target.value; document.getElementById('tf-y-v').textContent = ST.tf.y; renderTF(); });
+
+document.getElementById('wt-ev').addEventListener('change', e => { ST.wt.event = +e.target.value; renderWt(); });
+document.getElementById('wt-y').addEventListener('input',   e => { ST.wt.y = +e.target.value; document.getElementById('wt-y-v').textContent = ST.wt.y; renderWt(); });
+
+document.getElementById('g-ev').addEventListener('change',  e => { ST.G.event   = +e.target.value; renderG(); });
+document.getElementById('g-sta').addEventListener('change', e => { ST.G.station = +e.target.value; renderG(); });
+document.getElementById('g-y').addEventListener('input',    e => { ST.G.y = +e.target.value; document.getElementById('g-y-v').textContent = ST.G.y; renderG(); });
+
+/* ── Init ── */
+async function init() {
+  const runs = await apiFetch('/api/runs');
+  const sel  = document.getElementById('run-select');
+  if (!runs?.length) { sel.innerHTML = '<option value="">No runs found</option>'; return; }
+  sel.innerHTML = runs.map(r => `<option value="${r}">${r}</option>`).join('');
+  loadRun(runs[0]);
+}
+
+init();
+
+let _rt;
+window.addEventListener('resize', () => {
+  clearTimeout(_rt);
+  _rt = setTimeout(() => {
+    ['plot-vel','plot-tf','plot-wt','plot-G'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el?._fullLayout) Plotly.relayout(id, { autosize: true });
+    });
+  }, 150);
+});
+</script>
+</body>
+</html>

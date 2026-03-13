@@ -2,6 +2,9 @@
 Prototype tomography inversion from arrival tables.
 """
 from typing import Any, Dict, List, Optional, Sequence, Tuple, Union
+from pathlib import Path
+from datetime import datetime
+import json
 
 import numpy as np
 import time
@@ -23,6 +26,107 @@ EventArrivals = Dict[str, Union[GridPoint, List[StationArrival]]]
 TomographyEventResult = Dict[str, Union[int, GridPoint, np.ndarray]]
 
 
+# ---------------------------------------------------------------------------
+# Logger
+# ---------------------------------------------------------------------------
+
+class TomographyLogger:
+    """
+    Сохраняет все данные инверсии по итерациям и запускам.
+    Структура директорий:
+        runs/
+          run_<timestamp>/
+            meta.json
+            initial_model.npy
+            true_model.npy          (опционально)
+            iter_<i>/
+              model.npy
+              delta_s.npy
+              station_fields.npy    # (n_stations, nx, ny, nz)
+              event_<j>/
+                weights.npy
+                residuals.npy
+                G_station_<k>.npy
+                G_s<a>_s<b>.npy     # G для каждой пары станций
+    """
+
+    def __init__(self, base_dir: str = "runs"):
+        self.run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.run_dir = Path(base_dir) / f"run_{self.run_id}"
+        self.run_dir.mkdir(parents=True, exist_ok=True)
+
+    def save_meta(
+        self,
+        run_params: dict,
+        station_locs: Sequence,
+        event_locs: Sequence,
+        grid_info=None
+    ):
+        meta = {
+            "run_id": self.run_id,
+            "run_params": run_params,
+            "station_locs": [list(s) for s in station_locs],
+            "event_locs": [list(e) for e in event_locs],
+            "grid_info": grid_info or {},
+        }
+        with open(self.run_dir / "meta.json", "w") as f:
+            json.dump(meta, f, indent=2)
+
+    def save_initial_model(self, model):
+        np.save(self.run_dir / "initial_model.npy", model.get_geo_grid(subdivision=1).vp)
+
+    def save_true_model(self, model):
+        if model is not None:
+            np.save(self.run_dir / "true_model.npy", model.get_geo_grid(subdivision=1).vp)
+
+    def iter_dir(self, iteration: int) -> Path:
+        d = self.run_dir / f"iter_{iteration}"
+        d.mkdir(exist_ok=True)
+        return d
+
+    def save_iteration_model(self, iteration: int, model):
+        np.save(self.iter_dir(iteration) / "model.npy", model.get_geo_grid(subdivision=1).vp)
+
+    def save_delta_s(self, iteration: int, delta_s: np.ndarray):
+        np.save(self.iter_dir(iteration) / "delta_s.npy", delta_s)
+
+    def save_station_fields(self, iteration: int, station_fields: np.ndarray):
+        # station_fields: (n_stations, nx, ny, nz)
+        np.save(self.iter_dir(iteration) / "station_fields.npy", station_fields)
+
+    def save_event_data(
+        self,
+        iteration: int,
+        event_idx: int,
+        weights: np.ndarray,
+        residuals: np.ndarray,
+        G_per_station: Optional[List[np.ndarray]] = None,
+    ):
+        event_dir = self.iter_dir(iteration) / f"event_{event_idx}"
+        event_dir.mkdir(exist_ok=True)
+        np.save(event_dir / "weights.npy", weights)
+        np.save(event_dir / "residuals.npy", residuals)
+        if G_per_station is not None:
+            for si, g in enumerate(G_per_station):
+                np.save(event_dir / f"G_station_{si}.npy", g)
+
+    def save_G_pair(
+        self,
+        iteration: int,
+        event_idx: int,
+        sta_a: int,
+        sta_b: int,
+        G: np.ndarray,
+    ):
+        event_dir = self.iter_dir(iteration) / f"event_{event_idx}"
+        event_dir.mkdir(exist_ok=True)
+        np.save(event_dir / f"G_s{sta_a}_s{sta_b}.npy", G)
+
+
+# ---------------------------------------------------------------------------
+# EM loop
+# ---------------------------------------------------------------------------
+
 def run_em(
     n_cycles,
     initial_model,
@@ -34,9 +138,56 @@ def run_em(
     temperature: float = 1.0,
     weights_top_n: int = 1,
     subdivision: int = 1,
+    # --- новые параметры ---
+    true_model=None,
+    event_locs: Optional[Sequence] = None,
+    logger: Optional[TomographyLogger] = None,
+    save_runs: bool = True,
+    runs_dir: str = "runs",
 ):
+    # Инициализируем логгер если нужен
+    if save_runs and logger is None:
+        logger = TomographyLogger(base_dir=runs_dir)
+
+    if logger is not None:
+        run_params = dict(
+            n_cycles=n_cycles,
+            wave_type=wave_type,
+            solver=str(solver),
+            lambda_reg=lambda_reg,
+            temperature=temperature,
+            weights_top_n=weights_top_n,
+            subdivision=subdivision,
+        )
+
+        coarse_grid = initial_model.get_geo_grid(subdivision=1)
+        grid_info = {
+            "coarse_cell_size": float(coarse_grid.cell_size),
+            "coarse_shape":     [int(v) for v in coarse_grid.shape],
+        }
+        if subdivision > 1:
+            fine_grid = initial_model.get_geo_grid(subdivision=subdivision)
+            grid_info["fine_cell_size"] = float(fine_grid.cell_size)
+            grid_info["fine_shape"]     = [int(v) for v in fine_grid.shape]
+        else:
+            grid_info["fine_cell_size"] = float(coarse_grid.cell_size)
+            grid_info["fine_shape"]     = [int(v) for v in coarse_grid.shape]
+        
+        logger.save_meta(
+            run_params=run_params,
+            station_locs=station_locs,
+            event_locs=event_locs or [],
+            grid_info=grid_info, 
+        )
+        logger.save_initial_model(initial_model)
+        logger.save_true_model(true_model)
+
     model = initial_model
+
     for i in range(n_cycles):
+        if logger is not None:
+            logger.save_iteration_model(i, model)
+
         delta_s = make_tomography_step(
             model,
             arrivals_table,
@@ -47,14 +198,27 @@ def run_em(
             temperature,
             weights_top_n,
             subdivision,
+            iteration=i,
+            logger=logger,
         )
-        # delta_s имеет форму coarse сетки (subdivision=1)
+
         new_velocities = 1 / (1 / model.get_geo_grid(subdivision=1).vp + delta_s)
         model.set_vp_array(new_velocities)
 
-        # print(f"iteration: {i+1}")
-        # simple_heatmap(model.get_geo_grid(subdivision=1).vp[:, 0, :])
+        if logger is not None:
+            logger.save_delta_s(i, delta_s)
 
+    # Сохраняем финальную модель как iter_n_cycles
+    if logger is not None:
+        logger.save_iteration_model(n_cycles, model)
+        print(f"[TomographyLogger] Run saved to: {logger.run_dir}")
+
+    return logger
+
+
+# ---------------------------------------------------------------------------
+# One tomography step
+# ---------------------------------------------------------------------------
 
 def make_tomography_step(
         initial_model,
@@ -66,28 +230,21 @@ def make_tomography_step(
         temperature: float = 1.0,
         weights_top_n: int = 1,
         subdivision: int = 1,
+        # --- логирование ---
+        iteration: int = 0,
+        logger: Optional[TomographyLogger] = None,
     ):
     """
     station_locs — координаты станций в метрах: [(x_m, y_m, z_m), ...].
-
-    Внутри:
-      - travel time fields считаются на fine сетке (subdivision)
-      - G считается на fine сетке, затем схлопывается до coarse (subdivision=1)
-      - система Ax=b решается для coarse сетки
     """
-    # --- Coarse сетка (для решения системы и обновления модели) ---
     coarse_grid = initial_model.get_geo_grid(subdivision=1)
     coarse_shape = tuple(int(v) for v in coarse_grid.shape)
 
-    # --- Fine сетка (для точного ray tracing) ---
     fine_grid = initial_model.get_geo_grid(subdivision=subdivision)
     fine_shape = tuple(int(v) for v in fine_grid.shape)
     fine_cell_size = float(fine_grid.cell_size)
     fine_voxel_size = (fine_cell_size,) * 3
 
-    # simple_heatmap(fine_grid.vp[:, 0, :])
-
-    # Конвертируем метрические координаты станций → индексы fine сетки
     station_idx_fine = [metric_to_index(s, fine_cell_size) for s in station_locs]
 
     G = []
@@ -97,10 +254,13 @@ def make_tomography_step(
         fine_grid, station_idx_fine, wave_type, solver
     )
 
-    for observed in arrivals_table:
+    # Сохраняем поля станций один раз на итерацию
+    if logger is not None:
+        logger.save_station_fields(iteration, np.array(station_fields))
+
+    for event_idx, observed in enumerate(arrivals_table):
         observed = np.array(observed)
 
-        # Веса считаются на fine сетке
         weights = compute_epicenter_weight_matrix(
             station_fields=station_fields,
             observed=observed,
@@ -114,6 +274,10 @@ def make_tomography_step(
         G_weights = []
         r_weights = []
 
+        # Для логирования: собираем G по станциям для первого ненулевого веса
+        event_G_stations_log: Optional[List[np.ndarray]] = [] if logger else None
+        event_residuals_log: Optional[np.ndarray] = None
+
         for weight_idx, weight_val in zip(weights_indices, weights_values):
             G_stations = []
 
@@ -124,27 +288,54 @@ def make_tomography_step(
 
                 g_fine = _calculate_G(
                     station_field=station_field,
-                    origin_loc=weight_idx,       # индекс на fine сетке
+                    origin_loc=weight_idx,
                     station_loc=station_fine_loc,
                     geo_shape=fine_shape,
                     voxel_size=fine_voxel_size,
                 )
-                print('g_heatmap')
-                # simple_heatmap(g_fine[:, 0, :])
-                time.sleep(1)
-                # Схлопываем G с fine до coarse
+        
                 g_coarse = coarsen_G(g_fine, subdivision)
                 G_stations.append(g_coarse)
 
-            G_stations = np.array(G_stations)  # (n_stations, nx, ny, nz) coarse
+                # Логируем G на fine сетке для каждой станции
+                if logger is not None and event_G_stations_log is not None:
+                    event_G_stations_log.append(g_fine)
+
+            G_stations = np.array(G_stations)
             G_tilda = (
                 G_stations[:, np.newaxis, :, :, :]
                 - G_stations[np.newaxis, :, :, :, :]
             )
             residuals = _calculate_residuals(station_fields, observed, weight_idx)
 
+            if event_residuals_log is None:
+                event_residuals_log = residuals
+
             G_weights.append(G_tilda * weight_val)
             r_weights.append(residuals * weight_val)
+
+        # Сохраняем данные по событию
+        if logger is not None:
+            logger.save_event_data(
+                iteration=iteration,
+                event_idx=event_idx,
+                weights=weights,
+                residuals=event_residuals_log if event_residuals_log is not None else np.array([]),
+                G_per_station=event_G_stations_log,
+            )
+            # Также сохраняем G_tilda для верхнего треугольника пар
+            if len(G_weights) > 0:
+                G_tilda_sum = sum(G_weights)
+                n_st = G_tilda_sum.shape[0]
+                for sa in range(n_st):
+                    for sb in range(sa + 1, n_st):
+                        logger.save_G_pair(
+                            iteration=iteration,
+                            event_idx=event_idx,
+                            sta_a=sa,
+                            sta_b=sb,
+                            G=G_tilda_sum[sa, sb],
+                        )
 
         G.append(sum(G_weights))
         r.append(sum(r_weights))
@@ -160,18 +351,22 @@ def make_tomography_step(
     return delta_s
 
 
+# ---------------------------------------------------------------------------
+# Helpers (без изменений)
+# ---------------------------------------------------------------------------
+
 def _calculate_G(station_field, origin_loc, station_loc, geo_shape, voxel_size):
     path = trace_ray_from_timefield(
         T=station_field,
         station_xyz=station_loc,
         epic_xyz=origin_loc,
-        spacing_xyz=(1.0, 1.0, 1.0),   # единичный шаг в индексном пространстве
+        spacing_xyz=(1.0, 1.0, 1.0),
     )
 
     G = rasterize_path_lengths(
         path_xyz=path,
         shape=geo_shape,
-        voxel_size=voxel_size,          # реальный размер вокселя fine сетки
+        voxel_size=voxel_size,
         dtype=np.float64,
     )
     return G
@@ -192,7 +387,6 @@ def _solve_delta_s(
         lambda_reg: float,
         use_upper_triangle_pairs: bool
     ):
-
     g_tilde_prime = np.array(g_tilde_prime)
     n_stations = g_tilde_prime.shape[0]
     if n_stations != g_tilde_prime.shape[1]:
