@@ -17,7 +17,6 @@ from instruments import (
     MetricPoint,
 )
 from raytracing import trace_ray_from_timefield, rasterize_path_lengths
-from components.graphics import simple_heatmap
 
 
 GridPoint = Tuple[int, int, int]

@@ -1,0 +1,9 @@
+services:
+  tomoviewer:
+    build: .
+    container_name: tomoviewer
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5050:5050"
+    volumes:
+      - ./runs:/runs:ro

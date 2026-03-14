@@ -22,7 +22,7 @@ if __name__ == '__main__':
     profiler.enable()
 
     CELL_SIZE = 500.0
-    SUBDIVISION = 7
+    SUBDIVISION = 5
     model_config = {
         'lon': 37.6173,
         'lat': 55.7558,
@@ -34,16 +34,19 @@ if __name__ == '__main__':
         'n_z': 10
     }
 
-    n_stations = 15
-    n_events = 17
+    n_stations = 7
+    n_events = 10
+    middle_y = (model_config['n_y']) * CELL_SIZE / 2
+    # middle_y = CELL_SIZE * 1
+
     stations_metric = [
-        (i * CELL_SIZE * model_config['n_x'] / n_stations, CELL_SIZE, 0)
+        (i * CELL_SIZE * model_config['n_x'] / n_stations, middle_y, 0)
         for i in range(n_stations)
     ]
     events_metric = [
         (
             (i + 1) * CELL_SIZE * model_config['n_x'] / (n_events + 1),
-            CELL_SIZE,
+            middle_y,
             (j + 1) * CELL_SIZE * model_config['n_z'] / (n_events + 1),
         )
         for i in range(n_events)
@@ -60,7 +63,7 @@ if __name__ == '__main__':
                     true_model.set_vp(i, j, k, 1)
                     initial_model.set_vp(i, j, k, 1)
                 else:
-                    true_model.set_vp(i, j, k, np.random.normal(100, 0.3))
+                    true_model.set_vp(i, j, k, np.random.normal(100, 0.001))
                     initial_model.set_vp(i, j, k, 100)
                 # elif (i % 2 == 0 and k % 2 == 0) or (i % 2 != 0 and k % 2 != 0):
                 #     true_model.set_vp(i, j, k, 90)
@@ -68,8 +71,6 @@ if __name__ == '__main__':
                 # else:
                 #     true_model.set_vp(i, j, k, 100.1)
 
-    simple_heatmap(true_model.get_geo_grid().vp[:, 0, :], filename='true_model_3.png')
-    simple_heatmap(initial_model.get_geo_grid().vp[:, 0, :], filename='initial_model_3.png')
 
     full_arr, events_metric = generate_synthetic_arrivals_table(
         true_model,
@@ -81,14 +82,10 @@ if __name__ == '__main__':
 
     # print("Events (metric):", events_metric)
 
-    X = [e[0] for e in events_metric]
-    Y = [e[2] for e in events_metric]
-    simple_scatter(X, Y)
-
     # print(full_arr)
 
     logger = run_em(
-        n_cycles=10,
+        n_cycles=3,
         initial_model=initial_model,
         arrivals_table=full_arr,
         station_locs=stations_metric,
