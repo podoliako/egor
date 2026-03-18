@@ -31,22 +31,22 @@ TomographyEventResult = Dict[str, Union[int, GridPoint, np.ndarray]]
 
 class TomographyLogger:
     """
-    Сохраняет все данные инверсии по итерациям и запускам.
     Структура директорий:
         runs/
           run_<timestamp>/
             meta.json
             initial_model.npy
-            true_model.npy          (опционально)
+            true_model.npy
             iter_<i>/
               model.npy
               delta_s.npy
-              station_fields.npy    # (n_stations, nx, ny, nz)
+              station_fields.npy        # (n_stations, nx, ny, nz)  fine grid
               event_<j>/
-                weights.npy
+                weights.npy             # (nx, ny, nz)  coarse grid
+                misfit.npy              # (nx, ny, nz)  coarse grid
                 residuals.npy
-                G_station_<k>.npy
-                G_s<a>_s<b>.npy     # G для каждой пары станций
+                weight_<w>/
+                  G_station_<k>.npy     # (nx, ny, nz)  fine grid
     """
 
     def __init__(self, base_dir: str = "runs"):
@@ -54,12 +54,14 @@ class TomographyLogger:
         self.run_dir = Path(base_dir) / f"run_{self.run_id}"
         self.run_dir.mkdir(parents=True, exist_ok=True)
 
+    # ── meta ──────────────────────────────────────────────────────────────
+
     def save_meta(
         self,
         run_params: dict,
         station_locs: Sequence,
         event_locs: Sequence,
-        grid_info=None
+        grid_info=None,
     ):
         meta = {
             "run_id": self.run_id,
@@ -71,12 +73,18 @@ class TomographyLogger:
         with open(self.run_dir / "meta.json", "w") as f:
             json.dump(meta, f, indent=2)
 
+    # ── models ────────────────────────────────────────────────────────────
+
     def save_initial_model(self, model):
-        np.save(self.run_dir / "initial_model.npy", model.get_geo_grid(subdivision=1).vp)
+        np.save(self.run_dir / "initial_model.npy",
+                model.get_geo_grid(subdivision=1).vp)
 
     def save_true_model(self, model):
         if model is not None:
-            np.save(self.run_dir / "true_model.npy", model.get_geo_grid(subdivision=1).vp)
+            np.save(self.run_dir / "true_model.npy",
+                    model.get_geo_grid(subdivision=1).vp)
+
+    # ── per-iteration ──────────────────────────────────────────────────────
 
     def iter_dir(self, iteration: int) -> Path:
         d = self.run_dir / f"iter_{iteration}"
@@ -84,42 +92,49 @@ class TomographyLogger:
         return d
 
     def save_iteration_model(self, iteration: int, model):
-        np.save(self.iter_dir(iteration) / "model.npy", model.get_geo_grid(subdivision=1).vp)
+        np.save(self.iter_dir(iteration) / "model.npy",
+                model.get_geo_grid(subdivision=1).vp)
 
     def save_delta_s(self, iteration: int, delta_s: np.ndarray):
         np.save(self.iter_dir(iteration) / "delta_s.npy", delta_s)
 
     def save_station_fields(self, iteration: int, station_fields: np.ndarray):
-        # station_fields: (n_stations, nx, ny, nz)
-        np.save(self.iter_dir(iteration) / "station_fields.npy", station_fields)
+        # shape: (n_stations, nx, ny, nz)  — fine grid
+        np.save(self.iter_dir(iteration) / "station_fields.npy",
+                np.array(station_fields))
+
+    # ── per-event ──────────────────────────────────────────────────────────
 
     def save_event_data(
         self,
         iteration: int,
         event_idx: int,
         weights: np.ndarray,
-        residuals: np.ndarray,
-        G_per_station: Optional[List[np.ndarray]] = None,
+        misfit: Optional[np.ndarray] = None,
+        residuals: Optional[np.ndarray] = None,
+        G_per_weight: Optional[Dict[int, List[np.ndarray]]] = None,
     ):
+        """
+        G_per_weight: {weight_index: [g_fine_station_0, g_fine_station_1, ...]}
+                      g_fine arrays are on the fine grid.
+        """
         event_dir = self.iter_dir(iteration) / f"event_{event_idx}"
         event_dir.mkdir(exist_ok=True)
-        np.save(event_dir / "weights.npy", weights)
-        np.save(event_dir / "residuals.npy", residuals)
-        if G_per_station is not None:
-            for si, g in enumerate(G_per_station):
-                np.save(event_dir / f"G_station_{si}.npy", g)
 
-    def save_G_pair(
-        self,
-        iteration: int,
-        event_idx: int,
-        sta_a: int,
-        sta_b: int,
-        G: np.ndarray,
-    ):
-        event_dir = self.iter_dir(iteration) / f"event_{event_idx}"
-        event_dir.mkdir(exist_ok=True)
-        np.save(event_dir / f"G_s{sta_a}_s{sta_b}.npy", G)
+        np.save(event_dir / "weights.npy", weights)
+
+        if misfit is not None:
+            np.save(event_dir / "misfit.npy", misfit)
+
+        if residuals is not None:
+            np.save(event_dir / "residuals.npy", residuals)
+
+        if G_per_weight is not None:
+            for w_idx, g_list in G_per_weight.items():
+                w_dir = event_dir / f"weight_{w_idx}"
+                w_dir.mkdir(exist_ok=True)
+                for si, g in enumerate(g_list):
+                    np.save(w_dir / f"G_station_{si}.npy", g)
 
 
 # ---------------------------------------------------------------------------
@@ -137,14 +152,12 @@ def run_em(
     temperature: float = 1.0,
     weights_top_n: int = 1,
     subdivision: int = 1,
-    # --- новые параметры ---
     true_model=None,
     event_locs: Optional[Sequence] = None,
     logger: Optional[TomographyLogger] = None,
     save_runs: bool = True,
     runs_dir: str = "runs",
 ):
-    # Инициализируем логгер если нужен
     if save_runs and logger is None:
         logger = TomographyLogger(base_dir=runs_dir)
 
@@ -158,25 +171,24 @@ def run_em(
             weights_top_n=weights_top_n,
             subdivision=subdivision,
         )
-
         coarse_grid = initial_model.get_geo_grid(subdivision=1)
         grid_info = {
             "coarse_cell_size": float(coarse_grid.cell_size),
-            "coarse_shape":     [int(v) for v in coarse_grid.shape],
+            "coarse_shape": [int(v) for v in coarse_grid.shape],
         }
         if subdivision > 1:
             fine_grid = initial_model.get_geo_grid(subdivision=subdivision)
             grid_info["fine_cell_size"] = float(fine_grid.cell_size)
-            grid_info["fine_shape"]     = [int(v) for v in fine_grid.shape]
+            grid_info["fine_shape"] = [int(v) for v in fine_grid.shape]
         else:
             grid_info["fine_cell_size"] = float(coarse_grid.cell_size)
-            grid_info["fine_shape"]     = [int(v) for v in coarse_grid.shape]
-        
+            grid_info["fine_shape"] = [int(v) for v in coarse_grid.shape]
+
         logger.save_meta(
             run_params=run_params,
             station_locs=station_locs,
             event_locs=event_locs or [],
-            grid_info=grid_info, 
+            grid_info=grid_info,
         )
         logger.save_initial_model(initial_model)
         logger.save_true_model(true_model)
@@ -184,6 +196,7 @@ def run_em(
     model = initial_model
 
     for i in range(n_cycles):
+        print(f'{i+1}/{n_cycles}')
         if logger is not None:
             logger.save_iteration_model(i, model)
 
@@ -207,7 +220,6 @@ def run_em(
         if logger is not None:
             logger.save_delta_s(i, delta_s)
 
-    # Сохраняем финальную модель как iter_n_cycles
     if logger is not None:
         logger.save_iteration_model(n_cycles, model)
         print(f"[TomographyLogger] Run saved to: {logger.run_dir}")
@@ -229,13 +241,9 @@ def make_tomography_step(
         temperature: float = 1.0,
         weights_top_n: int = 1,
         subdivision: int = 1,
-        # --- логирование ---
         iteration: int = 0,
         logger: Optional[TomographyLogger] = None,
     ):
-    """
-    station_locs — координаты станций в метрах: [(x_m, y_m, z_m), ...].
-    """
     coarse_grid = initial_model.get_geo_grid(subdivision=1)
     coarse_shape = tuple(int(v) for v in coarse_grid.shape)
 
@@ -244,26 +252,27 @@ def make_tomography_step(
     fine_cell_size = float(fine_grid.cell_size)
     fine_voxel_size = (fine_cell_size,) * 3
 
-    station_idx_fine = [metric_to_index(s, fine_cell_size) for s in station_locs]
+    station_idx_fine = [metric_to_index(s, fine_cell_size, fine_shape) for s in station_locs]
 
-    G = []
-    r = []
+    G_acc = []
+    r_acc = []
 
     station_fields = compute_station_travel_time_fields(
         fine_grid, station_idx_fine, wave_type, solver
     )
 
-    # Сохраняем поля станций один раз на итерацию
     if logger is not None:
         logger.save_station_fields(iteration, np.array(station_fields))
 
     for event_idx, observed in enumerate(arrivals_table):
         observed = np.array(observed)
 
-        weights = compute_epicenter_weight_matrix(
+        # Get both weights and misfit in one call
+        weights, misfit = compute_epicenter_weight_matrix(
             station_fields=station_fields,
             observed=observed,
             temperature=temperature,
+            return_misfit=True,
         )
         weights = _select_top_n_weights(weights, weights_top_n, normolize=True)
 
@@ -273,12 +282,15 @@ def make_tomography_step(
         G_weights = []
         r_weights = []
 
-        # Для логирования: собираем G по станциям для первого ненулевого веса
-        event_G_stations_log: Optional[List[np.ndarray]] = [] if logger else None
-        event_residuals_log: Optional[np.ndarray] = None
+        # G_per_weight: {w_idx: [g_fine_st0, g_fine_st1, ...]}
+        G_per_weight: Optional[Dict[int, List[np.ndarray]]] = {} if logger else None
+        first_residuals: Optional[np.ndarray] = None
 
-        for weight_idx, weight_val in zip(weights_indices, weights_values):
+        for w_idx, (weight_idx, weight_val) in enumerate(
+            zip(weights_indices, weights_values)
+        ):
             G_stations = []
+            g_fine_list: List[np.ndarray] = []
 
             for station_fine_idx, station_fine_loc in zip(
                 range(len(station_idx_fine)), station_idx_fine
@@ -292,56 +304,44 @@ def make_tomography_step(
                     geo_shape=fine_shape,
                     voxel_size=fine_voxel_size,
                 )
-        
                 g_coarse = coarsen_G(g_fine, subdivision)
                 G_stations.append(g_coarse)
 
-                # Логируем G на fine сетке для каждой станции
-                if logger is not None and event_G_stations_log is not None:
-                    event_G_stations_log.append(g_fine)
+                if logger is not None:
+                    g_fine_list.append(g_fine)
 
-            G_stations = np.array(G_stations)
+            if logger is not None and G_per_weight is not None:
+                G_per_weight[w_idx] = g_fine_list
+
+            G_stations = np.array(G_stations)  # (n_stations, nx, ny, nz) coarse
             G_tilda = (
                 G_stations[:, np.newaxis, :, :, :]
                 - G_stations[np.newaxis, :, :, :, :]
             )
             residuals = _calculate_residuals(station_fields, observed, weight_idx)
 
-            if event_residuals_log is None:
-                event_residuals_log = residuals
+            if first_residuals is None:
+                first_residuals = residuals
 
             G_weights.append(G_tilda * weight_val)
             r_weights.append(residuals * weight_val)
 
-        # Сохраняем данные по событию
         if logger is not None:
             logger.save_event_data(
                 iteration=iteration,
                 event_idx=event_idx,
                 weights=weights,
-                residuals=event_residuals_log if event_residuals_log is not None else np.array([]),
-                G_per_station=event_G_stations_log,
+                misfit=misfit,
+                residuals=first_residuals if first_residuals is not None else np.array([]),
+                G_per_weight=G_per_weight,
             )
-            # Также сохраняем G_tilda для верхнего треугольника пар
-            if len(G_weights) > 0:
-                G_tilda_sum = sum(G_weights)
-                n_st = G_tilda_sum.shape[0]
-                for sa in range(n_st):
-                    for sb in range(sa + 1, n_st):
-                        logger.save_G_pair(
-                            iteration=iteration,
-                            event_idx=event_idx,
-                            sta_a=sa,
-                            sta_b=sb,
-                            G=G_tilda_sum[sa, sb],
-                        )
 
-        G.append(sum(G_weights))
-        r.append(sum(r_weights))
+        G_acc.append(sum(G_weights))
+        r_acc.append(sum(r_weights))
 
     delta_s = _solve_delta_s(
-        g_tilde_prime=sum(G),
-        r_prime=sum(r),
+        g_tilde_prime=sum(G_acc),
+        r_prime=sum(r_acc),
         model_shape=coarse_shape,
         lambda_reg=lambda_reg,
         use_upper_triangle_pairs=True,
@@ -351,7 +351,7 @@ def make_tomography_step(
 
 
 # ---------------------------------------------------------------------------
-# Helpers (без изменений)
+# Helpers
 # ---------------------------------------------------------------------------
 
 def _calculate_G(station_field, origin_loc, station_loc, geo_shape, voxel_size):
@@ -361,7 +361,6 @@ def _calculate_G(station_field, origin_loc, station_loc, geo_shape, voxel_size):
         epic_xyz=origin_loc,
         spacing_xyz=(1.0, 1.0, 1.0),
     )
-
     G = rasterize_path_lengths(
         path_xyz=path,
         shape=geo_shape,
@@ -384,7 +383,7 @@ def _solve_delta_s(
         r_prime: np.ndarray,
         model_shape: Tuple[int, int, int],
         lambda_reg: float,
-        use_upper_triangle_pairs: bool
+        use_upper_triangle_pairs: bool,
     ):
     g_tilde_prime = np.array(g_tilde_prime)
     n_stations = g_tilde_prime.shape[0]
@@ -417,7 +416,6 @@ def _solve_delta_s(
 
 def _select_top_n_weights(weights_martix, n, normolize=False):
     w = np.asarray(weights_martix, dtype=np.float64)
-
     if w.ndim != 3:
         raise ValueError("weights_martix must be a 3D array")
     if not isinstance(n, (int, np.integer)):
@@ -426,12 +424,9 @@ def _select_top_n_weights(weights_martix, n, normolize=False):
         raise ValueError("n must be >= 0")
 
     out = np.zeros_like(w)
-    total = w.size
-
     if n == 0:
         return out
-
-    if n >= total:
+    if n >= w.size:
         out = w.copy()
     else:
         flat = w.ravel()

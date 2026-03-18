@@ -53,7 +53,6 @@ button {
 button:hover { border-color: var(--accent); color: var(--accent); }
 button.active { border-color: var(--accent); color: var(--accent); background: #eaf0fb; }
 
-/* Layout */
 #app { display: flex; flex-direction: column; height: 100vh; }
 
 #header {
@@ -61,7 +60,6 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   border-bottom: 1px solid var(--border); display: flex; align-items: center;
   gap: 10px; padding: 0 14px; flex-shrink: 0;
 }
-
 .logo { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
 .logo span { color: var(--accent); }
 .vsep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
@@ -70,13 +68,11 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 .toggle-row { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .toggle-item { display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--text2); user-select: none; font-size: 11px; }
 .badge { font-family: var(--ff-mono); font-size: 10px; padding: 1px 5px; border-radius: 3px; background: var(--bg2); color: var(--text2); border: 1px solid var(--border); }
-
 #warn-no-grid {
   display: none; color: var(--warn); font-size: 10px; white-space: nowrap;
   padding: 2px 7px; border: 1px solid currentColor; border-radius: 3px; background: #fdf5ec;
 }
 
-/* Params bar */
 #params-bar {
   display: none; background: var(--bg2); border-bottom: 1px solid var(--border);
   padding: 5px 14px; flex-shrink: 0; flex-wrap: wrap; gap: 16px; align-items: center;
@@ -86,9 +82,11 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 .param-k { color: var(--text3); font-size: 10px; }
 .param-v { color: var(--green); font-family: var(--ff-mono); font-size: 10px; }
 
-/* Panels */
+/* 2 rows × 3 columns */
 #panels {
-  display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
   gap: 1px; background: var(--border); flex: 1; min-height: 0; overflow: hidden;
 }
 .panel { background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
@@ -100,7 +98,6 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
 }
 .panel-hdr::-webkit-scrollbar { display: none; }
-
 .panel-title {
   font-size: 10px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase;
   color: var(--text3); white-space: nowrap; padding-right: 7px;
@@ -150,21 +147,20 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 
 <div id="panels">
 
-  <!-- Velocity Model -->
+  <!-- Row 1, Col 1: Velocity Model (iter / initial / delta_s) -->
   <div class="panel">
     <div class="panel-hdr">
       <span class="panel-title">Velocity Model</span>
       <div class="ph-group">
         <select id="vel-type">
-          <option value="iter">Iter Model</option>
+          <option value="iter">Iter</option>
           <option value="initial">Initial</option>
-          <option value="true" id="vel-true-opt">True Model</option>
           <option value="delta_s">ΔS</option>
         </select>
       </div>
       <div class="ph-group"><span class="badge" id="vel-shape-badge">—</span></div>
       <div class="ph-group">
-        Y <input type="range" id="vel-y" min="0" max="0" value="0" style="width:70px">
+        Y <input type="range" id="vel-y" min="0" max="0" value="0" style="width:60px">
         <span class="y-val" id="vel-y-v">0</span>
       </div>
     </div>
@@ -174,14 +170,14 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
     </div>
   </div>
 
-  <!-- Time Fields -->
+  <!-- Row 1, Col 2: Time Fields (fine) -->
   <div class="panel">
     <div class="panel-hdr">
       <span class="panel-title">Time Fields</span>
       <div class="ph-group">Station <select id="tf-sta"></select></div>
       <div class="ph-group">fine <span class="badge" id="tf-shape-badge">—</span></div>
       <div class="ph-group">
-        Y <input type="range" id="tf-y" min="0" max="0" value="0" style="width:70px">
+        Y <input type="range" id="tf-y" min="0" max="0" value="0" style="width:60px">
         <span class="y-val" id="tf-y-v">0</span>
       </div>
     </div>
@@ -191,14 +187,49 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
     </div>
   </div>
 
-  <!-- Hypocenter Weights -->
+  <!-- Row 1, Col 3: G Matrix (fine, per station+weight) -->
   <div class="panel">
     <div class="panel-hdr">
-      <span class="panel-title">Hypocenter Weights</span>
+      <span class="panel-title">G Matrix</span>
+      <div class="ph-group">Ev <select id="g-ev"></select></div>
+      <div class="ph-group">Sta <select id="g-sta"></select></div>
+      <div class="ph-group">Wt <select id="g-wt"><option value="0">0</option></select></div>
+      <div class="ph-group">fine <span class="badge" id="g-shape-badge">—</span></div>
+      <div class="ph-group">
+        Y <input type="range" id="g-y" min="0" max="0" value="0" style="width:60px">
+        <span class="y-val" id="g-y-v">0</span>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="no-data-msg" id="g-empty">Select run / event / station</div>
+      <div id="plot-G" style="width:100%;height:100%"></div>
+    </div>
+  </div>
+
+  <!-- Row 2, Col 1: True Model -->
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">True Model</span>
+      <div class="ph-group"><span class="badge" id="tr-shape-badge">—</span></div>
+      <div class="ph-group">
+        Y <input type="range" id="tr-y" min="0" max="0" value="0" style="width:60px">
+        <span class="y-val" id="tr-y-v">0</span>
+      </div>
+    </div>
+    <div class="panel-body">
+      <div class="no-data-msg" id="tr-empty">No true model saved</div>
+      <div id="plot-tr" style="width:100%;height:100%"></div>
+    </div>
+  </div>
+
+  <!-- Row 2, Col 2: Hypocenter Weights (fine) -->
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Hypo Weights</span>
       <div class="ph-group">Event <select id="wt-ev"></select></div>
       <div class="ph-group">fine <span class="badge" id="wt-shape-badge">—</span></div>
       <div class="ph-group">
-        Y <input type="range" id="wt-y" min="0" max="0" value="0" style="width:70px">
+        Y <input type="range" id="wt-y" min="0" max="0" value="0" style="width:60px">
         <span class="y-val" id="wt-y-v">0</span>
       </div>
     </div>
@@ -208,21 +239,20 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
     </div>
   </div>
 
-  <!-- G Matrix (fine, per station) -->
+  <!-- Row 2, Col 3: Misfit (fine) -->
   <div class="panel">
     <div class="panel-hdr">
-      <span class="panel-title">G Matrix</span>
-      <div class="ph-group">Event <select id="g-ev"></select></div>
-      <div class="ph-group">Station <select id="g-sta"></select></div>
-      <div class="ph-group">fine <span class="badge" id="g-shape-badge">—</span></div>
+      <span class="panel-title">Misfit</span>
+      <div class="ph-group">Event <select id="mf-ev"></select></div>
+      <div class="ph-group">fine <span class="badge" id="mf-shape-badge">—</span></div>
       <div class="ph-group">
-        Y <input type="range" id="g-y" min="0" max="0" value="0" style="width:70px">
-        <span class="y-val" id="g-y-v">0</span>
+        Y <input type="range" id="mf-y" min="0" max="0" value="0" style="width:60px">
+        <span class="y-val" id="mf-y-v">0</span>
       </div>
     </div>
     <div class="panel-body">
-      <div class="no-data-msg" id="g-empty">Select a run</div>
-      <div id="plot-G" style="width:100%;height:100%"></div>
+      <div class="no-data-msg" id="mf-empty">Select a run</div>
+      <div id="plot-mf" style="width:100%;height:100%"></div>
     </div>
   </div>
 
@@ -237,37 +267,38 @@ const ST = {
   showGrid: true, showStations: true, showEvents: true,
   vel: { type: 'iter', y: 0 },
   tf:  { station: 0,   y: 0 },
+  tr:  { y: 0 },
   wt:  { event: 0,     y: 0 },
-  G:   { event: 0, station: 0, y: 0 },
+  mf:  { event: 0,     y: 0 },
+  G:   { event: 0, station: 0, weight: 0, y: 0 },
 };
 
 const PLY_CFG = {
   responsive: true, displaylogo: false,
-  modeBarButtonsToRemove: ['lasso2d', 'select2d', 'autoScale2d'],
+  modeBarButtonsToRemove: ['lasso2d','select2d','autoScale2d'],
 };
 
 function mkLayout(nx, nz, cbTitle) {
   return {
-    paper_bgcolor: '#ffffff',
-    plot_bgcolor:  '#f8f9fb',
+    paper_bgcolor: '#ffffff', plot_bgcolor: '#f8f9fb',
     font: { color: '#1e2530', size: 9, family: "Menlo, Consolas, monospace" },
     margin: { l: 40, r: 14, t: 8, b: 38 },
     xaxis: {
-      title: { text: 'X', font: { size: 9 }, standoff: 2 },
+      title: { text: 'X (grid idx)', font: { size: 9 }, standoff: 2 },
       showgrid: ST.showGrid, gridcolor: '#dde1ea', zeroline: false,
       range: [-0.5, nx - 0.5], tickfont: { size: 8 },
     },
     yaxis: {
-      title: { text: 'Z (depth ↓)', font: { size: 9 }, standoff: 2 },
+      title: { text: 'Z depth ↓', font: { size: 9 }, standoff: 2 },
       showgrid: ST.showGrid, gridcolor: '#dde1ea', zeroline: false,
       autorange: 'reversed', tickfont: { size: 8 },
     },
     showlegend: false,
     coloraxis: {
       colorbar: {
-        thickness: 8, len: 0.85,
-        tickfont: { size: 8, color: '#5a6478' },
-        title: { text: cbTitle || '', font: { size: 8, color: '#5a6478' } },
+        thickness: 10, len: 0.85,
+        tickfont: { size: 9, color: '#5a6478' },
+        title: { text: cbTitle || '', font: { size: 9, color: '#5a6478' } },
       },
     },
   };
@@ -278,26 +309,33 @@ async function apiFetch(url) {
   catch { return null; }
 }
 
+// Transpose: server returns arr[x][z], Plotly heatmap wants z[row=z][col=x]
 function T(mat) {
   if (!mat?.length) return [];
-  const nx = mat.length, nz = mat[0].length, out = new Array(nz);
-  for (let z = 0; z < nz; z++) { out[z] = new Array(nx); for (let x = 0; x < nx; x++) out[z][x] = mat[x][z]; }
+  const nx = mat.length, nz = mat[0].length;
+  const out = new Array(nz);
+  for (let z = 0; z < nz; z++) {
+    out[z] = new Array(nx);
+    for (let x = 0; x < nx; x++) out[z][x] = mat[x][z];
+  }
   return out;
 }
 
-function cellSize(coarse) {
+// cell size for coarse or fine grid
+function cs(coarse) {
   const gi = ST.meta?.grid_info;
   if (!gi) return null;
   return coarse ? gi.coarse_cell_size : (gi.fine_cell_size ?? gi.coarse_cell_size);
 }
 
+// metric coords → grid indices for overlay traces
 function stationTraces(hilite, coarse) {
   if (!ST.showStations) return [];
-  const locs = ST.meta?.station_locs, cs = cellSize(coarse);
-  if (!locs || !cs) return [];
+  const locs = ST.meta?.station_locs, c = cs(coarse);
+  if (!locs || !c) return [];
   return locs.map((loc, i) => ({
     type: 'scatter', mode: 'markers+text',
-    x: [loc[0] / cs], y: [loc[2] / cs],
+    x: [loc[0] / c], y: [loc[2] / c],
     text: [`S${i}`], textposition: 'top center',
     textfont: { size: 8, color: i === hilite ? '#1a4ea8' : '#555' },
     marker: {
@@ -306,17 +344,17 @@ function stationTraces(hilite, coarse) {
       line: { color: '#fff', width: 1 },
     },
     showlegend: false,
-    hovertemplate: `Station ${i}<br>x: ${loc[0].toFixed(0)} m<br>z: ${loc[2].toFixed(0)} m<extra></extra>`,
+    hovertemplate: `Sta ${i}<br>x=${loc[0].toFixed(0)}m  z=${loc[2].toFixed(0)}m<extra></extra>`,
   }));
 }
 
 function eventTraces(hilite, coarse) {
   if (!ST.showEvents) return [];
-  const locs = ST.meta?.event_locs, cs = cellSize(coarse);
-  if (!locs || !cs) return [];
+  const locs = ST.meta?.event_locs, c = cs(coarse);
+  if (!locs || !c) return [];
   return locs.map((loc, i) => ({
     type: 'scatter', mode: 'markers+text',
-    x: [loc[0] / cs], y: [loc[2] / cs],
+    x: [loc[0] / c], y: [loc[2] / c],
     text: [`E${i}`], textposition: 'top center',
     textfont: { size: 8, color: i === hilite ? '#a04800' : '#555' },
     marker: {
@@ -325,13 +363,16 @@ function eventTraces(hilite, coarse) {
       line: { color: '#fff', width: 1 },
     },
     showlegend: false,
-    hovertemplate: `Event ${i}<br>x: ${loc[0].toFixed(0)} m<br>z: ${loc[2].toFixed(0)} m<extra></extra>`,
+    hovertemplate: `Ev ${i}<br>x=${loc[0].toFixed(0)}m  z=${loc[2].toFixed(0)}m<extra></extra>`,
   }));
 }
 
 function heatTrace(slice, colorscale, zmid) {
-  const t = { type: 'heatmap', z: T(slice), colorscale, showscale: true, coloraxis: 'coloraxis',
-    hovertemplate: 'x=%{x}  z=%{y}  val=%{z:.4g}<extra></extra>' };
+  const t = {
+    type: 'heatmap', z: T(slice), colorscale,
+    showscale: true, coloraxis: 'coloraxis',
+    hovertemplate: 'x=%{x}  z=%{y}  val=%{z:.4g}<extra></extra>',
+  };
   if (zmid !== undefined) { t.zmid = zmid; t.zauto = false; }
   return t;
 }
@@ -343,11 +384,11 @@ function shapeBadge(id, s) {
 
 function showP(pid, eid) {
   document.getElementById(eid).style.display = 'none';
-  document.getElementById(pid).style.display  = 'block';
+  document.getElementById(pid).style.display = 'block';
 }
 function emptyP(pid, eid, msg) {
   Plotly.purge(pid);
-  document.getElementById(pid).style.display  = 'none';
+  document.getElementById(pid).style.display = 'none';
   const el = document.getElementById(eid);
   el.style.display = 'flex'; el.textContent = msg || 'No data';
 }
@@ -361,21 +402,27 @@ function syncY(slId, lblId, ny, stObj) {
   document.getElementById(lblId).textContent = stObj.y;
 }
 
-/* ── Render ── */
+// ── Render functions ──────────────────────────────────────────────────────────
 
 async function renderVel() {
   if (!ST.run) return;
-  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=${ST.vel.type}&iter=${ST.iter}&y=${ST.vel.y}`);
-  if (!d?.slice) { emptyP('plot-vel', 'vel-empty', 'No data for this selection'); return; }
-  showP('plot-vel', 'vel-empty');
-  syncY('vel-y', 'vel-y-v', d.full_shape[1], ST.vel);
+  const mt = ST.vel.type;
+  // delta_s has its own type in server API
+  const typeParam = mt === 'delta_s' ? 'delta_s' : 'model';
+  const mtParam   = mt === 'delta_s' ? '' : `&model_type=${mt}`;
+  const d = await apiFetch(
+    `/api/runs/${ST.run}/slice?type=${typeParam}${mtParam}&iter=${ST.iter}&y=${ST.vel.y}`
+  );
+  if (!d?.slice) { emptyP('plot-vel','vel-empty','No data'); return; }
+  showP('plot-vel','vel-empty');
+  syncY('vel-y','vel-y-v', d.full_shape[1], ST.vel);
   shapeBadge('vel-shape-badge', d.full_shape);
-  const isDelta = ST.vel.type === 'delta_s';
-  const cs = isDelta
+  const isDelta = mt === 'delta_s';
+  const cs_ = isDelta
     ? [[0,'#3a78c9'],[0.5,'#f5f5f5'],[1,'#c94040']]
     : 'Viridis';
   Plotly.react('plot-vel',
-    [heatTrace(d.slice, cs, isDelta ? 0 : undefined),
+    [heatTrace(d.slice, cs_, isDelta ? 0 : undefined),
      ...stationTraces(-1, true), ...eventTraces(-1, true)],
     mkLayout(d.shape[0], d.shape[1], isDelta ? 'Δs' : 'Vp'), PLY_CFG);
 }
@@ -383,10 +430,12 @@ async function renderVel() {
 async function renderTF() {
   if (!ST.run) return;
   const sta = ST.tf.station;
-  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=station_field&station=${sta}&iter=${ST.iter}&y=${ST.tf.y}`);
-  if (!d?.slice) { emptyP('plot-tf', 'tf-empty', 'No data for this selection'); return; }
-  showP('plot-tf', 'tf-empty');
-  syncY('tf-y', 'tf-y-v', d.full_shape[1], ST.tf);
+  const d = await apiFetch(
+    `/api/runs/${ST.run}/slice?type=station_field&station=${sta}&iter=${ST.iter}&y=${ST.tf.y}`
+  );
+  if (!d?.slice) { emptyP('plot-tf','tf-empty','No data'); return; }
+  showP('plot-tf','tf-empty');
+  syncY('tf-y','tf-y-v', d.full_shape[1], ST.tf);
   shapeBadge('tf-shape-badge', d.full_shape);
   Plotly.react('plot-tf',
     [heatTrace(d.slice, 'YlOrRd'),
@@ -394,13 +443,30 @@ async function renderTF() {
     mkLayout(d.shape[0], d.shape[1], 'T (s)'), PLY_CFG);
 }
 
+async function renderTr() {
+  if (!ST.run) return;
+  const d = await apiFetch(
+    `/api/runs/${ST.run}/slice?type=true_model&iter=0&y=${ST.tr.y}`
+  );
+  if (!d?.slice) { emptyP('plot-tr','tr-empty','No true model saved'); return; }
+  showP('plot-tr','tr-empty');
+  syncY('tr-y','tr-y-v', d.full_shape[1], ST.tr);
+  shapeBadge('tr-shape-badge', d.full_shape);
+  Plotly.react('plot-tr',
+    [heatTrace(d.slice, 'Viridis'),
+     ...stationTraces(-1, true), ...eventTraces(-1, true)],
+    mkLayout(d.shape[0], d.shape[1], 'Vp true'), PLY_CFG);
+}
+
 async function renderWt() {
   if (!ST.run) return;
   const ev = ST.wt.event;
-  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=weights&event=${ev}&iter=${ST.iter}&y=${ST.wt.y}`);
-  if (!d?.slice) { emptyP('plot-wt', 'wt-empty', 'No data for this selection'); return; }
-  showP('plot-wt', 'wt-empty');
-  syncY('wt-y', 'wt-y-v', d.full_shape[1], ST.wt);
+  const d = await apiFetch(
+    `/api/runs/${ST.run}/slice?type=weights&event=${ev}&iter=${ST.iter}&y=${ST.wt.y}`
+  );
+  if (!d?.slice) { emptyP('plot-wt','wt-empty','No data'); return; }
+  showP('plot-wt','wt-empty');
+  syncY('wt-y','wt-y-v', d.full_shape[1], ST.wt);
   shapeBadge('wt-shape-badge', d.full_shape);
   Plotly.react('plot-wt',
     [heatTrace(d.slice, [[0,'#f0f4ff'],[0.5,'#6699dd'],[1,'#0a2a7a']]),
@@ -408,13 +474,32 @@ async function renderWt() {
     mkLayout(d.shape[0], d.shape[1], 'w'), PLY_CFG);
 }
 
+async function renderMf() {
+  if (!ST.run) return;
+  const ev = ST.mf.event;
+  const d = await apiFetch(
+    `/api/runs/${ST.run}/slice?type=misfit&event=${ev}&iter=${ST.iter}&y=${ST.mf.y}`
+  );
+  if (!d?.slice) { emptyP('plot-mf','mf-empty','No data'); return; }
+  showP('plot-mf','mf-empty');
+  syncY('mf-y','mf-y-v', d.full_shape[1], ST.mf);
+  shapeBadge('mf-shape-badge', d.full_shape);
+  const rdbu = [[0,'#3a78c9'],[0.25,'#90b8e8'],[0.5,'#f5f5f5'],[0.75,'#e89090'],[1,'#c94040']];
+  Plotly.react('plot-mf',
+    [heatTrace(d.slice, rdbu, 0),
+     ...stationTraces(-1, false), ...eventTraces(ev, false)],
+    mkLayout(d.shape[0], d.shape[1], 'misfit'), PLY_CFG);
+}
+
 async function renderG() {
   if (!ST.run) return;
-  const { event, station, y } = ST.G;
-  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=G&event=${event}&iter=${ST.iter}&y=${y}&grid=fine&station_a=${station}`);
-  if (!d?.slice) { emptyP('plot-G', 'g-empty', 'No data — check event/station combination'); return; }
-  showP('plot-G', 'g-empty');
-  syncY('g-y', 'g-y-v', d.full_shape[1], ST.G);
+  const { event, station, weight, y } = ST.G;
+  const d = await apiFetch(
+    `/api/runs/${ST.run}/slice?type=G&event=${event}&station=${station}&weight=${weight}&iter=${ST.iter}&y=${y}`
+  );
+  if (!d?.slice) { emptyP('plot-G','g-empty','No data — check event/station/weight'); return; }
+  showP('plot-G','g-empty');
+  syncY('g-y','g-y-v', d.full_shape[1], ST.G);
   shapeBadge('g-shape-badge', d.full_shape);
   const rdbu = [[0,'#3a78c9'],[0.25,'#90b8e8'],[0.5,'#f5f5f5'],[0.75,'#e89090'],[1,'#c94040']];
   Plotly.react('plot-G',
@@ -423,9 +508,9 @@ async function renderG() {
     mkLayout(d.shape[0], d.shape[1], 'G'), PLY_CFG);
 }
 
-function renderAll() { renderVel(); renderTF(); renderWt(); renderG(); }
+function renderAll() { renderVel(); renderTF(); renderTr(); renderWt(); renderMf(); renderG(); }
 
-/* ── Selects ── */
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function fillSelect(id, count, prefix) {
   const el = document.getElementById(id), cur = +el.value || 0;
@@ -435,6 +520,22 @@ function fillSelect(id, count, prefix) {
     o.value = i; o.textContent = `${prefix}${i}`; el.appendChild(o);
   }
   el.value = Math.min(cur, Math.max(0, count - 1));
+}
+
+// Reload weight list for G panel when event changes
+async function reloadGWeights() {
+  const ev = ST.G.event;
+  const d = await apiFetch(
+    `/api/runs/${ST.run}/weights_list?iter=${ST.iter}&event=${ev}`
+  );
+  const sel = document.getElementById('g-wt');
+  sel.innerHTML = '';
+  const count = d?.length || 1;
+  for (let i = 0; i < count; i++) {
+    const o = document.createElement('option');
+    o.value = i; o.textContent = `wt ${i}`; sel.appendChild(o);
+  }
+  sel.value = 0; ST.G.weight = 0;
 }
 
 function updateParamsBar() {
@@ -447,8 +548,10 @@ function updateParamsBar() {
 
 async function loadRun(rid) {
   ST.run = rid; ST.iter = 0;
-  ['vel','tf','wt','G'].forEach(k => { ST[k].y = 0; });
-  ['vel-y','tf-y','wt-y','g-y'].forEach(id => { const el = document.getElementById(id); el.value = 0; el.max = 0; });
+  ['vel','tf','tr','wt','mf','G'].forEach(k => { if (ST[k]) ST[k].y = 0; });
+  ['vel-y','tf-y','tr-y','wt-y','mf-y','g-y'].forEach(id => {
+    const el = document.getElementById(id); if (el) { el.value = 0; el.max = 0; }
+  });
 
   const [meta, info] = await Promise.all([
     apiFetch(`/api/runs/${rid}/meta`),
@@ -468,15 +571,16 @@ async function loadRun(rid) {
   const nSta = ST.info.n_stations || 0, nEv = ST.info.n_events || 0;
   fillSelect('tf-sta', nSta, 'Sta ');
   fillSelect('wt-ev',  nEv,  'Ev ');
+  fillSelect('mf-ev',  nEv,  'Ev ');
   fillSelect('g-ev',   nEv,  'Ev ');
   fillSelect('g-sta',  nSta, 'Sta ');
 
-  document.getElementById('vel-true-opt').disabled = !ST.info.has_true_model;
+  await reloadGWeights();
   updateParamsBar();
   renderAll();
 }
 
-/* ── Wire-up ── */
+// ── Wire-up ───────────────────────────────────────────────────────────────────
 
 function setIter(v) {
   const max = +document.getElementById('iter-slider').max || 0;
@@ -500,20 +604,48 @@ document.getElementById('btn-params').addEventListener('click', function() {
   this.textContent = document.getElementById('params-bar').classList.contains('open') ? 'Params ▴' : 'Params ▾';
 });
 
+// Vel panel
 document.getElementById('vel-type').addEventListener('change', e => { ST.vel.type = e.target.value; renderVel(); });
-document.getElementById('vel-y').addEventListener('input', e => { ST.vel.y = +e.target.value; document.getElementById('vel-y-v').textContent = ST.vel.y; renderVel(); });
+document.getElementById('vel-y').addEventListener('input', e => {
+  ST.vel.y = +e.target.value; document.getElementById('vel-y-v').textContent = ST.vel.y; renderVel();
+});
 
+// TF panel
 document.getElementById('tf-sta').addEventListener('change', e => { ST.tf.station = +e.target.value; renderTF(); });
-document.getElementById('tf-y').addEventListener('input',   e => { ST.tf.y = +e.target.value; document.getElementById('tf-y-v').textContent = ST.tf.y; renderTF(); });
+document.getElementById('tf-y').addEventListener('input', e => {
+  ST.tf.y = +e.target.value; document.getElementById('tf-y-v').textContent = ST.tf.y; renderTF();
+});
 
+// True model panel
+document.getElementById('tr-y').addEventListener('input', e => {
+  ST.tr.y = +e.target.value; document.getElementById('tr-y-v').textContent = ST.tr.y; renderTr();
+});
+
+// Weights panel
 document.getElementById('wt-ev').addEventListener('change', e => { ST.wt.event = +e.target.value; renderWt(); });
-document.getElementById('wt-y').addEventListener('input',   e => { ST.wt.y = +e.target.value; document.getElementById('wt-y-v').textContent = ST.wt.y; renderWt(); });
+document.getElementById('wt-y').addEventListener('input', e => {
+  ST.wt.y = +e.target.value; document.getElementById('wt-y-v').textContent = ST.wt.y; renderWt();
+});
 
-document.getElementById('g-ev').addEventListener('change',  e => { ST.G.event   = +e.target.value; renderG(); });
+// Misfit panel
+document.getElementById('mf-ev').addEventListener('change', e => { ST.mf.event = +e.target.value; renderMf(); });
+document.getElementById('mf-y').addEventListener('input', e => {
+  ST.mf.y = +e.target.value; document.getElementById('mf-y-v').textContent = ST.mf.y; renderMf();
+});
+
+// G panel — event change: reload weight list first
+document.getElementById('g-ev').addEventListener('change', async e => {
+  ST.G.event = +e.target.value;
+  await reloadGWeights();
+  renderG();
+});
 document.getElementById('g-sta').addEventListener('change', e => { ST.G.station = +e.target.value; renderG(); });
-document.getElementById('g-y').addEventListener('input',    e => { ST.G.y = +e.target.value; document.getElementById('g-y-v').textContent = ST.G.y; renderG(); });
+document.getElementById('g-wt').addEventListener('change', e => { ST.G.weight  = +e.target.value; renderG(); });
+document.getElementById('g-y').addEventListener('input', e => {
+  ST.G.y = +e.target.value; document.getElementById('g-y-v').textContent = ST.G.y; renderG();
+});
 
-/* ── Init ── */
+// ── Init ──────────────────────────────────────────────────────────────────────
 async function init() {
   const runs = await apiFetch('/api/runs');
   const sel  = document.getElementById('run-select');
@@ -528,7 +660,7 @@ let _rt;
 window.addEventListener('resize', () => {
   clearTimeout(_rt);
   _rt = setTimeout(() => {
-    ['plot-vel','plot-tf','plot-wt','plot-G'].forEach(id => {
+    ['plot-vel','plot-tf','plot-tr','plot-wt','plot-mf','plot-G'].forEach(id => {
       const el = document.getElementById(id);
       if (el?._fullLayout) Plotly.relayout(id, { autosize: true });
     });
