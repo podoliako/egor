@@ -21,11 +21,19 @@
   --warn:   #b06010;
   --ff: system-ui, -apple-system, 'Segoe UI', sans-serif;
   --ff-mono: 'Menlo', 'Consolas', monospace;
+  --panel-h: 520px;
 }
 
-html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--ff); font-size: 12px; overflow: hidden; }
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ff);
+  font-size: 12px;
+  overflow: hidden;
+}
 
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg2); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
@@ -42,23 +50,28 @@ input[type=range] {
 }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none; width: 11px; height: 11px; border-radius: 50%;
-  background: var(--accent); cursor: pointer; border: 2px solid white; box-shadow: 0 0 0 1px var(--border);
+  background: var(--accent); cursor: pointer; border: 2px solid white;
+  box-shadow: 0 0 0 1px var(--border);
 }
 input[type=checkbox] { accent-color: var(--accent); cursor: pointer; }
 
 button {
   background: var(--bg1); border: 1px solid var(--border); color: var(--text2);
-  font-family: var(--ff); font-size: 11px; padding: 3px 10px; border-radius: 4px; cursor: pointer;
+  font-family: var(--ff); font-size: 11px; padding: 3px 10px;
+  border-radius: 4px; cursor: pointer;
 }
 button:hover { border-color: var(--accent); color: var(--accent); }
 button.active { border-color: var(--accent); color: var(--accent); background: #eaf0fb; }
 
+/* ── App shell ── */
 #app { display: flex; flex-direction: column; height: 100vh; }
 
+/* ── Header ── */
 #header {
   height: 44px; min-height: 44px; background: var(--bg1);
-  border-bottom: 1px solid var(--border); display: flex; align-items: center;
-  gap: 10px; padding: 0 14px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px; padding: 0 14px;
+  flex-shrink: 0; z-index: 10;
 }
 .logo { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
 .logo span { color: var(--accent); }
@@ -73,6 +86,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   padding: 2px 7px; border: 1px solid currentColor; border-radius: 3px; background: #fdf5ec;
 }
 
+/* ── Params bar ── */
 #params-bar {
   display: none; background: var(--bg2); border-bottom: 1px solid var(--border);
   padding: 5px 14px; flex-shrink: 0; flex-wrap: wrap; gap: 16px; align-items: center;
@@ -82,37 +96,88 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 .param-k { color: var(--text3); font-size: 10px; }
 .param-v { color: var(--green); font-family: var(--ff-mono); font-size: 10px; }
 
-/* 2 rows × 3 columns */
-#panels {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 1px; background: var(--border); flex: 1; min-height: 0; overflow: hidden;
+/* ── Scroll container ── */
+#panels-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px;
 }
-.panel { background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
+
+/* ── Panel rows: two columns, flow downward ── */
+.panel-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* ── Panel ── */
+.panel {
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: var(--panel-h);
+}
 
 .panel-hdr {
-  background: var(--bg1); border-bottom: 1px solid var(--border);
-  padding: 0 8px; display: flex; align-items: center; gap: 7px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 8px;
+  display: flex; align-items: center; gap: 7px;
   height: 34px; min-height: 34px; flex-shrink: 0;
   overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+  border-radius: 6px 6px 0 0;
 }
 .panel-hdr::-webkit-scrollbar { display: none; }
+
 .panel-title {
   font-size: 10px; font-weight: 600; letter-spacing: .4px; text-transform: uppercase;
-  color: var(--text3); white-space: nowrap; padding-right: 7px;
-  border-right: 1px solid var(--border);
+  color: var(--text2); white-space: nowrap; padding-right: 7px;
+  border-right: 1px solid var(--border); flex-shrink: 0;
 }
-.ph-group { display: flex; align-items: center; gap: 4px; flex-shrink: 0; color: var(--text2); font-size: 11px; white-space: nowrap; }
+.ph-group {
+  display: flex; align-items: center; gap: 4px;
+  flex-shrink: 0; color: var(--text2); font-size: 11px; white-space: nowrap;
+}
 .y-val { font-family: var(--ff-mono); font-size: 11px; color: var(--accent); min-width: 20px; }
+.btn-full {
+  margin-left: auto; padding: 2px 7px; font-size: 12px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 4px; cursor: pointer; color: var(--text3); flex-shrink: 0;
+}
+.btn-full:hover { border-color: var(--accent); color: var(--accent); }
 
-.panel-body { flex: 1; min-height: 0; position: relative; }
-.no-data-msg { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 12px; }
+/* dim toggle — inline in panel header, fine-grid panels only */
+.dim-toggle {
+  display: flex; align-items: center; gap: 3px;
+  font-size: 10px; color: var(--text3); flex-shrink: 0; cursor: pointer;
+  user-select: none;
+}
+.dim-toggle input { cursor: pointer; }
+
+.panel-body { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+.no-data-msg {
+  position: absolute; inset: 0; display: flex;
+  align-items: center; justify-content: center; color: var(--text3); font-size: 12px;
+}
+
+/* ── Fullscreen ── */
+.panel.fullscreen {
+  position: fixed !important; z-index: 9999;
+  top: 44px; left: 0; right: 0; bottom: 0;
+  width: 100%; height: calc(100vh - 44px);
+  border-radius: 0;
+}
 </style>
 </head>
 <body>
 <div id="app">
 
+<!-- Header -->
 <div id="header">
   <div class="logo">Tomo<span>Viewer</span></div>
   <div class="vsep"></div>
@@ -126,15 +191,15 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   <div class="ctrl-group">
     <span class="ctrl-label">Iter</span>
     <input type="range" id="iter-slider" min="0" max="0" value="0" style="width:90px">
-    <input type="number" id="iter-num" min="0" max="0" value="0" style="width:48px">
+    <input type="number" id="iter-num"   min="0" max="0" value="0" style="width:48px">
     <span class="badge" id="iter-max-badge">/ 0</span>
   </div>
   <div class="vsep"></div>
 
   <div class="toggle-row">
-    <label class="toggle-item"><input type="checkbox" id="cb-grid" checked> Grid</label>
+    <label class="toggle-item"><input type="checkbox" id="cb-grid"     checked> Grid</label>
     <label class="toggle-item"><input type="checkbox" id="cb-stations" checked> Stations</label>
-    <label class="toggle-item"><input type="checkbox" id="cb-events" checked> Events</label>
+    <label class="toggle-item"><input type="checkbox" id="cb-events"   checked> Events</label>
   </div>
   <div class="vsep"></div>
 
@@ -143,134 +208,165 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   <span id="warn-no-grid">⚠ grid_info missing in meta.json — overlays disabled</span>
 </div>
 
+<!-- Params bar -->
 <div id="params-bar"></div>
 
-<div id="panels">
+<!-- Scrollable panel flow -->
+<div id="panels-scroll">
 
-  <!-- Row 1, Col 1: Velocity Model (iter / initial / delta_s) -->
-  <div class="panel">
-    <div class="panel-hdr">
-      <span class="panel-title">Velocity Model</span>
-      <div class="ph-group">
-        <select id="vel-type">
-          <option value="iter">Iter</option>
-          <option value="initial">Initial</option>
-          <option value="delta_s">ΔS</option>
-        </select>
-      </div>
-      <div class="ph-group"><span class="badge" id="vel-shape-badge">—</span></div>
-      <div class="ph-group">
-        Y <input type="range" id="vel-y" min="0" max="0" value="0" style="width:60px">
-        <span class="y-val" id="vel-y-v">0</span>
-      </div>
-    </div>
-    <div class="panel-body">
-      <div class="no-data-msg" id="vel-empty">Select a run</div>
-      <div id="plot-vel" style="width:100%;height:100%"></div>
-    </div>
-  </div>
+  <!-- Row 1: Velocity Model + True Model -->
+  <div class="panel-row">
 
-  <!-- Row 1, Col 2: Time Fields (fine) -->
-  <div class="panel">
-    <div class="panel-hdr">
-      <span class="panel-title">Time Fields</span>
-      <div class="ph-group">Station <select id="tf-sta"></select></div>
-      <div class="ph-group">fine <span class="badge" id="tf-shape-badge">—</span></div>
-      <div class="ph-group">
-        Y <input type="range" id="tf-y" min="0" max="0" value="0" style="width:60px">
-        <span class="y-val" id="tf-y-v">0</span>
+    <div class="panel">
+      <div class="panel-hdr">
+        <span class="panel-title">Velocity Model</span>
+        <button class="btn-full" title="Fullscreen">⤢</button>
+        <div class="ph-group">
+          <select id="vel-type">
+            <option value="iter">Iter</option>
+            <option value="initial">Initial</option>
+            <option value="delta_s">ΔS</option>
+            <option value="diff">True − Iter</option>
+          </select>
+        </div>
+        <div class="ph-group"><span class="badge" id="vel-shape-badge">—</span></div>
+        <div class="ph-group">
+          Y <input type="range" id="vel-y" min="0" max="0" value="0" style="width:60px">
+          <span class="y-val" id="vel-y-v">0</span>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="no-data-msg" id="vel-empty">Select a run</div>
+        <div id="plot-vel" style="width:100%;height:100%"></div>
       </div>
     </div>
-    <div class="panel-body">
-      <div class="no-data-msg" id="tf-empty">Select a run</div>
-      <div id="plot-tf" style="width:100%;height:100%"></div>
-    </div>
-  </div>
 
-  <!-- Row 1, Col 3: G Matrix (fine, per station+weight) -->
-  <div class="panel">
-    <div class="panel-hdr">
-      <span class="panel-title">G Matrix</span>
-      <div class="ph-group">Ev <select id="g-ev"></select></div>
-      <div class="ph-group">Sta <select id="g-sta"></select></div>
-      <div class="ph-group">Wt <select id="g-wt"><option value="0">0</option></select></div>
-      <div class="ph-group">fine <span class="badge" id="g-shape-badge">—</span></div>
-      <div class="ph-group">
-        Y <input type="range" id="g-y" min="0" max="0" value="0" style="width:60px">
-        <span class="y-val" id="g-y-v">0</span>
+    <div class="panel">
+      <div class="panel-hdr">
+        <span class="panel-title">True Model</span>
+        <button class="btn-full" title="Fullscreen">⤢</button>
+        <div class="ph-group"><span class="badge" id="tr-shape-badge">—</span></div>
+        <div class="ph-group">
+          Y <input type="range" id="tr-y" min="0" max="0" value="0" style="width:60px">
+          <span class="y-val" id="tr-y-v">0</span>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="no-data-msg" id="tr-empty">No true model saved</div>
+        <div id="plot-tr" style="width:100%;height:100%"></div>
       </div>
     </div>
-    <div class="panel-body">
-      <div class="no-data-msg" id="g-empty">Select run / event / station</div>
-      <div id="plot-G" style="width:100%;height:100%"></div>
-    </div>
-  </div>
 
-  <!-- Row 2, Col 1: True Model -->
-  <div class="panel">
-    <div class="panel-hdr">
-      <span class="panel-title">True Model</span>
-      <div class="ph-group"><span class="badge" id="tr-shape-badge">—</span></div>
-      <div class="ph-group">
-        Y <input type="range" id="tr-y" min="0" max="0" value="0" style="width:60px">
-        <span class="y-val" id="tr-y-v">0</span>
+  </div><!-- /row 1 -->
+
+  <!-- Row 2: Time Fields + G Matrix (fine) -->
+  <div class="panel-row">
+
+    <div class="panel">
+      <div class="panel-hdr">
+        <span class="panel-title">Time Fields</span>
+        <button class="btn-full" title="Fullscreen">⤢</button>
+        <div class="ph-group">Station <select id="tf-sta"></select></div>
+        <div class="ph-group">fine <span class="badge" id="tf-shape-badge">—</span></div>
+        <div class="ph-group">
+          Y <input type="range" id="tf-y" min="0" max="0" value="0" style="width:60px">
+          <span class="y-val" id="tf-y-v">0</span>
+        </div>
+        <label class="dim-toggle" title="Dim stations/events not on this Y slice">
+          <input type="checkbox" id="cb-dim-tf" checked> Dim
+        </label>
+      </div>
+      <div class="panel-body">
+        <div class="no-data-msg" id="tf-empty">Select a run</div>
+        <div id="plot-tf" style="width:100%;height:100%"></div>
       </div>
     </div>
-    <div class="panel-body">
-      <div class="no-data-msg" id="tr-empty">No true model saved</div>
-      <div id="plot-tr" style="width:100%;height:100%"></div>
-    </div>
-  </div>
 
-  <!-- Row 2, Col 2: Hypocenter Weights (fine) -->
-  <div class="panel">
-    <div class="panel-hdr">
-      <span class="panel-title">Hypo Weights</span>
-      <div class="ph-group">Event <select id="wt-ev"></select></div>
-      <div class="ph-group">fine <span class="badge" id="wt-shape-badge">—</span></div>
-      <div class="ph-group">
-        Y <input type="range" id="wt-y" min="0" max="0" value="0" style="width:60px">
-        <span class="y-val" id="wt-y-v">0</span>
+    <div class="panel">
+      <div class="panel-hdr">
+        <span class="panel-title">G Matrix</span>
+        <button class="btn-full" title="Fullscreen">⤢</button>
+        <div class="ph-group">Ev <select id="g-ev"></select></div>
+        <div class="ph-group">Sta <select id="g-sta"></select></div>
+        <div class="ph-group">Wt <select id="g-wt"><option value="0">0</option></select></div>
+        <div class="ph-group">fine <span class="badge" id="g-shape-badge">—</span></div>
+        <div class="ph-group">
+          Y <input type="range" id="g-y" min="0" max="0" value="0" style="width:60px">
+          <span class="y-val" id="g-y-v">0</span>
+        </div>
+        <label class="dim-toggle">
+          <input type="checkbox" id="cb-dim-g" checked> Dim
+        </label>
+      </div>
+      <div class="panel-body">
+        <div class="no-data-msg" id="g-empty">Select run / event / station</div>
+        <div id="plot-G" style="width:100%;height:100%"></div>
       </div>
     </div>
-    <div class="panel-body">
-      <div class="no-data-msg" id="wt-empty">Select a run</div>
-      <div id="plot-wt" style="width:100%;height:100%"></div>
-    </div>
-  </div>
 
-  <!-- Row 2, Col 3: Misfit (fine) -->
-  <div class="panel">
-    <div class="panel-hdr">
-      <span class="panel-title">Misfit</span>
-      <div class="ph-group">Event <select id="mf-ev"></select></div>
-      <div class="ph-group">fine <span class="badge" id="mf-shape-badge">—</span></div>
-      <div class="ph-group">
-        Y <input type="range" id="mf-y" min="0" max="0" value="0" style="width:60px">
-        <span class="y-val" id="mf-y-v">0</span>
+  </div><!-- /row 2 -->
+
+  <!-- Row 3: Hypo Weights + Misfit (fine) -->
+  <div class="panel-row">
+
+    <div class="panel">
+      <div class="panel-hdr">
+        <span class="panel-title">Hypo Weights</span>
+        <button class="btn-full" title="Fullscreen">⤢</button>
+        <div class="ph-group">Event <select id="wt-ev"></select></div>
+        <div class="ph-group">fine <span class="badge" id="wt-shape-badge">—</span></div>
+        <div class="ph-group">
+          Y <input type="range" id="wt-y" min="0" max="0" value="0" style="width:60px">
+          <span class="y-val" id="wt-y-v">0</span>
+        </div>
+        <label class="dim-toggle">
+          <input type="checkbox" id="cb-dim-wt" checked> Dim
+        </label>
+      </div>
+      <div class="panel-body">
+        <div class="no-data-msg" id="wt-empty">Select a run</div>
+        <div id="plot-wt" style="width:100%;height:100%"></div>
       </div>
     </div>
-    <div class="panel-body">
-      <div class="no-data-msg" id="mf-empty">Select a run</div>
-      <div id="plot-mf" style="width:100%;height:100%"></div>
-    </div>
-  </div>
 
-</div>
-</div>
+    <div class="panel">
+      <div class="panel-hdr">
+        <span class="panel-title">Misfit</span>
+        <button class="btn-full" title="Fullscreen">⤢</button>
+        <div class="ph-group">Event <select id="mf-ev"></select></div>
+        <div class="ph-group">fine <span class="badge" id="mf-shape-badge">—</span></div>
+        <div class="ph-group">
+          Y <input type="range" id="mf-y" min="0" max="0" value="0" style="width:60px">
+          <span class="y-val" id="mf-y-v">0</span>
+        </div>
+        <label class="dim-toggle">
+          <input type="checkbox" id="cb-dim-mf" checked> Dim
+        </label>
+      </div>
+      <div class="panel-body">
+        <div class="no-data-msg" id="mf-empty">Select a run</div>
+        <div id="plot-mf" style="width:100%;height:100%"></div>
+      </div>
+    </div>
+
+  </div><!-- /row 3 -->
+
+</div><!-- #panels-scroll -->
+</div><!-- #app -->
 
 <script>
 'use strict';
 
+/* ── State ── */
 const ST = {
   run: null, iter: 0, meta: null, info: null,
   showGrid: true, showStations: true, showEvents: true,
   vel: { type: 'iter', y: 0 },
-  tf:  { station: 0,   y: 0 },
   tr:  { y: 0 },
-  wt:  { event: 0,     y: 0 },
-  mf:  { event: 0,     y: 0 },
-  G:   { event: 0, station: 0, weight: 0, y: 0 },
+  tf:  { station: 0, y: 0, dim: true },
+  G:   { event: 0, station: 0, weight: 0, y: 0, dim: true },
+  wt:  { event: 0, y: 0, dim: true },
+  mf:  { event: 0, y: 0, dim: true },
 };
 
 const PLY_CFG = {
@@ -278,6 +374,9 @@ const PLY_CFG = {
   modeBarButtonsToRemove: ['lasso2d','select2d','autoScale2d'],
 };
 
+const ALL_PLOTS = ['plot-vel','plot-tf','plot-tr','plot-wt','plot-mf','plot-G'];
+
+/* ── Layout factory ── */
 function mkLayout(nx, nz, cbTitle) {
   return {
     paper_bgcolor: '#ffffff', plot_bgcolor: '#f8f9fb',
@@ -285,12 +384,12 @@ function mkLayout(nx, nz, cbTitle) {
     margin: { l: 40, r: 14, t: 8, b: 38 },
     xaxis: {
       title: { text: 'X (grid idx)', font: { size: 9 }, standoff: 2 },
-      showgrid: ST.showGrid, gridcolor: '#dde1ea', zeroline: false,
+      showgrid: false, zeroline: false,
       range: [-0.5, nx - 0.5], tickfont: { size: 8 },
     },
     yaxis: {
       title: { text: 'Z depth ↓', font: { size: 9 }, standoff: 2 },
-      showgrid: ST.showGrid, gridcolor: '#dde1ea', zeroline: false,
+      showgrid: false, zeroline: false,
       autorange: 'reversed', tickfont: { size: 8 },
     },
     showlegend: false,
@@ -304,75 +403,126 @@ function mkLayout(nx, nz, cbTitle) {
   };
 }
 
-async function apiFetch(url) {
-  try { const r = await fetch(url); return r.ok ? r.json() : null; }
-  catch { return null; }
+/* Grid as a trace — renders between heatmap and overlays */
+function gridTrace(nx, nz) {
+  if (!ST.showGrid) return null;
+  const x = [], y = [];
+  for (let i = 0; i <= nx; i++) { x.push(-0.5+i, -0.5+i, null); y.push(-0.5, nz-0.5, null); }
+  for (let j = 0; j <= nz; j++) { x.push(-0.5, nx-0.5, null); y.push(-0.5+j, -0.5+j, null); }
+  return { type: 'scatter', mode: 'lines', x, y,
+    line: { color: '#c5d1e4', width: 0.5 }, showlegend: false, hoverinfo: 'skip' };
 }
 
-// Transpose: server returns arr[x][z], Plotly heatmap wants z[row=z][col=x]
-function T(mat) {
-  if (!mat?.length) return [];
-  const nx = mat.length, nz = mat[0].length;
-  const out = new Array(nz);
-  for (let z = 0; z < nz; z++) {
-    out[z] = new Array(nx);
-    for (let x = 0; x < nx; x++) out[z][x] = mat[x][z];
-  }
-  return out;
-}
-
-// cell size for coarse or fine grid
-function cs(coarse) {
+/* ── Overlay helpers ── */
+function csz(coarse) {
   const gi = ST.meta?.grid_info;
   if (!gi) return null;
   return coarse ? gi.coarse_cell_size : (gi.fine_cell_size ?? gi.coarse_cell_size);
 }
 
-// metric coords → grid indices for overlay traces
-function stationTraces(hilite, coarse) {
-  if (!ST.showStations) return [];
-  const locs = ST.meta?.station_locs, c = cs(coarse);
+/*
+ * dim:      whether to apply off-slice dimming (fine-grid panels only)
+ * hilite:   index to highlight (-1 = none)
+ * panelY:   current Y slice index
+ *
+ * Non-highlighted markers: fill at 40% opacity, border transparent (rgba 40%)
+ * Highlighted marker:      full opacity, white border
+ */
+function stationTraces(hilite, coarse, panelY, dim) {
+  if (!ST.showStations && hilite < 0) return [];
+  const locs = ST.meta?.station_locs, c = csz(coarse);
   if (!locs || !c) return [];
-  return locs.map((loc, i) => ({
-    type: 'scatter', mode: 'markers+text',
-    x: [loc[0] / c], y: [loc[2] / c],
-    text: [`S${i}`], textposition: 'top center',
-    textfont: { size: 8, color: i === hilite ? '#1a4ea8' : '#555' },
-    marker: {
-      symbol: 'triangle-up', size: i === hilite ? 13 : 7,
-      color: i === hilite ? '#4a7fd4' : '#90aed0',
-      line: { color: '#fff', width: 1 },
-    },
-    showlegend: false,
-    hovertemplate: `Sta ${i}<br>x=${loc[0].toFixed(0)}m  z=${loc[2].toFixed(0)}m<extra></extra>`,
-  }));
+  return locs.map((loc, i) => {
+    if (!ST.showStations && i !== hilite) return null;
+    const isHi = i === hilite;
+    const offSlice = dim && (Math.abs(loc[1] / c - panelY) >= 0.5);
+    // opacity factors
+    const fillOpacity   = offSlice ? 0.25 : (isHi ? 1.0 : 0.55);
+    const borderOpacity = offSlice ? 0.15 : (isHi ? 1.0 : 0.4);
+    const fillColor  = isHi
+      ? `rgba(74,127,212,${fillOpacity})`
+      : `rgba(144,174,208,${fillOpacity})`;
+    const lineColor  = isHi
+      ? `rgba(255,255,255,${borderOpacity})`
+      : `rgba(255,255,255,${borderOpacity})`;
+    const textColor  = offSlice ? 'rgba(90,100,120,0.3)' : (isHi ? '#1a4ea8' : 'rgba(60,70,85,0.55)');
+    return {
+      type: 'scatter', mode: 'markers+text',
+      x: [loc[0] / c], y: [loc[2] / c],
+      text: [`S${i}`], textposition: 'top center',
+      textfont: { size: 8, color: textColor },
+      marker: {
+        symbol: 'triangle-up',
+        size:   isHi ? 13 : (offSlice ? 5 : 7),
+        color:  fillColor,
+        line:   { color: lineColor, width: isHi ? 1.5 : 1 },
+      },
+      showlegend: false,
+      hovertemplate: `Sta ${i}<br>x=${loc[0].toFixed(0)}m  z=${loc[2].toFixed(0)}m<extra></extra>`,
+    };
+  }).filter(Boolean);
 }
 
-function eventTraces(hilite, coarse) {
-  if (!ST.showEvents) return [];
-  const locs = ST.meta?.event_locs, c = cs(coarse);
+function eventTraces(hilite, coarse, panelY, dim) {
+  if (!ST.showEvents && hilite < 0) return [];
+  const locs = ST.meta?.event_locs, c = csz(coarse);
   if (!locs || !c) return [];
-  return locs.map((loc, i) => ({
-    type: 'scatter', mode: 'markers+text',
-    x: [loc[0] / c], y: [loc[2] / c],
-    text: [`E${i}`], textposition: 'top center',
-    textfont: { size: 8, color: i === hilite ? '#a04800' : '#555' },
-    marker: {
-      symbol: 'star', size: i === hilite ? 14 : 7,
-      color: i === hilite ? '#d46820' : '#d4a870',
-      line: { color: '#fff', width: 1 },
-    },
-    showlegend: false,
-    hovertemplate: `Ev ${i}<br>x=${loc[0].toFixed(0)}m  z=${loc[2].toFixed(0)}m<extra></extra>`,
-  }));
+  return locs.map((loc, i) => {
+    if (!ST.showEvents && i !== hilite) return null;
+    const isHi = i === hilite;
+    const offSlice = dim && (Math.abs(loc[1] / c - panelY) >= 0.5);
+    const fillOpacity   = offSlice ? 0.25 : (isHi ? 1.0 : 0.55);
+    const borderOpacity = offSlice ? 0.15 : (isHi ? 1.0 : 0.4);
+    const fillColor  = isHi
+      ? `rgba(212,104,32,${fillOpacity})`
+      : `rgba(212,168,112,${fillOpacity})`;
+    const lineColor  = `rgba(255,255,255,${borderOpacity})`;
+    const textColor  = offSlice ? 'rgba(90,100,120,0.3)' : (isHi ? '#a04800' : 'rgba(60,70,85,0.55)');
+    return {
+      type: 'scatter', mode: 'markers+text',
+      x: [loc[0] / c], y: [loc[2] / c],
+      text: [`E${i}`], textposition: 'top center',
+      textfont: { size: 8, color: textColor },
+      marker: {
+        symbol: 'star',
+        size:   isHi ? 14 : (offSlice ? 5 : 7),
+        color:  fillColor,
+        line:   { color: lineColor, width: isHi ? 1.5 : 1 },
+      },
+      showlegend: false,
+      hovertemplate: `Ev ${i}<br>x=${loc[0].toFixed(0)}m  z=${loc[2].toFixed(0)}m<extra></extra>`,
+    };
+  }).filter(Boolean);
 }
+
+function buildTraces(ht, nx, nz, hilSta, hilEv, coarse, panelY, dim) {
+  const g = gridTrace(nx, nz);
+  return [
+    ht,
+    ...(g ? [g] : []),
+    ...stationTraces(hilSta, coarse, panelY, dim ?? false),
+    ...eventTraces(hilEv,   coarse, panelY, dim ?? false),
+  ];
+}
+
+/* ── API / data utils ── */
+async function apiFetch(url) {
+  try { const r = await fetch(url); return r.ok ? r.json() : null; }
+  catch { return null; }
+}
+
+function T(mat) {
+  if (!mat?.length) return [];
+  const nx = mat.length, nz = mat[0].length, out = new Array(nz);
+  for (let z = 0; z < nz; z++) { out[z] = new Array(nx); for (let x = 0; x < nx; x++) out[z][x] = mat[x][z]; }
+  return out;
+}
+
+function sub2d(a, b) { return a.map((row, i) => row.map((v, j) => v - b[i][j])); }
 
 function heatTrace(slice, colorscale, zmid) {
-  const t = {
-    type: 'heatmap', z: T(slice), colorscale,
-    showscale: true, coloraxis: 'coloraxis',
-    hovertemplate: 'x=%{x}  z=%{y}  val=%{z:.4g}<extra></extra>',
-  };
+  const t = { type: 'heatmap', z: T(slice), colorscale, showscale: true, coloraxis: 'coloraxis',
+    hovertemplate: 'x=%{x}  z=%{y}  val=%{z:.4g}<extra></extra>' };
   if (zmid !== undefined) { t.zmid = zmid; t.zauto = false; }
   return t;
 }
@@ -384,116 +534,120 @@ function shapeBadge(id, s) {
 
 function showP(pid, eid) {
   document.getElementById(eid).style.display = 'none';
-  document.getElementById(pid).style.display = 'block';
+  document.getElementById(pid).style.display  = 'block';
 }
 function emptyP(pid, eid, msg) {
   Plotly.purge(pid);
-  document.getElementById(pid).style.display = 'none';
-  const el = document.getElementById(eid);
-  el.style.display = 'flex'; el.textContent = msg || 'No data';
+  document.getElementById(pid).style.display  = 'none';
+  const el = document.getElementById(eid); el.style.display = 'flex'; el.textContent = msg || 'No data';
 }
 
 function syncY(slId, lblId, ny, stObj) {
-  const sl = document.getElementById(slId);
-  const max = Math.max(0, ny - 1);
+  const sl = document.getElementById(slId), max = Math.max(0, ny - 1);
   if (+sl.max !== max) sl.max = max;
   if (stObj.y > max) stObj.y = 0;
-  sl.value = stObj.y;
-  document.getElementById(lblId).textContent = stObj.y;
+  sl.value = stObj.y; document.getElementById(lblId).textContent = stObj.y;
 }
 
-// ── Render functions ──────────────────────────────────────────────────────────
+function relayoutAll() {
+  ALL_PLOTS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el?._fullLayout) Plotly.relayout(id, { autosize: true });
+  });
+}
+
+const CS_DIVERG = [[0,'#3a78c9'],[0.5,'#f5f5f5'],[1,'#c94040']];
+const CS_RDBU   = [[0,'#3a78c9'],[0.25,'#90b8e8'],[0.5,'#f5f5f5'],[0.75,'#e89090'],[1,'#c94040']];
+
+/* ── Render functions ── */
 
 async function renderVel() {
   if (!ST.run) return;
   const mt = ST.vel.type;
-  // delta_s has its own type in server API
-  const typeParam = mt === 'delta_s' ? 'delta_s' : 'model';
-  const mtParam   = mt === 'delta_s' ? '' : `&model_type=${mt}`;
-  const d = await apiFetch(
-    `/api/runs/${ST.run}/slice?type=${typeParam}${mtParam}&iter=${ST.iter}&y=${ST.vel.y}`
-  );
+  if (mt === 'diff') {
+    const [dT, dI] = await Promise.all([
+      apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=true&iter=0&y=${ST.vel.y}`),
+      apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=iter&iter=${ST.iter}&y=${ST.vel.y}`),
+    ]);
+    if (!dT?.slice || !dI?.slice) {
+      emptyP('plot-vel','vel-empty', dT?.slice ? 'No iter model' : 'No true model — cannot diff'); return;
+    }
+    showP('plot-vel','vel-empty');
+    syncY('vel-y','vel-y-v', dI.full_shape[1], ST.vel);
+    shapeBadge('vel-shape-badge', dI.full_shape);
+    Plotly.react('plot-vel',
+      buildTraces(heatTrace(sub2d(dT.slice, dI.slice), CS_DIVERG, 0),
+        dI.shape[0], dI.shape[1], -1, -1, true, ST.vel.y, false),
+      mkLayout(dI.shape[0], dI.shape[1], 'True−Iter'), PLY_CFG);
+    return;
+  }
+  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=${mt}&iter=${ST.iter}&y=${ST.vel.y}`);
   if (!d?.slice) { emptyP('plot-vel','vel-empty','No data'); return; }
   showP('plot-vel','vel-empty');
   syncY('vel-y','vel-y-v', d.full_shape[1], ST.vel);
   shapeBadge('vel-shape-badge', d.full_shape);
   const isDelta = mt === 'delta_s';
-  const cs_ = isDelta
-    ? [[0,'#3a78c9'],[0.5,'#f5f5f5'],[1,'#c94040']]
-    : 'Viridis';
   Plotly.react('plot-vel',
-    [heatTrace(d.slice, cs_, isDelta ? 0 : undefined),
-     ...stationTraces(-1, true), ...eventTraces(-1, true)],
+    buildTraces(heatTrace(d.slice, isDelta ? CS_DIVERG : 'Viridis', isDelta ? 0 : undefined),
+      d.shape[0], d.shape[1], -1, -1, true, ST.vel.y, false),
     mkLayout(d.shape[0], d.shape[1], isDelta ? 'Δs' : 'Vp'), PLY_CFG);
-}
-
-async function renderTF() {
-  if (!ST.run) return;
-  const sta = ST.tf.station;
-  const d = await apiFetch(
-    `/api/runs/${ST.run}/slice?type=station_field&station=${sta}&iter=${ST.iter}&y=${ST.tf.y}`
-  );
-  if (!d?.slice) { emptyP('plot-tf','tf-empty','No data'); return; }
-  showP('plot-tf','tf-empty');
-  syncY('tf-y','tf-y-v', d.full_shape[1], ST.tf);
-  shapeBadge('tf-shape-badge', d.full_shape);
-  Plotly.react('plot-tf',
-    [heatTrace(d.slice, 'YlOrRd'),
-     ...stationTraces(sta, false), ...eventTraces(-1, false)],
-    mkLayout(d.shape[0], d.shape[1], 'T (s)'), PLY_CFG);
 }
 
 async function renderTr() {
   if (!ST.run) return;
-  const d = await apiFetch(
-    `/api/runs/${ST.run}/slice?type=true_model&iter=0&y=${ST.tr.y}`
-  );
+  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=true&iter=0&y=${ST.tr.y}`);
   if (!d?.slice) { emptyP('plot-tr','tr-empty','No true model saved'); return; }
   showP('plot-tr','tr-empty');
   syncY('tr-y','tr-y-v', d.full_shape[1], ST.tr);
   shapeBadge('tr-shape-badge', d.full_shape);
   Plotly.react('plot-tr',
-    [heatTrace(d.slice, 'Viridis'),
-     ...stationTraces(-1, true), ...eventTraces(-1, true)],
+    buildTraces(heatTrace(d.slice, 'Viridis'), d.shape[0], d.shape[1], -1, -1, true, ST.tr.y, false),
     mkLayout(d.shape[0], d.shape[1], 'Vp true'), PLY_CFG);
+}
+
+async function renderTF() {
+  if (!ST.run) return;
+  const { station, y, dim } = ST.tf;
+  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=station_field&station=${station}&iter=${ST.iter}&y=${y}`);
+  if (!d?.slice) { emptyP('plot-tf','tf-empty','No data'); return; }
+  showP('plot-tf','tf-empty');
+  syncY('tf-y','tf-y-v', d.full_shape[1], ST.tf);
+  shapeBadge('tf-shape-badge', d.full_shape);
+  Plotly.react('plot-tf',
+    buildTraces(heatTrace(d.slice, 'YlOrRd'), d.shape[0], d.shape[1], station, -1, false, y, dim),
+    mkLayout(d.shape[0], d.shape[1], 'T (s)'), PLY_CFG);
 }
 
 async function renderWt() {
   if (!ST.run) return;
-  const ev = ST.wt.event;
-  const d = await apiFetch(
-    `/api/runs/${ST.run}/slice?type=weights&event=${ev}&iter=${ST.iter}&y=${ST.wt.y}`
-  );
+  const { event, y, dim } = ST.wt;
+  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=weights&event=${event}&iter=${ST.iter}&y=${y}`);
   if (!d?.slice) { emptyP('plot-wt','wt-empty','No data'); return; }
   showP('plot-wt','wt-empty');
   syncY('wt-y','wt-y-v', d.full_shape[1], ST.wt);
   shapeBadge('wt-shape-badge', d.full_shape);
   Plotly.react('plot-wt',
-    [heatTrace(d.slice, [[0,'#f0f4ff'],[0.5,'#6699dd'],[1,'#0a2a7a']]),
-     ...stationTraces(-1, false), ...eventTraces(ev, false)],
+    buildTraces(heatTrace(d.slice, [[0,'#f0f4ff'],[0.5,'#6699dd'],[1,'#0a2a7a']]),
+      d.shape[0], d.shape[1], -1, event, false, y, dim),
     mkLayout(d.shape[0], d.shape[1], 'w'), PLY_CFG);
 }
 
 async function renderMf() {
   if (!ST.run) return;
-  const ev = ST.mf.event;
-  const d = await apiFetch(
-    `/api/runs/${ST.run}/slice?type=misfit&event=${ev}&iter=${ST.iter}&y=${ST.mf.y}`
-  );
+  const { event, y, dim } = ST.mf;
+  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=misfit&event=${event}&iter=${ST.iter}&y=${y}`);
   if (!d?.slice) { emptyP('plot-mf','mf-empty','No data'); return; }
   showP('plot-mf','mf-empty');
   syncY('mf-y','mf-y-v', d.full_shape[1], ST.mf);
   shapeBadge('mf-shape-badge', d.full_shape);
-  const rdbu = [[0,'#3a78c9'],[0.25,'#90b8e8'],[0.5,'#f5f5f5'],[0.75,'#e89090'],[1,'#c94040']];
   Plotly.react('plot-mf',
-    [heatTrace(d.slice, rdbu, 0),
-     ...stationTraces(-1, false), ...eventTraces(ev, false)],
+    buildTraces(heatTrace(d.slice, CS_RDBU, 0), d.shape[0], d.shape[1], -1, event, false, y, dim),
     mkLayout(d.shape[0], d.shape[1], 'misfit'), PLY_CFG);
 }
 
 async function renderG() {
   if (!ST.run) return;
-  const { event, station, weight, y } = ST.G;
+  const { event, station, weight, y, dim } = ST.G;
   const d = await apiFetch(
     `/api/runs/${ST.run}/slice?type=G&event=${event}&station=${station}&weight=${weight}&iter=${ST.iter}&y=${y}`
   );
@@ -501,16 +655,14 @@ async function renderG() {
   showP('plot-G','g-empty');
   syncY('g-y','g-y-v', d.full_shape[1], ST.G);
   shapeBadge('g-shape-badge', d.full_shape);
-  const rdbu = [[0,'#3a78c9'],[0.25,'#90b8e8'],[0.5,'#f5f5f5'],[0.75,'#e89090'],[1,'#c94040']];
   Plotly.react('plot-G',
-    [heatTrace(d.slice, rdbu, 0),
-     ...stationTraces(station, false), ...eventTraces(event, false)],
+    buildTraces(heatTrace(d.slice, CS_RDBU, 0), d.shape[0], d.shape[1], station, event, false, y, dim),
     mkLayout(d.shape[0], d.shape[1], 'G'), PLY_CFG);
 }
 
-function renderAll() { renderVel(); renderTF(); renderTr(); renderWt(); renderMf(); renderG(); }
+function renderAll() { renderVel(); renderTr(); renderTF(); renderWt(); renderMf(); renderG(); }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+/* ── Populate helpers ── */
 
 function fillSelect(id, count, prefix) {
   const el = document.getElementById(id), cur = +el.value || 0;
@@ -522,18 +674,14 @@ function fillSelect(id, count, prefix) {
   el.value = Math.min(cur, Math.max(0, count - 1));
 }
 
-// Reload weight list for G panel when event changes
 async function reloadGWeights() {
   const ev = ST.G.event;
-  const d = await apiFetch(
-    `/api/runs/${ST.run}/weights_list?iter=${ST.iter}&event=${ev}`
-  );
+  const d = await apiFetch(`/api/runs/${ST.run}/weights_list?iter=${ST.iter}&event=${ev}`);
   const sel = document.getElementById('g-wt');
   sel.innerHTML = '';
   const count = d?.length || 1;
   for (let i = 0; i < count; i++) {
-    const o = document.createElement('option');
-    o.value = i; o.textContent = `wt ${i}`; sel.appendChild(o);
+    const o = document.createElement('option'); o.value = i; o.textContent = `wt ${i}`; sel.appendChild(o);
   }
   sel.value = 0; ST.G.weight = 0;
 }
@@ -548,8 +696,8 @@ function updateParamsBar() {
 
 async function loadRun(rid) {
   ST.run = rid; ST.iter = 0;
-  ['vel','tf','tr','wt','mf','G'].forEach(k => { if (ST[k]) ST[k].y = 0; });
-  ['vel-y','tf-y','tr-y','wt-y','mf-y','g-y'].forEach(id => {
+  ['vel','tr','tf','wt','mf','G'].forEach(k => { if (ST[k]) ST[k].y = 0; });
+  ['vel-y','tr-y','tf-y','wt-y','mf-y','g-y'].forEach(id => {
     const el = document.getElementById(id); if (el) { el.value = 0; el.max = 0; }
   });
 
@@ -580,7 +728,7 @@ async function loadRun(rid) {
   renderAll();
 }
 
-// ── Wire-up ───────────────────────────────────────────────────────────────────
+/* ── Wire-up ── */
 
 function setIter(v) {
   const max = +document.getElementById('iter-slider').max || 0;
@@ -604,48 +752,49 @@ document.getElementById('btn-params').addEventListener('click', function() {
   this.textContent = document.getElementById('params-bar').classList.contains('open') ? 'Params ▴' : 'Params ▾';
 });
 
-// Vel panel
+// Per-panel dim toggles
+document.getElementById('cb-dim-tf').addEventListener('change', e => { ST.tf.dim = e.target.checked; renderTF(); });
+document.getElementById('cb-dim-g').addEventListener('change',  e => { ST.G.dim  = e.target.checked; renderG();  });
+document.getElementById('cb-dim-wt').addEventListener('change', e => { ST.wt.dim = e.target.checked; renderWt(); });
+document.getElementById('cb-dim-mf').addEventListener('change', e => { ST.mf.dim = e.target.checked; renderMf(); });
+
+// Vel
 document.getElementById('vel-type').addEventListener('change', e => { ST.vel.type = e.target.value; renderVel(); });
-document.getElementById('vel-y').addEventListener('input', e => {
-  ST.vel.y = +e.target.value; document.getElementById('vel-y-v').textContent = ST.vel.y; renderVel();
-});
+document.getElementById('vel-y').addEventListener('input', e => { ST.vel.y = +e.target.value; document.getElementById('vel-y-v').textContent = ST.vel.y; renderVel(); });
 
-// TF panel
+// True model
+document.getElementById('tr-y').addEventListener('input', e => { ST.tr.y = +e.target.value; document.getElementById('tr-y-v').textContent = ST.tr.y; renderTr(); });
+
+// TF
 document.getElementById('tf-sta').addEventListener('change', e => { ST.tf.station = +e.target.value; renderTF(); });
-document.getElementById('tf-y').addEventListener('input', e => {
-  ST.tf.y = +e.target.value; document.getElementById('tf-y-v').textContent = ST.tf.y; renderTF();
-});
+document.getElementById('tf-y').addEventListener('input',   e => { ST.tf.y = +e.target.value; document.getElementById('tf-y-v').textContent = ST.tf.y; renderTF(); });
 
-// True model panel
-document.getElementById('tr-y').addEventListener('input', e => {
-  ST.tr.y = +e.target.value; document.getElementById('tr-y-v').textContent = ST.tr.y; renderTr();
-});
-
-// Weights panel
+// Wt
 document.getElementById('wt-ev').addEventListener('change', e => { ST.wt.event = +e.target.value; renderWt(); });
-document.getElementById('wt-y').addEventListener('input', e => {
-  ST.wt.y = +e.target.value; document.getElementById('wt-y-v').textContent = ST.wt.y; renderWt();
-});
+document.getElementById('wt-y').addEventListener('input',   e => { ST.wt.y = +e.target.value; document.getElementById('wt-y-v').textContent = ST.wt.y; renderWt(); });
 
-// Misfit panel
+// Mf
 document.getElementById('mf-ev').addEventListener('change', e => { ST.mf.event = +e.target.value; renderMf(); });
-document.getElementById('mf-y').addEventListener('input', e => {
-  ST.mf.y = +e.target.value; document.getElementById('mf-y-v').textContent = ST.mf.y; renderMf();
-});
+document.getElementById('mf-y').addEventListener('input',   e => { ST.mf.y = +e.target.value; document.getElementById('mf-y-v').textContent = ST.mf.y; renderMf(); });
 
-// G panel — event change: reload weight list first
-document.getElementById('g-ev').addEventListener('change', async e => {
-  ST.G.event = +e.target.value;
-  await reloadGWeights();
-  renderG();
-});
+// G
+document.getElementById('g-ev').addEventListener('change', async e => { ST.G.event = +e.target.value; await reloadGWeights(); renderG(); });
 document.getElementById('g-sta').addEventListener('change', e => { ST.G.station = +e.target.value; renderG(); });
-document.getElementById('g-wt').addEventListener('change', e => { ST.G.weight  = +e.target.value; renderG(); });
-document.getElementById('g-y').addEventListener('input', e => {
-  ST.G.y = +e.target.value; document.getElementById('g-y-v').textContent = ST.G.y; renderG();
+document.getElementById('g-wt').addEventListener('change',  e => { ST.G.weight  = +e.target.value; renderG(); });
+document.getElementById('g-y').addEventListener('input',    e => { ST.G.y = +e.target.value; document.getElementById('g-y-v').textContent = ST.G.y; renderG(); });
+
+/* ── Fullscreen ── */
+document.querySelectorAll('.btn-full').forEach(btn => {
+  btn.addEventListener('click', e => {
+    const panel = e.target.closest('.panel');
+    const isFs  = panel.classList.toggle('fullscreen');
+    document.body.classList.toggle('has-fullscreen', isFs);
+    btn.textContent = isFs ? '✕' : '⤢';
+    setTimeout(relayoutAll, 120);
+  });
 });
 
-// ── Init ──────────────────────────────────────────────────────────────────────
+/* ── Init ── */
 async function init() {
   const runs = await apiFetch('/api/runs');
   const sel  = document.getElementById('run-select');
@@ -659,12 +808,7 @@ init();
 let _rt;
 window.addEventListener('resize', () => {
   clearTimeout(_rt);
-  _rt = setTimeout(() => {
-    ['plot-vel','plot-tf','plot-tr','plot-wt','plot-mf','plot-G'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el?._fullLayout) Plotly.relayout(id, { autosize: true });
-    });
-  }, 150);
+  _rt = setTimeout(relayoutAll, 150);
 });
 </script>
 </body>

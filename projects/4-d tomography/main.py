@@ -22,26 +22,27 @@ if __name__ == '__main__':
     profiler.enable()
 
     CELL_SIZE = 500.0
-    SUBDIVISION = 11
+    SUBDIVISION = 7
     model_config = {
         'lon': 37.6173,
         'lat': 55.7558,
         'height': 50.0,
         'azimuth': 45.0,
         'side_size': CELL_SIZE,
-        'n_x': 10,
-        'n_y': 1,
-        'n_z': 10
+        'n_x': 5,
+        'n_y': 5,
+        'n_z': 5
     }
 
-    n_stations_in_row = 20
+    n_stations_in_row = 40
     # n_events = 10
     middle_y = (model_config['n_y']) * CELL_SIZE / 2
     middle_z = (model_config['n_z']) * CELL_SIZE / 2
+    n_y = model_config['n_y']
     # middle_y = CELL_SIZE * 1
 
     stations_metric = [
-        (i * CELL_SIZE * model_config['n_x'] / n_stations_in_row, middle_y + np.random.uniform(-0.4*CELL_SIZE, 0.4*CELL_SIZE), 0)
+        (i * CELL_SIZE * model_config['n_x'] / n_stations_in_row, middle_y + np.random.uniform(-0.49*n_y*CELL_SIZE, 0.49*n_y*CELL_SIZE), 0)
         for i in range(n_stations_in_row)
     ]
 
@@ -64,8 +65,8 @@ if __name__ == '__main__':
     for i in range(true_model.grid.vp.shape[0]):
         for j in range(true_model.grid.vp.shape[1]):
             for k in range(true_model.grid.vp.shape[2]):
-                if i >= 4 and i <= 5 and k >= 5 and k <= 6:
-                    true_model.set_vp(i, j, k, 101)
+                # if i >= 4 and i <= 5 and k >= 5 and k <= 6:
+                #     true_model.set_vp(i, j, k, 101)
                 
                 # if j != 1:
                 #     true_model.set_vp(i, j, k, 1)
@@ -73,12 +74,12 @@ if __name__ == '__main__':
                 # else:
                 #     true_model.set_vp(i, j, k, np.random.normal(100, 0.001))
                 #     initial_model.set_vp(i, j, k, 100)
-                # if (i % 2 == 0 and k % 2 == 0) or (i % 2 != 0 and k % 2 != 0):
-                #     true_model.set_vp(i, j, k, 100)
-                    # initial_model.set_vp(i, j, k, 100)
-                # else:
-                #     true_model.set_vp(i, j, k, 101)
-                #     initial_model.set_vp(i, j, k, 100)
+                if (i % 2 == 0 and k % 2 == 0) or (i % 2 != 0 and k % 2 != 0):
+                    true_model.set_vp(i, j, k, 105)
+                    initial_model.set_vp(i, j, k, 100)
+                else:
+                    true_model.set_vp(i, j, k, 95)
+                    initial_model.set_vp(i, j, k, 100)
                 # if (i % 2 == 0 and k % 2 == 0) or (i % 2 != 0 and k % 2 != 0):
                 #     true_model.set_vp(i, j, k, 98)
                 #     initial_model.set_vp(i, j, k, 99)
@@ -91,7 +92,7 @@ if __name__ == '__main__':
         true_model,
         station_locs=stations_metric,
         # event_locs=events_metric,
-        n_events=150,
+        n_events=450,
         random_seed=7,
         subdivision=SUBDIVISION,
         depth_bias=3
@@ -102,11 +103,11 @@ if __name__ == '__main__':
     # print(full_arr)
 
     logger = run_em(
-        n_cycles=20,
+        n_cycles=25,
         initial_model=initial_model,
         arrivals_table=full_arr,
         station_locs=stations_metric,
-        weights_top_n=20,
+        weights_top_n=1,
         lambda_reg=0.001,
         subdivision=SUBDIVISION,
         # --- сохранение ---
