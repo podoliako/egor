@@ -86,6 +86,20 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   padding: 2px 7px; border: 1px solid currentColor; border-radius: 3px; background: #fdf5ec;
 }
 
+/* ── Timing chips in header ── */
+#timing-chips {
+  display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+}
+.timing-chip {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 10px; color: var(--text3);
+  padding: 1px 7px; border: 1px solid var(--border);
+  border-radius: 3px; background: var(--bg2);
+  font-family: var(--ff-mono); white-space: nowrap;
+}
+.timing-chip .tc-val { color: var(--accent); font-weight: 600; }
+.timing-chip .tc-lbl { color: var(--text3); font-size: 9px; }
+
 /* ── Params bar ── */
 #params-bar {
   display: none; background: var(--bg2); border-bottom: 1px solid var(--border);
@@ -121,6 +135,12 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   flex-direction: column;
   overflow: hidden;
   height: var(--panel-h);
+}
+
+/* Timing panel: shorter, full width */
+.panel.panel-timing {
+  height: 220px;
+  grid-column: 1 / -1;
 }
 
 .panel-hdr {
@@ -204,6 +224,11 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   <div class="vsep"></div>
 
   <button id="btn-params">Params ▾</button>
+  <div class="vsep"></div>
+
+  <!-- Timing summary chips -->
+  <div id="timing-chips"></div>
+
   <div style="flex:1"></div>
   <span id="warn-no-grid">⚠ grid_info missing in meta.json — overlays disabled</span>
 </div>
@@ -351,6 +376,28 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 
   </div><!-- /row 3 -->
 
+  <!-- Row 4: Timing (full width) -->
+  <div class="panel-row">
+    <div class="panel panel-timing">
+      <div class="panel-hdr">
+        <span class="panel-title">Timing</span>
+        <button class="btn-full" title="Fullscreen">⤢</button>
+        <div class="ph-group">
+          <span class="ctrl-label">Mode</span>
+          <select id="timing-mode">
+            <option value="per_iter">Per-iter elapsed</option>
+            <option value="cumulative">Cumulative</option>
+          </select>
+        </div>
+        <div class="ph-group" id="timing-stats-hdr"></div>
+      </div>
+      <div class="panel-body">
+        <div class="no-data-msg" id="timing-empty">No timing.jsonl found</div>
+        <div id="plot-timing" style="width:100%;height:100%"></div>
+      </div>
+    </div>
+  </div><!-- /row 4 -->
+
 </div><!-- #panels-scroll -->
 </div><!-- #app -->
 
@@ -361,12 +408,13 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 const ST = {
   run: null, iter: 0, meta: null, info: null,
   showGrid: true, showStations: true, showEvents: true,
-  vel: { type: 'iter', y: 0 },
-  tr:  { y: 0 },
-  tf:  { station: 0, y: 0, dim: true },
-  G:   { event: 0, station: 0, weight: 0, y: 0, dim: true },
-  wt:  { event: 0, y: 0, dim: true },
-  mf:  { event: 0, y: 0, dim: true },
+  vel:    { type: 'iter', y: 0 },
+  tr:     { y: 0 },
+  tf:     { station: 0, y: 0, dim: true },
+  G:      { event: 0, station: 0, weight: 0, y: 0, dim: true },
+  wt:     { event: 0, y: 0, dim: true },
+  mf:     { event: 0, y: 0, dim: true },
+  timing: { data: [], mode: 'per_iter' },
 };
 
 const PLY_CFG = {
@@ -374,7 +422,7 @@ const PLY_CFG = {
   modeBarButtonsToRemove: ['lasso2d','select2d','autoScale2d'],
 };
 
-const ALL_PLOTS = ['plot-vel','plot-tf','plot-tr','plot-wt','plot-mf','plot-G'];
+const ALL_PLOTS = ['plot-vel','plot-tf','plot-tr','plot-wt','plot-mf','plot-G','plot-timing'];
 
 /* ── Layout factory ── */
 function mkLayout(nx, nz, cbTitle) {
@@ -420,14 +468,6 @@ function csz(coarse) {
   return coarse ? gi.coarse_cell_size : (gi.fine_cell_size ?? gi.coarse_cell_size);
 }
 
-/*
- * dim:      whether to apply off-slice dimming (fine-grid panels only)
- * hilite:   index to highlight (-1 = none)
- * panelY:   current Y slice index
- *
- * Non-highlighted markers: fill at 40% opacity, border transparent (rgba 40%)
- * Highlighted marker:      full opacity, white border
- */
 function stationTraces(hilite, coarse, panelY, dim) {
   if (!ST.showStations && hilite < 0) return [];
   const locs = ST.meta?.station_locs, c = csz(coarse);
@@ -435,8 +475,7 @@ function stationTraces(hilite, coarse, panelY, dim) {
   return locs.map((loc, i) => {
     if (!ST.showStations && i !== hilite) return null;
     const isHi = i === hilite;
-    const offSlice = dim && (Math.abs(loc[1] / c - panelY) >= 0.5);
-    // opacity factors
+    const offSlice = dim && (Math.abs(loc[1] / c - 0.5 - panelY) >= 0.5);
     const fillOpacity   = offSlice ? 0.25 : (isHi ? 1.0 : 0.55);
     const borderOpacity = offSlice ? 0.15 : (isHi ? 1.0 : 0.4);
     const fillColor  = isHi
@@ -448,7 +487,7 @@ function stationTraces(hilite, coarse, panelY, dim) {
     const textColor  = offSlice ? 'rgba(90,100,120,0.3)' : (isHi ? '#1a4ea8' : 'rgba(60,70,85,0.55)');
     return {
       type: 'scatter', mode: 'markers+text',
-      x: [loc[0] / c], y: [loc[2] / c],
+      x: [loc[0] / c - 0.5], y: [loc[2] / c - 0.5],
       text: [`S${i}`], textposition: 'top center',
       textfont: { size: 8, color: textColor },
       marker: {
@@ -470,7 +509,7 @@ function eventTraces(hilite, coarse, panelY, dim) {
   return locs.map((loc, i) => {
     if (!ST.showEvents && i !== hilite) return null;
     const isHi = i === hilite;
-    const offSlice = dim && (Math.abs(loc[1] / c - panelY) >= 0.5);
+    const offSlice = dim && (Math.abs(loc[1] / c - 0.5 - panelY) >= 0.5);
     const fillOpacity   = offSlice ? 0.25 : (isHi ? 1.0 : 0.55);
     const borderOpacity = offSlice ? 0.15 : (isHi ? 1.0 : 0.4);
     const fillColor  = isHi
@@ -480,7 +519,7 @@ function eventTraces(hilite, coarse, panelY, dim) {
     const textColor  = offSlice ? 'rgba(90,100,120,0.3)' : (isHi ? '#a04800' : 'rgba(60,70,85,0.55)');
     return {
       type: 'scatter', mode: 'markers+text',
-      x: [loc[0] / c], y: [loc[2] / c],
+      x: [loc[0] / c - 0.5], y: [loc[2] / c - 0.5],
       text: [`E${i}`], textposition: 'top center',
       textfont: { size: 8, color: textColor },
       marker: {
@@ -556,8 +595,132 @@ function relayoutAll() {
   });
 }
 
+function fmtSec(s) {
+  if (s == null || isNaN(s)) return '—';
+  if (s >= 3600) return `${(s/3600).toFixed(2)}h`;
+  if (s >= 60)   return `${(s/60).toFixed(2)}m`;
+  return `${s.toFixed(2)}s`;
+}
+
 const CS_DIVERG = [[0,'#3a78c9'],[0.5,'#f5f5f5'],[1,'#c94040']];
 const CS_RDBU   = [[0,'#3a78c9'],[0.25,'#90b8e8'],[0.5,'#f5f5f5'],[0.75,'#e89090'],[1,'#c94040']];
+
+/* ── Timing render ── */
+
+function renderTiming() {
+  const rows = ST.timing.data;
+  if (!rows || rows.length === 0) {
+    emptyP('plot-timing', 'timing-empty', 'No timing.jsonl found');
+    updateTimingChips([]);
+    return;
+  }
+
+  // Sort by iter
+  const sorted = [...rows].sort((a, b) => a.iter - b.iter);
+  const iters  = sorted.map(r => r.iter);
+  const perIter = sorted.map(r => r.elapsed_s);
+
+  // Cumulative
+  let cum = 0;
+  const cumulative = sorted.map(r => { cum += r.elapsed_s; return cum; });
+
+  const mode  = ST.timing.mode;
+  const yVals = mode === 'cumulative' ? cumulative : perIter;
+  const yLabel = mode === 'cumulative' ? 'Cumulative elapsed (s)' : 'Elapsed per iter (s)';
+
+  // Color bars: highlight current iter
+  const barColors = iters.map(it =>
+    it === ST.iter ? '#4a7fd4' : '#90b4d8'
+  );
+
+  // Current iter marker line
+  const shapes = [];
+  if (iters.includes(ST.iter)) {
+    shapes.push({
+      type: 'line',
+      x0: ST.iter, x1: ST.iter,
+      y0: 0, y1: 1,
+      xref: 'x', yref: 'paper',
+      line: { color: '#4a7fd4', width: 1.5, dash: 'dot' },
+    });
+  }
+
+  const traces = [
+    {
+      type: 'bar',
+      x: iters,
+      y: yVals,
+      marker: { color: barColors, line: { width: 0 } },
+      hovertemplate: 'iter %{x}<br>%{y:.3f} s<extra></extra>',
+    },
+    // Line overlay for trend
+    {
+      type: 'scatter', mode: 'lines+markers',
+      x: iters, y: yVals,
+      line: { color: '#2a5fa8', width: 1.5 },
+      marker: { size: 4, color: '#2a5fa8' },
+      hoverinfo: 'skip',
+    },
+  ];
+
+  const layout = {
+    paper_bgcolor: '#ffffff', plot_bgcolor: '#f8f9fb',
+    font: { color: '#1e2530', size: 9, family: "Menlo, Consolas, monospace" },
+    margin: { l: 52, r: 14, t: 6, b: 36 },
+    xaxis: {
+      title: { text: 'Iteration', font: { size: 9 }, standoff: 2 },
+      showgrid: false, zeroline: false,
+      tickmode: 'linear', dtick: 1,
+      tickfont: { size: 8 },
+    },
+    yaxis: {
+      title: { text: yLabel, font: { size: 9 }, standoff: 2 },
+      showgrid: true, gridcolor: '#e8ecf0', zeroline: false,
+      tickfont: { size: 8 },
+    },
+    showlegend: false,
+    bargap: 0.25,
+    shapes,
+  };
+
+  showP('plot-timing', 'timing-empty');
+  Plotly.react('plot-timing', traces, layout, PLY_CFG);
+  updateTimingChips(sorted);
+}
+
+function updateTimingChips(sorted) {
+  const chips = document.getElementById('timing-chips');
+  if (!sorted || sorted.length === 0) { chips.innerHTML = ''; return; }
+
+  const perIter = sorted.map(r => r.elapsed_s);
+  const total   = perIter.reduce((a, b) => a + b, 0);
+  const avg     = total / perIter.length;
+  const minT    = Math.min(...perIter);
+  const maxT    = Math.max(...perIter);
+
+  // Current iter timing
+  const curRow  = sorted.find(r => r.iter === ST.iter);
+  const curEl   = curRow ? curRow.elapsed_s : null;
+
+  chips.innerHTML = `
+    <div class="timing-chip">
+      <span class="tc-lbl">iter ${ST.iter}</span>
+      <span class="tc-val">${fmtSec(curEl)}</span>
+    </div>
+    <div class="timing-chip">
+      <span class="tc-lbl">avg</span>
+      <span class="tc-val">${fmtSec(avg)}</span>
+    </div>
+    <div class="timing-chip">
+      <span class="tc-lbl">total</span>
+      <span class="tc-val">${fmtSec(total)}</span>
+    </div>
+    <div class="timing-chip">
+      <span class="tc-lbl">min/max</span>
+      <span class="tc-val">${fmtSec(minT)} / ${fmtSec(maxT)}</span>
+    </div>
+  `;
+}
 
 /* ── Render functions ── */
 
@@ -581,7 +744,10 @@ async function renderVel() {
       mkLayout(dI.shape[0], dI.shape[1], 'True−Iter'), PLY_CFG);
     return;
   }
-  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=${mt}&iter=${ST.iter}&y=${ST.vel.y}`);
+  const url = mt === 'delta_s'
+    ? `/api/runs/${ST.run}/slice?type=delta_s&iter=${ST.iter}&y=${ST.vel.y}`
+    : `/api/runs/${ST.run}/slice?type=model&model_type=${mt}&iter=${ST.iter}&y=${ST.vel.y}`;
+  const d = await apiFetch(url);
   if (!d?.slice) { emptyP('plot-vel','vel-empty','No data'); return; }
   showP('plot-vel','vel-empty');
   syncY('vel-y','vel-y-v', d.full_shape[1], ST.vel);
@@ -660,7 +826,10 @@ async function renderG() {
     mkLayout(d.shape[0], d.shape[1], 'G'), PLY_CFG);
 }
 
-function renderAll() { renderVel(); renderTr(); renderTF(); renderWt(); renderMf(); renderG(); }
+function renderAll() {
+  renderVel(); renderTr(); renderTF(); renderWt(); renderMf(); renderG();
+  renderTiming();
+}
 
 /* ── Populate helpers ── */
 
@@ -701,11 +870,14 @@ async function loadRun(rid) {
     const el = document.getElementById(id); if (el) { el.value = 0; el.max = 0; }
   });
 
-  const [meta, info] = await Promise.all([
+  const [meta, info, timing] = await Promise.all([
     apiFetch(`/api/runs/${rid}/meta`),
     apiFetch(`/api/runs/${rid}/info`),
+    apiFetch(`/api/runs/${rid}/timing`),
   ]);
-  ST.meta = meta || {}; ST.info = info || {};
+  ST.meta = meta || {};
+  ST.info = info || {};
+  ST.timing.data = timing || [];
 
   document.getElementById('warn-no-grid').style.display =
     ST.meta?.grid_info?.coarse_cell_size ? 'none' : 'inline';
@@ -750,6 +922,11 @@ document.getElementById('btn-params').addEventListener('click', function() {
   document.getElementById('params-bar').classList.toggle('open');
   this.classList.toggle('active');
   this.textContent = document.getElementById('params-bar').classList.contains('open') ? 'Params ▴' : 'Params ▾';
+});
+
+// Timing mode
+document.getElementById('timing-mode').addEventListener('change', e => {
+  ST.timing.mode = e.target.value; renderTiming();
 });
 
 // Per-panel dim toggles

@@ -143,6 +143,11 @@ def _accumulate_segment_lengths(G, a, b, voxel_size=(1.0, 1.0, 1.0), eps=1e-12):
             t_max[ax] = (next_boundary - a[ax]) / d[ax]
         else:
             next_boundary = np.floor(a[ax])
+            # If a[ax] is exactly on a cell boundary and moving negative,
+            # t_max would be 0 — the DDA would skip the starting cell entirely.
+            # Step back one cell so the starting cell is properly traversed.
+            if next_boundary >= a[ax] - eps:
+                next_boundary -= 1.0
             t_max[ax] = (a[ax] - next_boundary) / (-d[ax])
         t_delta[ax] = 1.0 / abs(d[ax])
 

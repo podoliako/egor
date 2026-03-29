@@ -22,28 +22,33 @@ if __name__ == '__main__':
     profiler.enable()
 
     CELL_SIZE = 500.0
-    SUBDIVISION = 7
+    SUBDIVISION = 17
     model_config = {
         'lon': 37.6173,
         'lat': 55.7558,
         'height': 50.0,
         'azimuth': 45.0,
         'side_size': CELL_SIZE,
-        'n_x': 5,
-        'n_y': 5,
-        'n_z': 5
+        'n_x': 3,
+        'n_y': 2,
+        'n_z': 3
     }
 
-    n_stations_in_row = 40
+    n_stations = 50
     # n_events = 10
     middle_y = (model_config['n_y']) * CELL_SIZE / 2
     middle_z = (model_config['n_z']) * CELL_SIZE / 2
     n_y = model_config['n_y']
+    n_x = model_config['n_x']
     # middle_y = CELL_SIZE * 1
 
     stations_metric = [
-        (i * CELL_SIZE * model_config['n_x'] / n_stations_in_row, middle_y + np.random.uniform(-0.49*n_y*CELL_SIZE, 0.49*n_y*CELL_SIZE), 0)
-        for i in range(n_stations_in_row)
+        (
+            np.random.uniform(0, n_x*CELL_SIZE), 
+            np.random.uniform(0, n_y*CELL_SIZE),
+            0
+         )
+        for i in range(n_stations)
     ]
 
     # events_metric = [
@@ -75,10 +80,10 @@ if __name__ == '__main__':
                 #     true_model.set_vp(i, j, k, np.random.normal(100, 0.001))
                 #     initial_model.set_vp(i, j, k, 100)
                 if (i % 2 == 0 and k % 2 == 0) or (i % 2 != 0 and k % 2 != 0):
-                    true_model.set_vp(i, j, k, 105)
+                    true_model.set_vp(i, j, k, 100 + np.random.normal(0, 2))
                     initial_model.set_vp(i, j, k, 100)
                 else:
-                    true_model.set_vp(i, j, k, 95)
+                    true_model.set_vp(i, j, k, 100)
                     initial_model.set_vp(i, j, k, 100)
                 # if (i % 2 == 0 and k % 2 == 0) or (i % 2 != 0 and k % 2 != 0):
                 #     true_model.set_vp(i, j, k, 98)
@@ -92,7 +97,7 @@ if __name__ == '__main__':
         true_model,
         station_locs=stations_metric,
         # event_locs=events_metric,
-        n_events=450,
+        n_events=350,
         random_seed=7,
         subdivision=SUBDIVISION,
         depth_bias=3
@@ -103,7 +108,7 @@ if __name__ == '__main__':
     # print(full_arr)
 
     logger = run_em(
-        n_cycles=25,
+        n_cycles=10,
         initial_model=initial_model,
         arrivals_table=full_arr,
         station_locs=stations_metric,
@@ -118,7 +123,8 @@ if __name__ == '__main__':
     )
 
     print(f"Run saved: {logger.run_dir}")
-
+    
     profiler.disable()
+    logger.save_profiling(profiler)
     stats = pstats.Stats(profiler).strip_dirs().sort_stats(SortKey.CUMULATIVE)
     stats.print_stats(30)

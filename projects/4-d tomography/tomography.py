@@ -8,6 +8,8 @@ import json
 
 import numpy as np
 import time
+import pstats
+import io
 
 from instruments import (
     compute_epicenter_weight_matrix,
@@ -17,12 +19,6 @@ from instruments import (
     MetricPoint,
 )
 from raytracing import trace_ray_from_timefield, rasterize_path_lengths
-
-
-GridPoint = Tuple[int, int, int]
-StationArrival = Dict[str, Union[GridPoint, float]]
-EventArrivals = Dict[str, Union[GridPoint, List[StationArrival]]]
-TomographyEventResult = Dict[str, Union[int, GridPoint, np.ndarray]]
 
 
 # ---------------------------------------------------------------------------
@@ -53,22 +49,19 @@ class TomographyLogger:
         self.run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.run_dir = Path(base_dir) / f"run_{self.run_id}"
         self.run_dir.mkdir(parents=True, exist_ok=True)
+        self._iter_start: float = 0.0
+        self._run_start: float = time.perf_counter()
+        self.timing: dict = {}          # iter → elapsed_s
 
     # ── meta ──────────────────────────────────────────────────────────────
 
-    def save_meta(
-        self,
-        run_params: dict,
-        station_locs: Sequence,
-        event_locs: Sequence,
-        grid_info=None,
-    ):
+    def save_meta(self, run_params, station_locs, event_locs, grid_info=None):
         meta = {
             "run_id": self.run_id,
             "run_params": run_params,
             "station_locs": [list(s) for s in station_locs],
-            "event_locs": [list(e) for e in event_locs],
-            "grid_info": grid_info or {},
+            "event_locs":   [list(e) for e in event_locs],
+            "grid_info":    grid_info or {},
         }
         with open(self.run_dir / "meta.json", "w") as f:
             json.dump(meta, f, indent=2)
@@ -136,6 +129,52 @@ class TomographyLogger:
                 for si, g in enumerate(g_list):
                     np.save(w_dir / f"G_station_{si}.npy", g)
 
+    # ── timing ────────────────────────────────────────────────────────────
+
+    def start_iteration(self, iteration: int):
+        self._iter_start = time.perf_counter()
+
+    def end_iteration(self, iteration: int):
+        elapsed = time.perf_counter() - self._iter_start
+        self.timing[iteration] = elapsed
+        # дописываем в конец файла — не перезаписываем
+        with open(self.run_dir / "timing.jsonl", "a") as f:
+            json.dump({"iter": iteration, "elapsed_s": elapsed}, f)
+            f.write("\n")
+
+    def save_profiling(self, profiler):
+        """Сохраняет текстовый дамп cProfile + summary-json."""
+        buf = io.StringIO()
+        stats = pstats.Stats(profiler, stream=buf).strip_dirs().sort_stats("cumulative")
+        stats.print_stats(50)
+        (self.run_dir / "profile.txt").write_text(buf.getvalue())
+
+        # Машиночитаемые топ-30 функций
+        rows = []
+        for func, (cc, nc, tt, ct, _) in list(stats.stats.items())[:30]:
+            rows.append({
+                "func": f"{func[0]}:{func[1]}:{func[2]}",
+                "n_calls": nc,
+                "tottime_s": round(tt, 6),
+                "cumtime_s": round(ct, 6),
+            })
+        with open(self.run_dir / "profile_top30.json", "w") as f:
+            json.dump(rows, f, indent=2)
+
+    def save_timing_summary(self):
+        total = time.perf_counter() - self._run_start
+        summary = {
+            "total_s": round(total, 3),
+            "per_iter": {str(k): round(v, 3) for k, v in self.timing.items()},
+            "mean_iter_s": round(
+                sum(self.timing.values()) / len(self.timing), 3
+            ) if self.timing else None,
+        }
+        with open(self.run_dir / "timing_summary.json", "w") as f:
+            json.dump(summary, f, indent=2)
+        return summary
+    
+
 
 # ---------------------------------------------------------------------------
 # EM loop
@@ -144,8 +183,8 @@ class TomographyLogger:
 def run_em(
     n_cycles,
     initial_model,
-    arrivals_table: Sequence[EventArrivals],
-    station_locs: Sequence[MetricPoint],
+    arrivals_table,
+    station_locs,
     wave_type: str = 'P',
     solver: Union[str, object] = 'skfmm',
     lambda_reg: float = 1e-3,
@@ -153,8 +192,8 @@ def run_em(
     weights_top_n: int = 1,
     subdivision: int = 1,
     true_model=None,
-    event_locs: Optional[Sequence] = None,
-    logger: Optional[TomographyLogger] = None,
+    event_locs=None,
+    logger=None,
     save_runs: bool = True,
     runs_dir: str = "runs",
 ):
@@ -162,6 +201,23 @@ def run_em(
         logger = TomographyLogger(base_dir=runs_dir)
 
     if logger is not None:
+        coarse_grid = initial_model.get_geo_grid(subdivision=1)
+        grid_info = {
+            "coarse_cell_size": float(coarse_grid.cell_size),
+            "coarse_shape": [int(v) for v in coarse_grid.shape],
+        }
+
+        coarse_side = coarse_grid.cell_size
+        fine_side = coarse_side
+        if subdivision > 1:
+                fine_grid = initial_model.get_geo_grid(subdivision=subdivision)
+                grid_info["fine_cell_size"] = float(fine_grid.cell_size)
+                grid_info["fine_shape"] = [int(v) for v in fine_grid.shape]
+                fine_side = fine_grid.cell_size
+        else:
+            grid_info["fine_cell_size"] = float(coarse_grid.cell_size)
+            grid_info["fine_shape"] = [int(v) for v in coarse_grid.shape]
+        
         run_params = dict(
             n_cycles=n_cycles,
             wave_type=wave_type,
@@ -170,19 +226,11 @@ def run_em(
             temperature=temperature,
             weights_top_n=weights_top_n,
             subdivision=subdivision,
+            coarse_side_m=round(coarse_side, 2),
+            fine_side_m=round(fine_side, 2),
         )
-        coarse_grid = initial_model.get_geo_grid(subdivision=1)
-        grid_info = {
-            "coarse_cell_size": float(coarse_grid.cell_size),
-            "coarse_shape": [int(v) for v in coarse_grid.shape],
-        }
-        if subdivision > 1:
-            fine_grid = initial_model.get_geo_grid(subdivision=subdivision)
-            grid_info["fine_cell_size"] = float(fine_grid.cell_size)
-            grid_info["fine_shape"] = [int(v) for v in fine_grid.shape]
-        else:
-            grid_info["fine_cell_size"] = float(coarse_grid.cell_size)
-            grid_info["fine_shape"] = [int(v) for v in coarse_grid.shape]
+        
+        
 
         logger.save_meta(
             run_params=run_params,
@@ -198,6 +246,7 @@ def run_em(
     for i in range(n_cycles):
         print(f'{i+1}/{n_cycles}')
         if logger is not None:
+            logger.start_iteration(i)
             logger.save_iteration_model(i, model)
 
         delta_s = make_tomography_step(
@@ -218,10 +267,13 @@ def run_em(
         model.set_vp_array(new_velocities)
 
         if logger is not None:
+            logger.end_iteration(i)
             logger.save_delta_s(i, delta_s)
 
     if logger is not None:
-        logger.save_iteration_model(n_cycles, model)
+        # logger.save_iteration_model(n_cycles, model)
+        logger.save_timing_summary()
+
         print(f"[TomographyLogger] Run saved to: {logger.run_dir}")
 
     return logger
@@ -233,8 +285,8 @@ def run_em(
 
 def make_tomography_step(
         initial_model,
-        arrivals_table: Sequence[EventArrivals],
-        station_locs: Sequence[MetricPoint],
+        arrivals_table,
+        station_locs,
         wave_type: str = 'P',
         solver: Union[str, object] = 'skfmm',
         lambda_reg: float = 1e-3,
@@ -274,7 +326,7 @@ def make_tomography_step(
             temperature=temperature,
             return_misfit=True,
         )
-        weights = _select_top_n_weights(weights, weights_top_n, normolize=True)
+        weights = _select_top_n_weights(weights, weights_top_n, normalize=True)
 
         weights_indices = np.argwhere(weights > 0)
         weights_values = weights[weights > 0]
@@ -292,11 +344,8 @@ def make_tomography_step(
             G_stations = []
             g_fine_list: List[np.ndarray] = []
 
-            for station_fine_idx, station_fine_loc in zip(
-                range(len(station_idx_fine)), station_idx_fine
-            ):
+            for station_fine_idx, station_fine_loc in enumerate(station_idx_fine):
                 station_field = station_fields[station_fine_idx]
-
                 g_fine = _calculate_G(
                     station_field=station_field,
                     origin_loc=weight_idx,
@@ -336,8 +385,8 @@ def make_tomography_step(
                 G_per_weight=G_per_weight,
             )
 
-        G_acc.append(sum(G_weights))
-        r_acc.append(sum(r_weights))
+        G_acc.append(np.add.reduce(G_weights))
+        r_acc.append(np.add.reduce(r_weights))
 
     delta_s = _solve_delta_s(
         g_tilde_prime=sum(G_acc),
@@ -414,7 +463,7 @@ def _solve_delta_s(
     return delta_flat.reshape(model_shape)
 
 
-def _select_top_n_weights(weights_martix, n, normolize=False):
+def _select_top_n_weights(weights_martix, n, normalize=False):
     w = np.asarray(weights_martix, dtype=np.float64)
     if w.ndim != 3:
         raise ValueError("weights_martix must be a 3D array")
@@ -434,7 +483,7 @@ def _select_top_n_weights(weights_martix, n, normolize=False):
         out_flat = out.ravel()
         out_flat[top_idx] = flat[top_idx]
 
-    if normolize:
+    if normalize:
         s = out.sum()
         if s > 0:
             out /= s

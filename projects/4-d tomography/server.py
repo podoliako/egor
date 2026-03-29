@@ -119,6 +119,25 @@ def api_info(rid):
     })
 
 
+# ─── timing ───────────────────────────────────────────────────────────────────
+
+@app.route("/api/runs/<rid>/timing")
+def api_timing(rid):
+    """Read timing.jsonl → [{iter, elapsed_s}, ...]"""
+    p = _rd(rid) / "timing.jsonl"
+    if not p.exists():
+        return jsonify([])
+    rows = []
+    for line in p.read_text().splitlines():
+        line = line.strip()
+        if line:
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                pass
+    return jsonify(rows)
+
+
 # ─── iter / event / weight lists ──────────────────────────────────────────────
 
 @app.route("/api/runs/<rid>/iters_list")
