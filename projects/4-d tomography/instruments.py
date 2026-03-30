@@ -295,8 +295,6 @@ def _resolve_station_locs_metric(
         metric_stations = []
         grid_stations = []
         for idx, loc in enumerate(station_locs):
-            if loc[2] != 0.0:
-                raise ValueError(f"Station #{idx} must have z=0.0, got {loc}")
             metric_stations.append(tuple(float(c) for c in loc))
             grid_stations.append(metric_to_index(loc, cell_size, shape))
     else:

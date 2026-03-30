@@ -270,6 +270,9 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
       <div class="panel-hdr">
         <span class="panel-title">True Model</span>
         <button class="btn-full" title="Fullscreen">⤢</button>
+        <label class="dim-toggle" title="Share colorscale with Velocity Model panel">
+          <input type="checkbox" id="cb-shared-vel-scale"> Shared scale
+        </label>
         <div class="ph-group"><span class="badge" id="tr-shape-badge">—</span></div>
         <div class="ph-group">
           Y <input type="range" id="tr-y" min="0" max="0" value="0" style="width:60px">
@@ -408,7 +411,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 const ST = {
   run: null, iter: 0, meta: null, info: null,
   showGrid: true, showStations: true, showEvents: true,
-  vel:    { type: 'iter', y: 0 },
+  vel:    { type: 'iter', y: 0, sharedScale: false },
   tr:     { y: 0 },
   tf:     { station: 0, y: 0, dim: true },
   G:      { event: 0, station: 0, weight: 0, y: 0, dim: true },
@@ -425,7 +428,15 @@ const PLY_CFG = {
 const ALL_PLOTS = ['plot-vel','plot-tf','plot-tr','plot-wt','plot-mf','plot-G','plot-timing'];
 
 /* ── Layout factory ── */
-function mkLayout(nx, nz, cbTitle) {
+function mkLayout(nx, nz, cbTitle, zrange) {
+  const coloraxis = {
+    colorbar: {
+      thickness: 10, len: 0.85,
+      tickfont: { size: 9, color: '#5a6478' },
+      title: { text: cbTitle || '', font: { size: 9, color: '#5a6478' } },
+    },
+  };
+  if (zrange) { coloraxis.cmin = zrange[0]; coloraxis.cmax = zrange[1]; coloraxis.cauto = false; }
   return {
     paper_bgcolor: '#ffffff', plot_bgcolor: '#f8f9fb',
     font: { color: '#1e2530', size: 9, family: "Menlo, Consolas, monospace" },
@@ -441,13 +452,7 @@ function mkLayout(nx, nz, cbTitle) {
       autorange: 'reversed', tickfont: { size: 8 },
     },
     showlegend: false,
-    coloraxis: {
-      colorbar: {
-        thickness: 10, len: 0.85,
-        tickfont: { size: 9, color: '#5a6478' },
-        title: { text: cbTitle || '', font: { size: 9, color: '#5a6478' } },
-      },
-    },
+    coloraxis,
   };
 }
 
@@ -559,10 +564,12 @@ function T(mat) {
 
 function sub2d(a, b) { return a.map((row, i) => row.map((v, j) => v - b[i][j])); }
 
-function heatTrace(slice, colorscale, zmid) {
+function heatTrace(slice, colorscale, _unused, zrange) {
+  // zrange = [min, max] is applied via layout.coloraxis.cmin/cmax, not trace zmin/zmax,
+  // because coloraxis binding overrides per-trace z limits in Plotly.
   const t = { type: 'heatmap', z: T(slice), colorscale, showscale: true, coloraxis: 'coloraxis',
     hovertemplate: 'x=%{x}  z=%{y}  val=%{z:.4g}<extra></extra>' };
-  if (zmid !== undefined) { t.zmid = zmid; t.zauto = false; }
+  t._zrange = zrange || null;  // carry for mkLayout to pick up
   return t;
 }
 
@@ -724,9 +731,13 @@ function updateTimingChips(sorted) {
 
 /* ── Render functions ── */
 
-async function renderVel() {
+/* ── Velocity + True: optionally share colorscale ── */
+
+async function renderVelPair() {
   if (!ST.run) return;
   const mt = ST.vel.type;
+
+  // diff mode: independent of shared-scale (uses its own diverging palette)
   if (mt === 'diff') {
     const [dT, dI] = await Promise.all([
       apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=true&iter=0&y=${ST.vel.y}`),
@@ -738,28 +749,90 @@ async function renderVel() {
     showP('plot-vel','vel-empty');
     syncY('vel-y','vel-y-v', dI.full_shape[1], ST.vel);
     shapeBadge('vel-shape-badge', dI.full_shape);
+    const diff = sub2d(dT.slice, dI.slice);
+    const absMax = Math.max(1e-12, ...diff.flat().map(Math.abs));
     Plotly.react('plot-vel',
-      buildTraces(heatTrace(sub2d(dT.slice, dI.slice), CS_DIVERG, 0),
+      buildTraces(heatTrace(diff, CS_DIVERG, undefined, [-absMax, absMax]),
         dI.shape[0], dI.shape[1], -1, -1, true, ST.vel.y, false),
-      mkLayout(dI.shape[0], dI.shape[1], 'True−Iter'), PLY_CFG);
+      mkLayout(dI.shape[0], dI.shape[1], 'True−Iter', [-absMax, absMax]), PLY_CFG);
+    // still render True independently
+    _renderTrAlone();
     return;
   }
-  const url = mt === 'delta_s'
+
+  const isDelta = mt === 'delta_s';
+  const velUrl = isDelta
     ? `/api/runs/${ST.run}/slice?type=delta_s&iter=${ST.iter}&y=${ST.vel.y}`
     : `/api/runs/${ST.run}/slice?type=model&model_type=${mt}&iter=${ST.iter}&y=${ST.vel.y}`;
-  const d = await apiFetch(url);
-  if (!d?.slice) { emptyP('plot-vel','vel-empty','No data'); return; }
-  showP('plot-vel','vel-empty');
-  syncY('vel-y','vel-y-v', d.full_shape[1], ST.vel);
-  shapeBadge('vel-shape-badge', d.full_shape);
-  const isDelta = mt === 'delta_s';
-  Plotly.react('plot-vel',
-    buildTraces(heatTrace(d.slice, isDelta ? CS_DIVERG : 'Viridis', isDelta ? 0 : undefined),
-      d.shape[0], d.shape[1], -1, -1, true, ST.vel.y, false),
-    mkLayout(d.shape[0], d.shape[1], isDelta ? 'Δs' : 'Vp'), PLY_CFG);
+
+  if (ST.vel.sharedScale && !isDelta) {
+    // fetch both in parallel, compute global range
+    const [dV, dTr] = await Promise.all([
+      apiFetch(velUrl),
+      apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=true&iter=0&y=${ST.tr.y}`),
+    ]);
+
+    if (dV?.slice) {
+      showP('plot-vel','vel-empty');
+      syncY('vel-y','vel-y-v', dV.full_shape[1], ST.vel);
+      shapeBadge('vel-shape-badge', dV.full_shape);
+    } else {
+      emptyP('plot-vel','vel-empty','No data');
+    }
+    if (dTr?.slice) {
+      showP('plot-tr','tr-empty');
+      syncY('tr-y','tr-y-v', dTr.full_shape[1], ST.tr);
+      shapeBadge('tr-shape-badge', dTr.full_shape);
+    } else {
+      emptyP('plot-tr','tr-empty','No true model saved');
+    }
+
+    if (dV?.slice && dTr?.slice) {
+      const allVals = [...dV.slice.flat(), ...dTr.slice.flat()].filter(isFinite);
+      const gMin = Math.min(...allVals);
+      const gMax = Math.max(...allVals);
+      const zrange = [gMin, gMax];
+      Plotly.react('plot-vel',
+        buildTraces(heatTrace(dV.slice, 'Viridis', undefined, zrange),
+          dV.shape[0], dV.shape[1], -1, -1, true, ST.vel.y, false),
+        mkLayout(dV.shape[0], dV.shape[1], 'Vp'), PLY_CFG);
+      Plotly.react('plot-tr',
+        buildTraces(heatTrace(dTr.slice, 'Viridis', undefined, zrange),
+          dTr.shape[0], dTr.shape[1], -1, -1, true, ST.tr.y, false),
+        mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true'), PLY_CFG);
+    } else {
+      // one panel missing — render what we have without shared scale
+      if (dV?.slice) Plotly.react('plot-vel',
+        buildTraces(heatTrace(dV.slice, 'Viridis'),
+          dV.shape[0], dV.shape[1], -1, -1, true, ST.vel.y, false),
+        mkLayout(dV.shape[0], dV.shape[1], 'Vp'), PLY_CFG);
+      if (dTr?.slice) Plotly.react('plot-tr',
+        buildTraces(heatTrace(dTr.slice, 'Viridis'),
+          dTr.shape[0], dTr.shape[1], -1, -1, true, ST.tr.y, false),
+        mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true'), PLY_CFG);
+    }
+    return;
+  }
+
+  // independent rendering
+  const d = await apiFetch(velUrl);
+  if (!d?.slice) { emptyP('plot-vel','vel-empty','No data'); }
+  else {
+    showP('plot-vel','vel-empty');
+    syncY('vel-y','vel-y-v', d.full_shape[1], ST.vel);
+    shapeBadge('vel-shape-badge', d.full_shape);
+    const velZrange = isDelta
+      ? (() => { const m = Math.max(1e-12, ...d.slice.flat().map(Math.abs)); return [-m, m]; })()
+      : undefined;
+    Plotly.react('plot-vel',
+      buildTraces(heatTrace(d.slice, isDelta ? CS_DIVERG : 'Viridis', undefined, velZrange),
+        d.shape[0], d.shape[1], -1, -1, true, ST.vel.y, false),
+      mkLayout(d.shape[0], d.shape[1], isDelta ? 'Δs' : 'Vp', velZrange), PLY_CFG);
+  }
+  _renderTrAlone();
 }
 
-async function renderTr() {
+async function _renderTrAlone() {
   if (!ST.run) return;
   const d = await apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=true&iter=0&y=${ST.tr.y}`);
   if (!d?.slice) { emptyP('plot-tr','tr-empty','No true model saved'); return; }
@@ -770,6 +843,10 @@ async function renderTr() {
     buildTraces(heatTrace(d.slice, 'Viridis'), d.shape[0], d.shape[1], -1, -1, true, ST.tr.y, false),
     mkLayout(d.shape[0], d.shape[1], 'Vp true'), PLY_CFG);
 }
+
+// keep renderVel / renderTr as thin aliases for backwards compat
+const renderVel = () => renderVelPair();
+const renderTr  = () => ST.vel.sharedScale ? renderVelPair() : _renderTrAlone();
 
 async function renderTF() {
   if (!ST.run) return;
@@ -827,7 +904,7 @@ async function renderG() {
 }
 
 function renderAll() {
-  renderVel(); renderTr(); renderTF(); renderWt(); renderMf(); renderG();
+  renderVelPair(); renderTF(); renderWt(); renderMf(); renderG();
   renderTiming();
 }
 
@@ -934,13 +1011,14 @@ document.getElementById('cb-dim-tf').addEventListener('change', e => { ST.tf.dim
 document.getElementById('cb-dim-g').addEventListener('change',  e => { ST.G.dim  = e.target.checked; renderG();  });
 document.getElementById('cb-dim-wt').addEventListener('change', e => { ST.wt.dim = e.target.checked; renderWt(); });
 document.getElementById('cb-dim-mf').addEventListener('change', e => { ST.mf.dim = e.target.checked; renderMf(); });
+document.getElementById('cb-shared-vel-scale').addEventListener('change', e => { ST.vel.sharedScale = e.target.checked; renderVelPair(); });
 
 // Vel
 document.getElementById('vel-type').addEventListener('change', e => { ST.vel.type = e.target.value; renderVel(); });
 document.getElementById('vel-y').addEventListener('input', e => { ST.vel.y = +e.target.value; document.getElementById('vel-y-v').textContent = ST.vel.y; renderVel(); });
 
 // True model
-document.getElementById('tr-y').addEventListener('input', e => { ST.tr.y = +e.target.value; document.getElementById('tr-y-v').textContent = ST.tr.y; renderTr(); });
+document.getElementById('tr-y').addEventListener('input', e => { ST.tr.y = +e.target.value; document.getElementById('tr-y-v').textContent = ST.tr.y; ST.vel.sharedScale ? renderVelPair() : _renderTrAlone(); });
 
 // TF
 document.getElementById('tf-sta').addEventListener('change', e => { ST.tf.station = +e.target.value; renderTF(); });
