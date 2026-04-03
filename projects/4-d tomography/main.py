@@ -22,7 +22,7 @@ if __name__ == '__main__':
     profiler.enable()
 
     CELL_SIZE = 500.0
-    SUBDIVISION = 11
+    SUBDIVISION = 13
     model_config = {
         'lon': 37.6173,
         'lat': 55.7558,
@@ -96,19 +96,16 @@ if __name__ == '__main__':
     full_arr, events_metric = generate_synthetic_arrivals_table(
         true_model,
         station_locs=stations_metric,
-        # event_locs=events_metric,
         n_events=350,
         random_seed=7,
         subdivision=SUBDIVISION,
-        depth_bias=3
+        depth_bias=3,
+        x_offset=CELL_SIZE*1,
+        y_offset=0
     )
 
-    # print("Events (metric):", events_metric)
-
-    # print(full_arr)
-
     logger = run_em(
-        n_cycles=10,
+        n_cycles=5,
         initial_model=initial_model,
         arrivals_table=full_arr,
         station_locs=stations_metric,

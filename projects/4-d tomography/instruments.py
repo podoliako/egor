@@ -75,6 +75,8 @@ def generate_synthetic_arrivals_table(
         random_seed: Optional[int] = None,
         subdivision: Optional[int] = 1,
         depth_bias: float = 0.0,
+        x_offset = 0,
+        y_offset = 0,
     ):
     """
     station_locs / event_locs задаются в метрах от угла сетки: (x_m, y_m, z_m).
@@ -91,7 +93,8 @@ def generate_synthetic_arrivals_table(
         shape, cell_size, station_locs, n_stations, rng
     )
     metric_events, event_idx = _resolve_event_locs_metric(
-        shape, cell_size, event_locs, n_events, rng, depth_bias=depth_bias
+        shape, cell_size, event_locs, n_events, rng, depth_bias=depth_bias, 
+        x_offset=x_offset, y_offset=y_offset
     )
 
     fields = compute_station_travel_time_fields(
@@ -229,6 +232,8 @@ def _sample_random_metric_points(
     rng: np.random.Generator,
     fixed_z: Optional[float] = None,
     depth_bias: float = 0.0,
+    x_offset: float = 0.0,
+    y_offset: float = 0.0,
 ) -> Tuple[List[MetricPoint], List[GridPoint]]:
     """
     Генерирует случайные точки в физическом пространстве (метрах) от угла (0,0,0)
@@ -249,8 +254,8 @@ def _sample_random_metric_points(
     while len(metric_points) < count and attempts < max_attempts:
         attempts += 1
         
-        x = rng.uniform(0.0, max_x)
-        y = rng.uniform(0.0, max_y)
+        x = rng.uniform(0.0 + x_offset, max_x - x_offset)
+        y = rng.uniform(0.0 + y_offset, max_y - y_offset)
 
         if fixed_z is not None:
             z = fixed_z
@@ -317,6 +322,8 @@ def _resolve_event_locs_metric(
     n_events: Optional[int],
     rng: np.random.Generator,
     depth_bias: float = 0.0,
+    x_offset = 0,
+    y_offset = 0,
 ) -> Tuple[List[MetricPoint], List[GridPoint]]:
     
     if event_locs is not None and n_events is not None:
@@ -332,7 +339,8 @@ def _resolve_event_locs_metric(
         if n_events is None:
             raise ValueError("event_locs or n_events must be provided")
         metric_events, grid_events = _sample_random_metric_points(
-            shape, cell_size, int(n_events), rng, fixed_z=None, depth_bias=depth_bias
+            shape, cell_size, int(n_events), rng, fixed_z=None, depth_bias=depth_bias, 
+            x_offset = x_offset, y_offset = y_offset
         )
 
     if len(metric_events) == 0:
