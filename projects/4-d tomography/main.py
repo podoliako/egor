@@ -4,13 +4,11 @@ root = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(root))
 
 import numpy as np
-from velocity_model import VelocityModel, GridGeometry, VelocityGrid
-from wave_propagation import WavePropagator
-from instruments import compute_epicenter_weight_matrix, generate_synthetic_arrivals_table
-from raytracing import trace_ray_from_timefield, rasterize_path_binary, rasterize_path_lengths
+from velocity_model import VelocityModel
+from instruments import generate_synthetic_arrivals_table
 from math import *
 from components.graphics import simple_scatter, simple_heatmap
-from tomography import make_tomography_step, run_em
+from tomography import make_tomography_step, run_em, warm_up_jit
 
 import cProfile
 import pstats
@@ -104,6 +102,8 @@ if __name__ == '__main__':
         y_offset=0
     )
 
+    warm_up_jit()
+
     logger = run_em(
         n_cycles=5,
         initial_model=initial_model,
@@ -117,6 +117,7 @@ if __name__ == '__main__':
         event_locs=events_metric,
         save_runs=True,
         runs_dir="runs",
+        n_workers=2,
     )
 
     print(f"Run saved: {logger.run_dir}")
