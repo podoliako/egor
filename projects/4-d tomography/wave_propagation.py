@@ -103,8 +103,6 @@ class SimpleFDSolver:
         """
         Solve using simple finite difference sweeping.
         """
-        from scipy.ndimage import distance_transform_edt
-        
         n_x, n_y, n_z = velocity.shape
         
         # Initialize travel times to infinity

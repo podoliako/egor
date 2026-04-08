@@ -3,8 +3,12 @@ Seismic velocity model with geographic grid reference.
 """
 import numpy as np
 import json
-from typing import Dict, Tuple, Optional, Callable, Union
-from components.utilities import trilinear_interpolation, nearest_neighbor_interpolation
+from typing import Callable, Dict, Optional, Tuple, Union
+
+from interpolation import (
+    nearest_neighbor_interpolation,
+    trilinear_interpolation,
+)
 
 
 class GeoGrid:

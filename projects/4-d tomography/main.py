@@ -1,14 +1,7 @@
-from pathlib import Path
-import sys
-root = Path(__file__).resolve().parent.parent.parent
-sys.path.insert(0, str(root))
-
 import numpy as np
 from velocity_model import VelocityModel
 from instruments import generate_synthetic_arrivals_table
-from math import *
-from components.graphics import simple_scatter, simple_heatmap
-from tomography import make_tomography_step, run_em, warm_up_jit
+from tomography import run_em, warm_up_jit
 
 import cProfile
 import pstats

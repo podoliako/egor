@@ -1,6 +1,8 @@
 """
 Example usage of the velocity model.
 """
+from pathlib import Path
+
 import numpy as np
 from velocity_model import VelocityModel, GridGeometry, VelocityGrid
 
@@ -63,15 +65,19 @@ print(f"Std Vp: {model.grid.vp.std():.1f} m/s")
 # Пример 5: Сохранение и загрузка
 print("\n=== Example 5: Save and load ===")
 # Сохраняем с данными
-model.to_json('/home/claude/model_full.json', include_data=True)
+out_dir = Path(__file__).resolve().parent
+full_path = out_dir / "model_full.json"
+geo_path = out_dir / "model_geometry_only.json"
+
+model.to_json(str(full_path), include_data=True)
 print("Model saved to model_full.json")
 
 # Сохраняем только геометрию
-model.to_json('/home/claude/model_geometry_only.json', include_data=False)
+model.to_json(str(geo_path), include_data=False)
 print("Geometry saved to model_geometry_only.json")
 
 # Загружаем обратно
-loaded_model = VelocityModel.from_json('/home/claude/model_full.json')
+loaded_model = VelocityModel.from_json(str(full_path))
 print(f"\nLoaded model: {loaded_model}")
 print(f"Vp at (25,25,12) in loaded model: {loaded_model.get_vp(25, 25, 12):.1f} m/s")
 
