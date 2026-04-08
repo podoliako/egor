@@ -87,21 +87,27 @@ def _mp_event_task(packed: tuple) -> tuple:
     """
     Process a single event inside a worker process.
     Reads heavy arrays from _MP (inherited via fork, copy-on-write).
+
+    Returns (G_acc, r_acc, log_data) where:
+        log_data = (weights, misfit, first_residuals)   — small arrays, safe to pickle
+    G_per_weight (large fine-grid arrays) is only included when
+    _MP['log_G_per_weight'] is True.
     """
     event_idx, observed = packed
 
-    gx  = _MP['gx'];   gy = _MP['gy'];   gz = _MP['gz']
-    sf  = _MP['sf'];   sl = _MP['sl']
+    gx   = _MP['gx'];    gy  = _MP['gy'];   gz  = _MP['gz']
+    sf   = _MP['sf'];    sl  = _MP['sl']
     x_lo = _MP['x_lo'];  x_hi = _MP['x_hi']
     fcs  = _MP['fine_cell_size']
     sub  = _MP['subdivision']
     T    = _MP['temperature']
     wtn  = _MP['weights_top_n']
+    log_G = _MP.get('log_G_per_weight', False)
 
     observed = np.asarray(observed, dtype=np.float64)
     step = 0.5
 
-    weights, _ = compute_epicenter_weight_matrix(
+    weights, misfit = compute_epicenter_weight_matrix(
         station_fields=sf, observed=observed, temperature=T, return_misfit=True,
     )
     weights = _select_top_n_weights(weights, wtn, normalize=True)
@@ -109,8 +115,13 @@ def _mp_event_task(packed: tuple) -> tuple:
     weights_values  = weights[weights > 0]
 
     G_w: list = [];  r_w: list = []
-    for weight_idx, weight_val in zip(weights_indices, weights_values):
-        epic = np.asarray(weight_idx, dtype=np.float64)
+    first_residuals = None
+    G_per_weight: dict = {}
+
+    for w_idx, (weight_idx, weight_val) in enumerate(
+        zip(weights_indices, weights_values)
+    ):
+        epic   = np.asarray(weight_idx, dtype=np.float64)
         G_fine = compute_G_all_stations_serial(
             gx, gy, gz, sl, epic, fcs, fcs, fcs, step, step, 50000, x_lo, x_hi,
         )
@@ -119,10 +130,22 @@ def _mp_event_task(packed: tuple) -> tuple:
         )
         G_tilda   = G_stations[:, np.newaxis] - G_stations[np.newaxis, :]
         residuals = _calculate_residuals(sf, observed, weight_idx)
+
+        if first_residuals is None:
+            first_residuals = residuals
+        if log_G:
+            G_per_weight[w_idx] = [G_fine[si] for si in range(G_fine.shape[0])]
+
         G_w.append(G_tilda * weight_val)
         r_w.append(residuals * weight_val)
 
-    return np.add.reduce(G_w), np.add.reduce(r_w)
+    log_data = (
+        weights,
+        misfit,
+        first_residuals if first_residuals is not None else np.array([]),
+        G_per_weight if log_G else None,
+    )
+    return np.add.reduce(G_w), np.add.reduce(r_w), log_data
 
 
 # ── Logger ────────────────────────────────────────────────────────────────────
@@ -271,6 +294,7 @@ def run_em(
     weights_top_n: int = 1,
     subdivision: int = 1,
     n_workers: int = 1,
+    log_G_per_weight: bool = False,
     true_model=None,
     event_locs=None,
     logger=None,
@@ -336,7 +360,8 @@ def run_em(
         delta_s = make_tomography_step(
             model, arrivals_table, station_locs,
             wave_type, solver, lambda_reg, temperature, weights_top_n,
-            subdivision, n_workers=n_workers, iteration=i, logger=logger,
+            subdivision, n_workers=n_workers, log_G_per_weight=log_G_per_weight,
+            iteration=i, logger=logger,
         )
 
         new_velocities = 1 / (1 / model.get_geo_grid(subdivision=1).vp + delta_s)
@@ -366,14 +391,15 @@ def make_tomography_step(
     weights_top_n: int = 1,
     subdivision: int = 1,
     n_workers: int = 1,
+    log_G_per_weight: bool = False,
     iteration: int = 0,
     logger: Optional[TomographyLogger] = None,
 ):
     coarse_grid = initial_model.get_geo_grid(subdivision=1)
     coarse_shape = tuple(int(v) for v in coarse_grid.shape)
 
-    fine_grid     = initial_model.get_geo_grid(subdivision=subdivision)
-    fine_shape    = tuple(int(v) for v in fine_grid.shape)
+    fine_grid      = initial_model.get_geo_grid(subdivision=subdivision)
+    fine_shape     = tuple(int(v) for v in fine_grid.shape)
     fine_cell_size = float(fine_grid.cell_size)
 
     station_idx_fine = [metric_to_index(s, fine_cell_size, fine_shape) for s in station_locs]
@@ -391,8 +417,7 @@ def make_tomography_step(
     gy = np.ascontiguousarray(grads[:, 1])
     gz = np.ascontiguousarray(grads[:, 2])
 
-    # Station positions as float64 for Numba
-    sl   = np.asarray(station_idx_fine, dtype=np.float64)   # (n_st, 3)
+    sl   = np.asarray(station_idx_fine, dtype=np.float64)
     x_lo = np.zeros(3, dtype=np.float64)
     x_hi = np.asarray(fine_shape, dtype=np.float64) - 1.0
 
@@ -404,6 +429,7 @@ def make_tomography_step(
         results = _run_events_parallel(
             arrivals_table, gx, gy, gz, sf_array, sl, x_lo, x_hi,
             fine_cell_size, subdivision, temperature, weights_top_n, n_workers,
+            log_G_per_weight=log_G_per_weight and logger is not None,
         )
     else:
         results = [
@@ -416,14 +442,26 @@ def make_tomography_step(
                 subdivision=subdivision,
                 temperature=temperature,
                 weights_top_n=weights_top_n,
-                iteration=iteration,
-                logger=logger,
+                log_G_per_weight=log_G_per_weight and logger is not None,
             )
             for i, obs in enumerate(arrivals_table)
         ]
 
-    G_acc = [r[0] for r in results]
-    r_acc = [r[1] for r in results]
+    # ── unified logging: both paths now return the same triple ────────────────
+    G_acc = [];  r_acc = []
+    for event_idx, (G_ev, r_ev, log_data) in enumerate(results):
+        G_acc.append(G_ev)
+        r_acc.append(r_ev)
+        if logger is not None:
+            weights, misfit, first_residuals, G_per_weight = log_data
+            logger.save_event_data(
+                iteration=iteration,
+                event_idx=event_idx,
+                weights=weights,
+                misfit=misfit,
+                residuals=first_residuals,
+                G_per_weight=G_per_weight,
+            )
 
     return _solve_delta_s(
         g_tilde_prime=np.add.reduce(G_acc),
@@ -437,9 +475,12 @@ def make_tomography_step(
 def _process_event_single(
     event_idx, observed, sf, gx, gy, gz, sl, x_lo, x_hi,
     fine_cell_size, subdivision, temperature, weights_top_n,
-    iteration, logger,
+    log_G_per_weight: bool = False,
 ):
-    """Single-process path: uses parallel Numba (prange over stations)."""
+    """
+    Single-process path: uses parallel Numba prange over stations.
+    Returns (G_acc, r_acc, log_data) — same shape as _mp_event_task.
+    """
     step = 0.5
 
     weights, misfit = compute_epicenter_weight_matrix(
@@ -449,16 +490,14 @@ def _process_event_single(
     weights_indices = np.argwhere(weights > 0)
     weights_values  = weights[weights > 0]
 
-    G_per_weight: Optional[dict] = {} if logger else None
     first_residuals = None
+    G_per_weight: dict = {}
     G_w: list = [];  r_w: list = []
 
     for w_idx, (weight_idx, weight_val) in enumerate(
         zip(weights_indices, weights_values)
     ):
-        epic = np.asarray(weight_idx, dtype=np.float64)
-
-        # All stations traced in parallel via Numba prange
+        epic   = np.asarray(weight_idx, dtype=np.float64)
         G_fine = compute_G_all_stations(
             gx, gy, gz, sl, epic,
             fine_cell_size, fine_cell_size, fine_cell_size,
@@ -473,33 +512,34 @@ def _process_event_single(
 
         if first_residuals is None:
             first_residuals = residuals
-        if logger is not None and G_per_weight is not None:
+        if log_G_per_weight:
             G_per_weight[w_idx] = [G_fine[si] for si in range(G_fine.shape[0])]
 
         G_w.append(G_tilda * weight_val)
         r_w.append(residuals * weight_val)
 
-    if logger is not None:
-        logger.save_event_data(
-            iteration=iteration,
-            event_idx=event_idx,
-            weights=weights,
-            misfit=misfit,
-            residuals=first_residuals if first_residuals is not None else np.array([]),
-            G_per_weight=G_per_weight,
-        )
-
-    return np.add.reduce(G_w), np.add.reduce(r_w)
+    log_data = (
+        weights,
+        misfit,
+        first_residuals if first_residuals is not None else np.array([]),
+        G_per_weight if log_G_per_weight else None,
+    )
+    return np.add.reduce(G_w), np.add.reduce(r_w), log_data
 
 
 def _run_events_parallel(
     arrivals_table, gx, gy, gz, sf, sl, x_lo, x_hi,
     fine_cell_size, subdivision, temperature, weights_top_n, n_workers,
+    log_G_per_weight: bool = False,
 ):
     """
     Fork-based event parallelism (Linux).  Heavy arrays are set as module
     globals before Pool creation so fork inherits them copy-on-write — no
-    serialization overhead.  Per-event logging is skipped in this mode.
+    serialization overhead.
+
+    G_per_weight (fine-grid ray paths per station) is only serialized back to
+    the main process when log_G_per_weight=True.  With 40 stations and a
+    fine grid of ~35^3 this adds ~7 MB per event; keep False for large runs.
     """
     global _MP
     _MP = dict(
@@ -510,6 +550,7 @@ def _run_events_parallel(
         subdivision=subdivision,
         temperature=temperature,
         weights_top_n=weights_top_n,
+        log_G_per_weight=log_G_per_weight,
     )
 
     tasks = [
