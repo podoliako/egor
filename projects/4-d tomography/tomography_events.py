@@ -14,7 +14,7 @@ _MP: dict = {}
 
 def _mp_worker_init() -> None:
     try:
-        from numba import set_num_threads
+        from numba import set_num_threads # pyright: ignore[reportMissingImports]
 
         set_num_threads(1)
     except Exception:
@@ -37,7 +37,7 @@ def _process_event(
     compute_G: Callable[..., np.ndarray],
     log_G_per_weight: bool,
 ) -> Tuple[np.ndarray, np.ndarray, Tuple[np.ndarray, np.ndarray, np.ndarray, Optional[Dict[int, list]]]]:
-    step = 0.5
+    step = 0.1
 
     weights, misfit = compute_epicenter_weight_matrix(
         station_fields=sf, observed=observed, temperature=temperature, return_misfit=True

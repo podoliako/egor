@@ -20,9 +20,9 @@ if __name__ == '__main__':
         'height': 50.0,
         'azimuth': 45.0,
         'side_size': CELL_SIZE,
-        'n_x': 3,
-        'n_y': 3,
-        'n_z': 2
+        'n_x': 20,
+        'n_y': 20,
+        'n_z': 1
     }
 
     n_stations = 70
@@ -71,8 +71,8 @@ if __name__ == '__main__':
                 #     true_model.set_vp(i, j, k, np.random.normal(100, 0.001))
                 #     initial_model.set_vp(i, j, k, 100)
                 # if (i % 2 == 0 and k % 2 == 0) or (i % 2 != 0 and k % 2 != 0):
-                true_model.set_vp(i, j, k, 100 + k*10 + np.random.normal(0, 0.1))
-                initial_model.set_vp(i, j, k, 100 + k*10)
+                true_model.set_vp(i, j, k, 100 + np.random.normal(0, 5))
+                initial_model.set_vp(i, j, k, 100)
                 # else:
                     # true_model.set_vp(i, j, k, 100 + np.random.normal(0, 2))
                     # initial_model.set_vp(i, j, k, 100)

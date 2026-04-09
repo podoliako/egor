@@ -14,7 +14,7 @@ warm-up once; subsequent runs load from cache in < 0.1 s).
 from __future__ import annotations
 
 import numpy as np
-from numba import njit, prange
+from numba import njit, prange # pyright: ignore[reportMissingImports]
 
 
 # ── Numba kernels ─────────────────────────────────────────────────────────────
