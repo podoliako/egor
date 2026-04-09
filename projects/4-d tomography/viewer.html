@@ -62,6 +62,14 @@ button {
 }
 button:hover { border-color: var(--accent); color: var(--accent); }
 button.active { border-color: var(--accent); color: var(--accent); background: #eaf0fb; }
+.y-group { display: flex; align-items: center; gap: 4px; }
+.y-btn {
+  width: 18px; height: 18px; padding: 0; line-height: 16px;
+  border-radius: 3px; font-size: 10px;
+}
+.y-num { width: 44px; }
+.y-sep { width: 6px; }
+.btn-nz { font-size: 10px; padding: 2px 6px; }
 
 /* ── App shell ── */
 #app { display: flex; flex-direction: column; height: 100vh; }
@@ -223,7 +231,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   </div>
   <div class="vsep"></div>
 
-  <button id="btn-params">Params ▾</button>
+  <button id="btn-params" class="active">Params ▴</button>
   <div class="vsep"></div>
 
   <!-- Timing summary chips -->
@@ -238,7 +246,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 </div>
 
 <!-- Params bar -->
-<div id="params-bar"></div>
+<div id="params-bar" class="open"></div>
 
 <!-- Scrollable panel flow -->
 <div id="panels-scroll">
@@ -259,8 +267,12 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
           </select>
         </div>
         <div class="ph-group"><span class="badge" id="vel-shape-badge">—</span></div>
-        <div class="ph-group">
-          Y <input type="range" id="vel-y" min="0" max="0" value="0" style="width:60px">
+        <div class="ph-group y-group">
+          Y
+          <button class="y-btn" id="vel-y-dec" title="Prev Y">◀</button>
+          <input type="range" id="vel-y" min="0" max="0" value="0" step="1" style="width:60px">
+          <button class="y-btn" id="vel-y-inc" title="Next Y">▶</button>
+          <input type="number" id="vel-y-num" min="0" max="0" value="0" class="y-num">
           <span class="y-val" id="vel-y-v">0</span>
         </div>
       </div>
@@ -278,8 +290,12 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
           <input type="checkbox" id="cb-shared-vel-scale"> Shared scale
         </label>
         <div class="ph-group"><span class="badge" id="tr-shape-badge">—</span></div>
-        <div class="ph-group">
-          Y <input type="range" id="tr-y" min="0" max="0" value="0" style="width:60px">
+        <div class="ph-group y-group">
+          Y
+          <button class="y-btn" id="tr-y-dec" title="Prev Y">◀</button>
+          <input type="range" id="tr-y" min="0" max="0" value="0" step="1" style="width:60px">
+          <button class="y-btn" id="tr-y-inc" title="Next Y">▶</button>
+          <input type="number" id="tr-y-num" min="0" max="0" value="0" class="y-num">
           <span class="y-val" id="tr-y-v">0</span>
         </div>
       </div>
@@ -300,8 +316,12 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
         <button class="btn-full" title="Fullscreen">⤢</button>
         <div class="ph-group">Station <select id="tf-sta"></select></div>
         <div class="ph-group">fine <span class="badge" id="tf-shape-badge">—</span></div>
-        <div class="ph-group">
-          Y <input type="range" id="tf-y" min="0" max="0" value="0" style="width:60px">
+        <div class="ph-group y-group">
+          Y
+          <button class="y-btn" id="tf-y-dec" title="Prev Y">◀</button>
+          <input type="range" id="tf-y" min="0" max="0" value="0" step="1" style="width:60px">
+          <button class="y-btn" id="tf-y-inc" title="Next Y">▶</button>
+          <input type="number" id="tf-y-num" min="0" max="0" value="0" class="y-num">
           <span class="y-val" id="tf-y-v">0</span>
         </div>
         <label class="dim-toggle" title="Dim stations/events not on this Y slice">
@@ -322,8 +342,12 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
         <div class="ph-group">Sta <select id="g-sta"></select></div>
         <div class="ph-group">Wt <select id="g-wt"><option value="0">0</option></select></div>
         <div class="ph-group">fine <span class="badge" id="g-shape-badge">—</span></div>
-        <div class="ph-group">
-          Y <input type="range" id="g-y" min="0" max="0" value="0" style="width:60px">
+        <div class="ph-group y-group">
+          Y
+          <button class="y-btn" id="g-y-dec" title="Prev Y">◀</button>
+          <input type="range" id="g-y" min="0" max="0" value="0" step="1" style="width:60px">
+          <button class="y-btn" id="g-y-inc" title="Next Y">▶</button>
+          <input type="number" id="g-y-num" min="0" max="0" value="0" class="y-num">
           <span class="y-val" id="g-y-v">0</span>
         </div>
         <label class="dim-toggle">
@@ -347,10 +371,16 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
         <button class="btn-full" title="Fullscreen">⤢</button>
         <div class="ph-group">Event <select id="wt-ev"></select></div>
         <div class="ph-group">fine <span class="badge" id="wt-shape-badge">—</span></div>
-        <div class="ph-group">
-          Y <input type="range" id="wt-y" min="0" max="0" value="0" style="width:60px">
+        <div class="ph-group y-group">
+          Y
+          <button class="y-btn" id="wt-y-dec" title="Prev Y">◀</button>
+          <input type="range" id="wt-y" min="0" max="0" value="0" step="1" style="width:60px">
+          <button class="y-btn" id="wt-y-inc" title="Next Y">▶</button>
+          <input type="number" id="wt-y-num" min="0" max="0" value="0" class="y-num">
           <span class="y-val" id="wt-y-v">0</span>
         </div>
+        <button class="btn-nz" id="wt-find-nz" title="Jump to next non-zero Y slice">Find NZ</button>
+        <span class="badge" id="wt-nz-status">NZ: —</span>
         <label class="dim-toggle">
           <input type="checkbox" id="cb-dim-wt" checked> Dim
         </label>
@@ -367,8 +397,12 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
         <button class="btn-full" title="Fullscreen">⤢</button>
         <div class="ph-group">Event <select id="mf-ev"></select></div>
         <div class="ph-group">fine <span class="badge" id="mf-shape-badge">—</span></div>
-        <div class="ph-group">
-          Y <input type="range" id="mf-y" min="0" max="0" value="0" style="width:60px">
+        <div class="ph-group y-group">
+          Y
+          <button class="y-btn" id="mf-y-dec" title="Prev Y">◀</button>
+          <input type="range" id="mf-y" min="0" max="0" value="0" step="1" style="width:60px">
+          <button class="y-btn" id="mf-y-inc" title="Next Y">▶</button>
+          <input type="number" id="mf-y-num" min="0" max="0" value="0" class="y-num">
           <span class="y-val" id="mf-y-v">0</span>
         </div>
         <label class="dim-toggle">
@@ -592,11 +626,16 @@ function emptyP(pid, eid, msg) {
   const el = document.getElementById(eid); el.style.display = 'flex'; el.textContent = msg || 'No data';
 }
 
-function syncY(slId, lblId, ny, stObj) {
-  const sl = document.getElementById(slId), max = Math.max(0, ny - 1);
+function syncY(slId, lblId, numId, ny, stObj) {
+  const sl = document.getElementById(slId);
+  const num = document.getElementById(numId);
+  const max = Math.max(0, ny - 1);
   if (+sl.max !== max) sl.max = max;
+  if (+num.max !== max) num.max = max;
   if (stObj.y > max) stObj.y = 0;
-  sl.value = stObj.y; document.getElementById(lblId).textContent = stObj.y;
+  sl.value = stObj.y;
+  num.value = stObj.y;
+  document.getElementById(lblId).textContent = stObj.y;
 }
 
 function relayoutAll() {
@@ -751,7 +790,7 @@ async function renderVelPair() {
       emptyP('plot-vel','vel-empty', dT?.slice ? 'No iter model' : 'No true model — cannot diff'); return;
     }
     showP('plot-vel','vel-empty');
-    syncY('vel-y','vel-y-v', dI.full_shape[1], ST.vel);
+    syncY('vel-y','vel-y-v','vel-y-num', dI.full_shape[1], ST.vel);
     shapeBadge('vel-shape-badge', dI.full_shape);
     const diff = sub2d(dT.slice, dI.slice);
     const absMax = Math.max(1e-12, ...diff.flat().map(Math.abs));
@@ -778,14 +817,14 @@ async function renderVelPair() {
 
     if (dV?.slice) {
       showP('plot-vel','vel-empty');
-      syncY('vel-y','vel-y-v', dV.full_shape[1], ST.vel);
+      syncY('vel-y','vel-y-v','vel-y-num', dV.full_shape[1], ST.vel);
       shapeBadge('vel-shape-badge', dV.full_shape);
     } else {
       emptyP('plot-vel','vel-empty','No data');
     }
     if (dTr?.slice) {
       showP('plot-tr','tr-empty');
-      syncY('tr-y','tr-y-v', dTr.full_shape[1], ST.tr);
+      syncY('tr-y','tr-y-v','tr-y-num', dTr.full_shape[1], ST.tr);
       shapeBadge('tr-shape-badge', dTr.full_shape);
     } else {
       emptyP('plot-tr','tr-empty','No true model saved');
@@ -823,7 +862,7 @@ async function renderVelPair() {
   if (!d?.slice) { emptyP('plot-vel','vel-empty','No data'); }
   else {
     showP('plot-vel','vel-empty');
-    syncY('vel-y','vel-y-v', d.full_shape[1], ST.vel);
+    syncY('vel-y','vel-y-v','vel-y-num', d.full_shape[1], ST.vel);
     shapeBadge('vel-shape-badge', d.full_shape);
     const velZrange = isDelta
       ? (() => { const m = Math.max(1e-12, ...d.slice.flat().map(Math.abs)); return [-m, m]; })()
@@ -841,7 +880,7 @@ async function _renderTrAlone() {
   const d = await apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=true&iter=0&y=${ST.tr.y}`);
   if (!d?.slice) { emptyP('plot-tr','tr-empty','No true model saved'); return; }
   showP('plot-tr','tr-empty');
-  syncY('tr-y','tr-y-v', d.full_shape[1], ST.tr);
+  syncY('tr-y','tr-y-v','tr-y-num', d.full_shape[1], ST.tr);
   shapeBadge('tr-shape-badge', d.full_shape);
   Plotly.react('plot-tr',
     buildTraces(heatTrace(d.slice, 'Viridis'), d.shape[0], d.shape[1], -1, -1, true, ST.tr.y, false),
@@ -858,7 +897,7 @@ async function renderTF() {
   const d = await apiFetch(`/api/runs/${ST.run}/slice?type=station_field&station=${station}&iter=${ST.iter}&y=${y}`);
   if (!d?.slice) { emptyP('plot-tf','tf-empty','No data'); return; }
   showP('plot-tf','tf-empty');
-  syncY('tf-y','tf-y-v', d.full_shape[1], ST.tf);
+  syncY('tf-y','tf-y-v','tf-y-num', d.full_shape[1], ST.tf);
   shapeBadge('tf-shape-badge', d.full_shape);
   Plotly.react('plot-tf',
     buildTraces(heatTrace(d.slice, 'YlOrRd'), d.shape[0], d.shape[1], station, -1, false, y, dim),
@@ -871,7 +910,7 @@ async function renderWt() {
   const d = await apiFetch(`/api/runs/${ST.run}/slice?type=weights&event=${event}&iter=${ST.iter}&y=${y}`);
   if (!d?.slice) { emptyP('plot-wt','wt-empty','No data'); return; }
   showP('plot-wt','wt-empty');
-  syncY('wt-y','wt-y-v', d.full_shape[1], ST.wt);
+  syncY('wt-y','wt-y-v','wt-y-num', d.full_shape[1], ST.wt);
   shapeBadge('wt-shape-badge', d.full_shape);
   Plotly.react('plot-wt',
     buildTraces(heatTrace(d.slice, [[0,'#f0f4ff'],[0.5,'#6699dd'],[1,'#0a2a7a']]),
@@ -885,7 +924,7 @@ async function renderMf() {
   const d = await apiFetch(`/api/runs/${ST.run}/slice?type=misfit&event=${event}&iter=${ST.iter}&y=${y}`);
   if (!d?.slice) { emptyP('plot-mf','mf-empty','No data'); return; }
   showP('plot-mf','mf-empty');
-  syncY('mf-y','mf-y-v', d.full_shape[1], ST.mf);
+  syncY('mf-y','mf-y-v','mf-y-num', d.full_shape[1], ST.mf);
   shapeBadge('mf-shape-badge', d.full_shape);
   Plotly.react('plot-mf',
     buildTraces(heatTrace(d.slice, CS_RDBU, 0), d.shape[0], d.shape[1], -1, event, false, y, dim),
@@ -900,7 +939,7 @@ async function renderG() {
   );
   if (!d?.slice) { emptyP('plot-G','g-empty','No data — check event/station/weight'); return; }
   showP('plot-G','g-empty');
-  syncY('g-y','g-y-v', d.full_shape[1], ST.G);
+  syncY('g-y','g-y-v','g-y-num', d.full_shape[1], ST.G);
   shapeBadge('g-shape-badge', d.full_shape);
   Plotly.react('plot-G',
     buildTraces(heatTrace(d.slice, CS_RDBU, 0), d.shape[0], d.shape[1], station, event, false, y, dim),
@@ -910,6 +949,47 @@ async function renderG() {
 function renderAll() {
   renderVelPair(); renderTF(); renderWt(); renderMf(); renderG();
   renderTiming();
+}
+
+function setY(prefix, stateObj, value, renderFn) {
+  const max = +document.getElementById(`${prefix}-y`).max || 0;
+  const v = Math.max(0, Math.min(max, +value || 0));
+  stateObj.y = v;
+  document.getElementById(`${prefix}-y`).value = v;
+  document.getElementById(`${prefix}-y-num`).value = v;
+  document.getElementById(`${prefix}-y-v`).textContent = v;
+  renderFn();
+}
+
+function bindYControls(prefix, stateObj, renderFn) {
+  document.getElementById(`${prefix}-y`).addEventListener('input', e => setY(prefix, stateObj, e.target.value, renderFn));
+  document.getElementById(`${prefix}-y-num`).addEventListener('change', e => setY(prefix, stateObj, e.target.value, renderFn));
+  document.getElementById(`${prefix}-y-dec`).addEventListener('click', () => setY(prefix, stateObj, stateObj.y - 1, renderFn));
+  document.getElementById(`${prefix}-y-inc`).addEventListener('click', () => setY(prefix, stateObj, stateObj.y + 1, renderFn));
+}
+
+async function findNextNonZeroWeights() {
+  if (!ST.run) return;
+  const status = document.getElementById('wt-nz-status');
+  status.textContent = 'NZ: …';
+  const baseUrl = `/api/runs/${ST.run}/slice?type=weights&event=${ST.wt.event}&iter=${ST.iter}`;
+  const first = await apiFetch(`${baseUrl}&y=${ST.wt.y}`);
+  if (!first?.full_shape) { status.textContent = 'NZ: —'; return; }
+  const ny = first.full_shape[1];
+  const start = ST.wt.y;
+  for (let i = 0; i < ny; i++) {
+    const y = (start + i) % ny;
+    const d = i === 0 ? first : await apiFetch(`${baseUrl}&y=${y}`);
+    if (d?.slice) {
+      const hasNz = d.slice.some(row => row.some(v => v > 0));
+      if (hasNz) {
+        setY('wt', ST.wt, y, renderWt);
+        status.textContent = `NZ: y=${y}`;
+        return;
+      }
+    }
+  }
+  status.textContent = 'NZ: none';
 }
 
 /* ── Populate helpers ── */
@@ -950,6 +1030,10 @@ async function loadRun(rid) {
   ['vel-y','tr-y','tf-y','wt-y','mf-y','g-y'].forEach(id => {
     const el = document.getElementById(id); if (el) { el.value = 0; el.max = 0; }
   });
+  ['vel-y-num','tr-y-num','tf-y-num','wt-y-num','mf-y-num','g-y-num'].forEach(id => {
+    const el = document.getElementById(id); if (el) { el.value = 0; el.max = 0; }
+  });
+  document.getElementById('wt-nz-status').textContent = 'NZ: —';
 
   const [meta, info, timing] = await Promise.all([
     apiFetch(`/api/runs/${rid}/meta`),
@@ -1019,28 +1103,29 @@ document.getElementById('cb-shared-vel-scale').addEventListener('change', e => {
 
 // Vel
 document.getElementById('vel-type').addEventListener('change', e => { ST.vel.type = e.target.value; renderVel(); });
-document.getElementById('vel-y').addEventListener('input', e => { ST.vel.y = +e.target.value; document.getElementById('vel-y-v').textContent = ST.vel.y; renderVel(); });
+bindYControls('vel', ST.vel, renderVel);
 
 // True model
-document.getElementById('tr-y').addEventListener('input', e => { ST.tr.y = +e.target.value; document.getElementById('tr-y-v').textContent = ST.tr.y; ST.vel.sharedScale ? renderVelPair() : _renderTrAlone(); });
+bindYControls('tr', ST.tr, () => (ST.vel.sharedScale ? renderVelPair() : _renderTrAlone()));
 
 // TF
 document.getElementById('tf-sta').addEventListener('change', e => { ST.tf.station = +e.target.value; renderTF(); });
-document.getElementById('tf-y').addEventListener('input',   e => { ST.tf.y = +e.target.value; document.getElementById('tf-y-v').textContent = ST.tf.y; renderTF(); });
+bindYControls('tf', ST.tf, renderTF);
 
 // Wt
 document.getElementById('wt-ev').addEventListener('change', e => { ST.wt.event = +e.target.value; renderWt(); });
-document.getElementById('wt-y').addEventListener('input',   e => { ST.wt.y = +e.target.value; document.getElementById('wt-y-v').textContent = ST.wt.y; renderWt(); });
+bindYControls('wt', ST.wt, renderWt);
+document.getElementById('wt-find-nz').addEventListener('click', findNextNonZeroWeights);
 
 // Mf
 document.getElementById('mf-ev').addEventListener('change', e => { ST.mf.event = +e.target.value; renderMf(); });
-document.getElementById('mf-y').addEventListener('input',   e => { ST.mf.y = +e.target.value; document.getElementById('mf-y-v').textContent = ST.mf.y; renderMf(); });
+bindYControls('mf', ST.mf, renderMf);
 
 // G
 document.getElementById('g-ev').addEventListener('change', async e => { ST.G.event = +e.target.value; await reloadGWeights(); renderG(); });
 document.getElementById('g-sta').addEventListener('change', e => { ST.G.station = +e.target.value; renderG(); });
 document.getElementById('g-wt').addEventListener('change',  e => { ST.G.weight  = +e.target.value; renderG(); });
-document.getElementById('g-y').addEventListener('input',    e => { ST.G.y = +e.target.value; document.getElementById('g-y-v').textContent = ST.G.y; renderG(); });
+bindYControls('g', ST.G, renderG);
 
 /* ── Fullscreen ── */
 document.querySelectorAll('.btn-full').forEach(btn => {
@@ -1058,7 +1143,29 @@ async function init() {
   const runs = await apiFetch('/api/runs');
   const sel  = document.getElementById('run-select');
   if (!runs?.length) { sel.innerHTML = '<option value="">No runs found</option>'; return; }
-  sel.innerHTML = runs.map(r => `<option value="${r}">${r}</option>`).join('');
+
+  const groups = new Map();
+  const other = [];
+  runs.forEach(r => {
+    const m = r.match(/run_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+    if (!m) { other.push(r); return; }
+    const [_, Y, M, D, h, m2, s] = m;
+    const date = `${Y}-${M}-${D}`;
+    const time = `${h}:${m2}:${s}`;
+    if (!groups.has(date)) groups.set(date, []);
+    groups.get(date).push({ id: r, label: `${time} • ${r}` });
+  });
+
+  let html = '';
+  for (const [date, items] of groups.entries()) {
+    html += `<optgroup label="${date}">`;
+    html += items.map(it => `<option value="${it.id}">${it.label}</option>`).join('');
+    html += `</optgroup>`;
+  }
+  if (other.length) {
+    html += `<optgroup label="Other">` + other.map(r => `<option value="${r}">${r}</option>`).join('') + `</optgroup>`;
+  }
+  sel.innerHTML = html;
   loadRun(runs[0]);
 }
 
