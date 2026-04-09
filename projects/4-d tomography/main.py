@@ -16,7 +16,7 @@ if __name__ == '__main__':
     SUBDIVISION = 15
     STATION_SEED = 42
     TRUE_MODEL_SEED = 123
-    V_BOUNDS = (90.0, 140.0)
+    V_BOUNDS = (90.0, 110.0)
     V_REG_STRENGTH = 0.05
     V_LEFT_MODE = "exp"
     V_RIGHT_MODE = "poly"
@@ -30,9 +30,9 @@ if __name__ == '__main__':
         'height': 50.0,
         'azimuth': 45.0,
         'side_size': CELL_SIZE,
-        'n_x': 20,
-        'n_y': 20,
-        'n_z': 1
+        'n_x': 5,
+        'n_y': 5,
+        'n_z': 2
     }
 
     n_stations = 70
@@ -102,7 +102,7 @@ if __name__ == '__main__':
         n_events=350,
         random_seed=7,
         subdivision=SUBDIVISION,
-        depth_bias=2,
+        depth_bias=10,
         x_offset=0,
         y_offset=0
     )
@@ -115,7 +115,7 @@ if __name__ == '__main__':
         arrivals_table=full_arr,
         station_locs=stations_metric,
         weights_top_n=1,
-        lambda_reg=100,
+        lambda_reg=0.001,
         subdivision=SUBDIVISION,
         v_bounds=V_BOUNDS,
         v_reg_strength=V_REG_STRENGTH,
