@@ -129,3 +129,8 @@ class TomographyLogger:
         with open(self.run_dir / "timing_summary.json", "w") as f:
             json.dump(summary, f, indent=2)
         return summary
+
+    def save_quality(self, iteration: int, avg_abs_pct_dev: float):
+        with open(self.run_dir / "quality.jsonl", "a") as f:
+            json.dump({"iter": int(iteration), "avg_abs_pct_dev": float(avg_abs_pct_dev)}, f)
+            f.write("\n")

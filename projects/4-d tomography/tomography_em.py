@@ -40,6 +40,14 @@ def run_em(
     subdivision: int = 1,
     n_workers: int = 1,
     log_G_per_weight: bool = False,
+    v_bounds: Optional[Tuple[float, float]] = None,
+    v_reg_strength: float = 0.0,
+    v_left_mode: str = "exp",
+    v_right_mode: str = "poly",
+    v_left_rate: float = 6.0,
+    v_right_rate: float = 2.0,
+    v_left_power: float = 2.0,
+    v_right_power: float = 2.0,
     true_model=None,
     event_locs=None,
     logger=None,
@@ -98,11 +106,27 @@ def run_em(
 
         current_vp = model.get_geo_grid(subdivision=1).vp
         new_velocities = 1.0 / (1.0 / current_vp + delta_s)
+        if v_bounds and v_reg_strength > 0:
+            new_velocities = _apply_velocity_bounds(
+                new_velocities,
+                v_min=v_bounds[0],
+                v_max=v_bounds[1],
+                strength=v_reg_strength,
+                left_mode=v_left_mode,
+                right_mode=v_right_mode,
+                left_rate=v_left_rate,
+                right_rate=v_right_rate,
+                left_power=v_left_power,
+                right_power=v_right_power,
+            )
         model.set_vp_array(new_velocities)
 
         if logger is not None:
             logger.end_iteration(i)
             logger.save_delta_s(i, delta_s)
+            if true_model is not None:
+                q = _avg_abs_percent_deviation(model, true_model)
+                logger.save_quality(i, q)
 
     if logger is not None:
         logger.save_timing_summary()
@@ -244,3 +268,50 @@ def _build_grid_info(model, subdivision: int) -> Tuple[dict, float, float]:
         )
 
     return grid_info, coarse_side, fine_side
+
+
+def _avg_abs_percent_deviation(model, true_model, eps: float = 1e-12) -> float:
+    m = model.get_geo_grid(subdivision=1).vp
+    t = true_model.get_geo_grid(subdivision=1).vp
+    denom = np.where(np.abs(t) < eps, np.nan, np.abs(t))
+    pct = np.abs(m - t) / denom * 100.0
+    return float(np.nanmean(pct))
+
+
+def _apply_velocity_bounds(
+    velocities: np.ndarray,
+    v_min: float,
+    v_max: float,
+    strength: float,
+    left_mode: str,
+    right_mode: str,
+    left_rate: float,
+    right_rate: float,
+    left_power: float,
+    right_power: float,
+) -> np.ndarray:
+    if v_min >= v_max:
+        return velocities
+
+    v = velocities.astype(np.float64, copy=True)
+    eps = 1e-12
+
+    left = v < v_min
+    if np.any(left):
+        dist = (v_min - v[left]) / max(v_min, eps)
+        if left_mode == "exp":
+            w = np.expm1(left_rate * dist)
+        else:
+            w = np.power(dist, left_power)
+        v[left] = v[left] + strength * w * (v_min - v[left])
+
+    right = v > v_max
+    if np.any(right):
+        dist = (v[right] - v_max) / max(v_max, eps)
+        if right_mode == "exp":
+            w = np.expm1(right_rate * dist)
+        else:
+            w = np.power(dist, right_power)
+        v[right] = v[right] - strength * w * (v[right] - v_max)
+
+    return v.astype(velocities.dtype, copy=False)

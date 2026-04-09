@@ -14,6 +14,16 @@ if __name__ == '__main__':
 
     CELL_SIZE = 500.0
     SUBDIVISION = 15
+    STATION_SEED = 42
+    TRUE_MODEL_SEED = 123
+    V_BOUNDS = (90.0, 140.0)
+    V_REG_STRENGTH = 0.05
+    V_LEFT_MODE = "exp"
+    V_RIGHT_MODE = "poly"
+    V_LEFT_RATE = 8.0
+    V_RIGHT_RATE = 2.0
+    V_LEFT_POWER = 2.0
+    V_RIGHT_POWER = 2.0
     model_config = {
         'lon': 37.6173,
         'lat': 55.7558,
@@ -33,13 +43,14 @@ if __name__ == '__main__':
     n_x = model_config['n_x']
     # middle_y = CELL_SIZE * 1
 
+    rng_stations = np.random.default_rng(STATION_SEED)
     stations_metric = [
         (
-            np.random.uniform(0, (n_x)*CELL_SIZE), 
-            np.random.uniform(0, (n_y)*CELL_SIZE),
-            0
-         )
-        for i in range(n_stations)
+            rng_stations.uniform(0, n_x * CELL_SIZE),
+            rng_stations.uniform(0, n_y * CELL_SIZE),
+            0,
+        )
+        for _ in range(n_stations)
     ]
 
     # events_metric = [
@@ -58,6 +69,7 @@ if __name__ == '__main__':
     initial_model.fill_linear_gradient('vp', 100, 100)
     true_model.fill_linear_gradient('vp', 100, 100)    
 
+    rng_true = np.random.default_rng(TRUE_MODEL_SEED)
     for i in range(true_model.grid.vp.shape[0]):
         for j in range(true_model.grid.vp.shape[1]):
             for k in range(true_model.grid.vp.shape[2]):
@@ -71,7 +83,7 @@ if __name__ == '__main__':
                 #     true_model.set_vp(i, j, k, np.random.normal(100, 0.001))
                 #     initial_model.set_vp(i, j, k, 100)
                 # if (i % 2 == 0 and k % 2 == 0) or (i % 2 != 0 and k % 2 != 0):
-                true_model.set_vp(i, j, k, 100 + np.random.normal(0, 5))
+                true_model.set_vp(i, j, k, 100 + rng_true.normal(0, 5))
                 initial_model.set_vp(i, j, k, 100)
                 # else:
                     # true_model.set_vp(i, j, k, 100 + np.random.normal(0, 2))
@@ -105,6 +117,14 @@ if __name__ == '__main__':
         weights_top_n=1,
         lambda_reg=100,
         subdivision=SUBDIVISION,
+        v_bounds=V_BOUNDS,
+        v_reg_strength=V_REG_STRENGTH,
+        v_left_mode=V_LEFT_MODE,
+        v_right_mode=V_RIGHT_MODE,
+        v_left_rate=V_LEFT_RATE,
+        v_right_rate=V_RIGHT_RATE,
+        v_left_power=V_LEFT_POWER,
+        v_right_power=V_RIGHT_POWER,
         # --- сохранение ---
         true_model=true_model,
         event_locs=events_metric,

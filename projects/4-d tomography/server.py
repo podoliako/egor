@@ -138,6 +138,23 @@ def api_timing(rid):
     return jsonify(rows)
 
 
+@app.route("/api/runs/<rid>/quality")
+def api_quality(rid):
+    """Read quality.jsonl → [{iter, avg_abs_pct_dev}, ...]"""
+    p = _rd(rid) / "quality.jsonl"
+    if not p.exists():
+        return jsonify([])
+    rows = []
+    for line in p.read_text().splitlines():
+        line = line.strip()
+        if line:
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                pass
+    return jsonify(rows)
+
+
 # ─── iter / event / weight lists ──────────────────────────────────────────────
 
 @app.route("/api/runs/<rid>/iters_list")

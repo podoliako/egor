@@ -439,6 +439,20 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
     </div>
   </div><!-- /row 4 -->
 
+  <!-- Row 5: Quality (full width) -->
+  <div class="panel-row">
+    <div class="panel panel-timing">
+      <div class="panel-hdr">
+        <span class="panel-title">Quality</span>
+        <button class="btn-full" title="Fullscreen">⤢</button>
+      </div>
+      <div class="panel-body">
+        <div class="no-data-msg" id="quality-empty">No quality.jsonl found</div>
+        <div id="plot-quality" style="width:100%;height:100%"></div>
+      </div>
+    </div>
+  </div><!-- /row 5 -->
+
 </div><!-- #panels-scroll -->
 </div><!-- #app -->
 
@@ -456,6 +470,7 @@ const ST = {
   wt:     { event: 0, y: 0, dim: true },
   mf:     { event: 0, y: 0, dim: true },
   timing: { data: [], mode: 'per_iter' },
+  quality:{ data: [] },
 };
 
 const PLY_CFG = {
@@ -463,7 +478,7 @@ const PLY_CFG = {
   modeBarButtonsToRemove: ['lasso2d','select2d','autoScale2d'],
 };
 
-const ALL_PLOTS = ['plot-vel','plot-tf','plot-tr','plot-wt','plot-mf','plot-G','plot-timing'];
+const ALL_PLOTS = ['plot-vel','plot-tf','plot-tr','plot-wt','plot-mf','plot-G','plot-timing','plot-quality'];
 
 /* ── Layout factory ── */
 function mkLayout(nx, nz, cbTitle, zrange) {
@@ -738,6 +753,49 @@ function renderTiming() {
   updateTimingChips(sorted);
 }
 
+function renderQuality() {
+  const rows = ST.quality.data;
+  if (!rows || rows.length === 0) {
+    emptyP('plot-quality', 'quality-empty', 'No quality.jsonl found');
+    return;
+  }
+
+  const sorted = [...rows].sort((a, b) => a.iter - b.iter);
+  const iters = sorted.map(r => r.iter);
+  const vals  = sorted.map(r => r.avg_abs_pct_dev);
+
+  const traces = [
+    {
+      type: 'scatter', mode: 'lines+markers',
+      x: iters, y: vals,
+      line: { color: '#2e9e6b', width: 2 },
+      marker: { size: 5, color: '#2e9e6b' },
+      hovertemplate: 'iter %{x}<br>%{y:.3f}%<extra></extra>',
+    },
+  ];
+
+  const layout = {
+    paper_bgcolor: '#ffffff', plot_bgcolor: '#f8f9fb',
+    font: { color: '#1e2530', size: 9, family: "Menlo, Consolas, monospace" },
+    margin: { l: 58, r: 14, t: 6, b: 36 },
+    xaxis: {
+      title: { text: 'Iteration', font: { size: 9 }, standoff: 2 },
+      showgrid: false, zeroline: false,
+      tickmode: 'linear', dtick: 1,
+      tickfont: { size: 8 },
+    },
+    yaxis: {
+      title: { text: 'Avg abs % deviation', font: { size: 9 }, standoff: 2 },
+      showgrid: true, gridcolor: '#e8ecf0', zeroline: false,
+      tickfont: { size: 8 },
+    },
+    showlegend: false,
+  };
+
+  showP('plot-quality', 'quality-empty');
+  Plotly.react('plot-quality', traces, layout, PLY_CFG);
+}
+
 function updateTimingChips(sorted) {
   const chips = document.getElementById('timing-chips');
   if (!sorted || sorted.length === 0) { chips.innerHTML = ''; return; }
@@ -949,6 +1007,7 @@ async function renderG() {
 function renderAll() {
   renderVelPair(); renderTF(); renderWt(); renderMf(); renderG();
   renderTiming();
+  renderQuality();
 }
 
 function setY(prefix, stateObj, value, renderFn) {
@@ -1035,14 +1094,16 @@ async function loadRun(rid) {
   });
   document.getElementById('wt-nz-status').textContent = 'NZ: —';
 
-  const [meta, info, timing] = await Promise.all([
+  const [meta, info, timing, quality] = await Promise.all([
     apiFetch(`/api/runs/${rid}/meta`),
     apiFetch(`/api/runs/${rid}/info`),
     apiFetch(`/api/runs/${rid}/timing`),
+    apiFetch(`/api/runs/${rid}/quality`),
   ]);
   ST.meta = meta || {};
   ST.info = info || {};
   ST.timing.data = timing || [];
+  ST.quality.data = quality || [];
 
   document.getElementById('warn-no-grid').style.display =
     ST.meta?.grid_info?.coarse_cell_size ? 'none' : 'inline';
