@@ -301,25 +301,25 @@ def _apply_velocity_bounds(
     left = v < v_min
     if np.any(left):
         dist = (v_min - v[left]) / max(v_min, eps)
-        w = _bounded_weight(dist, left_mode, left_rate, left_power)
-        v[left] = v[left] + strength * w * (v_min - v[left])
+        w = _unbounded_weight(dist, left_mode, left_rate, left_power)
+        d = v_min - v[left]
+        v[left] = v_min - d / (1.0 + strength * w)
 
     right = v > v_max
     if np.any(right):
         dist = (v[right] - v_max) / max(v_max, eps)
-        w = _bounded_weight(dist, right_mode, right_rate, right_power)
-        v[right] = v[right] - strength * w * (v[right] - v_max)
+        w = _unbounded_weight(dist, right_mode, right_rate, right_power)
+        d = v[right] - v_max
+        v[right] = v_max + d / (1.0 + strength * w)
 
     return v.astype(velocities.dtype, copy=False)
 
 
-def _bounded_weight(dist, mode: str, rate: float, power: float) -> np.ndarray:
+def _unbounded_weight(dist, mode: str, rate: float, power: float) -> np.ndarray:
     dist = np.maximum(dist, 0.0)
     if mode == "exp":
         x = np.minimum(rate * dist, 50.0)
-        # 1 - exp(-x) with good numerical stability
-        w = -np.expm1(-x)
+        w = np.expm1(x)
     else:
-        x = np.power(dist, power)
-        w = x / (1.0 + x)
+        w = np.power(dist, power)
     return w
