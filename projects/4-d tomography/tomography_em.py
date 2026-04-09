@@ -105,7 +105,9 @@ def run_em(
         )
 
         current_vp = model.get_geo_grid(subdivision=1).vp
-        new_velocities = 1.0 / (1.0 / current_vp + delta_s)
+        s = 1.0 / current_vp + delta_s
+        s = np.where(s <= 1e-12, 1e-12, s)
+        new_velocities = 1.0 / s
         if v_bounds and v_reg_strength > 0:
             new_velocities = _apply_velocity_bounds(
                 new_velocities,
@@ -299,19 +301,25 @@ def _apply_velocity_bounds(
     left = v < v_min
     if np.any(left):
         dist = (v_min - v[left]) / max(v_min, eps)
-        if left_mode == "exp":
-            w = np.expm1(left_rate * dist)
-        else:
-            w = np.power(dist, left_power)
+        w = _bounded_weight(dist, left_mode, left_rate, left_power)
         v[left] = v[left] + strength * w * (v_min - v[left])
 
     right = v > v_max
     if np.any(right):
         dist = (v[right] - v_max) / max(v_max, eps)
-        if right_mode == "exp":
-            w = np.expm1(right_rate * dist)
-        else:
-            w = np.power(dist, right_power)
+        w = _bounded_weight(dist, right_mode, right_rate, right_power)
         v[right] = v[right] - strength * w * (v[right] - v_max)
 
     return v.astype(velocities.dtype, copy=False)
+
+
+def _bounded_weight(dist, mode: str, rate: float, power: float) -> np.ndarray:
+    dist = np.maximum(dist, 0.0)
+    if mode == "exp":
+        x = np.minimum(rate * dist, 50.0)
+        # 1 - exp(-x) with good numerical stability
+        w = -np.expm1(-x)
+    else:
+        x = np.power(dist, power)
+        w = x / (1.0 + x)
+    return w
