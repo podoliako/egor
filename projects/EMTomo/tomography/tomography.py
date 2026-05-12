@@ -9,9 +9,9 @@ Implementation is split across:
 """
 from __future__ import annotations
 
-from tomography_em import make_tomography_step, run_em, warm_up_jit
-from tomography_logging import TomographyLogger
-from tomography_math import _calculate_G
+from .tomography_em import make_tomography_step, run_em, warm_up_jit
+from .tomography_logging import TomographyLogger
+from .tomography_math import _calculate_G
 
 __all__ = [
     "TomographyLogger",

@@ -4,11 +4,11 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 
-from instruments import compute_station_travel_time_fields, metric_to_index
+from instruments.instruments import compute_station_travel_time_fields, metric_to_index
 from raytracing import compute_G_all_stations, compute_G_all_stations_serial
-from tomography_events import _process_event_single, _run_events_parallel
-from tomography_logging import TomographyLogger
-from tomography_math import _solve_delta_s
+from .tomography_events import _process_event_single, _run_events_parallel
+from .tomography_logging import TomographyLogger
+from .tomography_math import _solve_delta_s
 
 
 def warm_up_jit() -> None:

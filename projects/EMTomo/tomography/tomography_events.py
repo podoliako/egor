@@ -5,9 +5,9 @@ from typing import Callable, Dict, Optional, Tuple
 
 import numpy as np
 
-from instruments import coarsen_G, compute_epicenter_weight_matrix
+from instruments.instruments import coarsen_G, compute_epicenter_weight_matrix
 from raytracing import compute_G_all_stations, compute_G_all_stations_serial
-from tomography_math import _calculate_residuals, _select_top_n_weights
+from .tomography_math import _calculate_residuals, _select_top_n_weights
 
 _MP: dict = {}
 

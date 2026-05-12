@@ -1,7 +1,7 @@
 import numpy as np
 from velocity_model import VelocityModel
-from instruments import generate_synthetic_arrivals_table
-from tomography import run_em, warm_up_jit
+from instruments.instruments import generate_synthetic_arrivals_table
+from tomography.tomography import run_em, warm_up_jit
 
 import cProfile
 import pstats
@@ -16,26 +16,26 @@ if __name__ == '__main__':
     SUBDIVISION = 15
     STATION_SEED = 42
     TRUE_MODEL_SEED = 123
-    V_BOUNDS = (90.0, 110.0)
-    V_REG_STRENGTH = 0.05
-    V_LEFT_MODE = "exp"
-    V_RIGHT_MODE = "poly"
-    V_LEFT_RATE = 8.0
-    V_RIGHT_RATE = 2.0
-    V_LEFT_POWER = 2.0
-    V_RIGHT_POWER = 2.0
+    V_BOUNDS = (50.0, 150.0)
+    V_REG_STRENGTH = 0.00055
+    V_LEFT_MODE = "lin"
+    V_RIGHT_MODE = "lin"
+    V_LEFT_RATE = 0.0
+    V_RIGHT_RATE = 0.0
+    V_LEFT_POWER = 0.0
+    V_RIGHT_POWER = 0.0
     model_config = {
         'lon': 37.6173,
         'lat': 55.7558,
         'height': 50.0,
         'azimuth': 45.0,
         'side_size': CELL_SIZE,
-        'n_x': 5,
-        'n_y': 5,
-        'n_z': 2
+        'n_x': 10,
+        'n_y': 10,
+        'n_z': 1
     }
 
-    n_stations = 70
+    n_stations = 30
     # n_events = 10
     middle_y = (model_config['n_y']) * CELL_SIZE / 2
     middle_z = (model_config['n_z']) * CELL_SIZE / 2
@@ -83,7 +83,7 @@ if __name__ == '__main__':
                 #     true_model.set_vp(i, j, k, np.random.normal(100, 0.001))
                 #     initial_model.set_vp(i, j, k, 100)
                 # if (i % 2 == 0 and k % 2 == 0) or (i % 2 != 0 and k % 2 != 0):
-                true_model.set_vp(i, j, k, 100 + rng_true.normal(0, 5))
+                true_model.set_vp(i, j, k, 100 + rng_true.normal(0, 2))
                 initial_model.set_vp(i, j, k, 100)
                 # else:
                     # true_model.set_vp(i, j, k, 100 + np.random.normal(0, 2))
@@ -99,10 +99,10 @@ if __name__ == '__main__':
     full_arr, events_metric = generate_synthetic_arrivals_table(
         true_model,
         station_locs=stations_metric,
-        n_events=350,
+        n_events=200,
         random_seed=7,
         subdivision=SUBDIVISION,
-        depth_bias=10,
+        depth_bias=2,
         x_offset=0,
         y_offset=0
     )
@@ -110,12 +110,13 @@ if __name__ == '__main__':
     warm_up_jit()
 
     logger = run_em(
-        n_cycles=5,
+        n_cycles=125,
         initial_model=initial_model,
         arrivals_table=full_arr,
         station_locs=stations_metric,
         weights_top_n=1,
-        lambda_reg=0.001,
+        temperature=0.01,
+        lambda_reg=0.0001,
         subdivision=SUBDIVISION,
         v_bounds=V_BOUNDS,
         v_reg_strength=V_REG_STRENGTH,
@@ -130,7 +131,7 @@ if __name__ == '__main__':
         event_locs=events_metric,
         save_runs=True,
         runs_dir="runs",
-        n_workers=10,
+        n_workers=20,
     )
 
     print(f"Run saved: {logger.run_dir}")
