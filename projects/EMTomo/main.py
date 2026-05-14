@@ -30,8 +30,8 @@ if __name__ == '__main__':
         'height': 50.0,
         'azimuth': 45.0,
         'side_size': CELL_SIZE,
-        'n_x': 10,
-        'n_y': 10,
+        'n_x': 5,
+        'n_y': 5,
         'n_z': 1
     }
 
@@ -114,9 +114,9 @@ if __name__ == '__main__':
         initial_model=initial_model,
         arrivals_table=full_arr,
         station_locs=stations_metric,
-        weights_top_n=1,
-        temperature=0.01,
-        lambda_reg=0.0001,
+        weights_top_n=80,
+        temperature=0.001,
+        lambda_reg=0.001,
         subdivision=SUBDIVISION,
         v_bounds=V_BOUNDS,
         v_reg_strength=V_REG_STRENGTH,

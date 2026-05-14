@@ -14,40 +14,37 @@ def _calculate_residuals(station_fields: np.ndarray, arrivals: np.ndarray, weigh
     return residual_vector[:, np.newaxis] - residual_vector[np.newaxis, :]
 
 
-def _solve_delta_s(
-    g_tilde_prime: np.ndarray,
-    r_prime: np.ndarray,
-    model_shape: Tuple[int, int, int],
-    lambda_reg: float,
-    use_upper_triangle_pairs: bool,
-):
-    g_tilde_prime = np.asarray(g_tilde_prime)
+def _solve_delta_s(g_tilde_prime, r_prime, model_shape, lambda_reg, use_upper_triangle_pairs):
     n_st = g_tilde_prime.shape[0]
-    if n_st != g_tilde_prime.shape[1]:
-        raise ValueError("g_tilde_prime must have shape (n_stations, n_stations, ...)")
-    if r_prime.shape != (n_st, n_st):
-        raise ValueError("r_prime shape must be (n_stations, n_stations)")
-
     pair_mask = (
         np.triu(np.ones((n_st, n_st), dtype=bool), k=1)
         if use_upper_triangle_pairs
         else ~np.eye(n_st, dtype=bool)
     )
 
-    g_rows = g_tilde_prime[pair_mask].reshape(-1, int(np.prod(model_shape)))
-    r_vec = r_prime[pair_mask].reshape(-1)
-    if g_rows.shape[0] == 0:
-        raise ValueError("No station pairs available to solve tomography system")
+    n_vox = int(np.prod(model_shape))
+    g_rows = g_tilde_prime[pair_mask].reshape(-1, n_vox)
+    r_vec  = r_prime[pair_mask].reshape(-1)
 
-    gg_t = g_rows @ g_rows.T
-    gg_t_reg = gg_t + float(lambda_reg) * np.eye(gg_t.shape[0], dtype=np.float64)
+    if g_rows.shape[0] == 0:
+        raise ValueError("No station pairs available")
+
+    gtg = g_rows.T @ g_rows                    # (n_vox, n_vox)
+    gtr = g_rows.T @ r_vec                     # (n_vox,)
+
+    # Нормируем λ на средний диагональный элемент GᵀG.
+    # lambda_reg=1.0  → регуляризация = data term (сильно)
+    # lambda_reg=0.01 → 1% от data term (слабо)
+    # lambda_reg=0.0  → нет регуляризации
+    scale = np.trace(gtg) / n_vox
+    gtg_reg = gtg + float(lambda_reg) * scale * np.eye(n_vox, dtype=np.float64)
 
     try:
-        alpha = np.linalg.solve(gg_t_reg, r_vec)
+        delta_s = np.linalg.solve(gtg_reg, gtr)
     except np.linalg.LinAlgError:
-        alpha = np.linalg.lstsq(gg_t_reg, r_vec, rcond=None)[0]
+        delta_s = np.linalg.lstsq(gtg_reg, gtr, rcond=None)[0]
 
-    return (g_rows.T @ alpha).reshape(model_shape)
+    return delta_s.reshape(model_shape)
 
 
 def _select_top_n_weights(weights_matrix, n: int, normalize: bool = False):
