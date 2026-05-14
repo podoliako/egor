@@ -31,6 +31,9 @@ def _rd(run_id: str) -> Path:
 def _npy(path: Path):
     return np.load(path) if path.exists() else None
 
+def _npz(path: Path, value):
+    return np.load(path)[value] if path.exists() else None
+
 
 def _slice_y(arr: np.ndarray, y: int) -> np.ndarray:
     """arr[:, y, :] → (nx, nz), y clamped."""
@@ -246,7 +249,7 @@ def api_slice(rid):
 
     elif dtype == "weights":
         ev  = request.args.get("event", 0, type=int)
-        arr = _npy(rd / f"iter_{it}" / f"event_{ev}" / "weights.npy")
+        arr = _npz(rd / f"iter_{it}" / f"event_{ev}" / "weights.npz", "weights")
 
     elif dtype == "misfit":
         ev  = request.args.get("event", 0, type=int)

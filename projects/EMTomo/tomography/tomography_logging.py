@@ -20,19 +20,26 @@ class TomographyLogger:
           timing.jsonl / timing_summary.json
           profile.txt / profile_top30.json
           iter_<i>/
-            model.npy / delta_s.npy / station_fields.npy
+            model.npy / delta_s.npy / station_fields.npy  (station_fields only if save_timefields=True)
             event_<j>/
-              weights.npy / misfit.npy / residuals.npy
+              weights.npz / misfit.npy (misfit only if save_misfit=True) / residuals.npy
               weight_<w>/G_station_<k>.npy
     """
 
-    def __init__(self, base_dir: str = "runs"):
+    def __init__(
+        self,
+        base_dir: str = "runs",
+        save_misfit: bool = False,
+        save_timefields: bool = False,
+    ):
         self.run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.run_dir = Path(base_dir) / f"run_{self.run_id}"
         self.run_dir.mkdir(parents=True, exist_ok=True)
         self._iter_start: float = 0.0
         self._run_start: float = time.perf_counter()
         self.timing: dict = {}
+        self.save_misfit = save_misfit
+        self.save_timefields = save_timefields
 
     def save_meta(self, run_params, station_locs, event_locs, grid_info=None):
         meta = {
@@ -64,6 +71,8 @@ class TomographyLogger:
         np.save(self.iter_dir(iteration) / "delta_s.npy", delta_s)
 
     def save_station_fields(self, iteration: int, station_fields: np.ndarray):
+        if not self.save_timefields:
+            return
         np.save(self.iter_dir(iteration) / "station_fields.npy", np.asarray(station_fields))
 
     def save_event_data(
@@ -77,8 +86,11 @@ class TomographyLogger:
     ):
         event_dir = self.iter_dir(iteration) / f"event_{event_idx}"
         event_dir.mkdir(exist_ok=True)
-        np.save(event_dir / "weights.npy", weights)
-        if misfit is not None:
+
+        # weights сжимаем — большинство значений нули, хорошо жмётся
+        np.savez_compressed(event_dir / "weights.npz", weights=weights)
+
+        if misfit is not None and self.save_misfit:
             np.save(event_dir / "misfit.npy", misfit)
         if residuals is not None:
             np.save(event_dir / "residuals.npy", residuals)
