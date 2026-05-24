@@ -20,10 +20,12 @@ class TomographyLogger:
           timing.jsonl / timing_summary.json
           profile.txt / profile_top30.json
           iter_<i>/
-            model.npy / delta_s.npy / station_fields.npy  (station_fields only if save_timefields=True)
+            model.npy / delta_s.npy
             event_<j>/
-              weights.npz / misfit.npy (misfit only if save_misfit=True) / residuals.npy
-              weight_<w>/G_station_<k>.npy
+              weights.npz / residuals.npy
+              weight_<w>/
+                G_station_<k>.npz   ← compressed (was .npy)
+                ray_count.npy       ← sum of |G| across stations (coarse grid)
     """
 
     def __init__(
@@ -87,19 +89,35 @@ class TomographyLogger:
         event_dir = self.iter_dir(iteration) / f"event_{event_idx}"
         event_dir.mkdir(exist_ok=True)
 
-        # weights сжимаем — большинство значений нули, хорошо жмётся
         np.savez_compressed(event_dir / "weights.npz", weights=weights)
 
         if misfit is not None and self.save_misfit:
             np.save(event_dir / "misfit.npy", misfit)
         if residuals is not None:
             np.save(event_dir / "residuals.npy", residuals)
+
         if G_per_weight is not None:
             for w_idx, g_list in G_per_weight.items():
                 w_dir = event_dir / f"weight_{w_idx}"
                 w_dir.mkdir(exist_ok=True)
+
+                # Save each station's G as compressed npz
+                # g_list[si] is a 3-D array on the fine grid
                 for si, g in enumerate(g_list):
-                    np.save(w_dir / f"G_station_{si}.npy", g)
+                    np.savez_compressed(
+                        w_dir / f"G_station_{si}.npz",
+                        G=g.astype(np.float32),  # float32 saves ~half the space
+                    )
+
+                # Ray count = number of stations with non-zero path through each coarse cell.
+                # We binarise each G (ray passed / didn't pass) and sum.
+                # g_list entries are already on the coarse grid after coarsen_G is applied
+                # inside _process_event — so shape is (nx, ny, nz) coarse.
+                if g_list:
+                    ray_count = np.zeros_like(g_list[0], dtype=np.int16)
+                    for g in g_list:
+                        ray_count += (g > 0).astype(np.int16)
+                    np.save(w_dir / "ray_count.npy", ray_count)
 
     def start_iteration(self, iteration: int):
         self._iter_start = time.perf_counter()

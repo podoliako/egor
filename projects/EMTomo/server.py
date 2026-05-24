@@ -31,8 +31,20 @@ def _rd(run_id: str) -> Path:
 def _npy(path: Path):
     return np.load(path) if path.exists() else None
 
-def _npz(path: Path, value):
-    return np.load(path)[value] if path.exists() else None
+
+def _npz(path: Path, key: str):
+    return np.load(path)[key] if path.exists() else None
+
+
+def _load_G_station(path_stem: Path) -> np.ndarray | None:
+    """Load G_station_<si> from either .npz (new) or .npy (old) file."""
+    npz_path = path_stem.with_suffix(".npz")
+    npy_path = path_stem.with_suffix(".npy")
+    if npz_path.exists():
+        return np.load(npz_path)["G"]
+    if npy_path.exists():
+        return np.load(npy_path)
+    return None
 
 
 def _slice_y(arr: np.ndarray, y: int) -> np.ndarray:
@@ -85,7 +97,6 @@ def api_meta(rid):
         return jsonify({})
     meta = json.loads(p.read_text())
 
-    # enrich with grid ny values for Y-sliders
     gi = meta.get("grid_info", {})
     meta["coarse_ny"] = gi.get("coarse_shape", [1, 1, 1])[1] if "coarse_shape" in gi else 1
     meta["fine_ny"]   = gi.get("fine_shape",   [1, 1, 1])[1] if "fine_shape"   in gi else 1
@@ -103,11 +114,28 @@ def api_info(rid):
     )
 
     n_stations = 0
+    # Try to infer station count from G files or weights
     for i in iters:
-        p = rd / f"iter_{i}" / "station_fields.npy"
+        iter_d = rd / f"iter_{i}"
+        # check first event's weight_0 for G files
+        ev0 = iter_d / "event_0" / "weight_0"
+        if ev0.exists():
+            g_files = list(ev0.glob("G_station_*.np*"))
+            if g_files:
+                n_stations = len(g_files)
+                break
+        # fallback: station_fields
+        p = iter_d / "station_fields.npy"
         if p.exists():
             n_stations = int(np.load(p, mmap_mode="r").shape[0])
             break
+
+    # also try meta
+    if n_stations == 0:
+        meta_path = rd / "meta.json"
+        if meta_path.exists():
+            m = json.loads(meta_path.read_text())
+            n_stations = len(m.get("station_locs", []))
 
     meta_path = rd / "meta.json"
     n_events = 0
@@ -126,7 +154,6 @@ def api_info(rid):
 
 @app.route("/api/runs/<rid>/timing")
 def api_timing(rid):
-    """Read timing.jsonl → [{iter, elapsed_s}, ...]"""
     p = _rd(rid) / "timing.jsonl"
     if not p.exists():
         return jsonify([])
@@ -143,7 +170,6 @@ def api_timing(rid):
 
 @app.route("/api/runs/<rid>/quality")
 def api_quality(rid):
-    """Read quality.jsonl → [{iter, avg_abs_pct_dev}, ...]"""
     p = _rd(rid) / "quality.jsonl"
     if not p.exists():
         return jsonify([])
@@ -208,16 +234,15 @@ def api_slice(rid):
 
     Query params
     ────────────
-    type        model | true_model | station_field | weights | misfit | G | delta_s
+    type        model | true_model | station_field | weights | G | delta_s | ray_count
     y           int   y-slice index
     iter        int   iteration number
 
-    type=model         model_type: initial | true | iter
-    type=station_field station: int
-    type=weights       event: int
-    type=misfit        event: int
-    type=G             event: int, weight: int, station: int   (fine grid)
-    type=delta_s       (no extra params)
+    type=model      model_type: initial | true | iter
+    type=weights    event: int
+    type=G          event: int, weight: int, station: int   (coarse grid via npz)
+    type=ray_count  event: int, weight: int                 (coarse grid)
+    type=delta_s    (no extra params)
     """
     rd    = _rd(rid)
     dtype = request.args.get("type", "model")
@@ -241,25 +266,24 @@ def api_slice(rid):
     elif dtype == "delta_s":
         arr = _npy(rd / f"iter_{it}" / "delta_s.npy")
 
-    elif dtype == "station_field":
-        sta  = request.args.get("station", 0, type=int)
-        full = _npy(rd / f"iter_{it}" / "station_fields.npy")
-        if full is not None and sta < full.shape[0]:
-            arr = full[sta]   # shape (nx, ny, nz)
-
     elif dtype == "weights":
         ev  = request.args.get("event", 0, type=int)
         arr = _npz(rd / f"iter_{it}" / f"event_{ev}" / "weights.npz", "weights")
-
-    elif dtype == "misfit":
-        ev  = request.args.get("event", 0, type=int)
-        arr = _npy(rd / f"iter_{it}" / f"event_{ev}" / "misfit.npy")
 
     elif dtype == "G":
         ev     = request.args.get("event",   0, type=int)
         wt     = request.args.get("weight",  0, type=int)
         sta    = request.args.get("station", 0, type=int)
-        arr    = _npy(rd / f"iter_{it}" / f"event_{ev}" / f"weight_{wt}" / f"G_station_{sta}.npy")
+        # Try new npz path, fall back to old npy path
+        stem = rd / f"iter_{it}" / f"event_{ev}" / f"weight_{wt}" / f"G_station_{sta}"
+        arr  = _load_G_station(stem)
+
+    elif dtype == "ray_count":
+        ev  = request.args.get("event",  0, type=int)
+        wt  = request.args.get("weight", 0, type=int)
+        arr = _npy(rd / f"iter_{it}" / f"event_{ev}" / f"weight_{wt}" / "ray_count.npy")
+        if arr is not None:
+            arr = arr.astype(np.float32)   # _arr_resp needs float for tolist
 
     return jsonify(_arr_resp(arr, y))
 

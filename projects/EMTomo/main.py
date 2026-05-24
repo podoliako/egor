@@ -110,11 +110,11 @@ if __name__ == '__main__':
     warm_up_jit()
 
     logger = run_em(
-        n_cycles=125,
+        n_cycles=5,
         initial_model=initial_model,
         arrivals_table=full_arr,
         station_locs=stations_metric,
-        weights_top_n=80,
+        weights_top_n=1,
         temperature=0.001,
         lambda_reg=0.001,
         subdivision=SUBDIVISION,
@@ -132,6 +132,7 @@ if __name__ == '__main__':
         save_runs=True,
         runs_dir="runs",
         n_workers=20,
+        log_G_per_weight=True
     )
 
     print(f"Run saved: {logger.run_dir}")
