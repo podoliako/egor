@@ -85,6 +85,7 @@ class TomographyLogger:
         misfit: Optional[np.ndarray] = None,
         residuals: Optional[np.ndarray] = None,
         G_per_weight: Optional[Dict[int, List[np.ndarray]]] = None,
+        ray_count_per_weight: Optional[Dict[int, np.ndarray]] = None,
     ):
         event_dir = self.iter_dir(iteration) / f"event_{event_idx}"
         event_dir.mkdir(exist_ok=True)
@@ -97,27 +98,22 @@ class TomographyLogger:
             np.save(event_dir / "residuals.npy", residuals)
 
         if G_per_weight is not None:
-            for w_idx, g_list in G_per_weight.items():
-                w_dir = event_dir / f"weight_{w_idx}"
-                w_dir.mkdir(exist_ok=True)
-
-                # Save each station's G as compressed npz
-                # g_list[si] is a 3-D array on the fine grid
-                for si, g in enumerate(g_list):
-                    np.savez_compressed(
-                        w_dir / f"G_station_{si}.npz",
-                        G=g.astype(np.float32),  # float32 saves ~half the space
-                    )
-
-                # Ray count = number of stations with non-zero path through each coarse cell.
-                # We binarise each G (ray passed / didn't pass) and sum.
-                # g_list entries are already on the coarse grid after coarsen_G is applied
-                # inside _process_event — so shape is (nx, ny, nz) coarse.
-                if g_list:
-                    ray_count = np.zeros_like(g_list[0], dtype=np.int16)
-                    for g in g_list:
-                        ray_count += (g > 0).astype(np.int16)
+            if ray_count_per_weight is not None:
+                for w_idx, ray_count in ray_count_per_weight.items():
+                    w_dir = event_dir / f"weight_{w_idx}"
+                    w_dir.mkdir(exist_ok=True)
                     np.save(w_dir / "ray_count.npy", ray_count)
+
+            # Сохраняем саму матрицу G на точной сетке
+            if G_per_weight is not None:
+                for w_idx, g_list in G_per_weight.items():
+                    w_dir = event_dir / f"weight_{w_idx}"
+                    w_dir.mkdir(exist_ok=True)
+                    for si, g in enumerate(g_list):
+                        np.savez_compressed(
+                            w_dir / f"G_station_{si}.npz",
+                            G=g.astype(np.float32),
+                        )
 
     def start_iteration(self, iteration: int):
         self._iter_start = time.perf_counter()

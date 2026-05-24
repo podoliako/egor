@@ -222,7 +222,7 @@ def make_tomography_step(
         G_acc.append(G_ev)
         r_acc.append(r_ev)
         if logger is not None:
-            weights, misfit, first_residuals, G_per_weight = log_data
+            weights, misfit, first_residuals, G_per_weight, rc_per_weight = log_data
             logger.save_event_data(
                 iteration=iteration,
                 event_idx=event_idx,
@@ -230,6 +230,7 @@ def make_tomography_step(
                 misfit=misfit,
                 residuals=first_residuals,
                 G_per_weight=G_per_weight,
+                ray_count_per_weight=rc_per_weight,
             )
 
     return _solve_delta_s(

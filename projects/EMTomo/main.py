@@ -110,7 +110,7 @@ if __name__ == '__main__':
     warm_up_jit()
 
     logger = run_em(
-        n_cycles=5,
+        n_cycles=3,
         initial_model=initial_model,
         arrivals_table=full_arr,
         station_locs=stations_metric,

@@ -56,6 +56,7 @@ def _process_event(
     r_w: list = []
     first_residuals = None
     G_per_weight: Dict[int, list] = {}
+    ray_count_per_weight: Dict[int, np.ndarray] = {}
 
     for w_idx, (weight_idx, weight_val) in enumerate(zip(weights_indices, weights_values)):
         epic = np.asarray(weight_idx, dtype=np.float64)
@@ -82,14 +83,14 @@ def _process_event(
             first_residuals = residuals
         if log_G_per_weight:
             G_per_weight[w_idx] = [G_fine[si] for si in range(G_fine.shape[0])]
-
+        ray_count_per_weight[w_idx] = (G_stations > 0).sum(axis=0).astype(np.int16)
         G_w.append(G_tilda * weight_val)
         r_w.append(residuals * weight_val)
 
     if not G_w:
         zero_g = np.zeros((sf.shape[0], sf.shape[0]) + sf.shape[1:], dtype=np.float64)
         zero_r = np.zeros((sf.shape[0], sf.shape[0]), dtype=np.float64)
-        log_data = (weights, misfit, np.array([]), G_per_weight if log_G_per_weight else None)
+        log_data = (weights, misfit, np.array([]), G_per_weight if log_G_per_weight else None, ray_count_per_weight)
         return zero_g, zero_r, log_data
 
     log_data = (
@@ -97,6 +98,7 @@ def _process_event(
         misfit,
         first_residuals if first_residuals is not None else np.array([]),
         G_per_weight if log_G_per_weight else None,
+        ray_count_per_weight
     )
     return np.add.reduce(G_w), np.add.reduce(r_w), log_data
 
