@@ -290,7 +290,7 @@ def api_slice(rid):
             else:
                 arr += rc
 
-        return jsonify(_arr_resp(arr, y))
+    return jsonify(_arr_resp(arr, y))
 
 
 # ─── main ─────────────────────────────────────────────────────────────────────
