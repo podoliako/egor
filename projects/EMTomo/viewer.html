@@ -363,8 +363,8 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
       <div class="panel-hdr">
         <span class="panel-title">Ray Count</span>
         <button class="btn-full" title="Fullscreen">⤢</button>
-        <div class="ph-group">Event <select id="rc-ev"></select></div>
-        <div class="ph-group">Wt <select id="rc-wt"><option value="0">0</option></select></div>
+        <div class="ph-group" style="display: none;">Event <select id="rc-ev"></select></div>
+        <div class="ph-group" style="display: none;">Wt <select id="rc-wt"><option value="0">0</option></select></div>
         <div class="ph-group">coarse <span class="badge" id="rc-shape-badge">—</span></div>
         <div class="ph-group y-group">
           Y
@@ -486,12 +486,12 @@ const ST = {
   timing: { data: [], mode: 'per_iter' },
   quality:{ data: [] },
   // auto-refresh
-  autoRefresh: false,
+  autoRefresh: true,
   refreshInterval: 5,
   _refreshTimer: null,
   _refreshCountdown: 0,
   _refreshCountdownTimer: null,
-  _refreshing: false,
+  _refreshing: true,
 };
 
 const PLY_CFG = {
@@ -1012,7 +1012,7 @@ async function renderWt() {
   shapeBadge('wt-shape-badge', d.full_shape);
   Plotly.react('plot-wt',
     buildTraces(heatTrace(d.slice, [[0,'#f0f4ff'],[0.5,'#6699dd'],[1,'#0a2a7a']]),
-      d.shape[0], d.shape[1], -1, event, true, y, dim),
+      d.shape[0], d.shape[1], -1, event, false, y, dim),
     mkLayout(d.shape[0], d.shape[1], 'w'), PLY_CFG);
 }
 
@@ -1027,7 +1027,7 @@ async function renderG() {
   syncY('g-y','g-y-v','g-y-num', d.full_shape[1], ST.G);
   shapeBadge('g-shape-badge', d.full_shape);
   Plotly.react('plot-G',
-    buildTraces(heatTrace(d.slice, CS_RDBU, 0), d.shape[0], d.shape[1], station, event, true, y, dim),
+    buildTraces(heatTrace(d.slice, CS_RDBU, 0), d.shape[0], d.shape[1], station, event, false, y, dim),
     mkLayout(d.shape[0], d.shape[1], 'G'), PLY_CFG);
 }
 

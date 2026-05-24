@@ -279,11 +279,16 @@ def api_slice(rid):
         arr  = _load_G_station(stem)
 
     elif dtype == "ray_count":
-        ev  = request.args.get("event",  0, type=int)
-        wt  = request.args.get("weight", 0, type=int)
-        arr = _npy(rd / f"iter_{it}" / f"event_{ev}" / f"weight_{wt}" / "ray_count.npy")
-        if arr is not None:
-            arr = arr.astype(np.float32)   # _arr_resp needs float for tolist
+        iter_dir = rd / f"iter_{it}"
+        arr = None
+        
+        # Проходим по всем событиям и весам текущей итерации
+        for rc_file in iter_dir.glob("event_*/weight_*/ray_count.npy"):
+            rc = np.load(rc_file).astype(np.float32)
+            if arr is None:
+                arr = rc
+            else:
+                arr += rc
 
     return jsonify(_arr_resp(arr, y))
 
