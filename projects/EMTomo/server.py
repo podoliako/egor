@@ -184,6 +184,97 @@ def api_quality(rid):
     return jsonify(rows)
 
 
+# ─── hypocenter quality ───────────────────────────────────────────────────────
+
+def _event_rms(ev_dir: Path):
+    """RMS of upper-triangle pairwise differential residuals for one event."""
+    rfile = ev_dir / "residuals.npy"
+    if not rfile.exists():
+        return None
+    try:
+        R = np.load(rfile)          # (n_stations, n_stations)
+        n = R.shape[0]
+        idx = np.triu_indices(n, k=1)
+        vals = R[idx]
+        return float(np.sqrt(np.mean(vals ** 2))) if vals.size > 0 else 0.0
+    except Exception:
+        return None
+
+
+def _sorted_event_dirs(iter_dir: Path):
+    return sorted(
+        [d for d in iter_dir.iterdir() if d.is_dir() and d.name.startswith("event_")],
+        key=lambda d: int(d.name.split("_")[1]),
+    )
+
+
+@app.route("/api/runs/<rid>/hypo_quality")
+def api_hypo_quality(rid):
+    """Per-event RMS hypocenter residual for one iteration.
+
+    Returns [{event, rms, n_pairs}, ...].
+    rms is None when residuals.npy is absent for that event.
+    """
+    rd = _rd(rid)
+    it = request.args.get("iter", 0, type=int)
+    iter_dir = rd / f"iter_{it}"
+    if not iter_dir.exists():
+        return jsonify([])
+
+    rows = []
+    for ev_dir in _sorted_event_dirs(iter_dir):
+        ev_idx = int(ev_dir.name.split("_")[1])
+        rfile  = ev_dir / "residuals.npy"
+        rms    = _event_rms(ev_dir)
+        try:
+            n_pairs = 0
+            if rfile.exists():
+                R = np.load(rfile)
+                n = R.shape[0]
+                n_pairs = n * (n - 1) // 2
+        except Exception:
+            n_pairs = 0
+        rows.append({"event": ev_idx, "rms": rms, "n_pairs": n_pairs})
+
+    return jsonify(rows)
+
+
+@app.route("/api/runs/<rid>/hypo_quality_summary")
+def api_hypo_quality_summary(rid):
+    """Per-iteration aggregates of per-event RMS hypocenter residuals.
+
+    Returns [{iter, mean_rms, median_rms, p10_rms, p90_rms, n_events}, ...].
+    Only iterations that have at least one residuals.npy are included.
+    """
+    rd = _rd(rid)
+    results = []
+
+    iter_dirs = sorted(
+        [d for d in rd.iterdir() if d.is_dir() and d.name.startswith("iter_")],
+        key=lambda d: int(d.name.split("_")[1]),
+    )
+
+    for it_dir in iter_dirs:
+        it = int(it_dir.name.split("_")[1])
+        rms_vals = [
+            v for ev_dir in _sorted_event_dirs(it_dir)
+            if (v := _event_rms(ev_dir)) is not None
+        ]
+        if not rms_vals:
+            continue
+        arr = np.array(rms_vals, dtype=np.float64)
+        results.append({
+            "iter":       it,
+            "mean_rms":   float(np.mean(arr)),
+            "median_rms": float(np.median(arr)),
+            "p10_rms":    float(np.percentile(arr, 10)),
+            "p90_rms":    float(np.percentile(arr, 90)),
+            "n_events":   len(rms_vals),
+        })
+
+    return jsonify(results)
+
+
 # ─── iter / event / weight lists ──────────────────────────────────────────────
 
 @app.route("/api/runs/<rid>/iters_list")

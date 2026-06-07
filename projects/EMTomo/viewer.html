@@ -177,6 +177,61 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   grid-column: 1 / -1;
 }
 
+/* Hypo Quality panel: taller, full width, 4-quadrant body */
+.panel.panel-hypoq {
+  height: 440px;
+  grid-column: 1 / -1;
+}
+.panel-hypoq .panel-body {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.hypoq-cell {
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+.hypoq-cell:nth-child(1) {
+  grid-column: 1 / -1;
+  border-bottom: 1px solid var(--border);
+}
+.hypoq-cell:nth-child(2) {
+  border-right: 1px solid var(--border);
+}
+.hypoq-cell-title {
+  position: absolute; top: 4px; left: 8px;
+  font-size: 9px; font-weight: 600; text-transform: uppercase;
+  color: var(--text3); letter-spacing: .3px; pointer-events: none; z-index: 1;
+}
+#hypoq-worst-list {
+  padding: 6px 8px;
+  overflow-y: auto;
+  height: 100%;
+  font-size: 11px;
+  font-family: var(--ff-mono);
+  color: var(--text2);
+}
+.hypoq-ev-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 4px; border-radius: 3px; cursor: pointer;
+  border-bottom: 1px solid var(--bg2);
+}
+.hypoq-ev-row:hover { background: #eaf0fb; color: var(--accent); }
+.hypoq-ev-rank { color: var(--text3); width: 18px; text-align: right; font-size: 9px; }
+.hypoq-ev-id   { color: var(--accent); font-weight: 600; min-width: 40px; }
+.hypoq-ev-rms  { color: var(--text); }
+.hypoq-ev-bar  {
+  flex: 1; height: 5px; border-radius: 2px;
+  background: linear-gradient(to right, #e88, #c94040);
+  min-width: 4px;
+}
+.hypoq-no-data {
+  position: absolute; inset: 0; display: flex;
+  align-items: center; justify-content: center; color: var(--text3); font-size: 11px;
+}
+
 .panel-hdr {
   background: var(--bg2);
   border-bottom: 1px solid var(--border);
@@ -446,6 +501,45 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 
   </div><!-- /row 3 -->
 
+  <!-- Row 3b: Hypo Quality (full width, 4-quadrant) -->
+  <div class="panel-row">
+    <div class="panel panel-hypoq">
+      <div class="panel-hdr">
+        <span class="panel-title">Hypo Quality</span>
+        <button class="btn-full" title="Fullscreen">⤢</button>
+        <div class="ph-group">
+          <span class="ctrl-label">Top</span>
+          <input type="number" id="hypoq-topn" value="8" min="1" max="50" style="width:42px" title="Number of worst events to show">
+          <span class="ctrl-label">worst</span>
+        </div>
+        <div class="ph-group" id="hypoq-stats-hdr" style="font-family:var(--ff-mono);font-size:10px;color:var(--text3)"></div>
+      </div>
+      <div class="panel-body">
+
+        <!-- Top: convergence trend (spans both columns) -->
+        <div class="hypoq-cell">
+          <span class="hypoq-cell-title">Mean RMS residual by iteration</span>
+          <div class="hypoq-no-data" id="hypoq-trend-empty">No residuals saved</div>
+          <div id="plot-hypoq-trend" style="width:100%;height:100%"></div>
+        </div>
+
+        <!-- Bottom-left: histogram for current iteration -->
+        <div class="hypoq-cell">
+          <span class="hypoq-cell-title">Distribution — current iter</span>
+          <div class="hypoq-no-data" id="hypoq-hist-empty">No data</div>
+          <div id="plot-hypoq-hist" style="width:100%;height:100%"></div>
+        </div>
+
+        <!-- Bottom-right: worst events list -->
+        <div class="hypoq-cell">
+          <span class="hypoq-cell-title">Worst events (click → highlight)</span>
+          <div id="hypoq-worst-list"><span style="color:var(--text3)">No data</span></div>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /row 3b -->
+
   <!-- Row 4: Timing (full width) -->
   <div class="panel-row">
     <div class="panel panel-timing">
@@ -485,6 +579,7 @@ const ST = {
   wt:     { event: 0, y: 0, dim: true },
   timing: { data: [], mode: 'per_iter' },
   quality:{ data: [] },
+  hypoQ:  { summaryData: [], iterData: [], topN: 8, hilightEv: -1 },
   // auto-refresh
   autoRefresh: true,
   refreshInterval: 5,
@@ -499,7 +594,7 @@ const PLY_CFG = {
   modeBarButtonsToRemove: ['lasso2d','select2d','autoScale2d'],
 };
 
-const ALL_PLOTS = ['plot-vel','plot-tr','plot-rc','plot-wt','plot-G','plot-timing','plot-quality'];
+const ALL_PLOTS = ['plot-vel','plot-tr','plot-rc','plot-wt','plot-G','plot-timing','plot-quality','plot-hypoq-trend','plot-hypoq-hist'];
 
 /* ── Layout factory ── */
 function mkLayout(nx, nz, cbTitle, zrange) {
@@ -865,6 +960,223 @@ function renderQuality() {
   Plotly.react('plot-quality', traces, layout, PLY_CFG);
 }
 
+/* ── Hypo Quality panel ─────────────────────────────────────────────────────
+   4 quadrants:
+     top (full-width) — convergence trend: mean ± p10-p90 band, all iterations
+     bottom-left      — histogram of per-event RMS for current iteration
+     bottom-right     — top-N worst events table, clickable
+   ─────────────────────────────────────────────────────────────────────────── */
+async function renderHypoQuality() {
+  if (!ST.run) return;
+
+  const [summary, iterData] = await Promise.all([
+    apiFetch(`/api/runs/${ST.run}/hypo_quality_summary`),
+    apiFetch(`/api/runs/${ST.run}/hypo_quality?iter=${ST.iter}`),
+  ]);
+
+  ST.hypoQ.summaryData = summary || [];
+  ST.hypoQ.iterData    = iterData || [];
+
+  _renderHypoTrend();
+  _renderHypoHist();
+  _renderHypoWorst();
+  _updateHypoStats();
+}
+
+function _hypoqLayout(xTitle, yTitle, extra) {
+  return Object.assign({
+    paper_bgcolor: '#ffffff', plot_bgcolor: '#f8f9fb',
+    font: { color: '#1e2530', size: 9, family: 'Menlo, Consolas, monospace' },
+    margin: { l: 54, r: 14, t: 20, b: 38 },
+    xaxis: {
+      title: { text: xTitle, font: { size: 9 }, standoff: 2 },
+      showgrid: false, zeroline: false, tickfont: { size: 8 },
+    },
+    yaxis: {
+      title: { text: yTitle, font: { size: 9 }, standoff: 2 },
+      showgrid: true, gridcolor: '#e8ecf0', zeroline: false, tickfont: { size: 8 },
+    },
+    showlegend: false,
+  }, extra || {});
+}
+
+function _renderHypoTrend() {
+  const rows = ST.hypoQ.summaryData;
+  const trendEl  = document.getElementById('plot-hypoq-trend');
+  const emptyEl  = document.getElementById('hypoq-trend-empty');
+
+  if (!rows || rows.length === 0) {
+    Plotly.purge('plot-hypoq-trend');
+    trendEl.style.display  = 'none';
+    emptyEl.style.display  = 'flex';
+    return;
+  }
+  trendEl.style.display  = 'block';
+  emptyEl.style.display  = 'none';
+
+  const sorted = [...rows].sort((a, b) => a.iter - b.iter);
+  const iters  = sorted.map(r => r.iter);
+  const means  = sorted.map(r => r.mean_rms);
+  const p10s   = sorted.map(r => r.p10_rms);
+  const p90s   = sorted.map(r => r.p90_rms);
+
+  // P10-P90 band (filled area)
+  const bandX = [...iters, ...[...iters].reverse()];
+  const bandY = [...p90s,  ...[...p10s].reverse()];
+
+  const shapes = [];
+  if (iters.includes(ST.iter)) {
+    shapes.push({
+      type: 'line', x0: ST.iter, x1: ST.iter, y0: 0, y1: 1,
+      xref: 'x', yref: 'paper',
+      line: { color: '#c94040', width: 1.5, dash: 'dot' },
+    });
+  }
+
+  const traces = [
+    {
+      type: 'scatter', mode: 'lines', fill: 'toself', fillcolor: 'rgba(46,158,107,0.12)',
+      x: bandX, y: bandY, line: { width: 0 },
+      hoverinfo: 'skip', showlegend: false,
+    },
+    {
+      type: 'scatter', mode: 'lines+markers',
+      x: iters, y: means,
+      line: { color: '#2e9e6b', width: 2 },
+      marker: { size: 5, color: '#2e9e6b' },
+      hovertemplate: 'iter %{x}<br>mean RMS = %{y:.4f}<extra></extra>',
+    },
+    {
+      type: 'scatter', mode: 'lines', x: iters, y: p90s,
+      line: { color: 'rgba(180,60,60,0.35)', width: 1, dash: 'dot' },
+      hovertemplate: 'iter %{x}<br>p90 = %{y:.4f}<extra></extra>',
+    },
+    {
+      type: 'scatter', mode: 'lines', x: iters, y: p10s,
+      line: { color: 'rgba(60,130,200,0.35)', width: 1, dash: 'dot' },
+      hovertemplate: 'iter %{x}<br>p10 = %{y:.4f}<extra></extra>',
+    },
+  ];
+
+  const layout = _hypoqLayout('Iteration', 'RMS residual (s)', {
+    shapes,
+    margin: { l: 54, r: 14, t: 20, b: 36 },
+    xaxis: { title: { text: 'Iteration', font: { size: 9 }, standoff: 2 },
+      showgrid: false, zeroline: false, tickmode: 'linear', dtick: 1, tickfont: { size: 8 } },
+  });
+
+  Plotly.react('plot-hypoq-trend', traces, layout, PLY_CFG);
+}
+
+function _renderHypoHist() {
+  const rows   = (ST.hypoQ.iterData || []).filter(r => r.rms != null);
+  const histEl = document.getElementById('plot-hypoq-hist');
+  const emptyEl = document.getElementById('hypoq-hist-empty');
+
+  if (rows.length === 0) {
+    Plotly.purge('plot-hypoq-hist');
+    histEl.style.display  = 'none';
+    emptyEl.style.display = 'flex';
+    return;
+  }
+  histEl.style.display  = 'block';
+  emptyEl.style.display = 'none';
+
+  const vals = rows.map(r => r.rms);
+  const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+
+  const shapes = [{
+    type: 'line', x0: mean, x1: mean, y0: 0, y1: 1,
+    xref: 'x', yref: 'paper',
+    line: { color: '#c94040', width: 1.5, dash: 'dash' },
+  }];
+
+  // Highlight worst event if selected
+  const topN  = ST.hypoQ.topN;
+  const sorted = [...vals].sort((a, b) => b - a);
+  const thresh = sorted[Math.min(topN - 1, sorted.length - 1)] ?? Infinity;
+
+  const colors = vals.map(v => v >= thresh ? 'rgba(201,64,64,0.75)' : 'rgba(74,127,212,0.55)');
+
+  const traces = [{
+    type: 'bar',
+    x: rows.map(r => r.event),
+    y: vals,
+    marker: { color: colors, line: { width: 0 } },
+    hovertemplate: 'Ev %{x}<br>RMS = %{y:.4f}<extra></extra>',
+  }];
+
+  const layout = _hypoqLayout('Event index', 'RMS residual (s)', {
+    shapes,
+    bargap: 0.15,
+    margin: { l: 54, r: 14, t: 20, b: 36 },
+    xaxis: { title: { text: 'Event index', font: { size: 9 }, standoff: 2 },
+      showgrid: false, zeroline: false, tickfont: { size: 8 } },
+  });
+
+  Plotly.react('plot-hypoq-hist', traces, layout, PLY_CFG);
+}
+
+function _renderHypoWorst() {
+  const rows = (ST.hypoQ.iterData || []).filter(r => r.rms != null);
+  const el   = document.getElementById('hypoq-worst-list');
+
+  if (rows.length === 0) {
+    el.innerHTML = '<span style="color:var(--text3)">No residuals for this iteration</span>';
+    return;
+  }
+
+  const topN   = Math.max(1, ST.hypoQ.topN);
+  const sorted = [...rows].sort((a, b) => b.rms - a.rms);
+  const worst  = sorted.slice(0, topN);
+  const maxRms = worst[0].rms || 1;
+
+  el.innerHTML = worst.map((r, i) => {
+    const barW = Math.max(4, Math.round((r.rms / maxRms) * 100));
+    const isHi = r.event === ST.hypoQ.hilightEv;
+    return `
+      <div class="hypoq-ev-row${isHi ? ' active' : ''}" data-ev="${r.event}"
+           style="${isHi ? 'background:#eaf0fb;' : ''}">
+        <span class="hypoq-ev-rank">${i + 1}.</span>
+        <span class="hypoq-ev-id">Ev ${r.event}</span>
+        <span class="hypoq-ev-rms">${r.rms.toFixed(4)}</span>
+        <div class="hypoq-ev-bar" style="width:${barW}%"></div>
+        <span style="font-size:9px;color:var(--text3)">${r.n_pairs} pairs</span>
+      </div>`;
+  }).join('');
+
+  // Click → highlight event in Wt / G panels
+  el.querySelectorAll('.hypoq-ev-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const ev = +row.dataset.ev;
+      ST.hypoQ.hilightEv = (ST.hypoQ.hilightEv === ev) ? -1 : ev;
+      // sync with Wt and G panels
+      const nEv = ST.info?.n_events || 0;
+      if (ev < nEv) {
+        ST.wt.event = ev;
+        ST.G.event  = ev;
+        document.getElementById('wt-ev').value = ev;
+        document.getElementById('g-ev').value  = ev;
+        Promise.all([reloadGWeights(), reloadRcWeights()]).then(() => {
+          renderWt(); renderG(); renderRayCount();
+        });
+      }
+      _renderHypoHist();
+      _renderHypoWorst();
+    });
+  });
+}
+
+function _updateHypoStats() {
+  const rows = (ST.hypoQ.iterData || []).filter(r => r.rms != null);
+  const hdr  = document.getElementById('hypoq-stats-hdr');
+  if (!rows.length) { hdr.textContent = ''; return; }
+  const vals = rows.map(r => r.rms);
+  const mean = (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(4);
+  const mx   = Math.max(...vals).toFixed(4);
+  hdr.innerHTML = `iter ${ST.iter} &nbsp;·&nbsp; n=${rows.length} &nbsp;·&nbsp; mean=${mean} &nbsp;·&nbsp; max=${mx}`;
+}
+
 function updateTimingChips(sorted) {
   const chips = document.getElementById('timing-chips');
   if (!sorted || sorted.length === 0) { chips.innerHTML = ''; return; }
@@ -1033,7 +1345,7 @@ async function renderG() {
 
 function renderAll() {
   renderVelPair(); renderRayCount(); renderWt(); renderG();
-  renderTiming(); renderQuality();
+  renderTiming(); renderQuality(); renderHypoQuality();
 }
 
 function setY(prefix, stateObj, value, renderFn) {
@@ -1213,6 +1525,13 @@ document.getElementById('g-sta').addEventListener('change', e => { ST.G.station 
 document.getElementById('g-wt').addEventListener('change',  e => { ST.G.weight  = +e.target.value; renderG(); });
 document.getElementById('cb-dim-g').addEventListener('change',  e => { ST.G.dim  = e.target.checked; renderG();  });
 bindYControls('g', ST.G, renderG);
+
+// Hypo Quality
+document.getElementById('hypoq-topn').addEventListener('change', e => {
+  ST.hypoQ.topN = Math.max(1, Math.min(50, +e.target.value || 8));
+  _renderHypoHist();
+  _renderHypoWorst();
+});
 
 /* ── Fullscreen ── */
 document.querySelectorAll('.btn-full').forEach(btn => {
