@@ -25,6 +25,8 @@ __pycache__/
 *.gif
 *.png
 runs/
+LOTOS/
+TomoDD/
 
 # OS
 .DS_Store
