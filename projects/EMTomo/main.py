@@ -13,7 +13,7 @@ if __name__ == '__main__':
     profiler.enable()
 
     CELL_SIZE = 500.0
-    SUBDIVISION = 15
+    SUBDIVISION = 25
     STATION_SEED = 42
     TRUE_MODEL_SEED = 123
     V_BOUNDS = (50.0, 150.0)
@@ -30,12 +30,12 @@ if __name__ == '__main__':
         'height': 50.0,
         'azimuth': 45.0,
         'side_size': CELL_SIZE,
-        'n_x': 5,
+        'n_x': 25,
         'n_y': 5,
         'n_z': 1
     }
 
-    n_stations = 30
+    n_stations = 75
     # n_events = 10
     middle_y = (model_config['n_y']) * CELL_SIZE / 2
     middle_z = (model_config['n_z']) * CELL_SIZE / 2
@@ -44,6 +44,8 @@ if __name__ == '__main__':
     # middle_y = CELL_SIZE * 1
 
     rng_stations = np.random.default_rng(STATION_SEED)
+    noise = np.random.default_rng()
+
     stations_metric = [
         (
             rng_stations.uniform(0, n_x * CELL_SIZE),
@@ -83,8 +85,12 @@ if __name__ == '__main__':
                 #     true_model.set_vp(i, j, k, np.random.normal(100, 0.001))
                 #     initial_model.set_vp(i, j, k, 100)
                 # if (i % 2 == 0 and k % 2 == 0) or (i % 2 != 0 and k % 2 != 0):
-                true_model.set_vp(i, j, k, 100 + rng_true.normal(0, 2))
-                initial_model.set_vp(i, j, k, 100)
+                true_rnd = rng_true.normal(0, 1)
+                true_model.set_vp(i, j, k, 100 + true_rnd)
+                if k < 0:
+                    initial_model.set_vp(i, j, k, 100 + true_rnd + noise.normal(0,0.04))
+                else:
+                    initial_model.set_vp(i, j, k, 100)
                 # else:
                     # true_model.set_vp(i, j, k, 100 + np.random.normal(0, 2))
                     # initial_model.set_vp(i, j, k, 100)
@@ -99,7 +105,7 @@ if __name__ == '__main__':
     full_arr, events_metric = generate_synthetic_arrivals_table(
         true_model,
         station_locs=stations_metric,
-        n_events=200,
+        n_events=300,
         random_seed=7,
         subdivision=SUBDIVISION,
         depth_bias=2,
@@ -110,13 +116,13 @@ if __name__ == '__main__':
     warm_up_jit()
 
     logger = run_em(
-        n_cycles=3,
+        n_cycles=60,
         initial_model=initial_model,
         arrivals_table=full_arr,
         station_locs=stations_metric,
         weights_top_n=1,
         temperature=0.001,
-        lambda_reg=0.001,
+        lambda_reg=0.0005,
         subdivision=SUBDIVISION,
         v_bounds=V_BOUNDS,
         v_reg_strength=V_REG_STRENGTH,
@@ -132,7 +138,7 @@ if __name__ == '__main__':
         save_runs=True,
         runs_dir="runs",
         n_workers=20,
-        log_G_per_weight=True
+        log_G_per_weight=False
     )
 
     print(f"Run saved: {logger.run_dir}")

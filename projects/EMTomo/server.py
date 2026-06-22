@@ -186,21 +186,6 @@ def api_quality(rid):
 
 # ─── hypocenter quality ───────────────────────────────────────────────────────
 
-def _event_rms(ev_dir: Path):
-    """RMS of upper-triangle pairwise differential residuals for one event."""
-    rfile = ev_dir / "residuals.npy"
-    if not rfile.exists():
-        return None
-    try:
-        R = np.load(rfile)          # (n_stations, n_stations)
-        n = R.shape[0]
-        idx = np.triu_indices(n, k=1)
-        vals = R[idx]
-        return float(np.sqrt(np.mean(vals ** 2))) if vals.size > 0 else 0.0
-    except Exception:
-        return None
-
-
 def _sorted_event_dirs(iter_dir: Path):
     return sorted(
         [d for d in iter_dir.iterdir() if d.is_dir() and d.name.startswith("event_")],
@@ -208,46 +193,69 @@ def _sorted_event_dirs(iter_dir: Path):
     )
 
 
-@app.route("/api/runs/<rid>/hypo_quality")
-def api_hypo_quality(rid):
-    """Per-event RMS hypocenter residual for one iteration.
-
-    Returns [{event, rms, n_pairs}, ...].
-    rms is None when residuals.npy is absent for that event.
-    """
-    rd = _rd(rid)
-    it = request.args.get("iter", 0, type=int)
-    iter_dir = rd / f"iter_{it}"
-    if not iter_dir.exists():
-        return jsonify([])
-
-    rows = []
-    for ev_dir in _sorted_event_dirs(iter_dir):
-        ev_idx = int(ev_dir.name.split("_")[1])
-        rfile  = ev_dir / "residuals.npy"
-        rms    = _event_rms(ev_dir)
-        try:
-            n_pairs = 0
-            if rfile.exists():
-                R = np.load(rfile)
-                n = R.shape[0]
-                n_pairs = n * (n - 1) // 2
-        except Exception:
-            n_pairs = 0
-        rows.append({"event": ev_idx, "rms": rms, "n_pairs": n_pairs})
-
-    return jsonify(rows)
+def _read_meta(rd: Path) -> dict:
+    p = rd / "meta.json"
+    if not p.exists():
+        return {}
+    return json.loads(p.read_text())
 
 
-@app.route("/api/runs/<rid>/hypo_quality_summary")
-def api_hypo_quality_summary(rid):
-    """Per-iteration aggregates of per-event RMS hypocenter residuals.
+def _fine_cell_size(meta: dict) -> float:
+    gi = meta.get("grid_info") or {}
+    return float(gi.get("fine_cell_size") or gi.get("coarse_cell_size") or 1.0)
 
-    Returns [{iter, mean_rms, median_rms, p10_rms, p90_rms, n_events}, ...].
-    Only iterations that have at least one residuals.npy are included.
-    """
-    rd = _rd(rid)
-    results = []
+
+def _rms_from_residuals(rfile: Path) -> float | None:
+    if not rfile.exists():
+        return None
+    try:
+        R = np.load(rfile, mmap_mode="r")
+        idx = np.triu_indices(R.shape[0], k=1)
+        vals = R[idx]
+        return float(np.sqrt(np.mean(vals ** 2))) if vals.size > 0 else 0.0
+    except Exception:
+        return None
+
+
+def _dist_to_true_hypo(ev_dir: Path, true_loc, cell_size: float) -> float | None:
+    """Euclidean distance (m) from argmax weights cell to true event location."""
+    wp = ev_dir / "weights.npz"
+    if not wp.exists() or not true_loc:
+        return None
+    try:
+        w = np.load(wp)["weights"]
+        flat = int(np.argmax(w))
+        ix, iy, iz = np.unravel_index(flat, w.shape)
+        est = np.array(
+            [(ix + 0.5) * cell_size, (iy + 0.5) * cell_size, (iz + 0.5) * cell_size],
+            dtype=np.float64,
+        )
+        true = np.asarray(true_loc, dtype=np.float64)
+        return float(np.linalg.norm(est - true))
+    except Exception:
+        return None
+
+
+def _aggregate(vals: list[float]) -> dict | None:
+    if not vals:
+        return None
+    arr = np.array(vals, dtype=np.float64)
+    return {
+        "mean":   float(np.mean(arr)),
+        "median": float(np.median(arr)),
+        "p10":    float(np.percentile(arr, 10)),
+        "p90":    float(np.percentile(arr, 90)),
+        "n":      len(vals),
+    }
+
+
+def _collect_all_hypo_metrics(rd: Path, meta: dict, current_iter: int) -> dict:
+    """Single pass over all iterations — summaries + current-iter rows."""
+    event_locs = meta.get("event_locs") or []
+    cell_size = _fine_cell_size(meta)
+    rms_by_iter: dict[int, list[float]] = {}
+    dist_by_iter: dict[int, list[float]] = {}
+    residual_iter, distance_iter = [], []
 
     iter_dirs = sorted(
         [d for d in rd.iterdir() if d.is_dir() and d.name.startswith("iter_")],
@@ -256,23 +264,66 @@ def api_hypo_quality_summary(rid):
 
     for it_dir in iter_dirs:
         it = int(it_dir.name.split("_")[1])
-        rms_vals = [
-            v for ev_dir in _sorted_event_dirs(it_dir)
-            if (v := _event_rms(ev_dir)) is not None
-        ]
-        if not rms_vals:
-            continue
-        arr = np.array(rms_vals, dtype=np.float64)
-        results.append({
-            "iter":       it,
-            "mean_rms":   float(np.mean(arr)),
-            "median_rms": float(np.median(arr)),
-            "p10_rms":    float(np.percentile(arr, 10)),
-            "p90_rms":    float(np.percentile(arr, 90)),
-            "n_events":   len(rms_vals),
-        })
+        for ev_dir in _sorted_event_dirs(it_dir):
+            ev = int(ev_dir.name.split("_")[1])
+            rms = _rms_from_residuals(ev_dir / "residuals.npy")
+            if rms is not None:
+                rms_by_iter.setdefault(it, []).append(rms)
+                if it == current_iter:
+                    residual_iter.append({"event": ev, "rms": rms})
+            true_loc = event_locs[ev] if ev < len(event_locs) else None
+            dist = _dist_to_true_hypo(ev_dir, true_loc, cell_size)
+            if dist is not None:
+                dist_by_iter.setdefault(it, []).append(dist)
+                if it == current_iter:
+                    distance_iter.append({"event": ev, "dist_m": dist})
 
-    return jsonify(results)
+    def _summary_rows(by_iter: dict[int, list[float]]) -> list[dict]:
+        rows = []
+        for it in sorted(by_iter):
+            agg = _aggregate(by_iter[it])
+            if agg:
+                rows.append({
+                    "iter": it, "mean": agg["mean"], "median": agg["median"],
+                    "p10": agg["p10"], "p90": agg["p90"], "n_events": agg["n"],
+                })
+        return rows
+
+    return {
+        "residual_summary": _summary_rows(rms_by_iter),
+        "distance_summary": _summary_rows(dist_by_iter),
+        "residual_iter": residual_iter,
+        "distance_iter": distance_iter,
+    }
+
+
+@app.route("/api/runs/latest")
+def api_runs_latest():
+    """Most recent run id and its max iteration."""
+    if not RUNS_DIR.exists():
+        return jsonify({"run_id": None, "max_iter": 0})
+    runs = sorted(
+        (d.name for d in RUNS_DIR.iterdir() if d.is_dir()),
+        reverse=True,
+    )
+    if not runs:
+        return jsonify({"run_id": None, "max_iter": 0})
+    rid = runs[0]
+    rd = RUNS_DIR / rid
+    iters = [
+        int(d.name[5:]) for d in rd.iterdir()
+        if d.is_dir() and d.name.startswith("iter_")
+    ]
+    return jsonify({"run_id": rid, "max_iter": max(iters) if iters else 0})
+
+
+@app.route("/api/runs/<rid>/hypo_metrics")
+def api_hypo_metrics(rid):
+    """Combined hypo residual + distance metrics for one iteration and all iters."""
+    rd = _rd(rid)
+    it = request.args.get("iter", 0, type=int)
+    meta = _read_meta(rd)
+    return jsonify(_collect_all_hypo_metrics(rd, meta, it))
 
 
 # ─── iter / event / weight lists ──────────────────────────────────────────────

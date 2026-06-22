@@ -70,32 +70,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 .y-num { width: 44px; }
 
 /* ── Auto-refresh ── */
-#refresh-bar {
-  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
-}
-#refresh-bar label { display: flex; align-items: center; gap: 4px; color: var(--text2); font-size: 11px; cursor: pointer; }
-#refresh-interval { width: 52px; }
-#refresh-status {
-  font-size: 10px; font-family: var(--ff-mono); color: var(--text3);
-  min-width: 64px; text-align: right;
-}
-
-/* Progress bar — sits below header */
-#progress-wrap {
-  height: 3px; background: var(--bg2); flex-shrink: 0; position: relative; overflow: hidden;
-}
-#progress-bar {
-  height: 100%; width: 0%; background: var(--accent);
-  transition: width 0.4s linear;
-}
-#progress-bar.indeterminate {
-  animation: indeterminate 1.4s linear infinite;
-  width: 30% !important;
-}
-@keyframes indeterminate {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(450%); }
-}
+#refresh-bar label { display: flex; align-items: center; gap: 4px; color: var(--text2); font-size: 11px; cursor: pointer; flex-shrink: 0; }
 
 /* ── App shell ── */
 #app { display: flex; flex-direction: column; height: 100vh; }
@@ -120,26 +95,11 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   padding: 2px 7px; border: 1px solid currentColor; border-radius: 3px; background: #fdf5ec;
 }
 
-/* ── Timing chips in header ── */
-#timing-chips {
-  display: flex; align-items: center; gap: 6px; flex-shrink: 0;
-}
-.timing-chip {
-  display: flex; align-items: center; gap: 4px;
-  font-size: 10px; color: var(--text3);
-  padding: 1px 7px; border: 1px solid var(--border);
-  border-radius: 3px; background: var(--bg2);
-  font-family: var(--ff-mono); white-space: nowrap;
-}
-.timing-chip .tc-val { color: var(--accent); font-weight: 600; }
-.timing-chip .tc-lbl { color: var(--text3); font-size: 9px; }
-
 /* ── Params bar ── */
 #params-bar {
-  display: none; background: var(--bg2); border-bottom: 1px solid var(--border);
+  display: flex; background: var(--bg2); border-bottom: 1px solid var(--border);
   padding: 5px 14px; flex-shrink: 0; flex-wrap: wrap; gap: 16px; align-items: center;
 }
-#params-bar.open { display: flex; }
 .param-chip { display: flex; gap: 5px; align-items: baseline; }
 .param-k { color: var(--text3); font-size: 10px; }
 .param-v { color: var(--green); font-family: var(--ff-mono); font-size: 10px; }
@@ -182,11 +142,22 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   height: 440px;
   grid-column: 1 / -1;
 }
+.panel.panel-collapsed {
+  height: auto;
+}
+.panel.panel-collapsed .panel-body {
+  flex: none;
+  height: 52px;
+}
 .panel-hypoq .panel-body {
   display: grid;
   grid-template-rows: 1fr 1fr;
   grid-template-columns: 1fr 1fr;
   gap: 0;
+}
+.panel-hypoq.panel-collapsed .panel-body {
+  height: 52px;
+  display: block;
 }
 .hypoq-cell {
   position: relative;
@@ -201,12 +172,12 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   border-right: 1px solid var(--border);
 }
 .hypoq-cell-title {
-  position: absolute; top: 4px; left: 8px;
+  position: absolute; top: 6px; left: 8px;
   font-size: 9px; font-weight: 600; text-transform: uppercase;
   color: var(--text3); letter-spacing: .3px; pointer-events: none; z-index: 1;
 }
-#hypoq-worst-list {
-  padding: 6px 8px;
+.hypoq-worst-list {
+  padding: 22px 8px 6px;
   overflow-y: auto;
   height: 100%;
   font-size: 11px;
@@ -214,22 +185,20 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   color: var(--text2);
 }
 .hypoq-ev-row {
-  display: flex; align-items: center; gap: 6px;
+  display: flex; align-items: center; gap: 8px;
   padding: 3px 4px; border-radius: 3px; cursor: pointer;
   border-bottom: 1px solid var(--bg2);
 }
 .hypoq-ev-row:hover { background: #eaf0fb; color: var(--accent); }
 .hypoq-ev-rank { color: var(--text3); width: 18px; text-align: right; font-size: 9px; }
-.hypoq-ev-id   { color: var(--accent); font-weight: 600; min-width: 40px; }
-.hypoq-ev-rms  { color: var(--text); }
-.hypoq-ev-bar  {
-  flex: 1; height: 5px; border-radius: 2px;
-  background: linear-gradient(to right, #e88, #c94040);
-  min-width: 4px;
-}
+.hypoq-ev-id   { color: var(--accent); font-weight: 600; min-width: 48px; }
+.hypoq-ev-val  { color: var(--text); margin-left: auto; }
 .hypoq-no-data {
   position: absolute; inset: 0; display: flex;
   align-items: center; justify-content: center; color: var(--text3); font-size: 11px;
+}
+.btn-dl {
+  padding: 2px 7px; font-size: 10px; flex-shrink: 0;
 }
 
 .panel-hdr {
@@ -311,20 +280,11 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   </div>
   <div class="vsep"></div>
 
-  <button id="btn-params" class="active">Params ▴</button>
-  <div class="vsep"></div>
-
   <!-- Auto-refresh -->
   <div id="refresh-bar">
-    <label><input type="checkbox" id="cb-autorefresh"> Auto</label>
-    <input type="number" id="refresh-interval" value="5" min="2" max="60" title="Refresh interval (s)">
-    <span class="ctrl-label">s</span>
-    <span id="refresh-status">—</span>
+    <label><input type="checkbox" id="cb-autorefresh"> Auto-refresh (1s)</label>
   </div>
   <div class="vsep"></div>
-
-  <!-- Timing summary chips -->
-  <div id="timing-chips"></div>
 
   <div style="flex:1"></div>
   <span id="warn-no-grid">⚠ grid_info missing in meta.json — overlays disabled</span>
@@ -332,11 +292,8 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   <div class="reference">Plots by Plotly</div>
 </div>
 
-<!-- Progress bar -->
-<div id="progress-wrap"><div id="progress-bar"></div></div>
-
 <!-- Params bar -->
-<div id="params-bar" class="open"></div>
+<div id="params-bar"></div>
 
 <!-- Scrollable panel flow -->
 <div id="panels-scroll">
@@ -346,6 +303,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
     <div class="panel panel-timing">
       <div class="panel-hdr">
         <span class="panel-title">Quality</span>
+        <button class="btn-dl" data-plot="plot-quality" data-fname="quality" title="Download PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
       </div>
       <div class="panel-body">
@@ -361,6 +319,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
     <div class="panel">
       <div class="panel-hdr">
         <span class="panel-title">Velocity Model</span>
+        <button class="btn-dl" data-plot="plot-vel" data-fname="velocity" title="Download PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
         <div class="ph-group">
           <select id="vel-type">
@@ -389,6 +348,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
     <div class="panel">
       <div class="panel-hdr">
         <span class="panel-title">True Model</span>
+        <button class="btn-dl" data-plot="plot-tr" data-fname="true_model" title="Download PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
         <label class="dim-toggle" title="Share colorscale with Velocity Model panel">
           <input type="checkbox" id="cb-shared-vel-scale"> Shared scale
@@ -417,6 +377,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
     <div class="panel">
       <div class="panel-hdr">
         <span class="panel-title">Ray Count</span>
+        <button class="btn-dl" data-plot="plot-rc" data-fname="ray_count" title="Download PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
         <div class="ph-group" style="display: none;">Event <select id="rc-ev"></select></div>
         <div class="ph-group" style="display: none;">Wt <select id="rc-wt"><option value="0">0</option></select></div>
@@ -442,6 +403,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
     <div class="panel">
       <div class="panel-hdr">
         <span class="panel-title">G Matrix</span>
+        <button class="btn-dl" data-plot="plot-G" data-fname="g_matrix" title="Download PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
         <div class="ph-group">Ev <select id="g-ev"></select></div>
         <div class="ph-group">Sta <select id="g-sta"></select></div>
@@ -473,6 +435,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
     <div class="panel">
       <div class="panel-hdr">
         <span class="panel-title">Hypo Weights</span>
+        <button class="btn-dl" data-plot="plot-wt" data-fname="hypo_weights" title="Download PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
         <div class="ph-group">Event <select id="wt-ev"></select></div>
         <div class="ph-group">coarse <span class="badge" id="wt-shape-badge">—</span></div>
@@ -484,8 +447,8 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
           <input type="number" id="wt-y-num" min="0" max="0" value="0" class="y-num">
           <span class="y-val" id="wt-y-v">0</span>
         </div>
-        <button style="font-size:10px;padding:2px 6px" id="wt-find-nz">Find NZ</button>
-        <span class="badge" id="wt-nz-status">NZ: —</span>
+        <button style="font-size:10px;padding:2px 6px" id="wt-go-layer">Go to layer</button>
+        <span class="badge" id="wt-layer-status">Layer: —</span>
         <label class="dim-toggle">
           <input type="checkbox" id="cb-dim-wt" checked> Dim
         </label>
@@ -501,50 +464,84 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 
   </div><!-- /row 3 -->
 
-  <!-- Row 3b: Hypo Quality (full width, 4-quadrant) -->
+  <!-- Row 3b: Hypo Residuals (full width) -->
   <div class="panel-row">
-    <div class="panel panel-hypoq">
+    <div class="panel panel-hypoq" id="panel-hypo-residuals">
       <div class="panel-hdr">
-        <span class="panel-title">Hypo Quality</span>
+        <span class="panel-title">Hypo Residuals</span>
+        <button class="btn-dl" data-plot="plot-hypoq-trend" data-fname="hypo_residuals_trend" title="Download trend PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
         <div class="ph-group">
           <span class="ctrl-label">Top</span>
           <input type="number" id="hypoq-topn" value="8" min="1" max="50" style="width:42px" title="Number of worst events to show">
           <span class="ctrl-label">worst</span>
         </div>
-        <div class="ph-group" id="hypoq-stats-hdr" style="font-family:var(--ff-mono);font-size:10px;color:var(--text3)"></div>
       </div>
       <div class="panel-body">
 
-        <!-- Top: convergence trend (spans both columns) -->
         <div class="hypoq-cell">
           <span class="hypoq-cell-title">Mean RMS residual by iteration</span>
           <div class="hypoq-no-data" id="hypoq-trend-empty">No residuals saved</div>
           <div id="plot-hypoq-trend" style="width:100%;height:100%"></div>
         </div>
 
-        <!-- Bottom-left: histogram for current iteration -->
         <div class="hypoq-cell">
           <span class="hypoq-cell-title">Distribution — current iter</span>
           <div class="hypoq-no-data" id="hypoq-hist-empty">No data</div>
           <div id="plot-hypoq-hist" style="width:100%;height:100%"></div>
         </div>
 
-        <!-- Bottom-right: worst events list -->
         <div class="hypoq-cell">
           <span class="hypoq-cell-title">Worst events (click → highlight)</span>
-          <div id="hypoq-worst-list"><span style="color:var(--text3)">No data</span></div>
+          <div class="hypoq-worst-list" id="hypoq-worst-list"><span style="color:var(--text3)">No data</span></div>
         </div>
 
       </div>
     </div>
   </div><!-- /row 3b -->
 
+  <!-- Row 3c: Hypo Distance (full width) -->
+  <div class="panel-row">
+    <div class="panel panel-hypoq" id="panel-hypo-distance">
+      <div class="panel-hdr">
+        <span class="panel-title">Hypo Distance</span>
+        <button class="btn-dl" data-plot="plot-hypod-trend" data-fname="hypo_distance_trend" title="Download trend PNG">↓</button>
+        <button class="btn-full" title="Fullscreen">⤢</button>
+        <div class="ph-group">
+          <span class="ctrl-label">Top</span>
+          <input type="number" id="hypod-topn" value="8" min="1" max="50" style="width:42px">
+          <span class="ctrl-label">worst</span>
+        </div>
+      </div>
+      <div class="panel-body">
+
+        <div class="hypoq-cell">
+          <span class="hypoq-cell-title">Mean distance to true hypo by iteration</span>
+          <div class="hypoq-no-data" id="hypod-trend-empty">No distance data</div>
+          <div id="plot-hypod-trend" style="width:100%;height:100%"></div>
+        </div>
+
+        <div class="hypoq-cell">
+          <span class="hypoq-cell-title">Distribution — current iter</span>
+          <div class="hypoq-no-data" id="hypod-hist-empty">No data</div>
+          <div id="plot-hypod-hist" style="width:100%;height:100%"></div>
+        </div>
+
+        <div class="hypoq-cell">
+          <span class="hypoq-cell-title">Worst events (click → highlight)</span>
+          <div class="hypoq-worst-list" id="hypod-worst-list"><span style="color:var(--text3)">No data</span></div>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /row 3c -->
+
   <!-- Row 4: Timing (full width) -->
   <div class="panel-row">
     <div class="panel panel-timing">
       <div class="panel-hdr">
         <span class="panel-title">Timing</span>
+        <button class="btn-dl" data-plot="plot-timing" data-fname="timing" title="Download PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
         <div class="ph-group">
           <span class="ctrl-label">Mode</span>
@@ -553,7 +550,6 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
             <option value="cumulative">Cumulative</option>
           </select>
         </div>
-        <div class="ph-group" id="timing-stats-hdr"></div>
       </div>
       <div class="panel-body">
         <div class="no-data-msg" id="timing-empty">No timing.jsonl found</div>
@@ -579,13 +575,11 @@ const ST = {
   wt:     { event: 0, y: 0, dim: true },
   timing: { data: [], mode: 'per_iter' },
   quality:{ data: [] },
-  hypoQ:  { summaryData: [], iterData: [], topN: 8, hilightEv: -1 },
-  // auto-refresh
-  autoRefresh: true,
-  refreshInterval: 5,
+  hypoQ:  { residualSummary: [], residualIter: [], topN: 8, hilightEv: -1 },
+  hypoD:  { distanceSummary: [], distanceIter: [], topN: 8, hilightEv: -1 },
+  autoRefresh: false,
+  refreshInterval: 1,
   _refreshTimer: null,
-  _refreshCountdown: 0,
-  _refreshCountdownTimer: null,
   _refreshing: false,
 };
 
@@ -594,7 +588,12 @@ const PLY_CFG = {
   modeBarButtonsToRemove: ['lasso2d','select2d','autoScale2d'],
 };
 
-const ALL_PLOTS = ['plot-vel','plot-tr','plot-rc','plot-wt','plot-G','plot-timing','plot-quality','plot-hypoq-trend','plot-hypoq-hist'];
+const ALL_PLOTS = [
+  'plot-vel','plot-tr','plot-rc','plot-wt','plot-G',
+  'plot-timing','plot-quality',
+  'plot-hypoq-trend','plot-hypoq-hist',
+  'plot-hypod-trend','plot-hypod-hist',
+];
 
 /* ── Layout factory ── */
 function mkLayout(nx, nz, cbTitle, zrange) {
@@ -734,14 +733,22 @@ function shapeBadge(id, s) {
   if (el) el.textContent = s ? s.join('×') : '—';
 }
 
+function setPanelCollapsed(pid, collapsed) {
+  const plotEl = document.getElementById(pid);
+  const panel = plotEl?.closest('.panel');
+  if (panel) panel.classList.toggle('panel-collapsed', collapsed);
+}
+
 function showP(pid, eid) {
   document.getElementById(eid).style.display = 'none';
   document.getElementById(pid).style.display  = 'block';
+  setPanelCollapsed(pid, false);
 }
 function emptyP(pid, eid, msg) {
   Plotly.purge(pid);
   document.getElementById(pid).style.display  = 'none';
   const el = document.getElementById(eid); el.style.display = 'flex'; el.textContent = msg || 'No data';
+  setPanelCollapsed(pid, true);
 }
 
 function syncY(slId, lblId, numId, ny, stObj) {
@@ -763,92 +770,93 @@ function relayoutAll() {
   });
 }
 
-function fmtSec(s) {
-  if (s == null || isNaN(s)) return '—';
-  if (s >= 3600) return `${(s/3600).toFixed(2)}h`;
-  if (s >= 60)   return `${(s/60).toFixed(2)}m`;
-  return `${s.toFixed(2)}s`;
+function populateRunSelect(runs, selectedId) {
+  const sel = document.getElementById('run-select');
+  if (!runs?.length) { sel.innerHTML = '<option value="">No runs found</option>'; return; }
+
+  const groups = new Map();
+  const other = [];
+  runs.forEach(r => {
+    const m = r.match(/run_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+    if (!m) { other.push(r); return; }
+    const [_, Y, M, D, h, m2, s] = m;
+    const date = `${Y}-${M}-${D}`;
+    if (!groups.has(date)) groups.set(date, []);
+    groups.get(date).push({ id: r, label: `${h}:${m2}:${s} • ${r}` });
+  });
+
+  let html = '';
+  for (const [date, items] of groups.entries()) {
+    html += `<optgroup label="${date}">`;
+    html += items.map(it => `<option value="${it.id}">${it.label}</option>`).join('');
+    html += `</optgroup>`;
+  }
+  if (other.length) {
+    html += `<optgroup label="Other">` + other.map(r => `<option value="${r}">${r}</option>`).join('') + `</optgroup>`;
+  }
+  sel.innerHTML = html;
+  if (selectedId && runs.includes(selectedId)) sel.value = selectedId;
 }
 
 const CS_DIVERG = [[0,'#3a78c9'],[0.5,'#f5f5f5'],[1,'#c94040']];
 const CS_RDBU   = [[0,'#3a78c9'],[0.25,'#90b8e8'],[0.5,'#f5f5f5'],[0.75,'#e89090'],[1,'#c94040']];
 const CS_RAYS   = [[0,'#f8faff'],[0.2,'#c5d9f7'],[0.5,'#5a9bd4'],[0.8,'#1a4ea8'],[1,'#0a1e6e']];
 
-/* ── Progress bar helpers ── */
-function pbIndeterminate() {
-  const pb = document.getElementById('progress-bar');
-  pb.style.width = '0%';
-  pb.classList.add('indeterminate');
-}
-function pbDone() {
-  const pb = document.getElementById('progress-bar');
-  pb.classList.remove('indeterminate');
-  pb.style.width = '100%';
-  setTimeout(() => { pb.style.width = '0%'; }, 600);
-}
-
 /* ── Auto-refresh logic ── */
-function _startCountdown() {
-  clearInterval(ST._refreshCountdownTimer);
-  ST._refreshCountdown = ST.refreshInterval;
-  const el = document.getElementById('refresh-status');
-  el.textContent = `${ST._refreshCountdown}s`;
-  ST._refreshCountdownTimer = setInterval(() => {
-    if (!ST.autoRefresh) { clearInterval(ST._refreshCountdownTimer); el.textContent = '—'; return; }
-    ST._refreshCountdown--;
-    el.textContent = ST._refreshCountdown > 0 ? `${ST._refreshCountdown}s` : '…';
-  }, 1000);
-}
-
 async function doAutoRefresh() {
-  if (!ST.run || ST._refreshing) return;
+  if (ST._refreshing) return;
   ST._refreshing = true;
-  pbIndeterminate();
-  const el = document.getElementById('refresh-status');
-  el.textContent = '↻';
 
   try {
-    const [info, timing, quality] = await Promise.all([
-      apiFetch(`/api/runs/${ST.run}/info`),
-      apiFetch(`/api/runs/${ST.run}/timing`),
-      apiFetch(`/api/runs/${ST.run}/quality`),
+    const [runs, latest] = await Promise.all([
+      apiFetch('/api/runs'),
+      apiFetch('/api/runs/latest'),
     ]);
-    ST.info = info || ST.info;
-    ST.timing.data = timing || ST.timing.data;
-    ST.quality.data = quality || ST.quality.data;
+    if (!latest?.run_id) return;
 
-    // Advance iter slider to latest available
-    const maxIter = ST.info.iterations?.length ? Math.max(...ST.info.iterations) : 0;
+    if (latest.run_id !== ST.run) {
+      populateRunSelect(runs || [], latest.run_id);
+      await loadRun(latest.run_id, latest.max_iter);
+      return;
+    }
+
+    const maxIter = latest.max_iter ?? 0;
     const prevMax = +document.getElementById('iter-slider').max;
     if (maxIter > prevMax) {
       ['iter-slider','iter-num'].forEach(id => {
-        const el2 = document.getElementById(id); el2.max = maxIter;
+        document.getElementById(id).max = maxIter;
       });
       document.getElementById('iter-max-badge').textContent = `/ ${maxIter}`;
-      // jump to latest
+    }
+    if (maxIter !== ST.iter) {
       setIter(maxIter);
     } else {
-      renderAll();
+      await refreshLiveData();
     }
   } finally {
     ST._refreshing = false;
-    pbDone();
-    _startCountdown();
   }
+}
+
+async function refreshLiveData() {
+  if (!ST.run) return;
+  const [info, timing, quality] = await Promise.all([
+    apiFetch(`/api/runs/${ST.run}/info`),
+    apiFetch(`/api/runs/${ST.run}/timing`),
+    apiFetch(`/api/runs/${ST.run}/quality`),
+  ]);
+  ST.info = info || ST.info;
+  ST.timing.data = timing || ST.timing.data;
+  ST.quality.data = quality || ST.quality.data;
+  renderAll();
 }
 
 function scheduleAutoRefresh() {
   clearTimeout(ST._refreshTimer);
-  if (!ST.autoRefresh) {
-    document.getElementById('refresh-status').textContent = '—';
-    return;
-  }
-  _startCountdown();
+  if (!ST.autoRefresh) return;
   ST._refreshTimer = setTimeout(async function tick() {
     await doAutoRefresh();
-    if (ST.autoRefresh) {
-      ST._refreshTimer = setTimeout(tick, ST.refreshInterval * 1000);
-    }
+    if (ST.autoRefresh) ST._refreshTimer = setTimeout(tick, ST.refreshInterval * 1000);
   }, ST.refreshInterval * 1000);
 }
 
@@ -856,17 +864,12 @@ document.getElementById('cb-autorefresh').addEventListener('change', e => {
   ST.autoRefresh = e.target.checked;
   scheduleAutoRefresh();
 });
-document.getElementById('refresh-interval').addEventListener('change', e => {
-  ST.refreshInterval = Math.max(2, Math.min(60, +e.target.value || 5));
-  if (ST.autoRefresh) { clearTimeout(ST._refreshTimer); scheduleAutoRefresh(); }
-});
 
 /* ── Timing render ── */
 function renderTiming() {
   const rows = ST.timing.data;
   if (!rows || rows.length === 0) {
     emptyP('plot-timing', 'timing-empty', 'No timing.jsonl found');
-    updateTimingChips([]);
     return;
   }
 
@@ -913,7 +916,6 @@ function renderTiming() {
 
   showP('plot-timing', 'timing-empty');
   Plotly.react('plot-timing', traces, layout, PLY_CFG);
-  updateTimingChips(sorted);
 }
 
 function renderQuality() {
@@ -960,27 +962,82 @@ function renderQuality() {
   Plotly.react('plot-quality', traces, layout, PLY_CFG);
 }
 
-/* ── Hypo Quality panel ─────────────────────────────────────────────────────
-   4 quadrants:
-     top (full-width) — convergence trend: mean ± p10-p90 band, all iterations
-     bottom-left      — histogram of per-event RMS for current iteration
-     bottom-right     — top-N worst events table, clickable
-   ─────────────────────────────────────────────────────────────────────────── */
-async function renderHypoQuality() {
+/* ── Hypo Residuals + Hypo Distance panels ── */
+async function renderHypoMetrics() {
   if (!ST.run) return;
 
-  const [summary, iterData] = await Promise.all([
-    apiFetch(`/api/runs/${ST.run}/hypo_quality_summary`),
-    apiFetch(`/api/runs/${ST.run}/hypo_quality?iter=${ST.iter}`),
-  ]);
+  const data = await apiFetch(`/api/runs/${ST.run}/hypo_metrics?iter=${ST.iter}`);
+  ST.hypoQ.residualSummary = data?.residual_summary || [];
+  ST.hypoQ.residualIter    = data?.residual_iter || [];
+  ST.hypoD.distanceSummary = data?.distance_summary || [];
+  ST.hypoD.distanceIter    = data?.distance_iter || [];
 
-  ST.hypoQ.summaryData = summary || [];
-  ST.hypoQ.iterData    = iterData || [];
+  _renderHypoTrend({
+    summary: ST.hypoQ.residualSummary,
+    plotId: 'plot-hypoq-trend',
+    emptyId: 'hypoq-trend-empty',
+    panelId: 'panel-hypo-residuals',
+    meanKey: 'mean', p10Key: 'p10', p90Key: 'p90',
+    yLabel: 'RMS residual (s)',
+    hoverFmt: 'mean RMS = %{y:.4f}',
+  });
+  _renderHypoHist({
+    rows: ST.hypoQ.residualIter,
+    valueKey: 'rms',
+    plotId: 'plot-hypoq-hist',
+    emptyId: 'hypoq-hist-empty',
+    yLabel: 'RMS residual (s)',
+    hoverFmt: 'RMS = %{y:.4f}',
+    topN: ST.hypoQ.topN,
+    hilightEv: ST.hypoQ.hilightEv,
+  });
+  _renderHypoWorst({
+    rows: ST.hypoQ.residualIter,
+    valueKey: 'rms',
+    listId: 'hypoq-worst-list',
+    topN: ST.hypoQ.topN,
+    hilightEv: ST.hypoQ.hilightEv,
+    fmt: v => v.toFixed(4),
+    onClick: ev => _highlightHypoEvent(ev, 'hypoQ'),
+  });
+  _setHypoPanelCollapsed('panel-hypo-residuals',
+    !ST.hypoQ.residualSummary.length && !ST.hypoQ.residualIter.length);
 
-  _renderHypoTrend();
-  _renderHypoHist();
-  _renderHypoWorst();
-  _updateHypoStats();
+  _renderHypoTrend({
+    summary: ST.hypoD.distanceSummary,
+    plotId: 'plot-hypod-trend',
+    emptyId: 'hypod-trend-empty',
+    panelId: 'panel-hypo-distance',
+    meanKey: 'mean', p10Key: 'p10', p90Key: 'p90',
+    yLabel: 'Distance (m)',
+    hoverFmt: 'mean = %{y:.1f} m',
+  });
+  _renderHypoHist({
+    rows: ST.hypoD.distanceIter,
+    valueKey: 'dist_m',
+    plotId: 'plot-hypod-hist',
+    emptyId: 'hypod-hist-empty',
+    yLabel: 'Distance (m)',
+    hoverFmt: 'dist = %{y:.1f} m',
+    topN: ST.hypoD.topN,
+    hilightEv: ST.hypoD.hilightEv,
+  });
+  _renderHypoWorst({
+    rows: ST.hypoD.distanceIter,
+    valueKey: 'dist_m',
+    listId: 'hypod-worst-list',
+    topN: ST.hypoD.topN,
+    hilightEv: ST.hypoD.hilightEv,
+    fmt: v => `${v.toFixed(1)} m`,
+    onClick: ev => _highlightHypoEvent(ev, 'hypoD'),
+  });
+  _setHypoPanelCollapsed('panel-hypo-distance',
+    !ST.hypoD.distanceSummary.length && !ST.hypoD.distanceIter.length);
+}
+
+function _setHypoPanelCollapsed(panelId, collapsed) {
+  const panel = document.getElementById(panelId);
+  if (panel) panel.classList.toggle('panel-collapsed', collapsed);
 }
 
 function _hypoqLayout(xTitle, yTitle, extra) {
@@ -1000,27 +1057,25 @@ function _hypoqLayout(xTitle, yTitle, extra) {
   }, extra || {});
 }
 
-function _renderHypoTrend() {
-  const rows = ST.hypoQ.summaryData;
-  const trendEl  = document.getElementById('plot-hypoq-trend');
-  const emptyEl  = document.getElementById('hypoq-trend-empty');
+function _renderHypoTrend({ summary, plotId, emptyId, meanKey, p10Key, p90Key, yLabel, hoverFmt }) {
+  const trendEl = document.getElementById(plotId);
+  const emptyEl = document.getElementById(emptyId);
 
-  if (!rows || rows.length === 0) {
-    Plotly.purge('plot-hypoq-trend');
-    trendEl.style.display  = 'none';
-    emptyEl.style.display  = 'flex';
+  if (!summary?.length) {
+    Plotly.purge(plotId);
+    trendEl.style.display = 'none';
+    emptyEl.style.display = 'flex';
     return;
   }
-  trendEl.style.display  = 'block';
-  emptyEl.style.display  = 'none';
+  trendEl.style.display = 'block';
+  emptyEl.style.display = 'none';
 
-  const sorted = [...rows].sort((a, b) => a.iter - b.iter);
-  const iters  = sorted.map(r => r.iter);
-  const means  = sorted.map(r => r.mean_rms);
-  const p10s   = sorted.map(r => r.p10_rms);
-  const p90s   = sorted.map(r => r.p90_rms);
+  const sorted = [...summary].sort((a, b) => a.iter - b.iter);
+  const iters = sorted.map(r => r.iter);
+  const means = sorted.map(r => r[meanKey]);
+  const p10s  = sorted.map(r => r[p10Key]);
+  const p90s  = sorted.map(r => r[p90Key]);
 
-  // P10-P90 band (filled area)
   const bandX = [...iters, ...[...iters].reverse()];
   const bandY = [...p90s,  ...[...p10s].reverse()];
 
@@ -1044,157 +1099,128 @@ function _renderHypoTrend() {
       x: iters, y: means,
       line: { color: '#2e9e6b', width: 2 },
       marker: { size: 5, color: '#2e9e6b' },
-      hovertemplate: 'iter %{x}<br>mean RMS = %{y:.4f}<extra></extra>',
-    },
-    {
-      type: 'scatter', mode: 'lines', x: iters, y: p90s,
-      line: { color: 'rgba(180,60,60,0.35)', width: 1, dash: 'dot' },
-      hovertemplate: 'iter %{x}<br>p90 = %{y:.4f}<extra></extra>',
-    },
-    {
-      type: 'scatter', mode: 'lines', x: iters, y: p10s,
-      line: { color: 'rgba(60,130,200,0.35)', width: 1, dash: 'dot' },
-      hovertemplate: 'iter %{x}<br>p10 = %{y:.4f}<extra></extra>',
+      hovertemplate: `iter %{x}<br>${hoverFmt}<extra></extra>`,
     },
   ];
 
-  const layout = _hypoqLayout('Iteration', 'RMS residual (s)', {
+  const layout = _hypoqLayout('Iteration', yLabel, {
     shapes,
     margin: { l: 54, r: 14, t: 20, b: 36 },
     xaxis: { title: { text: 'Iteration', font: { size: 9 }, standoff: 2 },
       showgrid: false, zeroline: false, tickmode: 'linear', dtick: 1, tickfont: { size: 8 } },
   });
 
-  Plotly.react('plot-hypoq-trend', traces, layout, PLY_CFG);
+  Plotly.react(plotId, traces, layout, PLY_CFG);
 }
 
-function _renderHypoHist() {
-  const rows   = (ST.hypoQ.iterData || []).filter(r => r.rms != null);
-  const histEl = document.getElementById('plot-hypoq-hist');
-  const emptyEl = document.getElementById('hypoq-hist-empty');
+function _renderHypoHist({ rows, valueKey, plotId, emptyId, yLabel, hoverFmt, topN, hilightEv }) {
+  const valid = (rows || []).filter(r => r[valueKey] != null);
+  const histEl = document.getElementById(plotId);
+  const emptyEl = document.getElementById(emptyId);
 
-  if (rows.length === 0) {
-    Plotly.purge('plot-hypoq-hist');
-    histEl.style.display  = 'none';
+  if (!valid.length) {
+    Plotly.purge(plotId);
+    histEl.style.display = 'none';
     emptyEl.style.display = 'flex';
     return;
   }
-  histEl.style.display  = 'block';
+  histEl.style.display = 'block';
   emptyEl.style.display = 'none';
 
-  const vals = rows.map(r => r.rms);
+  const vals = valid.map(r => r[valueKey]);
   const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
-
   const shapes = [{
     type: 'line', x0: mean, x1: mean, y0: 0, y1: 1,
     xref: 'x', yref: 'paper',
     line: { color: '#c94040', width: 1.5, dash: 'dash' },
   }];
 
-  // Highlight worst event if selected
-  const topN  = ST.hypoQ.topN;
   const sorted = [...vals].sort((a, b) => b - a);
   const thresh = sorted[Math.min(topN - 1, sorted.length - 1)] ?? Infinity;
-
   const colors = vals.map(v => v >= thresh ? 'rgba(201,64,64,0.75)' : 'rgba(74,127,212,0.55)');
 
   const traces = [{
     type: 'bar',
-    x: rows.map(r => r.event),
+    x: valid.map(r => r.event),
     y: vals,
     marker: { color: colors, line: { width: 0 } },
-    hovertemplate: 'Ev %{x}<br>RMS = %{y:.4f}<extra></extra>',
+    hovertemplate: `Ev %{x}<br>${hoverFmt}<extra></extra>`,
   }];
 
-  const layout = _hypoqLayout('Event index', 'RMS residual (s)', {
-    shapes,
-    bargap: 0.15,
+  const layout = _hypoqLayout('Event index', yLabel, { shapes, bargap: 0.15,
     margin: { l: 54, r: 14, t: 20, b: 36 },
     xaxis: { title: { text: 'Event index', font: { size: 9 }, standoff: 2 },
       showgrid: false, zeroline: false, tickfont: { size: 8 } },
   });
 
-  Plotly.react('plot-hypoq-hist', traces, layout, PLY_CFG);
+  Plotly.react(plotId, traces, layout, PLY_CFG);
 }
 
-function _renderHypoWorst() {
-  const rows = (ST.hypoQ.iterData || []).filter(r => r.rms != null);
-  const el   = document.getElementById('hypoq-worst-list');
+function _renderHypoWorst({ rows, valueKey, listId, topN, hilightEv, fmt, onClick }) {
+  const valid = (rows || []).filter(r => r[valueKey] != null);
+  const el = document.getElementById(listId);
 
-  if (rows.length === 0) {
-    el.innerHTML = '<span style="color:var(--text3)">No residuals for this iteration</span>';
+  if (!valid.length) {
+    el.innerHTML = '<span style="color:var(--text3)">No data for this iteration</span>';
     return;
   }
 
-  const topN   = Math.max(1, ST.hypoQ.topN);
-  const sorted = [...rows].sort((a, b) => b.rms - a.rms);
-  const worst  = sorted.slice(0, topN);
-  const maxRms = worst[0].rms || 1;
+  const worst = [...valid].sort((a, b) => b[valueKey] - a[valueKey]).slice(0, Math.max(1, topN));
 
   el.innerHTML = worst.map((r, i) => {
-    const barW = Math.max(4, Math.round((r.rms / maxRms) * 100));
-    const isHi = r.event === ST.hypoQ.hilightEv;
+    const isHi = r.event === hilightEv;
     return `
       <div class="hypoq-ev-row${isHi ? ' active' : ''}" data-ev="${r.event}"
            style="${isHi ? 'background:#eaf0fb;' : ''}">
         <span class="hypoq-ev-rank">${i + 1}.</span>
         <span class="hypoq-ev-id">Ev ${r.event}</span>
-        <span class="hypoq-ev-rms">${r.rms.toFixed(4)}</span>
-        <div class="hypoq-ev-bar" style="width:${barW}%"></div>
-        <span style="font-size:9px;color:var(--text3)">${r.n_pairs} pairs</span>
+        <span class="hypoq-ev-val">${fmt(r[valueKey])}</span>
       </div>`;
   }).join('');
 
-  // Click → highlight event in Wt / G panels
   el.querySelectorAll('.hypoq-ev-row').forEach(row => {
-    row.addEventListener('click', () => {
-      const ev = +row.dataset.ev;
-      ST.hypoQ.hilightEv = (ST.hypoQ.hilightEv === ev) ? -1 : ev;
-      // sync with Wt and G panels
-      const nEv = ST.info?.n_events || 0;
-      if (ev < nEv) {
-        ST.wt.event = ev;
-        ST.G.event  = ev;
-        document.getElementById('wt-ev').value = ev;
-        document.getElementById('g-ev').value  = ev;
-        Promise.all([reloadGWeights(), reloadRcWeights()]).then(() => {
-          renderWt(); renderG(); renderRayCount();
-        });
-      }
-      _renderHypoHist();
-      _renderHypoWorst();
-    });
+    row.addEventListener('click', () => onClick(+row.dataset.ev));
   });
 }
 
-function _updateHypoStats() {
-  const rows = (ST.hypoQ.iterData || []).filter(r => r.rms != null);
-  const hdr  = document.getElementById('hypoq-stats-hdr');
-  if (!rows.length) { hdr.textContent = ''; return; }
-  const vals = rows.map(r => r.rms);
-  const mean = (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(4);
-  const mx   = Math.max(...vals).toFixed(4);
-  hdr.innerHTML = `iter ${ST.iter} &nbsp;·&nbsp; n=${rows.length} &nbsp;·&nbsp; mean=${mean} &nbsp;·&nbsp; max=${mx}`;
-}
-
-function updateTimingChips(sorted) {
-  const chips = document.getElementById('timing-chips');
-  if (!sorted || sorted.length === 0) { chips.innerHTML = ''; return; }
-
-  const perIter = sorted.map(r => r.elapsed_s);
-  const total   = perIter.reduce((a, b) => a + b, 0);
-  const avg     = total / perIter.length;
-  const minT    = Math.min(...perIter);
-  const maxT    = Math.max(...perIter);
-  const curRow  = sorted.find(r => r.iter === ST.iter);
-  const curEl   = curRow ? curRow.elapsed_s : null;
-
-  chips.innerHTML = `
-    <div class="timing-chip"><span class="tc-lbl">iter ${ST.iter}</span><span class="tc-val">${fmtSec(curEl)}</span></div>
-    <div class="timing-chip"><span class="tc-lbl">avg</span><span class="tc-val">${fmtSec(avg)}</span></div>
-    <div class="timing-chip"><span class="tc-lbl">total</span><span class="tc-val">${fmtSec(total)}</span></div>
-    <div class="timing-chip"><span class="tc-lbl">min/max</span><span class="tc-val">${fmtSec(minT)} / ${fmtSec(maxT)}</span></div>
-  `;
+function _highlightHypoEvent(ev, which) {
+  const st = ST[which];
+  st.hilightEv = (st.hilightEv === ev) ? -1 : ev;
+  const nEv = ST.info?.n_events || 0;
+  if (ev < nEv) {
+    ST.wt.event = ev;
+    ST.G.event  = ev;
+    document.getElementById('wt-ev').value = ev;
+    document.getElementById('g-ev').value  = ev;
+    Promise.all([reloadGWeights(), reloadRcWeights()]).then(() => {
+      renderWt(); renderG(); renderRayCount();
+    });
+  }
+  if (which === 'hypoQ') {
+    _renderHypoHist({
+      rows: ST.hypoQ.residualIter, valueKey: 'rms',
+      plotId: 'plot-hypoq-hist', emptyId: 'hypoq-hist-empty',
+      yLabel: 'RMS residual (s)', hoverFmt: 'RMS = %{y:.4f}',
+      topN: ST.hypoQ.topN, hilightEv: ST.hypoQ.hilightEv,
+    });
+    _renderHypoWorst({
+      rows: ST.hypoQ.residualIter, valueKey: 'rms', listId: 'hypoq-worst-list',
+      topN: ST.hypoQ.topN, hilightEv: ST.hypoQ.hilightEv,
+      fmt: v => v.toFixed(4), onClick: e => _highlightHypoEvent(e, 'hypoQ'),
+    });
+  } else {
+    _renderHypoHist({
+      rows: ST.hypoD.distanceIter, valueKey: 'dist_m',
+      plotId: 'plot-hypod-hist', emptyId: 'hypod-hist-empty',
+      yLabel: 'Distance (m)', hoverFmt: 'dist = %{y:.1f} m',
+      topN: ST.hypoD.topN, hilightEv: ST.hypoD.hilightEv,
+    });
+    _renderHypoWorst({
+      rows: ST.hypoD.distanceIter, valueKey: 'dist_m', listId: 'hypod-worst-list',
+      topN: ST.hypoD.topN, hilightEv: ST.hypoD.hilightEv,
+      fmt: v => `${v.toFixed(1)} m`, onClick: e => _highlightHypoEvent(e, 'hypoD'),
+    });
+  }
 }
 
 /* ── Render functions ── */
@@ -1345,7 +1371,7 @@ async function renderG() {
 
 function renderAll() {
   renderVelPair(); renderRayCount(); renderWt(); renderG();
-  renderTiming(); renderQuality(); renderHypoQuality();
+  renderTiming(); renderQuality(); renderHypoMetrics();
 }
 
 function setY(prefix, stateObj, value, renderFn) {
@@ -1365,24 +1391,19 @@ function bindYControls(prefix, stateObj, renderFn) {
   document.getElementById(`${prefix}-y-inc`).addEventListener('click', () => setY(prefix, stateObj, stateObj.y + 1, renderFn));
 }
 
-async function findNextNonZeroWeights() {
-  if (!ST.run) return;
-  const status = document.getElementById('wt-nz-status');
-  status.textContent = 'NZ: …';
-  const baseUrl = `/api/runs/${ST.run}/slice?type=weights&event=${ST.wt.event}&iter=${ST.iter}`;
-  const first = await apiFetch(`${baseUrl}&y=${ST.wt.y}`);
-  if (!first?.full_shape) { status.textContent = 'NZ: —'; return; }
-  const ny = first.full_shape[1];
-  const start = ST.wt.y;
-  for (let i = 0; i < ny; i++) {
-    const y = (start + i) % ny;
-    const d = i === 0 ? first : await apiFetch(`${baseUrl}&y=${y}`);
-    if (d?.slice) {
-      const hasNz = d.slice.some(row => row.some(v => v > 0));
-      if (hasNz) { setY('wt', ST.wt, y, renderWt); status.textContent = `NZ: y=${y}`; return; }
-    }
+function goToEventLayer() {
+  const locs = ST.meta?.event_locs;
+  const c = csz(false);
+  const status = document.getElementById('wt-layer-status');
+  if (!locs?.[ST.wt.event] || !c) {
+    status.textContent = 'Layer: —';
+    return;
   }
-  status.textContent = 'NZ: none';
+  const y = Math.round(locs[ST.wt.event][1] / c - 0.5);
+  const max = +document.getElementById('wt-y').max || 0;
+  const clamped = Math.max(0, Math.min(max, y));
+  setY('wt', ST.wt, clamped, renderWt);
+  status.textContent = `Layer: y=${clamped}`;
 }
 
 /* ── Populate helpers ── */
@@ -1428,8 +1449,10 @@ function updateParamsBar() {
     .join('');
 }
 
-async function loadRun(rid) {
-  ST.run = rid; ST.iter = 0;
+async function loadRun(rid, targetIter = null) {
+  ST.run = rid;
+  ST.hypoQ.hilightEv = -1;
+  ST.hypoD.hilightEv = -1;
   ['vel','tr','rc','wt','G'].forEach(k => { if (ST[k]) ST[k].y = 0; });
   ['vel-y','tr-y','rc-y','wt-y','g-y'].forEach(id => {
     const el = document.getElementById(id); if (el) { el.value = 0; el.max = 0; }
@@ -1437,9 +1460,8 @@ async function loadRun(rid) {
   ['vel-y-num','tr-y-num','rc-y-num','wt-y-num','g-y-num'].forEach(id => {
     const el = document.getElementById(id); if (el) { el.value = 0; el.max = 0; }
   });
-  document.getElementById('wt-nz-status').textContent = 'NZ: —';
+  document.getElementById('wt-layer-status').textContent = 'Layer: —';
 
-  pbIndeterminate();
   const [meta, info, timing, quality] = await Promise.all([
     apiFetch(`/api/runs/${rid}/meta`),
     apiFetch(`/api/runs/${rid}/info`),
@@ -1455,10 +1477,12 @@ async function loadRun(rid) {
     ST.meta?.grid_info?.coarse_cell_size ? 'none' : 'inline';
 
   const maxIter = ST.info.iterations?.length ? Math.max(...ST.info.iterations) : 0;
+  const iter = targetIter != null ? Math.min(targetIter, maxIter) : 0;
   ['iter-slider','iter-num'].forEach(id => {
-    const el = document.getElementById(id); el.max = maxIter; el.value = 0;
+    const el = document.getElementById(id); el.max = maxIter; el.value = iter;
   });
   document.getElementById('iter-max-badge').textContent = `/ ${maxIter}`;
+  ST.iter = iter;
 
   const nSta = ST.info.n_stations || 0, nEv = ST.info.n_events || 0;
   fillSelect('wt-ev',  nEv,  'Ev ');
@@ -1468,7 +1492,6 @@ async function loadRun(rid) {
 
   await Promise.all([reloadGWeights(), reloadRcWeights()]);
   updateParamsBar();
-  pbDone();
   renderAll();
   if (ST.autoRefresh) scheduleAutoRefresh();
 }
@@ -1490,12 +1513,6 @@ document.getElementById('cb-grid').addEventListener('change',     e => { ST.show
 document.getElementById('cb-stations').addEventListener('change', e => { ST.showStations = e.target.checked; renderAll(); });
 document.getElementById('cb-events').addEventListener('change',   e => { ST.showEvents   = e.target.checked; renderAll(); });
 
-document.getElementById('btn-params').addEventListener('click', function() {
-  document.getElementById('params-bar').classList.toggle('open');
-  this.classList.toggle('active');
-  this.textContent = document.getElementById('params-bar').classList.contains('open') ? 'Params ▴' : 'Params ▾';
-});
-
 document.getElementById('timing-mode').addEventListener('change', e => {
   ST.timing.mode = e.target.value; renderTiming();
 });
@@ -1514,10 +1531,11 @@ document.getElementById('cb-dim-rc').addEventListener('change', e => { ST.rc.dim
 bindYControls('rc', ST.rc, renderRayCount);
 
 // Wt
-document.getElementById('wt-ev').addEventListener('change', e => { ST.wt.event = +e.target.value; renderWt(); });
-bindYControls('wt', ST.wt, renderWt);
-document.getElementById('wt-find-nz').addEventListener('click', findNextNonZeroWeights);
+document.getElementById('wt-go-layer').addEventListener('click', goToEventLayer);
 document.getElementById('cb-dim-wt').addEventListener('change', e => { ST.wt.dim = e.target.checked; renderWt(); });
+document.getElementById('wt-ev').addEventListener('change', e => { ST.wt.event = +e.target.value; goToEventLayer(); renderWt(); });
+
+bindYControls('wt', ST.wt, renderWt);
 
 // G
 document.getElementById('g-ev').addEventListener('change', async e => { ST.G.event = +e.target.value; await reloadGWeights(); renderG(); });
@@ -1529,8 +1547,27 @@ bindYControls('g', ST.G, renderG);
 // Hypo Quality
 document.getElementById('hypoq-topn').addEventListener('change', e => {
   ST.hypoQ.topN = Math.max(1, Math.min(50, +e.target.value || 8));
-  _renderHypoHist();
-  _renderHypoWorst();
+  renderHypoMetrics();
+});
+document.getElementById('hypod-topn').addEventListener('change', e => {
+  ST.hypoD.topN = Math.max(1, Math.min(50, +e.target.value || 8));
+  renderHypoMetrics();
+});
+
+function downloadPlot(plotId, filename) {
+  const el = document.getElementById(plotId);
+  if (!el?._fullLayout) return;
+  Plotly.downloadImage(plotId, {
+    format: 'png', width: 1200, height: 700,
+    filename: `${ST.run || 'plot'}_${filename}`,
+  });
+}
+
+document.querySelectorAll('.btn-dl').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    downloadPlot(btn.dataset.plot, btn.dataset.fname || 'plot');
+  });
 });
 
 /* ── Fullscreen ── */
@@ -1547,30 +1584,11 @@ document.querySelectorAll('.btn-full').forEach(btn => {
 /* ── Init ── */
 async function init() {
   const runs = await apiFetch('/api/runs');
-  const sel  = document.getElementById('run-select');
-  if (!runs?.length) { sel.innerHTML = '<option value="">No runs found</option>'; return; }
-
-  const groups = new Map();
-  const other = [];
-  runs.forEach(r => {
-    const m = r.match(/run_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
-    if (!m) { other.push(r); return; }
-    const [_, Y, M, D, h, m2, s] = m;
-    const date = `${Y}-${M}-${D}`;
-    if (!groups.has(date)) groups.set(date, []);
-    groups.get(date).push({ id: r, label: `${h}:${m2}:${s} • ${r}` });
-  });
-
-  let html = '';
-  for (const [date, items] of groups.entries()) {
-    html += `<optgroup label="${date}">`;
-    html += items.map(it => `<option value="${it.id}">${it.label}</option>`).join('');
-    html += `</optgroup>`;
+  if (!runs?.length) {
+    document.getElementById('run-select').innerHTML = '<option value="">No runs found</option>';
+    return;
   }
-  if (other.length) {
-    html += `<optgroup label="Other">` + other.map(r => `<option value="${r}">${r}</option>`).join('') + `</optgroup>`;
-  }
-  sel.innerHTML = html;
+  populateRunSelect(runs, runs[0]);
   loadRun(runs[0]);
 }
 
