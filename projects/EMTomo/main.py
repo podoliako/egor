@@ -1,124 +1,81 @@
-import numpy as np
-from velocity_model import VelocityModel
-from instruments.instruments import generate_synthetic_arrivals_table
-from tomography.tomography import run_em, warm_up_jit
-
 import cProfile
 import pstats
 from pstats import SortKey
 
+from instruments.instruments import generate_synthetic_arrivals_table
+from tomography.tomography import run_em, warm_up_jit
+from velocity_model import VelocityModel
 
-if __name__ == '__main__':
-    profiler = cProfile.Profile()
-    profiler.enable()
 
-    CELL_SIZE = 500.0
-    SUBDIVISION = 25
-    STATION_SEED = 42
-    TRUE_MODEL_SEED = 123
-    V_BOUNDS = (50.0, 150.0)
-    V_REG_STRENGTH = 0.00055
-    V_LEFT_MODE = "lin"
-    V_RIGHT_MODE = "lin"
-    V_LEFT_RATE = 0.0
-    V_RIGHT_RATE = 0.0
-    V_LEFT_POWER = 0.0
-    V_RIGHT_POWER = 0.0
-    model_config = {
-        'lon': 37.6173,
-        'lat': 55.7558,
-        'height': 50.0,
-        'azimuth': 45.0,
-        'side_size': CELL_SIZE,
-        'n_x': 25,
-        'n_y': 5,
-        'n_z': 1
-    }
+CELL_SIZE = 500.0
+GRID_SHAPE = (8, 8, 8)
+SUBDIVISION = 15
+N_EVENTS = 300
+N_CYCLES = 60
+N_WORKERS = 20
 
-    n_stations = 75
-    # n_events = 10
-    middle_y = (model_config['n_y']) * CELL_SIZE / 2
-    middle_z = (model_config['n_z']) * CELL_SIZE / 2
-    n_y = model_config['n_y']
-    n_x = model_config['n_x']
-    # middle_y = CELL_SIZE * 1
+V_BOUNDS = (50.0, 150.0)
+V_REG_STRENGTH = 0.00055
 
-    rng_stations = np.random.default_rng(STATION_SEED)
-    noise = np.random.default_rng()
 
-    stations_metric = [
-        (
-            rng_stations.uniform(0, n_x * CELL_SIZE),
-            rng_stations.uniform(0, n_y * CELL_SIZE),
-            0,
-        )
-        for _ in range(n_stations)
+def build_top_cell_center_stations(n_x: int, n_y: int, cell_size: float):
+    """Return one station above the center of every cell in the top layer."""
+    return [
+        ((i + 0.5) * cell_size, (j + 0.5) * cell_size, 0.0)
+        for i in range(n_x)
+        for j in range(n_y)
     ]
 
-    # events_metric = [
-    #     (
-    #         (i + 1) * CELL_SIZE * model_config['n_x'] / (n_events + 1),
-    #         middle_y,
-    #         (j + 1) * CELL_SIZE * model_config['n_z'] / (n_events + 1),
-    #     )
-    #     for i in range(n_events)
-    #     for j in range(n_events)
-    # ]
+
+def build_true_model(model: VelocityModel) -> None:
+    model.fill_linear_gradient("vp", 100.0, 100.0)
+
+    for i in (2, 3, 4):
+        for j in range(model.grid.vp.shape[1]):
+            for k in (2, 3):
+                velocity = 102.0 if j in (0, 2) else 110.0 if i == 3 else 105.0
+                model.set_vp(i, j, k, velocity)
+
+
+if __name__ == "__main__":
+    n_x, n_y, n_z = GRID_SHAPE
+    model_config = {
+        "lon": 37.6173,
+        "lat": 55.7558,
+        "height": 50.0,
+        "azimuth": 45.0,
+        "side_size": CELL_SIZE,
+        "n_x": n_x,
+        "n_y": n_y,
+        "n_z": n_z,
+    }
+
+    # 8 × 8 stations: one above the center of each top-layer cell.
+    stations_metric = build_top_cell_center_stations(n_x, n_y, CELL_SIZE)
 
     initial_model = VelocityModel.from_config(model_config)
+    initial_model.fill_linear_gradient("vp", 100.0, 100.0)
+
     true_model = VelocityModel.from_config(model_config)
+    build_true_model(true_model)
 
-    initial_model.fill_linear_gradient('vp', 100, 100)
-    true_model.fill_linear_gradient('vp', 100, 100)    
-
-    rng_true = np.random.default_rng(TRUE_MODEL_SEED)
-    for i in range(true_model.grid.vp.shape[0]):
-        for j in range(true_model.grid.vp.shape[1]):
-            for k in range(true_model.grid.vp.shape[2]):
-                # if i >= 4 and i <= 5 and k >= 5 and k <= 6:
-                #     true_model.set_vp(i, j, k, 101)
-                
-                # if j != 1:
-                #     true_model.set_vp(i, j, k, 1)
-                #     initial_model.set_vp(i, j, k, 1)
-                # else:
-                #     true_model.set_vp(i, j, k, np.random.normal(100, 0.001))
-                #     initial_model.set_vp(i, j, k, 100)
-                # if (i % 2 == 0 and k % 2 == 0) or (i % 2 != 0 and k % 2 != 0):
-                true_rnd = rng_true.normal(0, 1)
-                true_model.set_vp(i, j, k, 100 + true_rnd)
-                if k < 0:
-                    initial_model.set_vp(i, j, k, 100 + true_rnd + noise.normal(0,0.04))
-                else:
-                    initial_model.set_vp(i, j, k, 100)
-                # else:
-                    # true_model.set_vp(i, j, k, 100 + np.random.normal(0, 2))
-                    # initial_model.set_vp(i, j, k, 100)
-                # if (i % 2 == 0 and k % 2 == 0) or (i % 2 != 0 and k % 2 != 0):
-                #     true_model.set_vp(i, j, k, 98)
-                #     initial_model.set_vp(i, j, k, 99)
-                # else:
-                #     true_model.set_vp(i, j, k, 102)
-                #     initial_model.set_vp(i, j, k, 101)
-
-
-    full_arr, events_metric = generate_synthetic_arrivals_table(
+    arrivals_table, events_metric = generate_synthetic_arrivals_table(
         true_model,
         station_locs=stations_metric,
-        n_events=300,
+        n_events=N_EVENTS,
         random_seed=7,
         subdivision=SUBDIVISION,
         depth_bias=2,
-        x_offset=0,
-        y_offset=0
     )
 
     warm_up_jit()
 
+    profiler = cProfile.Profile()
+    profiler.enable()
     logger = run_em(
-        n_cycles=60,
+        n_cycles=N_CYCLES,
         initial_model=initial_model,
-        arrivals_table=full_arr,
+        arrivals_table=arrivals_table,
         station_locs=stations_metric,
         weights_top_n=1,
         temperature=0.001,
@@ -126,24 +83,21 @@ if __name__ == '__main__':
         subdivision=SUBDIVISION,
         v_bounds=V_BOUNDS,
         v_reg_strength=V_REG_STRENGTH,
-        v_left_mode=V_LEFT_MODE,
-        v_right_mode=V_RIGHT_MODE,
-        v_left_rate=V_LEFT_RATE,
-        v_right_rate=V_RIGHT_RATE,
-        v_left_power=V_LEFT_POWER,
-        v_right_power=V_RIGHT_POWER,
-        # --- сохранение ---
+        v_left_mode="lin",
+        v_right_mode="lin",
+        v_left_rate=0.0,
+        v_right_rate=0.0,
+        v_left_power=0.0,
+        v_right_power=0.0,
         true_model=true_model,
         event_locs=events_metric,
         save_runs=True,
         runs_dir="runs",
-        n_workers=20,
-        log_G_per_weight=False
+        n_workers=N_WORKERS,
+        log_G_per_weight=False,
     )
+    profiler.disable()
 
     print(f"Run saved: {logger.run_dir}")
-    
-    profiler.disable()
     logger.save_profiling(profiler)
-    stats = pstats.Stats(profiler).strip_dirs().sort_stats(SortKey.CUMULATIVE)
-    stats.print_stats(30)
+    pstats.Stats(profiler).strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats(30)
