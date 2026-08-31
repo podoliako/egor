@@ -65,7 +65,8 @@ if __name__ == "__main__":
         n_events=N_EVENTS,
         random_seed=7,
         subdivision=SUBDIVISION,
-        depth_bias=2,
+        depth_bias=0.0,
+        z_offset=2 * CELL_SIZE,
     )
 
     warm_up_jit()

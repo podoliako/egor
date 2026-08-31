@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 import multiprocessing as mp
-from typing import Callable, Dict, Optional, Tuple
+from typing import Callable, Dict
 
 import numpy as np
 
 from instruments.instruments import coarsen_G, compute_epicenter_weight_matrix
 from raytracing import compute_G_all_stations, compute_G_all_stations_serial
-from .tomography_math import _calculate_residuals, _select_top_n_weights
+from .tomography_math import (
+    _calculate_residuals,
+    _normal_equation_contribution,
+    _select_top_n_weights,
+)
 
 _MP: dict = {}
 
@@ -34,9 +38,9 @@ def _process_event(
     subdivision: int,
     temperature: float,
     weights_top_n: int,
-    compute_G: Callable[..., np.ndarray],
+    compute_G: Callable[..., tuple[np.ndarray, np.ndarray]],
     log_G_per_weight: bool,
-) -> Tuple[np.ndarray, np.ndarray, Tuple[np.ndarray, np.ndarray, np.ndarray, Optional[Dict[int, list]]]]:
+) -> tuple:
     step = 0.1
 
     weights, misfit = compute_epicenter_weight_matrix(
@@ -52,15 +56,17 @@ def _process_event(
         weights_indices = np.array([best_idx], dtype=np.int64)
         weights_values = np.array([weights[best_idx]], dtype=np.float64)
 
-    G_w: list = []
-    r_w: list = []
+    coarse_shape = tuple(int(v) // subdivision for v in sf.shape[1:])
+    n_vox = int(np.prod(coarse_shape))
+    hessian = np.zeros((n_vox, n_vox), dtype=np.float64)
+    rhs = np.zeros(n_vox, dtype=np.float64)
     first_residuals = None
-    G_per_weight: Dict[int, list] = {}
+    G_per_weight: Dict[int, list[np.ndarray]] = {}
     ray_count_per_weight: Dict[int, np.ndarray] = {}
 
     for w_idx, (weight_idx, weight_val) in enumerate(zip(weights_indices, weights_values)):
         epic = np.asarray(weight_idx, dtype=np.float64)
-        G_fine = compute_G(
+        G_fine, ray_reached = compute_G(
             gx,
             gy,
             gz,
@@ -76,22 +82,24 @@ def _process_event(
             x_hi,
         )
         G_stations = np.array([coarsen_G(G_fine[si], subdivision) for si in range(G_fine.shape[0])])
-        G_tilda = G_stations[:, np.newaxis] - G_stations[np.newaxis, :]
         residuals = _calculate_residuals(sf, observed, weight_idx)
+        x, y, z = weight_idx
+        station_residuals = observed - sf[:, x, y, z]
+        hessian_w, rhs_w = _normal_equation_contribution(
+            station_sensitivities=G_stations,
+            station_residuals=station_residuals,
+            model_shape=coarse_shape,
+            weight=float(weight_val),
+            valid_stations=ray_reached,
+        )
+        hessian += hessian_w
+        rhs += rhs_w
 
         if first_residuals is None:
             first_residuals = residuals
         if log_G_per_weight:
             G_per_weight[w_idx] = [G_fine[si] for si in range(G_fine.shape[0])]
         ray_count_per_weight[w_idx] = (G_stations > 0).sum(axis=0).astype(np.int16)
-        G_w.append(G_tilda * weight_val)
-        r_w.append(residuals * weight_val)
-
-    if not G_w:
-        zero_g = np.zeros((sf.shape[0], sf.shape[0]) + sf.shape[1:], dtype=np.float64)
-        zero_r = np.zeros((sf.shape[0], sf.shape[0]), dtype=np.float64)
-        log_data = (weights, misfit, np.array([]), G_per_weight if log_G_per_weight else None, ray_count_per_weight)
-        return zero_g, zero_r, log_data
 
     log_data = (
         weights,
@@ -100,7 +108,7 @@ def _process_event(
         G_per_weight if log_G_per_weight else None,
         ray_count_per_weight
     )
-    return np.add.reduce(G_w), np.add.reduce(r_w), log_data
+    return hessian, rhs, log_data
 
 
 def _mp_event_task(packed: tuple) -> tuple:

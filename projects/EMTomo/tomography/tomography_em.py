@@ -216,11 +216,11 @@ def make_tomography_step(
             for i, obs in enumerate(arrivals_table)
         ]
 
-    G_acc = []
-    r_acc = []
-    for event_idx, (G_ev, r_ev, log_data) in enumerate(results):
-        G_acc.append(G_ev)
-        r_acc.append(r_ev)
+    hessian_acc = []
+    rhs_acc = []
+    for event_idx, (hessian_ev, rhs_ev, log_data) in enumerate(results):
+        hessian_acc.append(hessian_ev)
+        rhs_acc.append(rhs_ev)
         if logger is not None:
             weights, misfit, first_residuals, G_per_weight, rc_per_weight = log_data
             logger.save_event_data(
@@ -234,11 +234,10 @@ def make_tomography_step(
             )
 
     return _solve_delta_s(
-        g_tilde_prime=np.add.reduce(G_acc),
-        r_prime=np.add.reduce(r_acc),
+        hessian=np.add.reduce(hessian_acc),
+        rhs=np.add.reduce(rhs_acc),
         model_shape=coarse_shape,
         lambda_reg=lambda_reg,
-        use_upper_triangle_pairs=True,
     )
 
 

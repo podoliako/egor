@@ -73,10 +73,11 @@ class SKFMMSolver:
         The eikonal equation: |∇T| = 1/v(x)
         where T is travel time and v is velocity.
         """
-        # Create phi array (distance field)
-        # Negative inside source, positive outside
+        # Velocity samples represent cell centres. Seeding the zero level set at
+        # the source cell centre makes its travel time exactly zero; a negative
+        # seed would place the interface halfway towards neighbouring cells.
         phi = np.ones_like(velocity, dtype=np.float64)
-        phi[source_idx] = -1
+        phi[source_idx] = 0.0
         
         # Solve eikonal equation
         # dx parameter accounts for cell size

@@ -37,6 +37,7 @@ def _sample_random_metric_points(
     depth_bias: float = 0.0,
     x_offset: float = 0.0,
     y_offset: float = 0.0,
+    z_offset: float = 0.0,
 ) -> Tuple[List[MetricPoint], List[GridPoint]]:
     if cell_size <= 0:
         raise ValueError("cell_size must be positive")
@@ -52,6 +53,10 @@ def _sample_random_metric_points(
 
     if x_offset * 2 >= max_x or y_offset * 2 >= max_y:
         raise ValueError("x_offset/y_offset too large for grid size")
+    if not 0.0 <= z_offset < max_z:
+        raise ValueError("z_offset must be within the grid depth")
+    if fixed_z is not None and not z_offset <= fixed_z < max_z:
+        raise ValueError("fixed_z must be within [z_offset, grid depth)")
 
     metric_points = []
     grid_points = []
@@ -70,12 +75,13 @@ def _sample_random_metric_points(
             z = fixed_z
         else:
             if depth_bias == 0.0:
-                z = rng.uniform(0.0, max_z)
+                z = rng.uniform(z_offset, max_z)
             else:
                 u = rng.uniform(0.0, 1.0)
                 b = depth_bias
-                z = (max_z / b) * np.log(1.0 + u * (np.exp(b) - 1.0))
-                z = max(0.0, min(z, max_z))
+                depth_range = max_z - z_offset
+                z = z_offset + (depth_range / b) * np.log(1.0 + u * (np.exp(b) - 1.0))
+                z = max(z_offset, min(z, max_z))
 
         point = (float(x), float(y), float(z))
         idx = metric_to_index(point, cell_size, shape)
@@ -131,6 +137,7 @@ def _resolve_event_locs_metric(
     depth_bias: float = 0.0,
     x_offset: float = 0.0,
     y_offset: float = 0.0,
+    z_offset: float = 0.0,
 ) -> Tuple[List[MetricPoint], List[GridPoint]]:
     if event_locs is not None and n_events is not None:
         raise ValueError("Provide either event_locs or n_events, not both")
@@ -153,6 +160,7 @@ def _resolve_event_locs_metric(
             depth_bias=depth_bias,
             x_offset=x_offset,
             y_offset=y_offset,
+            z_offset=z_offset,
         )
 
     if len(metric_events) == 0:

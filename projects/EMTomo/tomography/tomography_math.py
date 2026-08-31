@@ -14,35 +14,56 @@ def _calculate_residuals(station_fields: np.ndarray, arrivals: np.ndarray, weigh
     return residual_vector[:, np.newaxis] - residual_vector[np.newaxis, :]
 
 
-def _solve_delta_s(g_tilde_prime, r_prime, model_shape, lambda_reg, use_upper_triangle_pairs):
-    n_st = g_tilde_prime.shape[0]
-    pair_mask = (
-        np.triu(np.ones((n_st, n_st), dtype=bool), k=1)
-        if use_upper_triangle_pairs
-        else ~np.eye(n_st, dtype=bool)
+def _normal_equation_contribution(
+    station_sensitivities: np.ndarray,
+    station_residuals: np.ndarray,
+    model_shape,
+    weight: float,
+    valid_stations: np.ndarray,
+):
+    """Return ``w GᵀG`` and ``w Gᵀr`` for all valid station pairs.
+
+    For station rows ``X_i`` and residuals ``q_i``, the identity
+    ``sum_{i<j}(X_i-X_j)ᵀ(X_i-X_j) = n X_cᵀX_c`` avoids explicitly
+    constructing the quadratic number of pair rows.
+    """
+    n_vox = int(np.prod(model_shape))
+    valid = np.asarray(valid_stations, dtype=bool)
+    if np.count_nonzero(valid) < 2 or weight <= 0.0:
+        return (
+            np.zeros((n_vox, n_vox), dtype=np.float64),
+            np.zeros(n_vox, dtype=np.float64),
+        )
+
+    rows = station_sensitivities[valid].reshape(-1, n_vox)
+    residual = np.asarray(station_residuals, dtype=np.float64)[valid]
+    rows_centered = rows - np.mean(rows, axis=0, keepdims=True)
+    residual_centered = residual - np.mean(residual)
+    n_valid = rows.shape[0]
+
+    return (
+        weight * n_valid * (rows_centered.T @ rows_centered),
+        weight * n_valid * (rows_centered.T @ residual_centered),
     )
 
+
+def _solve_delta_s(hessian, rhs, model_shape, lambda_reg):
+    """Solve an already accumulated normal system for the slowness update."""
     n_vox = int(np.prod(model_shape))
-    g_rows = g_tilde_prime[pair_mask].reshape(-1, n_vox)
-    r_vec  = r_prime[pair_mask].reshape(-1)
-
-    if g_rows.shape[0] == 0:
-        raise ValueError("No station pairs available")
-
-    gtg = g_rows.T @ g_rows                    # (n_vox, n_vox)
-    gtr = g_rows.T @ r_vec                     # (n_vox,)
+    hessian = np.asarray(hessian, dtype=np.float64).reshape(n_vox, n_vox)
+    rhs = np.asarray(rhs, dtype=np.float64).reshape(n_vox)
 
     # Нормируем λ на средний диагональный элемент GᵀG.
     # lambda_reg=1.0  → регуляризация = data term (сильно)
     # lambda_reg=0.01 → 1% от data term (слабо)
     # lambda_reg=0.0  → нет регуляризации
-    scale = np.trace(gtg) / n_vox
-    gtg_reg = gtg + float(lambda_reg) * scale * np.eye(n_vox, dtype=np.float64)
+    scale = np.trace(hessian) / n_vox
+    hessian_reg = hessian + float(lambda_reg) * scale * np.eye(n_vox, dtype=np.float64)
 
     try:
-        delta_s = np.linalg.solve(gtg_reg, gtr)
+        delta_s = np.linalg.solve(hessian_reg, rhs)
     except np.linalg.LinAlgError:
-        delta_s = np.linalg.lstsq(gtg_reg, gtr, rcond=None)[0]
+        delta_s = np.linalg.lstsq(hessian_reg, rhs, rcond=None)[0]
 
     return delta_s.reshape(model_shape)
 
@@ -74,13 +95,16 @@ def _select_top_n_weights(weights_matrix, n: int, normalize: bool = False):
 
 
 def _calculate_G(station_field, origin_loc, station_loc, geo_shape, voxel_size, gradT=None):
-    path = trace_ray_from_timefield(
+    path, reached = trace_ray_from_timefield(
         T=station_field,
         station_xyz=station_loc,
         epic_xyz=origin_loc,
         spacing_xyz=(1.0, 1.0, 1.0),
         gradT=gradT,
+        return_status=True,
     )
+    if not reached:
+        return np.zeros(geo_shape, dtype=np.float64)
     return rasterize_path_lengths(
         path_xyz=path, shape=geo_shape, voxel_size=voxel_size, dtype=np.float64
     )

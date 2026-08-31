@@ -25,6 +25,7 @@ def generate_synthetic_arrivals_table(
     depth_bias: float = 0.0,
     x_offset: float = 0.0,
     y_offset: float = 0.0,
+    z_offset: float = 0.0,
 ) -> Tuple[List[List[float]], List[MetricPoint]]:
     geo_grid = model.get_geo_grid(subdivision=subdivision)
     cell_size = float(geo_grid.cell_size)
@@ -43,6 +44,7 @@ def generate_synthetic_arrivals_table(
         depth_bias=depth_bias,
         x_offset=x_offset,
         y_offset=y_offset,
+        z_offset=z_offset,
     )
 
     fields = compute_station_travel_time_fields(

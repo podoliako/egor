@@ -38,15 +38,18 @@ def _trilinear_nb(v, i, j, k, di, dj, dk):
 @njit(cache=True, fastmath=True)
 def _trace_ray_nb(gx, gy, gz, station, epic, step, tol_sq, max_steps, x_lo, x_hi):
     """
-    Gradient-descent ray trace in index coordinates (spacing = 1 assumed).
-    Receives tol_sq = tol**2 to avoid one sqrt per step.
-    Returns (N, 3) contiguous float64 path.
+    Gradient-descent ray trace in cell-centred index coordinates.
+
+    Integer coordinates denote cell centres. Returns the path and a flag showing
+    whether the ray reached the station. Unsuccessful partial paths must not be
+    used to build sensitivity matrices.
     """
     x0 = min(max(epic[0], x_lo[0]), x_hi[0])
     x1 = min(max(epic[1], x_lo[1]), x_hi[1])
     x2 = min(max(epic[2], x_lo[2]), x_hi[2])
 
-    buf = np.empty((max_steps + 1, 3), dtype=np.float64)
+    # One extra slot is reserved for the exact station position.
+    buf = np.empty((max_steps + 2, 3), dtype=np.float64)
     buf[0, 0] = x0;  buf[0, 1] = x1;  buf[0, 2] = x2
     n = 1
     nx_, ny_, nz_ = gx.shape
@@ -54,7 +57,12 @@ def _trace_ray_nb(gx, gy, gz, station, epic, step, tol_sq, max_steps, x_lo, x_hi
     for _ in range(max_steps):
         dx = x0 - station[0];  dy = x1 - station[1];  dz = x2 - station[2]
         if dx * dx + dy * dy + dz * dz <= tol_sq:
-            break
+            if dx * dx + dy * dy + dz * dz > 1e-24:
+                buf[n, 0] = station[0]
+                buf[n, 1] = station[1]
+                buf[n, 2] = station[2]
+                n += 1
+            return buf[:n], True
 
         cx = min(max(x0, x_lo[0]), x_hi[0])
         cy = min(max(x1, x_lo[1]), x_hi[1])
@@ -81,16 +89,19 @@ def _trace_ray_nb(gx, gy, gz, station, epic, step, tol_sq, max_steps, x_lo, x_hi
         buf[n, 0] = x0;  buf[n, 1] = x1;  buf[n, 2] = x2
         n += 1
 
-    return buf[:n]
+    return buf[:n], False
 
 
 @njit(cache=True, fastmath=True)
 def _rasterize_nb(path, G, vsx, vsy, vsz, eps=1e-12):
     """DDA ray-length accumulation into G in-place (index coordinates)."""
     nx, ny, nz = G.shape
-    hx = float(nx) - 1e-9
-    hy = float(ny) - 1e-9
-    hz = float(nz) - 1e-9
+    # Array samples and ray coordinates are cell-centred: integer i is the
+    # centre of cell i, whose physical index-space bounds are i ± 0.5.
+    lx = ly = lz = -0.5
+    hx = float(nx) - 0.5 - 1e-9
+    hy = float(ny) - 0.5 - 1e-9
+    hz = float(nz) - 0.5 - 1e-9
 
     for s in range(path.shape[0] - 1):
         a0 = path[s,   0];  a1 = path[s,   1];  a2 = path[s,   2]
@@ -104,10 +115,12 @@ def _rasterize_nb(path, G, vsx, vsy, vsz, eps=1e-12):
             da = d0 if ax == 0 else (d1 if ax == 1 else d2)
             hi = hx if ax == 0 else (hy if ax == 1 else hz)
             if abs(da) < eps:
-                if aa < 0.0 or aa > hi:
+                lo = lx if ax == 0 else (ly if ax == 1 else lz)
+                if aa < lo or aa > hi:
                     skip = True;  break
             else:
-                tn = (0.0 - aa) / da;  tf = (hi - aa) / da
+                lo = lx if ax == 0 else (ly if ax == 1 else lz)
+                tn = (lo - aa) / da;  tf = (hi - aa) / da
                 if tn > tf:  tn, tf = tf, tn
                 t0c = max(t0c, tn);  t1c = min(t1c, tf)
                 if t0c > t1c:  skip = True;  break
@@ -121,27 +134,30 @@ def _rasterize_nb(path, G, vsx, vsy, vsz, eps=1e-12):
             continue
 
         # ── DDA traversal ─────────────────────────────────────────────────
-        i = int(np.floor(ca0));  j = int(np.floor(ca1));  k = int(np.floor(ca2))
+        i = int(np.floor(ca0 + 0.5));  j = int(np.floor(ca1 + 0.5));  k = int(np.floor(ca2 + 0.5))
         si_ = 1 if cd0 > 0 else (-1 if cd0 < 0 else 0)
         sj_ = 1 if cd1 > 0 else (-1 if cd1 < 0 else 0)
         sk_ = 1 if cd2 > 0 else (-1 if cd2 < 0 else 0)
 
+        # A segment starting exactly on a cell boundary belongs to the cell it
+        # enters, not the one it leaves.
+        if cd0 < 0 and abs(ca0 - (i - 0.5)) < eps:  i -= 1
+        if cd1 < 0 and abs(ca1 - (j - 0.5)) < eps:  j -= 1
+        if cd2 < 0 and abs(ca2 - (k - 0.5)) < eps:  k -= 1
+
         tm0 = tm1 = tm2 = 2.0
         td0 = td1 = td2 = 2.0
         if abs(cd0) >= eps:
-            nb = np.floor(ca0) + 1.0 if cd0 > 0 else np.floor(ca0)
-            if cd0 < 0 and nb >= ca0 - eps:  nb -= 1.0
-            tm0 = (nb - ca0) / cd0 if cd0 > 0 else (ca0 - nb) / (-cd0)
+            nb = i + 0.5 if cd0 > 0 else i - 0.5
+            tm0 = (nb - ca0) / cd0
             td0 = 1.0 / abs(cd0)
         if abs(cd1) >= eps:
-            nb = np.floor(ca1) + 1.0 if cd1 > 0 else np.floor(ca1)
-            if cd1 < 0 and nb >= ca1 - eps:  nb -= 1.0
-            tm1 = (nb - ca1) / cd1 if cd1 > 0 else (ca1 - nb) / (-cd1)
+            nb = j + 0.5 if cd1 > 0 else j - 0.5
+            tm1 = (nb - ca1) / cd1
             td1 = 1.0 / abs(cd1)
         if abs(cd2) >= eps:
-            nb = np.floor(ca2) + 1.0 if cd2 > 0 else np.floor(ca2)
-            if cd2 < 0 and nb >= ca2 - eps:  nb -= 1.0
-            tm2 = (nb - ca2) / cd2 if cd2 > 0 else (ca2 - nb) / (-cd2)
+            nb = k + 0.5 if cd2 > 0 else k - 0.5
+            tm2 = (nb - ca2) / cd2
             td2 = 1.0 / abs(cd2)
 
         t = 0.0
@@ -170,7 +186,7 @@ def compute_G_all_stations(
 ):
     """
     Traces rays from *epic* to every station in parallel via Numba prange.
-    Returns G tensor (n_st, nx, ny, nz) float64.
+    Returns ``(G, reached)`` where ``reached`` marks successful station rays.
 
     Use this when n_workers = 1 (single process; Numba uses all available cores).
     With 40 stations on a 48-core machine this saturates ~40 cores.
@@ -178,16 +194,19 @@ def compute_G_all_stations(
     n_st = gx.shape[0]
     nx_ = gx.shape[1];  ny_ = gx.shape[2];  nz_ = gx.shape[3]
     G_all = np.zeros((n_st, nx_, ny_, nz_), dtype=np.float64)
+    reached = np.zeros(n_st, dtype=np.bool_)
     tol_sq = tol * tol
 
     for si in prange(n_st):
-        path = _trace_ray_nb(
+        path, ray_reached = _trace_ray_nb(
             gx[si], gy[si], gz[si], sl[si], epic,
             step, tol_sq, max_steps, x_lo, x_hi,
         )
-        _rasterize_nb(path, G_all[si], vsx, vsy, vsz)
+        reached[si] = ray_reached
+        if ray_reached:
+            _rasterize_nb(path, G_all[si], vsx, vsy, vsz)
 
-    return G_all
+    return G_all, reached
 
 
 @njit(cache=True, fastmath=True)
@@ -202,23 +221,26 @@ def compute_G_all_stations_serial(
     n_st = gx.shape[0]
     nx_ = gx.shape[1];  ny_ = gx.shape[2];  nz_ = gx.shape[3]
     G_all = np.zeros((n_st, nx_, ny_, nz_), dtype=np.float64)
+    reached = np.zeros(n_st, dtype=np.bool_)
     tol_sq = tol * tol
 
     for si in range(n_st):
-        path = _trace_ray_nb(
+        path, ray_reached = _trace_ray_nb(
             gx[si], gy[si], gz[si], sl[si], epic,
             step, tol_sq, max_steps, x_lo, x_hi,
         )
-        _rasterize_nb(path, G_all[si], vsx, vsy, vsz)
+        reached[si] = ray_reached
+        if ray_reached:
+            _rasterize_nb(path, G_all[si], vsx, vsy, vsz)
 
-    return G_all
+    return G_all, reached
 
 
 # ── Public backward-compatible API ────────────────────────────────────────────
 
 def trace_ray_from_timefield(
     T, station_xyz, epic_xyz, spacing_xyz,
-    step=None, tol=None, max_steps=50000, gradT=None,
+    step=None, tol=None, max_steps=50000, gradT=None, return_status=False,
 ):
     station = np.asarray(station_xyz, dtype=np.float64)
     epic    = np.asarray(epic_xyz,    dtype=np.float64)
@@ -237,7 +259,10 @@ def trace_ray_from_timefield(
     gy = np.ascontiguousarray(gradT[1], dtype=np.float64)
     gz = np.ascontiguousarray(gradT[2], dtype=np.float64)
 
-    return _trace_ray_nb(gx, gy, gz, station, epic, step, tol * tol, max_steps, x_lo, x_hi)
+    path, reached = _trace_ray_nb(
+        gx, gy, gz, station, epic, step, tol * tol, max_steps, x_lo, x_hi
+    )
+    return (path, reached) if return_status else path
 
 
 def rasterize_path_lengths(path_xyz, shape, voxel_size=(1.0, 1.0, 1.0), dtype=np.float32):
