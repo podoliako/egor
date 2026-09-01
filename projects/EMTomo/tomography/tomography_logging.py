@@ -21,6 +21,7 @@ class TomographyLogger:
           profile.txt / profile_top30.json
           iter_<i>/
             model.npy / delta_s.npy
+            sensitivity_diagonal.npy / coverage_confidence.npy
             event_<j>/
               weights.npz / residuals.npy
               weight_<w>/
@@ -71,6 +72,16 @@ class TomographyLogger:
 
     def save_delta_s(self, iteration: int, delta_s: np.ndarray):
         np.save(self.iter_dir(iteration) / "delta_s.npy", delta_s)
+
+    def save_inversion_diagnostics(
+        self,
+        iteration: int,
+        sensitivity_diagonal: np.ndarray,
+        coverage_confidence: np.ndarray,
+    ) -> None:
+        directory = self.iter_dir(iteration)
+        np.save(directory / "sensitivity_diagonal.npy", sensitivity_diagonal)
+        np.save(directory / "coverage_confidence.npy", coverage_confidence)
 
     def save_station_fields(self, iteration: int, station_fields: np.ndarray):
         if not self.save_timefields:

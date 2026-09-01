@@ -94,25 +94,62 @@ def _normal_equation_contribution(
     )
 
 
-def _solve_delta_s(hessian, rhs, model_shape, lambda_reg):
-    """Solve an already accumulated normal system for the slowness update."""
+def _solve_delta_s(
+    hessian,
+    rhs,
+    model_shape,
+    lambda_reg,
+    coverage_damping_power: float = 0.0,
+    coverage_floor: float = 0.05,
+    coverage_reference_percentile: float = 75.0,
+    return_diagnostics: bool = False,
+):
+    """Solve the normal system with optional coverage-aware damping.
+
+    ``diag(G.T @ W @ G)`` measures differential sensitivity, which is more
+    informative than raw ray counts. When ``coverage_damping_power`` is
+    positive, poorly constrained cells receive a stronger zero-update prior.
+    No coupling between neighbouring cells is introduced.
+    """
     n_vox = int(np.prod(model_shape))
     hessian = np.asarray(hessian, dtype=np.float64).reshape(n_vox, n_vox)
     rhs = np.asarray(rhs, dtype=np.float64).reshape(n_vox)
+    if coverage_damping_power < 0.0:
+        raise ValueError("coverage_damping_power must be >= 0")
+    if not 0.0 < coverage_floor <= 1.0:
+        raise ValueError("coverage_floor must be in (0, 1]")
+    if not 0.0 <= coverage_reference_percentile <= 100.0:
+        raise ValueError("coverage_reference_percentile must be in [0, 100]")
 
-    # Нормируем λ на средний диагональный элемент GᵀG.
-    # lambda_reg=1.0  → регуляризация = data term (сильно)
-    # lambda_reg=0.01 → 1% от data term (слабо)
-    # lambda_reg=0.0  → нет регуляризации
+    sensitivity = np.maximum(np.diag(hessian), 0.0)
+    positive = sensitivity[sensitivity > 0.0]
+    reference = (
+        float(np.percentile(positive, coverage_reference_percentile))
+        if positive.size
+        else 1.0
+    )
+    confidence = np.clip(sensitivity / max(reference, np.finfo(float).tiny), 0.0, 1.0)
+
+    # lambda_reg is relative to the mean diagonal data sensitivity. With
+    # power=0 this is exactly the previous uniform ridge regularization.
     scale = np.trace(hessian) / n_vox
-    hessian_reg = hessian + float(lambda_reg) * scale * np.eye(n_vox, dtype=np.float64)
+    safe_confidence = np.maximum(confidence, coverage_floor)
+    regularization_diagonal = (
+        float(lambda_reg)
+        * scale
+        / np.power(safe_confidence, float(coverage_damping_power))
+    )
+    hessian_reg = hessian + np.diag(regularization_diagonal)
 
     try:
         delta_s = np.linalg.solve(hessian_reg, rhs)
     except np.linalg.LinAlgError:
         delta_s = np.linalg.lstsq(hessian_reg, rhs, rcond=None)[0]
 
-    return delta_s.reshape(model_shape)
+    delta_s = delta_s.reshape(model_shape)
+    if not return_diagnostics:
+        return delta_s
+    return delta_s, sensitivity.reshape(model_shape), confidence.reshape(model_shape)
 
 
 def _select_top_n_cells_by_misfit(

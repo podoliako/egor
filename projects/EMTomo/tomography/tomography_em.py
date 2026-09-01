@@ -55,6 +55,10 @@ def run_em(
     save_runs: bool = True,
     runs_dir: str = "runs",
     slowness_interpolation: str = "nearest",
+    coverage_damping_power: float = 0.0,
+    coverage_floor: float = 0.05,
+    coverage_reference_percentile: float = 75.0,
+    max_velocity_step_fraction: Optional[float] = None,
 ):
     if save_runs and logger is None:
         logger = TomographyLogger(base_dir=runs_dir)
@@ -72,6 +76,10 @@ def run_em(
             subdivision=subdivision,
             slowness_interpolation=slowness_interpolation,
             n_workers=n_workers,
+            coverage_damping_power=coverage_damping_power,
+            coverage_floor=coverage_floor,
+            coverage_reference_percentile=coverage_reference_percentile,
+            max_velocity_step_fraction=max_velocity_step_fraction,
             coarse_side_m=round(coarse_side, 2),
             fine_side_m=round(fine_side, 2),
         )
@@ -92,7 +100,7 @@ def run_em(
             logger.start_iteration(i)
             logger.save_iteration_model(i, model)
 
-        delta_s = make_tomography_step(
+        delta_s, sensitivity_diagonal, coverage_confidence = make_tomography_step(
             model,
             arrivals_table,
             station_locs,
@@ -108,6 +116,10 @@ def run_em(
             log_G_per_weight=log_G_per_weight,
             iteration=i,
             logger=logger,
+            coverage_damping_power=coverage_damping_power,
+            coverage_floor=coverage_floor,
+            coverage_reference_percentile=coverage_reference_percentile,
+            return_diagnostics=True,
         )
 
         current_vp = model.get_geo_grid(subdivision=1).vp
@@ -127,11 +139,21 @@ def run_em(
                 left_power=v_left_power,
                 right_power=v_right_power,
             )
+        new_velocities = _limit_velocity_update(
+            current_vp,
+            new_velocities,
+            max_velocity_step_fraction,
+        )
         model.set_vp_array(new_velocities)
 
         if logger is not None:
             logger.end_iteration(i)
             logger.save_delta_s(i, delta_s)
+            logger.save_inversion_diagnostics(
+                i,
+                sensitivity_diagonal,
+                coverage_confidence,
+            )
             if true_model is not None:
                 q = _avg_abs_percent_deviation(model, true_model)
                 logger.save_quality(i, q)
@@ -159,6 +181,10 @@ def make_tomography_step(
     iteration: int = 0,
     logger: Optional[TomographyLogger] = None,
     slowness_interpolation: str = "nearest",
+    coverage_damping_power: float = 0.0,
+    coverage_floor: float = 0.05,
+    coverage_reference_percentile: float = 75.0,
+    return_diagnostics: bool = False,
 ):
     coarse_grid = initial_model.get_geo_grid(
         subdivision=1,
@@ -256,6 +282,10 @@ def make_tomography_step(
         rhs=np.add.reduce(rhs_acc),
         model_shape=coarse_shape,
         lambda_reg=lambda_reg,
+        coverage_damping_power=coverage_damping_power,
+        coverage_floor=coverage_floor,
+        coverage_reference_percentile=coverage_reference_percentile,
+        return_diagnostics=return_diagnostics,
     )
 
 
@@ -296,6 +326,23 @@ def _avg_abs_percent_deviation(model, true_model, eps: float = 1e-12) -> float:
     denom = np.where(np.abs(t) < eps, np.nan, np.abs(t))
     pct = np.abs(m - t) / denom * 100.0
     return float(np.nanmean(pct))
+
+
+def _limit_velocity_update(
+    current_velocities: np.ndarray,
+    proposed_velocities: np.ndarray,
+    max_step_fraction: Optional[float],
+) -> np.ndarray:
+    """Apply a cellwise trust region in velocity space."""
+    if max_step_fraction is None:
+        return proposed_velocities
+    if not 0.0 <= max_step_fraction < 1.0:
+        raise ValueError("max_velocity_step_fraction must be in [0, 1)")
+
+    current = np.asarray(current_velocities)
+    lower = current * (1.0 - max_step_fraction)
+    upper = current * (1.0 + max_step_fraction)
+    return np.clip(proposed_velocities, lower, upper)
 
 
 def _apply_velocity_bounds(

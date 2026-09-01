@@ -18,6 +18,7 @@ from raytracing import (
     compute_G_all_stations_serial,
     rasterize_path_lengths,
 )
+from tomography.tomography_em import _limit_velocity_update
 from tomography.tomography_math import (
     _normal_equation_contribution,
     _refine_epicenter_in_cell,
@@ -91,6 +92,33 @@ def test_pairs_with_failed_rays_are_excluded():
 
     assert not np.any(h)
     assert not np.any(b)
+
+
+def test_coverage_damping_suppresses_poorly_resolved_cell_update():
+    hessian = np.diag([1.0, 0.01])
+    rhs = np.array([1.0, 0.01])
+
+    uniform = _solve_delta_s(hessian, rhs, (2, 1, 1), lambda_reg=0.1)
+    adaptive = _solve_delta_s(
+        hessian,
+        rhs,
+        (2, 1, 1),
+        lambda_reg=0.1,
+        coverage_damping_power=1.0,
+        coverage_floor=0.05,
+    )
+
+    assert adaptive[0].item() == uniform[0].item()
+    assert abs(adaptive[1].item()) < abs(uniform[1].item())
+
+
+def test_velocity_update_trust_region_is_cellwise_and_relative():
+    current = np.array([100.0, 200.0])
+    proposed = np.array([80.0, 240.0])
+
+    limited = _limit_velocity_update(current, proposed, max_step_fraction=0.01)
+
+    assert np.allclose(limited, [99.0, 202.0])
 
 
 def test_cell_centred_metric_coordinates_and_trilinear_sampling():
@@ -313,6 +341,8 @@ if __name__ == "__main__":
         test_em_weight_enters_normal_equations_linearly,
         test_centered_station_formula_matches_explicit_pairs,
         test_pairs_with_failed_rays_are_excluded,
+        test_coverage_damping_suppresses_poorly_resolved_cell_update,
+        test_velocity_update_trust_region_is_cellwise_and_relative,
         test_cell_centred_metric_coordinates_and_trilinear_sampling,
         test_trilinear_prolongation_and_G_restriction_are_adjoint,
         test_geo_grid_trilinear_slowness_interpolation,
