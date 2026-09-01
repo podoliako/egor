@@ -1,17 +1,64 @@
 from __future__ import annotations
 
-from typing import Tuple
-
 import numpy as np
+from scipy.optimize import minimize
 
+from instruments.instruments_coords import (
+    cell_coord_bounds,
+    sample_cell_centered_trilinear_batch,
+)
 from raytracing import rasterize_path_lengths, trace_ray_from_timefield
 
 
-def _calculate_residuals(station_fields: np.ndarray, arrivals: np.ndarray, weight_idx):
-    x, y, z = weight_idx
-    predicted = station_fields[:, x, y, z]
-    residual_vector = arrivals - predicted
+def _station_residuals_at_coord(
+    station_fields: np.ndarray,
+    arrivals: np.ndarray,
+    cell_coord,
+) -> np.ndarray:
+    predicted = sample_cell_centered_trilinear_batch(station_fields, cell_coord)
+    return np.asarray(arrivals, dtype=np.float64) - predicted
+
+
+def _pairwise_misfit_from_station_residuals(residuals: np.ndarray) -> float:
+    residuals = np.asarray(residuals, dtype=np.float64)
+    n_stations = residuals.size
+    value = n_stations * np.dot(residuals, residuals) - np.sum(residuals) ** 2
+    return max(float(value), 0.0)
+
+
+def _calculate_residuals(station_fields: np.ndarray, arrivals: np.ndarray, cell_coord):
+    residual_vector = _station_residuals_at_coord(station_fields, arrivals, cell_coord)
     return residual_vector[:, np.newaxis] - residual_vector[np.newaxis, :]
+
+
+def _refine_epicenter_in_cell(
+    station_fields: np.ndarray,
+    arrivals: np.ndarray,
+    cell_index,
+):
+    """Refine one event hypothesis continuously, constrained to its cell."""
+    start = np.asarray(cell_index, dtype=np.float64)
+    bounds = cell_coord_bounds(tuple(int(v) for v in cell_index), station_fields.shape[1:])
+
+    def objective(coord):
+        residuals = _station_residuals_at_coord(station_fields, arrivals, coord)
+        return _pairwise_misfit_from_station_residuals(residuals)
+
+    start_misfit = objective(start)
+    result = minimize(
+        objective,
+        start,
+        method="Powell",
+        bounds=bounds,
+        options={"xtol": 1e-3, "ftol": 1e-8, "maxiter": 50},
+    )
+    refined = np.asarray(result.x, dtype=np.float64)
+    refined_misfit = objective(refined)
+    if not np.all(np.isfinite(refined)) or not np.isfinite(refined_misfit):
+        return start, start_misfit
+    if refined_misfit > start_misfit:
+        return start, start_misfit
+    return refined, refined_misfit
 
 
 def _normal_equation_contribution(
@@ -66,6 +113,36 @@ def _solve_delta_s(hessian, rhs, model_shape, lambda_reg):
         delta_s = np.linalg.lstsq(hessian_reg, rhs, rcond=None)[0]
 
     return delta_s.reshape(model_shape)
+
+
+def _select_top_n_cells_by_misfit(
+    misfit: np.ndarray,
+    n: int,
+    min_distance: int = 2,
+) -> np.ndarray:
+    """Select separated low-misfit cells using Chebyshev index distance."""
+    values = np.asarray(misfit, dtype=np.float64)
+    if values.ndim != 3:
+        raise ValueError("misfit must be a 3-D array")
+    if not isinstance(n, (int, np.integer)) or n < 1:
+        raise ValueError("n must be an integer >= 1")
+    if not isinstance(min_distance, (int, np.integer)) or min_distance < 1:
+        raise ValueError("min_distance must be an integer >= 1")
+
+    selected = []
+    for flat_index in np.argsort(values, axis=None, kind="stable"):
+        index = np.asarray(np.unravel_index(int(flat_index), values.shape), dtype=np.int64)
+        if not np.isfinite(values[tuple(index)]):
+            continue
+        if any(np.max(np.abs(index - previous)) < min_distance for previous in selected):
+            continue
+        selected.append(index)
+        if len(selected) == n:
+            break
+
+    if not selected:
+        raise ValueError("No finite epicenter candidates available")
+    return np.asarray(selected, dtype=np.int64)
 
 
 def _select_top_n_weights(weights_matrix, n: int, normalize: bool = False):

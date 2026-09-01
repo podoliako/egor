@@ -7,8 +7,19 @@ from typing import Callable, Dict, Optional, Tuple, Union
 
 from interpolation import (
     nearest_neighbor_interpolation,
-    trilinear_interpolation,
+    prolongate_cell_centered_trilinear,
 )
+
+
+def _prolongate_slowness_as_velocity(values: np.ndarray, subdivision: int) -> np.ndarray:
+    """Interpolate positive cell-centred velocities through slowness."""
+    values = np.asarray(values, dtype=np.float64)
+    if np.any(values <= 0.0):
+        # An uninitialized component (commonly Vs in a P-only model) is not
+        # physically usable for FMM; preserve its values without dividing by 0.
+        return prolongate_cell_centered_trilinear(values, subdivision)
+    fine_slowness = prolongate_cell_centered_trilinear(1.0 / values, subdivision)
+    return 1.0 / fine_slowness
 
 
 class GeoGrid:
@@ -296,8 +307,12 @@ class VelocityModel:
         """Fill parameter with linear gradient in depth."""
         self.grid.fill_linear_gradient(param, top_value, bottom_value)
     
-    def get_geo_grid(self, subdivision: int = 1, 
-                     interpolation: Union[str, Callable] = 'nearest') -> GeoGrid:
+    def get_geo_grid(
+        self,
+        subdivision: int = 1,
+        interpolation: Union[str, Callable] = 'nearest',
+        slowness_interpolation: str = 'nearest',
+    ) -> GeoGrid:
         """
         Generate refined geometric grid for raytracing.
         
@@ -310,10 +325,14 @@ class VelocityModel:
             Subdivision factor (1 = no subdivision, 2 = 8x cells, 3 = 27x cells)
         interpolation : str or callable
             Interpolation method:
-            - 'trilinear': Trilinear interpolation (default, smooth)
+            - 'trilinear': Cell-centred trilinear interpolation of velocity
             - 'nearest': Nearest neighbor (fast, blocky)
             - callable: Custom interpolation function with signature
                        func(values, i, j, k, di, dj, dk) -> float
+            slowness_interpolation : {'nearest', 'trilinear'}
+                Tomography parameterization for positive velocity components.
+                'trilinear' prolongs slowness and converts it back to velocity.
+                It takes precedence over ``interpolation``.
         
         Returns:
         --------
@@ -324,8 +343,10 @@ class VelocityModel:
         >>> # 1:1 mapping
         >>> geo = model.get_geo_grid(subdivision=1)
         >>> 
-        >>> # 27x refinement with smooth interpolation
-        >>> geo = model.get_geo_grid(subdivision=3)
+        >>> # 27x refinement with smooth slowness interpolation
+        >>> geo = model.get_geo_grid(
+        ...     subdivision=3, slowness_interpolation='trilinear'
+        ... )
         >>> 
         >>> # Custom interpolation
         >>> def my_interp(values, i, j, k, di, dj, dk):
@@ -335,10 +356,13 @@ class VelocityModel:
         if subdivision < 1:
             raise ValueError("subdivision must be >= 1")
         
-        # Select interpolation function
+        if slowness_interpolation not in {'nearest', 'trilinear'}:
+            raise ValueError("slowness_interpolation must be 'nearest' or 'trilinear'")
+
+        # Select interpolation function for the legacy velocity/custom modes.
         if isinstance(interpolation, str):
             if interpolation == 'trilinear':
-                interp_func = trilinear_interpolation
+                interp_func = None
             elif interpolation == 'nearest':
                 interp_func = nearest_neighbor_interpolation
             else:
@@ -357,7 +381,17 @@ class VelocityModel:
         geo_cell_size = self.geometry.side_size / subdivision
         geo_grid = GeoGrid(geo_shape, geo_cell_size, subdivision)
         
-        # Fill geo grid with interpolated values
+        if slowness_interpolation == 'trilinear':
+            geo_grid.vp[:] = _prolongate_slowness_as_velocity(self.grid.vp, subdivision)
+            geo_grid.vs[:] = _prolongate_slowness_as_velocity(self.grid.vs, subdivision)
+            return geo_grid
+
+        if interpolation == 'trilinear':
+            geo_grid.vp[:] = prolongate_cell_centered_trilinear(self.grid.vp, subdivision)
+            geo_grid.vs[:] = prolongate_cell_centered_trilinear(self.grid.vs, subdivision)
+            return geo_grid
+
+        # Fill geo grid with nearest-neighbour or custom interpolation.
         for gi in range(geo_shape[0]):
             for gj in range(geo_shape[1]):
                 for gk in range(geo_shape[2]):

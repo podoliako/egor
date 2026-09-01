@@ -1,40 +1,74 @@
 import cProfile
+import math
 import pstats
 from pstats import SortKey
 
-from instruments.instruments import generate_synthetic_arrivals_table
+from instruments.instruments import (
+    generate_synthetic_arrivals_table,
+    snap_metric_points_to_cell_centers,
+)
 from tomography.tomography import run_em, warm_up_jit
 from velocity_model import VelocityModel
 
 
 CELL_SIZE = 500.0
-GRID_SHAPE = (8, 8, 8)
-SUBDIVISION = 15
-N_EVENTS = 300
-N_CYCLES = 60
-N_WORKERS = 20
+GRID_SHAPE = (9, 9, 9)
+STATION_GRID_SHAPE = (8, 8)
+SUBDIVISION = 8
+N_EVENTS = 250
+N_CYCLES = 8
+N_WORKERS = 25
 
-V_BOUNDS = (50.0, 150.0)
-V_REG_STRENGTH = 0.00055
+BACKGROUND_VP = 100.0
+CENTRAL_ANOMALY_FRACTION = 0.08
+V_BOUNDS = (80.0, 120.0)
+V_REG_STRENGTH = 1
 
 
-def build_top_cell_center_stations(n_x: int, n_y: int, cell_size: float):
-    """Return one station above the center of every cell in the top layer."""
+def build_top_surface_stations(
+    n_stations_x: int,
+    n_stations_y: int,
+    model_n_x: int,
+    model_n_y: int,
+    cell_size: float,
+):
+    """Return an evenly spaced station grid above the model's top surface."""
+    model_width_x = model_n_x * cell_size
+    model_width_y = model_n_y * cell_size
     return [
-        ((i + 0.5) * cell_size, (j + 0.5) * cell_size, 0.0)
-        for i in range(n_x)
-        for j in range(n_y)
+        (
+            (i + 0.5) * model_width_x / n_stations_x,
+            (j + 0.5) * model_width_y / n_stations_y,
+            0.0,
+        )
+        for i in range(n_stations_x)
+        for j in range(n_stations_y)
     ]
 
 
 def build_true_model(model: VelocityModel) -> None:
-    model.fill_linear_gradient("vp", 100.0, 100.0)
+    """Create a +8% central anomaly with a smooth spherical taper to zero."""
+    model.fill_linear_gradient("vp", BACKGROUND_VP, BACKGROUND_VP)
 
-    for i in (2, 3, 4):
-        for j in range(model.grid.vp.shape[1]):
-            for k in (2, 3):
-                velocity = 102.0 if j in (0, 2) else 110.0 if i == 3 else 105.0
-                model.set_vp(i, j, k, velocity)
+    shape = model.grid.vp.shape
+    center = tuple((size - 1) / 2 for size in shape)
+    taper_radius = min(center)
+
+    for i in range(shape[0]):
+        for j in range(shape[1]):
+            for k in range(shape[2]):
+                radius = math.sqrt(
+                    (i - center[0]) ** 2
+                    + (j - center[1]) ** 2
+                    + (k - center[2]) ** 2
+                )
+                if radius >= taper_radius:
+                    continue
+
+                anomaly_fraction = CENTRAL_ANOMALY_FRACTION * 0.5 * (
+                    1.0 + math.cos(math.pi * radius / taper_radius)
+                )
+                model.set_vp(i, j, k, BACKGROUND_VP * (1.0 + anomaly_fraction))
 
 
 if __name__ == "__main__":
@@ -50,11 +84,18 @@ if __name__ == "__main__":
         "n_z": n_z,
     }
 
-    # 8 × 8 stations: one above the center of each top-layer cell.
-    stations_metric = build_top_cell_center_stations(n_x, n_y, CELL_SIZE)
+    # Snap surface stations to centres of the upper fine-grid cells so their
+    # metric coordinates match the cell-centred FMM source locations exactly.
+    fine_cell_size = CELL_SIZE / SUBDIVISION
+    fine_shape = (n_x * SUBDIVISION, n_y * SUBDIVISION, n_z * SUBDIVISION)
+    stations_metric = snap_metric_points_to_cell_centers(
+        build_top_surface_stations(*STATION_GRID_SHAPE, n_x, n_y, CELL_SIZE),
+        fine_cell_size,
+        fine_shape,
+    )
 
     initial_model = VelocityModel.from_config(model_config)
-    initial_model.fill_linear_gradient("vp", 100.0, 100.0)
+    initial_model.fill_linear_gradient("vp", BACKGROUND_VP, BACKGROUND_VP)
 
     true_model = VelocityModel.from_config(model_config)
     build_true_model(true_model)
@@ -65,6 +106,7 @@ if __name__ == "__main__":
         n_events=N_EVENTS,
         random_seed=7,
         subdivision=SUBDIVISION,
+        slowness_interpolation="trilinear",
         depth_bias=0.0,
         z_offset=2 * CELL_SIZE,
     )
@@ -79,9 +121,11 @@ if __name__ == "__main__":
         arrivals_table=arrivals_table,
         station_locs=stations_metric,
         weights_top_n=1,
-        temperature=0.001,
-        lambda_reg=0.0005,
+        weights_min_distance=2,
+        temperature=0.02,
+        lambda_reg=0.03,
         subdivision=SUBDIVISION,
+        slowness_interpolation="trilinear",
         v_bounds=V_BOUNDS,
         v_reg_strength=V_REG_STRENGTH,
         v_left_mode="lin",

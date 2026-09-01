@@ -2,7 +2,17 @@
 
 import numpy as np
 
-from instruments.instruments_coords import _resolve_event_locs_metric
+from instruments.instruments import generate_synthetic_arrivals_table
+from instruments.instruments_coords import (
+    _resolve_event_locs_metric,
+    metric_to_cell_coord,
+    metric_to_cell_index,
+    sample_cell_centered_trilinear,
+    snap_metric_points_to_cell_centers,
+)
+from instruments.instruments_ops import coarsen_G
+from instruments.instruments_travel import compute_station_travel_time_fields
+from interpolation import prolongate_cell_centered_trilinear
 from raytracing import (
     _trace_ray_nb,
     compute_G_all_stations_serial,
@@ -10,8 +20,11 @@ from raytracing import (
 )
 from tomography.tomography_math import (
     _normal_equation_contribution,
+    _refine_epicenter_in_cell,
+    _select_top_n_cells_by_misfit,
     _solve_delta_s,
 )
+from velocity_model import VelocityModel
 from wave_propagation import SKFMMSolver
 
 
@@ -78,6 +91,139 @@ def test_pairs_with_failed_rays_are_excluded():
 
     assert not np.any(h)
     assert not np.any(b)
+
+
+def test_cell_centred_metric_coordinates_and_trilinear_sampling():
+    field = np.fromfunction(
+        lambda i, j, k: i + 10.0 * j + 100.0 * k,
+        (5, 5, 5),
+        dtype=np.float64,
+    )
+
+    assert metric_to_cell_coord((125.0, 175.0, 225.0), 50.0, field.shape) == (2.0, 3.0, 4.0)
+    assert np.isclose(
+        sample_cell_centered_trilinear(field, (1.25, 2.5, 3.75)),
+        1.25 + 10.0 * 2.5 + 100.0 * 3.75,
+    )
+
+
+def test_trilinear_prolongation_and_G_restriction_are_adjoint():
+    rng = np.random.default_rng(7)
+    coarse_slowness = rng.uniform(0.005, 0.02, size=(3, 4, 2))
+    fine_lengths = rng.normal(size=(6, 8, 4))
+
+    fine_slowness = prolongate_cell_centered_trilinear(coarse_slowness, 2)
+    coarse_lengths = coarsen_G(
+        fine_lengths,
+        subdivision=2,
+        slowness_interpolation="trilinear",
+    )
+
+    assert np.allclose(
+        np.sum(fine_slowness * fine_lengths),
+        np.sum(coarse_slowness * coarse_lengths),
+    )
+
+
+def test_geo_grid_trilinear_slowness_interpolation():
+    config = {
+        "lon": 0.0,
+        "lat": 0.0,
+        "height": 0.0,
+        "azimuth": 0.0,
+        "side_size": 100.0,
+        "n_x": 3,
+        "n_y": 1,
+        "n_z": 1,
+    }
+    model = VelocityModel.from_config(config)
+    model.grid.vp[:, 0, 0] = [100.0, 200.0, 400.0]
+
+    geo = model.get_geo_grid(subdivision=2, slowness_interpolation="trilinear")
+    expected = 1.0 / prolongate_cell_centered_trilinear(1.0 / model.grid.vp, 2)
+
+    assert np.allclose(geo.vp, expected)
+
+
+def test_top_cells_are_separated_including_diagonals():
+    misfit = np.full((5, 5, 5), 100.0)
+    misfit[1, 1, 1] = 0.0
+    misfit[2, 2, 2] = 0.1
+    misfit[3, 1, 1] = 0.2
+
+    selected = _select_top_n_cells_by_misfit(misfit, n=2, min_distance=2)
+
+    assert np.array_equal(selected, [[1, 1, 1], [3, 1, 1]])
+
+
+def test_single_hypothesis_refinement_recovers_subcell_position():
+    shape = (5, 5, 5)
+    x, y, z = np.indices(shape, dtype=np.float64)
+    station_fields = np.stack([x, y, z, np.zeros(shape)], axis=0)
+    target = np.array([2.2, 2.3, 2.4])
+    arrivals = np.array([target[0], target[1], target[2], 0.0]) + 5.0
+
+    refined, refined_misfit = _refine_epicenter_in_cell(
+        station_fields,
+        arrivals,
+        cell_index=(2, 2, 2),
+    )
+
+    assert np.allclose(refined, target, atol=2e-3)
+    assert refined_misfit < 1e-8
+
+
+def test_station_positions_snap_to_fine_cell_centers():
+    centers = snap_metric_points_to_cell_centers(
+        [(281.25, 281.25, 0.0), (843.75, 281.25, 0.0)],
+        cell_size=50.0,
+        shape=(90, 90, 90),
+    )
+
+    assert centers == [(275.0, 275.0, 25.0), (825.0, 275.0, 25.0)]
+    assert [metric_to_cell_coord(point, 50.0, (90, 90, 90)) for point in centers] == [
+        (5.0, 5.0, 0.0),
+        (16.0, 5.0, 0.0),
+    ]
+
+
+def test_synthetic_arrivals_are_sampled_at_exact_event_position():
+    config = {
+        "lon": 0.0,
+        "lat": 0.0,
+        "height": 0.0,
+        "azimuth": 0.0,
+        "side_size": 100.0,
+        "n_x": 4,
+        "n_y": 4,
+        "n_z": 4,
+    }
+    model = VelocityModel.from_config(config)
+    model.fill_linear_gradient("vp", 100.0, 100.0)
+    stations = [(50.0, 50.0, 0.0), (350.0, 50.0, 0.0)]
+    event = (175.0, 150.0, 150.0)
+
+    arrivals, _ = generate_synthetic_arrivals_table(
+        model,
+        station_locs=stations,
+        event_locs=[event],
+        solver="skfmm",
+    )
+
+    grid = model.get_geo_grid()
+    fields = compute_station_travel_time_fields(
+        grid,
+        [metric_to_cell_index(station, grid.cell_size, grid.shape) for station in stations],
+        "P",
+        "skfmm",
+    )
+    event_coord = metric_to_cell_coord(event, grid.cell_size, grid.shape)
+    expected_abs = np.array(
+        [sample_cell_centered_trilinear(field, event_coord) for field in fields]
+    )
+    expected = expected_abs - np.min(expected_abs)
+
+    assert np.allclose(arrivals[0], expected)
 
 
 def test_event_depth_offset_excludes_upper_layers():
@@ -167,6 +313,13 @@ if __name__ == "__main__":
         test_em_weight_enters_normal_equations_linearly,
         test_centered_station_formula_matches_explicit_pairs,
         test_pairs_with_failed_rays_are_excluded,
+        test_cell_centred_metric_coordinates_and_trilinear_sampling,
+        test_trilinear_prolongation_and_G_restriction_are_adjoint,
+        test_geo_grid_trilinear_slowness_interpolation,
+        test_top_cells_are_separated_including_diagonals,
+        test_single_hypothesis_refinement_recovers_subcell_position,
+        test_station_positions_snap_to_fine_cell_centers,
+        test_synthetic_arrivals_are_sampled_at_exact_event_position,
         test_event_depth_offset_excludes_upper_layers,
         test_skfmm_source_is_at_cell_centre,
         test_successful_ray_reaches_station_and_uses_cell_centred_boundaries,

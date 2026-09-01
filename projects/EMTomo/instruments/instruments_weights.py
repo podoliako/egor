@@ -51,6 +51,20 @@ def compute_epicenter_weight_matrix(
     return weights
 
 
+def compute_weights_from_misfit(
+    misfit: np.ndarray,
+    temperature: float = 1.0,
+    abs_misfit_threshold: Optional[float] = None,
+) -> np.ndarray:
+    """Convert arbitrary-dimensional misfit values to normalized weights."""
+    if temperature <= 0:
+        raise ValueError("temperature must be > 0")
+    values = np.asarray(misfit, dtype=np.float64)
+    if values.size == 0 or not np.all(np.isfinite(values)):
+        raise ValueError("misfit must contain finite values")
+    return _weights_from_misfit(values, abs_misfit_threshold, temperature)
+
+
 def _weights_from_misfit(
     misfit: np.ndarray,
     abs_misfit_threshold: Optional[float],

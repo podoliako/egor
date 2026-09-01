@@ -4,7 +4,7 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 
-from instruments.instruments import compute_station_travel_time_fields, metric_to_index
+from instruments.instruments import compute_station_travel_time_fields, metric_to_cell_index
 from raytracing import compute_G_all_stations, compute_G_all_stations_serial
 from .tomography_events import _process_event_single, _run_events_parallel
 from .tomography_logging import TomographyLogger
@@ -37,6 +37,7 @@ def run_em(
     lambda_reg: float = 1e-3,
     temperature: float = 1.0,
     weights_top_n: int = 1,
+    weights_min_distance: int = 2,
     subdivision: int = 1,
     n_workers: int = 1,
     log_G_per_weight: bool = False,
@@ -53,6 +54,7 @@ def run_em(
     logger=None,
     save_runs: bool = True,
     runs_dir: str = "runs",
+    slowness_interpolation: str = "nearest",
 ):
     if save_runs and logger is None:
         logger = TomographyLogger(base_dir=runs_dir)
@@ -66,7 +68,9 @@ def run_em(
             lambda_reg=lambda_reg,
             temperature=temperature,
             weights_top_n=weights_top_n,
+            weights_min_distance=weights_min_distance,
             subdivision=subdivision,
+            slowness_interpolation=slowness_interpolation,
             n_workers=n_workers,
             coarse_side_m=round(coarse_side, 2),
             fine_side_m=round(fine_side, 2),
@@ -97,8 +101,10 @@ def run_em(
             lambda_reg,
             temperature,
             weights_top_n,
+            weights_min_distance,
             subdivision,
             n_workers=n_workers,
+            slowness_interpolation=slowness_interpolation,
             log_G_per_weight=log_G_per_weight,
             iteration=i,
             logger=logger,
@@ -146,20 +152,28 @@ def make_tomography_step(
     lambda_reg: float = 1e-3,
     temperature: float = 1.0,
     weights_top_n: int = 1,
+    weights_min_distance: int = 2,
     subdivision: int = 1,
     n_workers: int = 1,
     log_G_per_weight: bool = False,
     iteration: int = 0,
     logger: Optional[TomographyLogger] = None,
+    slowness_interpolation: str = "nearest",
 ):
-    coarse_grid = initial_model.get_geo_grid(subdivision=1)
+    coarse_grid = initial_model.get_geo_grid(
+        subdivision=1,
+        slowness_interpolation=slowness_interpolation,
+    )
     coarse_shape = tuple(int(v) for v in coarse_grid.shape)
 
-    fine_grid = initial_model.get_geo_grid(subdivision=subdivision)
+    fine_grid = initial_model.get_geo_grid(
+        subdivision=subdivision,
+        slowness_interpolation=slowness_interpolation,
+    )
     fine_shape = tuple(int(v) for v in fine_grid.shape)
     fine_cell_size = float(fine_grid.cell_size)
 
-    station_idx_fine = [metric_to_index(s, fine_cell_size, fine_shape) for s in station_locs]
+    station_idx_fine = [metric_to_cell_index(s, fine_cell_size, fine_shape) for s in station_locs]
 
     station_fields = compute_station_travel_time_fields(
         fine_grid, station_idx_fine, wave_type, solver
@@ -190,8 +204,10 @@ def make_tomography_step(
             x_hi,
             fine_cell_size,
             subdivision,
+            slowness_interpolation,
             temperature,
             weights_top_n,
+            weights_min_distance,
             n_workers,
             log_G_per_weight=log_G_per_weight and logger is not None,
         )
@@ -209,8 +225,10 @@ def make_tomography_step(
                 x_hi=x_hi,
                 fine_cell_size=fine_cell_size,
                 subdivision=subdivision,
+                slowness_interpolation=slowness_interpolation,
                 temperature=temperature,
                 weights_top_n=weights_top_n,
+                weights_min_distance=weights_min_distance,
                 log_G_per_weight=log_G_per_weight and logger is not None,
             )
             for i, obs in enumerate(arrivals_table)

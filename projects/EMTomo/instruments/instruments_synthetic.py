@@ -8,6 +8,8 @@ from .instruments_coords import (
     MetricPoint,
     _resolve_event_locs_metric,
     _resolve_station_locs_metric,
+    metric_to_cell_coord,
+    sample_cell_centered_trilinear,
 )
 from .instruments_travel import compute_station_travel_time_fields
 
@@ -26,8 +28,12 @@ def generate_synthetic_arrivals_table(
     x_offset: float = 0.0,
     y_offset: float = 0.0,
     z_offset: float = 0.0,
+    slowness_interpolation: str = "nearest",
 ) -> Tuple[List[List[float]], List[MetricPoint]]:
-    geo_grid = model.get_geo_grid(subdivision=subdivision)
+    geo_grid = model.get_geo_grid(
+        subdivision=subdivision,
+        slowness_interpolation=slowness_interpolation,
+    )
     cell_size = float(geo_grid.cell_size)
     shape = tuple(int(v) for v in geo_grid.shape)
     rng = np.random.default_rng(seed=random_seed)
@@ -35,7 +41,7 @@ def generate_synthetic_arrivals_table(
     _metric_stations, station_idx = _resolve_station_locs_metric(
         shape, cell_size, station_locs, n_stations, rng
     )
-    metric_events, event_idx = _resolve_event_locs_metric(
+    metric_events, _event_idx = _resolve_event_locs_metric(
         shape,
         cell_size,
         event_locs,
@@ -56,14 +62,17 @@ def generate_synthetic_arrivals_table(
 
     synthetic: List[List[float]] = []
 
-    for loc_idx, event_loc in enumerate(event_idx):
-        i, j, k = event_loc
-        arrivals_abs = fields[:, i, j, k]
+    for event_metric in metric_events:
+        event_coord = metric_to_cell_coord(event_metric, cell_size, shape)
+        arrivals_abs = np.asarray(
+            [sample_cell_centered_trilinear(field, event_coord) for field in fields],
+            dtype=np.float64,
+        )
 
         if not np.all(np.isfinite(arrivals_abs)):
             raise ValueError(
-                f"Non-finite travel times for event {event_loc} "
-                f"(metric: {metric_events[loc_idx]}). Check model/solver settings."
+                f"Non-finite travel times for event at metric position {event_metric}. "
+                "Check model/solver settings."
             )
 
         t_min = float(np.min(arrivals_abs))
