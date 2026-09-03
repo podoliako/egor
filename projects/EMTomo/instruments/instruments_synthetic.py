@@ -29,7 +29,17 @@ def generate_synthetic_arrivals_table(
     y_offset: float = 0.0,
     z_offset: float = 0.0,
     slowness_interpolation: str = "nearest",
+    arrival_noise_std: float = 0.0,
 ) -> Tuple[List[List[float]], List[MetricPoint]]:
+    """Generate relative synthetic arrivals, optionally with Gaussian pick noise.
+
+    ``arrival_noise_std`` is the per-station standard deviation in seconds.
+    Noise is applied to absolute travel times before the first arrival is used as
+    the event reference, matching the relative-time format used by inversion.
+    """
+    if not np.isfinite(arrival_noise_std) or arrival_noise_std < 0.0:
+        raise ValueError("arrival_noise_std must be a finite value >= 0")
+
     geo_grid = model.get_geo_grid(
         subdivision=subdivision,
         slowness_interpolation=slowness_interpolation,
@@ -73,6 +83,13 @@ def generate_synthetic_arrivals_table(
             raise ValueError(
                 f"Non-finite travel times for event at metric position {event_metric}. "
                 "Check model/solver settings."
+            )
+
+        if arrival_noise_std > 0.0:
+            arrivals_abs += rng.normal(
+                loc=0.0,
+                scale=arrival_noise_std,
+                size=arrivals_abs.shape,
             )
 
         t_min = float(np.min(arrivals_abs))

@@ -254,6 +254,45 @@ def test_synthetic_arrivals_are_sampled_at_exact_event_position():
     assert np.allclose(arrivals[0], expected)
 
 
+def test_synthetic_arrival_noise_is_reproducible_and_keeps_relative_times():
+    config = {
+        "lon": 0.0,
+        "lat": 0.0,
+        "height": 0.0,
+        "azimuth": 0.0,
+        "side_size": 100.0,
+        "n_x": 4,
+        "n_y": 4,
+        "n_z": 4,
+    }
+    model = VelocityModel.from_config(config)
+    model.fill_linear_gradient("vp", 100.0, 100.0)
+    stations = [(50.0, 50.0, 0.0), (350.0, 50.0, 0.0), (50.0, 350.0, 0.0)]
+    events = [(175.0, 150.0, 150.0), (250.0, 250.0, 150.0)]
+
+    noiseless, _ = generate_synthetic_arrivals_table(
+        model, station_locs=stations, event_locs=events, random_seed=7
+    )
+    noisy_a, _ = generate_synthetic_arrivals_table(
+        model,
+        station_locs=stations,
+        event_locs=events,
+        random_seed=7,
+        arrival_noise_std=0.05,
+    )
+    noisy_b, _ = generate_synthetic_arrivals_table(
+        model,
+        station_locs=stations,
+        event_locs=events,
+        random_seed=7,
+        arrival_noise_std=0.05,
+    )
+
+    assert np.allclose(noisy_a, noisy_b)
+    assert all(np.isclose(np.min(event_arrivals), 0.0) for event_arrivals in noisy_a)
+    assert not np.allclose(noisy_a, noiseless)
+
+
 def test_event_depth_offset_excludes_upper_layers():
     cell_size = 50.0
     shape = (90, 90, 90)
@@ -350,6 +389,7 @@ if __name__ == "__main__":
         test_single_hypothesis_refinement_recovers_subcell_position,
         test_station_positions_snap_to_fine_cell_centers,
         test_synthetic_arrivals_are_sampled_at_exact_event_position,
+        test_synthetic_arrival_noise_is_reproducible_and_keeps_relative_times,
         test_event_depth_offset_excludes_upper_layers,
         test_skfmm_source_is_at_cell_centre,
         test_successful_ray_reaches_station_and_uses_cell_centred_boundaries,

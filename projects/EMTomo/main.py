@@ -2,7 +2,10 @@ import cProfile
 import math
 import pstats
 from dataclasses import dataclass
+from pathlib import Path
 from pstats import SortKey
+
+import numpy as np
 
 from instruments.instruments import (
     generate_synthetic_arrivals_table,
@@ -18,16 +21,19 @@ class ExampleConfig:
 
     # Model geometry and geographic reference.
     cell_size: float = 500.0
-    grid_shape: tuple[int, int, int] = (9, 9, 5)
+    grid_shape: tuple[int, int, int] = (9, 9, 9)
     lon: float = 37.6173
     lat: float = 55.7558
     height: float = 50.0
     azimuth: float = 45.0
 
+    # Initial model: homogeneous background; loading a saved model is disabled.
+    # initial_model_path: str | None = "runs/run_20260903_195317/iter_17/model.npy"
+
     # Station layout and true velocity model.
     station_grid_shape: tuple[int, int] = (8, 8)
-    background_vp: float = 100.0
-    central_anomaly_fraction: float = 0.08
+    background_vp: float = 5000.0
+    central_anomaly_fraction: float = -0.08
 
     # Synthetic arrival generation.
     subdivision: int = 8
@@ -36,18 +42,19 @@ class ExampleConfig:
     event_depth_bias: float = 0.0
     event_z_offset: float = 250.0
     slowness_interpolation: str = "nearest"
+    arrival_noise_std: float = 0.0  # Gaussian pick noise: 10 ms per station.
 
     # EM inversion.
-    n_cycles: int = 8
-    weights_top_n: int = 10
-    weights_min_distance: int = 2
-    temperature: float = 0.5
-    lambda_reg: float = 0.03
-    coverage_damping_power: float = 1.3
+    n_cycles: int = 60
+    weights_top_n: int = 1
+    weights_min_distance: int = 1
+    temperature: float = 1
+    lambda_reg: float = 0.01
+    coverage_damping_power: float = 3
     coverage_floor: float = 0.05
     coverage_reference_percentile: float = 75.0
     max_velocity_step_fraction: float = 0.03
-    v_bounds: tuple[float, float] = (80.0, 120.0)
+    v_bounds: tuple[float, float] = (4000.0, 6000.0)
     v_reg_strength: float = 0.0
     v_left_mode: str = "lin"
     v_right_mode: str = "lin"
@@ -86,6 +93,25 @@ def build_top_surface_stations(
         for i in range(n_stations_x)
         for j in range(n_stations_y)
     ]
+
+
+def load_initial_vp(model: VelocityModel, filepath: str) -> None:
+    """Load a saved coarse-grid Vp array as the inversion starting model."""
+    path = Path(filepath)
+    if not path.is_file():
+        raise FileNotFoundError(f"Initial model file not found: {path}")
+
+    vp = np.load(path, allow_pickle=False)
+    expected_shape = model.grid.vp.shape
+    if vp.shape != expected_shape:
+        raise ValueError(
+            f"Initial Vp shape {vp.shape} does not match the configured "
+            f"coarse-grid shape {expected_shape}"
+        )
+    if not np.all(np.isfinite(vp)) or np.any(vp <= 0.0):
+        raise ValueError("Initial Vp must contain only finite positive velocities")
+
+    model.set_vp_array(vp)
 
 
 def build_true_model(model: VelocityModel, config: ExampleConfig) -> None:
@@ -151,6 +177,9 @@ def main(config: ExampleConfig = CONFIG) -> None:
         "vp", config.background_vp, config.background_vp
     )
 
+    # To resume from a saved coarse-grid model instead, replace the block above with:
+    # load_initial_vp(initial_model, "runs/run_20260903_195317/iter_17/model.npy")
+
     true_model = VelocityModel.from_config(model_config)
     build_true_model(true_model, config)
 
@@ -163,6 +192,7 @@ def main(config: ExampleConfig = CONFIG) -> None:
         slowness_interpolation=config.slowness_interpolation,
         depth_bias=config.event_depth_bias,
         z_offset=config.event_z_offset,
+        arrival_noise_std=config.arrival_noise_std,
     )
 
     warm_up_jit()
