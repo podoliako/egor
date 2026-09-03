@@ -59,25 +59,46 @@ class GridGeometry:
     """
     Geometry and spatial reference of the velocity grid.
     
+    Coordinate convention:
+    ----------------------
+    ``(lon, lat, height)`` identifies the geographic position of the centre of
+    the model's *top face*, i.e. local metric point
+    ``(n_x * side_size / 2, n_y * side_size / 2, 0)``.  This is a geometric
+    point, not the centre of a particular cell, so it remains unambiguous for
+    both odd and even grid dimensions.
+
+    EMTomo calculations use local metric coordinates.  The local axes are:
+
+    - ``x``: direction ``azimuth`` clockwise from geographic North;
+    - ``y``: direction ``azimuth + 90°`` (to the right of ``x``);
+    - ``z``: positive downward from the top face.
+
+    A value at array index ``(i, j, k)`` represents the centre of the cell
+    ``[(i, j, k) * side_size, (i + 1, j + 1, k + 1) * side_size)``.
+    Geographic conversion is intentionally left to an external projection
+    layer (for example, a UCVM adapter).
+
     Parameters:
     -----------
-    lon : float
-        Longitude of reference cube center (degrees)
-    lat : float
-        Latitude of reference cube center (degrees)
+    lon, lat : float
+        Longitude and latitude of the model top-face centre (degrees).
     height : float
-        Height relative to ground level of reference cube center (meters)
+        Height of the model top-face centre relative to ground level (meters).
     azimuth : float
-        Azimuth of grid orientation (degrees, clockwise from North)
+        Orientation of local x (degrees, clockwise from North).
     side_size : float
-        Cube side size in meters
+        Uniform cell side length in meters.
     n_x, n_y, n_z : int
-        Number of cubes along each axis (z goes downward)
+        Number of cells along each local axis; z increases downward.
     """
-    
-    def __init__(self, lon: float, lat: float, height: float, 
+
+    def __init__(self, lon: float, lat: float, height: float,
                  azimuth: float, side_size: float,
                  n_x: int, n_y: int, n_z: int):
+        if side_size <= 0:
+            raise ValueError("side_size must be positive")
+        if min(n_x, n_y, n_z) <= 0:
+            raise ValueError("n_x, n_y, and n_z must be positive")
         self.lon = lon
         self.lat = lat
         self.height = height
@@ -86,6 +107,30 @@ class GridGeometry:
         self.n_x = n_x
         self.n_y = n_y
         self.n_z = n_z
+
+    @property
+    def shape(self) -> Tuple[int, int, int]:
+        """Number of cells as ``(n_x, n_y, n_z)``."""
+        return (self.n_x, self.n_y, self.n_z)
+
+    @property
+    def top_face_center_local(self) -> Tuple[float, float, float]:
+        """Local metric coordinates of the geographic reference point."""
+        return (
+            self.n_x * self.side_size / 2.0,
+            self.n_y * self.side_size / 2.0,
+            0.0,
+        )
+
+    def cell_center_local(self, i: int, j: int, k: int) -> Tuple[float, float, float]:
+        """Return the local metric centre of cell ``(i, j, k)`` in meters."""
+        if not (0 <= i < self.n_x and 0 <= j < self.n_y and 0 <= k < self.n_z):
+            raise IndexError(f"cell index {(i, j, k)} out of bounds for shape {self.shape}")
+        return (
+            (i + 0.5) * self.side_size,
+            (j + 0.5) * self.side_size,
+            (k + 0.5) * self.side_size,
+        )
         
     def to_dict(self) -> Dict:
         """Export geometry to dictionary."""

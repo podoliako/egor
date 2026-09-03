@@ -74,6 +74,25 @@ def test_geometry():
     print("✓ Geometry test passed")
 
 
+def test_grid_geometry_coordinate_convention():
+    """The geographic reference is the geometric centre of the top face."""
+    even = GridGeometry(
+        lon=30.0, lat=60.0, height=0.0, azimuth=0.0,
+        side_size=500.0, n_x=10, n_y=8, n_z=4,
+    )
+    assert even.shape == (10, 8, 4)
+    assert even.top_face_center_local == (2500.0, 2000.0, 0.0)
+    assert even.cell_center_local(0, 0, 0) == (250.0, 250.0, 250.0)
+    assert even.cell_center_local(9, 7, 3) == (4750.0, 3750.0, 1750.0)
+
+    odd = GridGeometry(
+        lon=30.0, lat=60.0, height=0.0, azimuth=0.0,
+        side_size=500.0, n_x=9, n_y=9, n_z=9,
+    )
+    assert odd.top_face_center_local == (2250.0, 2250.0, 0.0)
+    assert odd.cell_center_local(4, 4, 0) == (2250.0, 2250.0, 250.0)
+
+
 def test_full_model():
     """Test complete model workflow."""
     config = {
@@ -219,6 +238,7 @@ if __name__ == '__main__':
     test_linear_gradient()
     test_array_operations()
     test_geometry()
+    test_grid_geometry_coordinate_convention()
     test_full_model()
     test_save_load()
     test_geo_grid_no_subdivision()
