@@ -595,6 +595,36 @@ const ALL_PLOTS = [
   'plot-hypod-trend','plot-hypod-hist',
 ];
 
+const PLOT_REQUEST_TOKENS = new Map();
+const PLOT_RENDER_TOKENS = new Map();
+const PLOT_RENDER_PROMISES = new Map();
+let LOAD_RUN_TOKEN = 0;
+
+function beginPlotRequest(...plotIds) {
+  const token = Symbol('plot-request');
+  plotIds.forEach(id => PLOT_REQUEST_TOKENS.set(id, token));
+  return token;
+}
+
+function isCurrentPlotRequest(token, ...plotIds) {
+  return plotIds.every(id => PLOT_REQUEST_TOKENS.get(id) === token);
+}
+
+function trackPlotRender(plotId, traces, layout, config) {
+  const el = document.getElementById(plotId);
+  const renderedRun = ST.run;
+  const renderedIter = ST.iter;
+  const renderToken = Symbol('plot-render');
+  PLOT_RENDER_TOKENS.set(plotId, renderToken);
+  const promise = Promise.resolve(Plotly.react(el, traces, layout, config)).then(() => {
+    if (PLOT_RENDER_TOKENS.get(plotId) !== renderToken) return;
+    el.dataset.renderRun = renderedRun || 'plot';
+    el.dataset.renderIter = String(renderedIter);
+  });
+  PLOT_RENDER_PROMISES.set(plotId, promise);
+  return promise;
+}
+
 /* ── Layout factory ── */
 function mkLayout(nx, nz, cbTitle, zrange) {
   const coloraxis = {
@@ -840,11 +870,13 @@ async function doAutoRefresh() {
 
 async function refreshLiveData() {
   if (!ST.run) return;
+  const run = ST.run;
   const [info, timing, quality] = await Promise.all([
-    apiFetch(`/api/runs/${ST.run}/info`),
-    apiFetch(`/api/runs/${ST.run}/timing`),
-    apiFetch(`/api/runs/${ST.run}/quality`),
+    apiFetch(`/api/runs/${run}/info`),
+    apiFetch(`/api/runs/${run}/timing`),
+    apiFetch(`/api/runs/${run}/quality`),
   ]);
+  if (ST.run !== run) return;
   ST.info = info || ST.info;
   ST.timing.data = timing || ST.timing.data;
   ST.quality.data = quality || ST.quality.data;
@@ -915,7 +947,7 @@ function renderTiming() {
   };
 
   showP('plot-timing', 'timing-empty');
-  Plotly.react('plot-timing', traces, layout, PLY_CFG);
+  trackPlotRender('plot-timing', traces, layout, PLY_CFG);
 }
 
 function renderQuality() {
@@ -959,14 +991,19 @@ function renderQuality() {
   };
 
   showP('plot-quality', 'quality-empty');
-  Plotly.react('plot-quality', traces, layout, PLY_CFG);
+  trackPlotRender('plot-quality', traces, layout, PLY_CFG);
 }
 
 /* ── Hypo Residuals + Hypo Distance panels ── */
 async function renderHypoMetrics() {
   if (!ST.run) return;
+  const plotIds = ['plot-hypoq-trend', 'plot-hypoq-hist', 'plot-hypod-trend', 'plot-hypod-hist'];
+  const request = beginPlotRequest(...plotIds);
+  const run = ST.run;
+  const iter = ST.iter;
 
-  const data = await apiFetch(`/api/runs/${ST.run}/hypo_metrics?iter=${ST.iter}`);
+  const data = await apiFetch(`/api/runs/${run}/hypo_metrics?iter=${iter}`);
+  if (!isCurrentPlotRequest(request, ...plotIds)) return;
   ST.hypoQ.residualSummary = data?.residual_summary || [];
   ST.hypoQ.residualIter    = data?.residual_iter || [];
   ST.hypoD.distanceSummary = data?.distance_summary || [];
@@ -1110,7 +1147,7 @@ function _renderHypoTrend({ summary, plotId, emptyId, meanKey, p10Key, p90Key, y
       showgrid: false, zeroline: false, tickmode: 'linear', dtick: 1, tickfont: { size: 8 } },
   });
 
-  Plotly.react(plotId, traces, layout, PLY_CFG);
+  trackPlotRender(plotId, traces, layout, PLY_CFG);
 }
 
 function _renderHypoHist({ rows, valueKey, plotId, emptyId, yLabel, hoverFmt, topN, hilightEv }) {
@@ -1153,7 +1190,7 @@ function _renderHypoHist({ rows, valueKey, plotId, emptyId, yLabel, hoverFmt, to
       showgrid: false, zeroline: false, tickfont: { size: 8 } },
   });
 
-  Plotly.react(plotId, traces, layout, PLY_CFG);
+  trackPlotRender(plotId, traces, layout, PLY_CFG);
 }
 
 function _renderHypoWorst({ rows, valueKey, listId, topN, hilightEv, fmt, onClick }) {
@@ -1227,13 +1264,20 @@ function _highlightHypoEvent(ev, which) {
 
 async function renderVelPair() {
   if (!ST.run) return;
+  const request = beginPlotRequest('plot-vel', 'plot-tr');
+  const run = ST.run;
+  const iter = ST.iter;
   const mt = ST.vel.type;
+  const velY = ST.vel.y;
+  const trY = ST.tr.y;
+  const sharedScale = ST.vel.sharedScale;
 
   if (mt === 'diff') {
     const [dT, dI] = await Promise.all([
-      apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=true&iter=0&y=${ST.vel.y}`),
-      apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=iter&iter=${ST.iter}&y=${ST.vel.y}`),
+      apiFetch(`/api/runs/${run}/slice?type=model&model_type=true&iter=0&y=${velY}`),
+      apiFetch(`/api/runs/${run}/slice?type=model&model_type=iter&iter=${iter}&y=${velY}`),
     ]);
+    if (!isCurrentPlotRequest(request, 'plot-vel')) return;
     if (!dT?.slice || !dI?.slice) {
       emptyP('plot-vel','vel-empty', dT?.slice ? 'No iter model' : 'No true model — cannot diff'); return;
     }
@@ -1242,24 +1286,25 @@ async function renderVelPair() {
     shapeBadge('vel-shape-badge', dI.full_shape);
     const diff = sub2d(dT.slice, dI.slice);
     const absMax = Math.max(1e-12, ...diff.flat().map(Math.abs));
-    Plotly.react('plot-vel',
+    await trackPlotRender('plot-vel',
       buildTraces(heatTrace(diff, CS_DIVERG, undefined, [-absMax, absMax]),
-        dI.shape[0], dI.shape[1], -1, -1, true, ST.vel.y, false),
+        dI.shape[0], dI.shape[1], -1, -1, true, velY, false),
       mkLayout(dI.shape[0], dI.shape[1], 'True−Iter', [-absMax, absMax]), PLY_CFG);
-    _renderTrAlone();
+    if (isCurrentPlotRequest(request, 'plot-vel')) await _renderTrAlone();
     return;
   }
 
   const isDelta = mt === 'delta_s';
   const velUrl = isDelta
-    ? `/api/runs/${ST.run}/slice?type=delta_s&iter=${ST.iter}&y=${ST.vel.y}`
-    : `/api/runs/${ST.run}/slice?type=model&model_type=${mt}&iter=${ST.iter}&y=${ST.vel.y}`;
+    ? `/api/runs/${run}/slice?type=delta_s&iter=${iter}&y=${velY}`
+    : `/api/runs/${run}/slice?type=model&model_type=${mt}&iter=${iter}&y=${velY}`;
 
-  if (ST.vel.sharedScale && !isDelta) {
+  if (sharedScale && !isDelta) {
     const [dV, dTr] = await Promise.all([
       apiFetch(velUrl),
-      apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=true&iter=0&y=${ST.tr.y}`),
+      apiFetch(`/api/runs/${run}/slice?type=model&model_type=true&iter=0&y=${trY}`),
     ]);
+    if (!isCurrentPlotRequest(request, 'plot-vel', 'plot-tr')) return;
     if (dV?.slice) {
       showP('plot-vel','vel-empty');
       syncY('vel-y','vel-y-v','vel-y-num', dV.full_shape[1], ST.vel);
@@ -1275,24 +1320,29 @@ async function renderVelPair() {
       const allVals = [...dV.slice.flat(), ...dTr.slice.flat()].filter(isFinite);
       const gMin = Math.min(...allVals), gMax = Math.max(...allVals);
       const zrange = [gMin, gMax];
-      Plotly.react('plot-vel',
-        buildTraces(heatTrace(dV.slice, 'Viridis', undefined, zrange), dV.shape[0], dV.shape[1], -1, -1, true, ST.vel.y, false),
-        mkLayout(dV.shape[0], dV.shape[1], 'Vp'), PLY_CFG);
-      Plotly.react('plot-tr',
-        buildTraces(heatTrace(dTr.slice, 'Viridis', undefined, zrange), dTr.shape[0], dTr.shape[1], -1, -1, true, ST.tr.y, false),
-        mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true'), PLY_CFG);
+      await Promise.all([
+        trackPlotRender('plot-vel',
+          buildTraces(heatTrace(dV.slice, 'Viridis', undefined, zrange), dV.shape[0], dV.shape[1], -1, -1, true, velY, false),
+          mkLayout(dV.shape[0], dV.shape[1], 'Vp'), PLY_CFG),
+        trackPlotRender('plot-tr',
+          buildTraces(heatTrace(dTr.slice, 'Viridis', undefined, zrange), dTr.shape[0], dTr.shape[1], -1, -1, true, trY, false),
+          mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true'), PLY_CFG),
+      ]);
     } else {
-      if (dV?.slice) Plotly.react('plot-vel',
-        buildTraces(heatTrace(dV.slice, 'Viridis'), dV.shape[0], dV.shape[1], -1, -1, true, ST.vel.y, false),
-        mkLayout(dV.shape[0], dV.shape[1], 'Vp'), PLY_CFG);
-      if (dTr?.slice) Plotly.react('plot-tr',
-        buildTraces(heatTrace(dTr.slice, 'Viridis'), dTr.shape[0], dTr.shape[1], -1, -1, true, ST.tr.y, false),
-        mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true'), PLY_CFG);
+      const renders = [];
+      if (dV?.slice) renders.push(trackPlotRender('plot-vel',
+        buildTraces(heatTrace(dV.slice, 'Viridis'), dV.shape[0], dV.shape[1], -1, -1, true, velY, false),
+        mkLayout(dV.shape[0], dV.shape[1], 'Vp'), PLY_CFG));
+      if (dTr?.slice) renders.push(trackPlotRender('plot-tr',
+        buildTraces(heatTrace(dTr.slice, 'Viridis'), dTr.shape[0], dTr.shape[1], -1, -1, true, trY, false),
+        mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true'), PLY_CFG));
+      await Promise.all(renders);
     }
     return;
   }
 
   const d = await apiFetch(velUrl);
+  if (!isCurrentPlotRequest(request, 'plot-vel')) return;
   if (!d?.slice) { emptyP('plot-vel','vel-empty','No data'); }
   else {
     showP('plot-vel','vel-empty');
@@ -1301,23 +1351,27 @@ async function renderVelPair() {
     const velZrange = isDelta
       ? (() => { const m = Math.max(1e-12, ...d.slice.flat().map(Math.abs)); return [-m, m]; })()
       : undefined;
-    Plotly.react('plot-vel',
+    await trackPlotRender('plot-vel',
       buildTraces(heatTrace(d.slice, isDelta ? CS_DIVERG : 'Viridis', undefined, velZrange),
-        d.shape[0], d.shape[1], -1, -1, true, ST.vel.y, false),
+        d.shape[0], d.shape[1], -1, -1, true, velY, false),
       mkLayout(d.shape[0], d.shape[1], isDelta ? 'Δs' : 'Vp', velZrange), PLY_CFG);
   }
-  _renderTrAlone();
+  if (isCurrentPlotRequest(request, 'plot-vel')) await _renderTrAlone();
 }
 
 async function _renderTrAlone() {
   if (!ST.run) return;
-  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=model&model_type=true&iter=0&y=${ST.tr.y}`);
+  const request = beginPlotRequest('plot-tr');
+  const run = ST.run;
+  const trY = ST.tr.y;
+  const d = await apiFetch(`/api/runs/${run}/slice?type=model&model_type=true&iter=0&y=${trY}`);
+  if (!isCurrentPlotRequest(request, 'plot-tr')) return;
   if (!d?.slice) { emptyP('plot-tr','tr-empty','No true model saved'); return; }
   showP('plot-tr','tr-empty');
   syncY('tr-y','tr-y-v','tr-y-num', d.full_shape[1], ST.tr);
   shapeBadge('tr-shape-badge', d.full_shape);
-  Plotly.react('plot-tr',
-    buildTraces(heatTrace(d.slice, 'Viridis'), d.shape[0], d.shape[1], -1, -1, true, ST.tr.y, false),
+  await trackPlotRender('plot-tr',
+    buildTraces(heatTrace(d.slice, 'Viridis'), d.shape[0], d.shape[1], -1, -1, true, trY, false),
     mkLayout(d.shape[0], d.shape[1], 'Vp true'), PLY_CFG);
 }
 
@@ -1327,28 +1381,36 @@ const renderTr  = () => ST.vel.sharedScale ? renderVelPair() : _renderTrAlone();
 /* ── Ray Count panel ── */
 async function renderRayCount() {
   if (!ST.run) return;
+  const request = beginPlotRequest('plot-rc');
+  const run = ST.run;
+  const iter = ST.iter;
   const { event, weight, y, dim } = ST.rc;
   const d = await apiFetch(
-    `/api/runs/${ST.run}/slice?type=ray_count&event=${event}&weight=${weight}&iter=${ST.iter}&y=${y}`
+    `/api/runs/${run}/slice?type=ray_count&event=${event}&weight=${weight}&iter=${iter}&y=${y}`
   );
+  if (!isCurrentPlotRequest(request, 'plot-rc')) return;
   if (!d?.slice) { emptyP('plot-rc','rc-empty','No ray_count data — check G is saved'); return; }
   showP('plot-rc','rc-empty');
   syncY('rc-y','rc-y-v','rc-y-num', d.full_shape[1], ST.rc);
   shapeBadge('rc-shape-badge', d.full_shape);
-  Plotly.react('plot-rc',
+  await trackPlotRender('plot-rc',
     buildTraces(heatTrace(d.slice, CS_RAYS), d.shape[0], d.shape[1], -1, event, true, y, dim),
     mkLayout(d.shape[0], d.shape[1], 'rays'), PLY_CFG);
 }
 
 async function renderWt() {
   if (!ST.run) return;
+  const request = beginPlotRequest('plot-wt');
+  const run = ST.run;
+  const iter = ST.iter;
   const { event, y, dim } = ST.wt;
-  const d = await apiFetch(`/api/runs/${ST.run}/slice?type=weights&event=${event}&iter=${ST.iter}&y=${y}`);
+  const d = await apiFetch(`/api/runs/${run}/slice?type=weights&event=${event}&iter=${iter}&y=${y}`);
+  if (!isCurrentPlotRequest(request, 'plot-wt')) return;
   if (!d?.slice) { emptyP('plot-wt','wt-empty','No data'); return; }
   showP('plot-wt','wt-empty');
   syncY('wt-y','wt-y-v','wt-y-num', d.full_shape[1], ST.wt);
   shapeBadge('wt-shape-badge', d.full_shape);
-  Plotly.react('plot-wt',
+  await trackPlotRender('plot-wt',
     buildTraces(heatTrace(d.slice, [[0,'#f0f4ff'],[0.5,'#6699dd'],[1,'#0a2a7a']]),
       d.shape[0], d.shape[1], -1, event, false, y, dim),
     mkLayout(d.shape[0], d.shape[1], 'w'), PLY_CFG);
@@ -1356,15 +1418,19 @@ async function renderWt() {
 
 async function renderG() {
   if (!ST.run) return;
+  const request = beginPlotRequest('plot-G');
+  const run = ST.run;
+  const iter = ST.iter;
   const { event, station, weight, y, dim } = ST.G;
   const d = await apiFetch(
-    `/api/runs/${ST.run}/slice?type=G&event=${event}&station=${station}&weight=${weight}&iter=${ST.iter}&y=${y}`
+    `/api/runs/${run}/slice?type=G&event=${event}&station=${station}&weight=${weight}&iter=${iter}&y=${y}`
   );
+  if (!isCurrentPlotRequest(request, 'plot-G')) return;
   if (!d?.slice) { emptyP('plot-G','g-empty','No data — check event/station/weight'); return; }
   showP('plot-G','g-empty');
   syncY('g-y','g-y-v','g-y-num', d.full_shape[1], ST.G);
   shapeBadge('g-shape-badge', d.full_shape);
-  Plotly.react('plot-G',
+  await trackPlotRender('plot-G',
     buildTraces(heatTrace(d.slice, CS_RDBU, 0), d.shape[0], d.shape[1], station, event, false, y, dim),
     mkLayout(d.shape[0], d.shape[1], 'G'), PLY_CFG);
 }
@@ -1450,7 +1516,10 @@ function updateParamsBar() {
 }
 
 async function loadRun(rid, targetIter = null) {
+  const loadToken = ++LOAD_RUN_TOKEN;
   ST.run = rid;
+  beginPlotRequest(...ALL_PLOTS);
+  document.getElementById('run-select').value = rid;
   ST.hypoQ.hilightEv = -1;
   ST.hypoD.hilightEv = -1;
   ['vel','tr','rc','wt','G'].forEach(k => { if (ST[k]) ST[k].y = 0; });
@@ -1468,6 +1537,7 @@ async function loadRun(rid, targetIter = null) {
     apiFetch(`/api/runs/${rid}/timing`),
     apiFetch(`/api/runs/${rid}/quality`),
   ]);
+  if (loadToken !== LOAD_RUN_TOKEN || ST.run !== rid) return;
   ST.meta = meta || {};
   ST.info = info || {};
   ST.timing.data = timing || [];
@@ -1491,6 +1561,7 @@ async function loadRun(rid, targetIter = null) {
   fillSelect('g-sta',  nSta, 'Sta ');
 
   await Promise.all([reloadGWeights(), reloadRcWeights()]);
+  if (loadToken !== LOAD_RUN_TOKEN || ST.run !== rid) return;
   updateParamsBar();
   renderAll();
   if (ST.autoRefresh) scheduleAutoRefresh();
@@ -1554,19 +1625,46 @@ document.getElementById('hypod-topn').addEventListener('change', e => {
   renderHypoMetrics();
 });
 
-function downloadPlot(plotId, filename) {
+async function renderPlotForDownload(plotId) {
+  switch (plotId) {
+    case 'plot-vel': await renderVelPair(); break;
+    case 'plot-tr': await (ST.vel.sharedScale ? renderVelPair() : _renderTrAlone()); break;
+    case 'plot-rc': await renderRayCount(); break;
+    case 'plot-wt': await renderWt(); break;
+    case 'plot-G': await renderG(); break;
+    case 'plot-timing': renderTiming(); break;
+    case 'plot-quality': renderQuality(); break;
+    case 'plot-hypoq-trend':
+    case 'plot-hypoq-hist':
+    case 'plot-hypod-trend':
+    case 'plot-hypod-hist':
+      await renderHypoMetrics();
+      break;
+  }
+  await PLOT_RENDER_PROMISES.get(plotId);
+}
+
+async function downloadPlot(plotId, filename) {
+  await renderPlotForDownload(plotId);
   const el = document.getElementById(plotId);
   if (!el?._fullLayout) return;
-  Plotly.downloadImage(plotId, {
+  const run = el.dataset.renderRun || ST.run || 'plot';
+  const iter = el.dataset.renderIter ?? ST.iter;
+  await Plotly.downloadImage(el, {
     format: 'png', width: 1200, height: 700,
-    filename: `${ST.run || 'plot'}_${filename}`,
+    filename: `${run}_iter_${iter}_${filename}`,
   });
 }
 
 document.querySelectorAll('.btn-dl').forEach(btn => {
-  btn.addEventListener('click', e => {
+  btn.addEventListener('click', async e => {
     e.stopPropagation();
-    downloadPlot(btn.dataset.plot, btn.dataset.fname || 'plot');
+    btn.disabled = true;
+    try {
+      await downloadPlot(btn.dataset.plot, btn.dataset.fname || 'plot');
+    } finally {
+      btn.disabled = false;
+    }
   });
 });
 
