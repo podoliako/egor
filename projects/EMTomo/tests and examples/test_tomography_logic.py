@@ -10,7 +10,7 @@ from instruments.instruments_coords import (
     sample_cell_centered_trilinear,
     snap_metric_points_to_cell_centers,
 )
-from instruments.instruments_ops import coarsen_G
+from instruments.instruments_ops import coarsen_G, coarsen_G_all
 from instruments.instruments_travel import compute_station_travel_time_fields
 from interpolation import prolongate_cell_centered_trilinear
 from raytracing import (
@@ -151,6 +151,27 @@ def test_trilinear_prolongation_and_G_restriction_are_adjoint():
         np.sum(fine_slowness * fine_lengths),
         np.sum(coarse_slowness * coarse_lengths),
     )
+
+
+def test_batched_trilinear_G_restriction_matches_stationwise_results():
+    rng = np.random.default_rng(11)
+    fine_lengths = rng.normal(size=(4, 6, 9, 12))
+
+    batched = coarsen_G_all(
+        fine_lengths,
+        subdivision=3,
+        slowness_interpolation="trilinear",
+    )
+    stationwise = np.stack([
+        coarsen_G(
+            station_lengths,
+            subdivision=3,
+            slowness_interpolation="trilinear",
+        )
+        for station_lengths in fine_lengths
+    ])
+
+    assert np.allclose(batched, stationwise)
 
 
 def test_geo_grid_trilinear_slowness_interpolation():

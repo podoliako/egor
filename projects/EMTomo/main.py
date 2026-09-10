@@ -1,5 +1,4 @@
 import cProfile
-import math
 import pstats
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,9 +18,9 @@ from velocity_model import VelocityModel
 class ExampleConfig:
     """All parameters of the synthetic tomography example."""
 
-    # Model geometry and geographic reference.
-    cell_size: float = 500.0
-    grid_shape: tuple[int, int, int] = (9, 9, 9)
+    # Model geometry and geographic reference: 200 x 70 x 70 km.
+    cell_size: float = 10_000.0
+    grid_shape: tuple[int, int, int] = (20, 7, 7)
     lon: float = 37.6173
     lat: float = 55.7558
     height: float = 50.0
@@ -30,27 +29,31 @@ class ExampleConfig:
     # Initial model: homogeneous background; loading a saved model is disabled.
     # initial_model_path: str | None = "runs/run_20260903_195317/iter_17/model.npy"
 
-    # Station layout and true velocity model.
-    station_grid_shape: tuple[int, int] = (8, 8)
+    # Station layout and true velocity model. Stations form a uniform surface grid;
+    # events are sampled uniformly in the model volume.
+    station_grid_shape: tuple[int, int] = (9, 9)
     background_vp: float = 5000.0
-    central_anomaly_fraction: float = -0.08
+    checkerboard_anomaly_fraction: float = 0.05
+    checkerboard_cell_size: float = 20_000.0
 
-    # Synthetic arrival generation.
-    subdivision: int = 8
-    n_events: int = 250
+    # Synthetic arrival generation: events are placed on a uniform volume grid.
+    subdivision: int = 9
+    event_grid_shape: tuple[int, int, int] = (11, 7, 7)  # 539 hypocentres.
     random_seed: int = 7
     event_depth_bias: float = 0.0
     event_z_offset: float = 250.0
-    slowness_interpolation: str = "nearest"
+    slowness_interpolation: str = "trilinear"
     arrival_noise_std: float = 0.0  # Gaussian pick noise: 10 ms per station.
 
-    # EM inversion.
-    n_cycles: int = 60
+    # EM inversion. Change the version for every method release.
+    run_name: str = "em"
+    run_version: str = "1.1"
+    n_cycles: int = 4
     weights_top_n: int = 1
     weights_min_distance: int = 1
     temperature: float = 1
     lambda_reg: float = 0.01
-    coverage_damping_power: float = 3
+    coverage_damping_power: float = 1
     coverage_floor: float = 0.05
     coverage_reference_percentile: float = 75.0
     max_velocity_step_fraction: float = 0.03
@@ -95,6 +98,30 @@ def build_top_surface_stations(
     ]
 
 
+def build_uniform_volume_events(
+    event_grid_shape: tuple[int, int, int],
+    model_shape: tuple[int, int, int],
+    cell_size: float,
+):
+    """Return hypocentres at centres of an evenly spaced 3D volume grid."""
+    event_n_x, event_n_y, event_n_z = event_grid_shape
+    model_n_x, model_n_y, model_n_z = model_shape
+    model_width_x = model_n_x * cell_size
+    model_width_y = model_n_y * cell_size
+    model_depth = model_n_z * cell_size
+
+    return [
+        (
+            (i + 0.5) * model_width_x / event_n_x,
+            (j + 0.5) * model_width_y / event_n_y,
+            (k + 0.5) * model_depth / event_n_z,
+        )
+        for i in range(event_n_x)
+        for j in range(event_n_y)
+        for k in range(event_n_z)
+    ]
+
+
 def load_initial_vp(model: VelocityModel, filepath: str) -> None:
     """Load a saved coarse-grid Vp array as the inversion starting model."""
     path = Path(filepath)
@@ -115,33 +142,29 @@ def load_initial_vp(model: VelocityModel, filepath: str) -> None:
 
 
 def build_true_model(model: VelocityModel, config: ExampleConfig) -> None:
-    """Create a smooth spherical central anomaly in the coarse-cell grid."""
+    """Create a 3D checkerboard with the configured physical cell size."""
     model.fill_linear_gradient("vp", config.background_vp, config.background_vp)
 
-    shape = model.grid.vp.shape
-    center = tuple((size - 1) / 2.0 for size in shape)
-    taper_radius = min(center)
+    checkerboard_blocks = config.checkerboard_cell_size / config.cell_size
+    if not checkerboard_blocks.is_integer() or checkerboard_blocks < 1:
+        raise ValueError(
+            "checkerboard_cell_size must be a positive multiple of cell_size"
+        )
+    checkerboard_blocks = int(checkerboard_blocks)
 
-    for i in range(shape[0]):
-        for j in range(shape[1]):
-            for k in range(shape[2]):
-                radius = math.sqrt(
-                    (i - center[0]) ** 2
-                    + (j - center[1]) ** 2
-                    + (k - center[2]) ** 2
-                )
-                if radius >= taper_radius:
-                    continue
-
-                anomaly_fraction = config.central_anomaly_fraction * 0.5 * (
-                    1.0 + math.cos(math.pi * radius / taper_radius)
-                )
-                model.set_vp(
-                    i,
-                    j,
-                    k,
-                    config.background_vp * (1.0 + anomaly_fraction),
-                )
+    for i, j, k in np.ndindex(model.grid.vp.shape):
+        anomaly_sign = (
+            1.0
+            if ((i // checkerboard_blocks) + (j // checkerboard_blocks) + (k // checkerboard_blocks)) % 2 == 0
+            else -1.0
+        )
+        model.set_vp(
+            i,
+            j,
+            k,
+            config.background_vp
+            * (1.0 + anomaly_sign * config.checkerboard_anomaly_fraction),
+        )
 
 
 def main(config: ExampleConfig = CONFIG) -> None:
@@ -183,15 +206,18 @@ def main(config: ExampleConfig = CONFIG) -> None:
     true_model = VelocityModel.from_config(model_config)
     build_true_model(true_model, config)
 
-    arrivals_table, events_metric = generate_synthetic_arrivals_table(
+    events_metric = build_uniform_volume_events(
+        config.event_grid_shape,
+        config.grid_shape,
+        config.cell_size,
+    )
+    arrivals_table, _ = generate_synthetic_arrivals_table(
         true_model,
         station_locs=stations_metric,
-        n_events=config.n_events,
+        event_locs=events_metric,
         random_seed=config.random_seed,
         subdivision=config.subdivision,
         slowness_interpolation=config.slowness_interpolation,
-        depth_bias=config.event_depth_bias,
-        z_offset=config.event_z_offset,
         arrival_noise_std=config.arrival_noise_std,
     )
 
@@ -213,6 +239,8 @@ def main(config: ExampleConfig = CONFIG) -> None:
         coverage_floor=config.coverage_floor,
         coverage_reference_percentile=config.coverage_reference_percentile,
         max_velocity_step_fraction=config.max_velocity_step_fraction,
+        run_name=config.run_name,
+        run_version=config.run_version,
         slowness_interpolation=config.slowness_interpolation,
         v_bounds=config.v_bounds,
         v_reg_strength=config.v_reg_strength,

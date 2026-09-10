@@ -3,8 +3,10 @@ from __future__ import annotations
 import io
 import json
 import pstats
+import re
 import time
-from datetime import datetime
+from collections.abc import Mapping
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -14,7 +16,7 @@ import numpy as np
 class TomographyLogger:
     """
     Directory layout:
-        runs/run_<timestamp>/
+        runs/run_<method>_v<version>_<tags>_<timestamp>/
           meta.json
           initial_model.npy / true_model.npy
           timing.jsonl / timing_summary.json
@@ -34,19 +36,43 @@ class TomographyLogger:
         base_dir: str = "runs",
         save_misfit: bool = False,
         save_timefields: bool = False,
+        run_name: str = "em",
+        run_version: str = "1.0",
+        run_tags: Optional[Mapping[str, object]] = None,
     ):
-        self.run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.run_dir = Path(base_dir) / f"run_{self.run_id}"
-        self.run_dir.mkdir(parents=True, exist_ok=True)
+        self.run_name = self._slug(run_name, "run_name")
+        self.run_version = self._slug(run_version, "run_version")
+        self.run_tags = {
+            self._slug(key, "run tag key"): self._slug(str(value), "run tag value")
+            for key, value in (run_tags or {}).items()
+        }
+        self.started_at = datetime.now(timezone.utc)
+        timestamp = self.started_at.astimezone().strftime("%Y%m%d_%H%M%S")
+        tag_part = "_".join(f"{key}-{value}" for key, value in self.run_tags.items())
+        parts = ["run", self.run_name, f"v{self.run_version}", tag_part, timestamp]
+        self.run_id = "_".join(part for part in parts if part)
+        self.run_dir = Path(base_dir) / self.run_id
+        self.run_dir.mkdir(parents=True, exist_ok=False)
         self._iter_start: float = 0.0
         self._run_start: float = time.perf_counter()
         self.timing: dict = {}
         self.save_misfit = save_misfit
         self.save_timefields = save_timefields
 
+    @staticmethod
+    def _slug(value: str, field_name: str) -> str:
+        slug = re.sub(r"[^A-Za-z0-9.]+", "-", value.strip()).strip("-.").lower()
+        if not slug:
+            raise ValueError(f"{field_name} must contain at least one letter or digit")
+        return slug
+
     def save_meta(self, run_params, station_locs, event_locs, grid_info=None):
         meta = {
             "run_id": self.run_id,
+            "started_at": self.started_at.isoformat(),
+            "run_name": self.run_name,
+            "run_version": self.run_version,
+            "run_tags": self.run_tags,
             "run_params": run_params,
             "station_locs": [list(s) for s in station_locs],
             "event_locs": [list(e) for e in event_locs],

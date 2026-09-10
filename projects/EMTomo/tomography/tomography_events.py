@@ -6,7 +6,7 @@ from typing import Callable, Dict, Optional
 import numpy as np
 
 from instruments.instruments import (
-    coarsen_G,
+    coarsen_G_all,
     compute_cellwise_pairwise_misfit,
     compute_weights_from_misfit,
 )
@@ -110,14 +110,11 @@ def _process_event(
             x_lo,
             x_hi,
         )
-        G_stations = np.array([
-            coarsen_G(
-                G_fine[si],
-                subdivision,
-                slowness_interpolation=slowness_interpolation,
-            )
-            for si in range(G_fine.shape[0])
-        ])
+        G_stations = coarsen_G_all(
+            G_fine,
+            subdivision,
+            slowness_interpolation=slowness_interpolation,
+        )
         residuals = _calculate_residuals(sf, observed, epic)
         station_residuals = _station_residuals_at_coord(sf, observed, epic)
         hessian_w, rhs_w = _normal_equation_contribution(

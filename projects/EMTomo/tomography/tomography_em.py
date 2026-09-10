@@ -59,13 +59,29 @@ def run_em(
     coverage_floor: float = 0.05,
     coverage_reference_percentile: float = 75.0,
     max_velocity_step_fraction: Optional[float] = None,
+    run_name: str = "em",
+    run_version: str = "1.0",
 ):
     if save_runs and logger is None:
-        logger = TomographyLogger(base_dir=runs_dir)
+        logger = TomographyLogger(
+            base_dir=runs_dir,
+            run_name=run_name,
+            run_version=run_version,
+            run_tags={
+                "topn": weights_top_n,
+                "dmin": weights_min_distance,
+                "lam": lambda_reg,
+                "temp": temperature,
+                "sub": subdivision,
+                "cov": coverage_damping_power,
+            },
+        )
 
     if logger is not None:
         grid_info, coarse_side, fine_side = _build_grid_info(initial_model, subdivision)
         run_params = dict(
+            run_name=run_name,
+            run_version=run_version,
             n_cycles=n_cycles,
             wave_type=wave_type,
             solver=str(solver),

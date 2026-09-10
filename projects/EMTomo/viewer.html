@@ -807,12 +807,18 @@ function populateRunSelect(runs, selectedId) {
   const groups = new Map();
   const other = [];
   runs.forEach(r => {
-    const m = r.match(/run_(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})/);
+    // Supports both legacy run_YYYYMMDD_HHMMSS and descriptive run IDs.
+    const m = r.match(/(?:^|_)(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})(?:$|_)/);
     if (!m) { other.push(r); return; }
     const [_, Y, M, D, h, m2, s] = m;
     const date = `${Y}-${M}-${D}`;
+    const timestamp = `${Y}${M}${D}_${h}${m2}${s}`;
+    const description = r
+      .replace(/^run_/, '')
+      .replace(new RegExp(`_?${timestamp}$`), '')
+      .replace(/_/g, ' · ');
     if (!groups.has(date)) groups.set(date, []);
-    groups.get(date).push({ id: r, label: `${h}:${m2}:${s} • ${r}` });
+    groups.get(date).push({ id: r, label: `${h}:${m2}:${s} • ${description || r}` });
   });
 
   let html = '';

@@ -4,6 +4,7 @@ services:
     container_name: tomoviewer
     restart: unless-stopped
     ports:
-      - "127.0.0.1:5050:5050"
+      # Expose the viewer only on the server's VPN-reachable LAN address.
+      - "10.0.62.59:5050:5050"
     volumes:
       - ./runs:/runs:ro
