@@ -282,11 +282,21 @@ def make_tomography_step(
         hessian_acc.append(hessian_ev)
         rhs_acc.append(rhs_ev)
         if logger is not None:
-            weights, misfit, first_residuals, G_per_weight, rc_per_weight = log_data
+            (
+                weights,
+                positions,
+                weight_values,
+                misfit,
+                first_residuals,
+                G_per_weight,
+                rc_per_weight,
+            ) = log_data
             logger.save_event_data(
                 iteration=iteration,
                 event_idx=event_idx,
                 weights=weights,
+                positions=positions,
+                weight_values=weight_values,
                 misfit=misfit,
                 residuals=first_residuals,
                 G_per_weight=G_per_weight,

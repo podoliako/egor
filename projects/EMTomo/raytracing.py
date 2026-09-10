@@ -56,7 +56,12 @@ def _trace_ray_nb(gx, gy, gz, station, epic, step, tol_sq, max_steps, x_lo, x_hi
 
     for _ in range(max_steps):
         dx = x0 - station[0];  dy = x1 - station[1];  dz = x2 - station[2]
-        if dx * dx + dy * dy + dz * dz <= tol_sq:
+        # FMM is seeded at the station cell centre. In heterogeneous models the
+        # interpolated gradient can point out of the domain near a surface source,
+        # so clipping may stall before the much smaller numerical tolerance is met.
+        # Entering the source cell is sufficient; append its exact centre below.
+        in_source_cell = abs(dx) <= 0.5 and abs(dy) <= 0.5 and abs(dz) <= 0.5
+        if dx * dx + dy * dy + dz * dz <= tol_sq or in_source_cell:
             if dx * dx + dy * dy + dz * dz > 1e-24:
                 buf[n, 0] = station[0]
                 buf[n, 1] = station[1]

@@ -22,6 +22,23 @@ from .tomography_math import (
 _MP: dict = {}
 
 
+def _sparsify_G_stations(G_fine: np.ndarray) -> dict[str, np.ndarray]:
+    """Pack all station ray paths without transferring dense fine-grid zeros."""
+    station, x, y, z = np.nonzero(G_fine)
+    counts = np.bincount(station, minlength=G_fine.shape[0])
+    offsets = np.empty(G_fine.shape[0] + 1, dtype=np.int64)
+    offsets[0] = 0
+    np.cumsum(counts, out=offsets[1:])
+    coords = np.column_stack((x, y, z)).astype(np.int32, copy=False)
+    values = G_fine[station, x, y, z].astype(np.float32, copy=False)
+    return {
+        "shape": np.asarray(G_fine.shape[1:], dtype=np.int32),
+        "offsets": offsets,
+        "coords": coords,
+        "values": values,
+    }
+
+
 def _mp_worker_init(state: Optional[dict] = None) -> None:
     global _MP
     if state is not None:
@@ -86,7 +103,7 @@ def _process_event(
     hessian = np.zeros((n_vox, n_vox), dtype=np.float64)
     rhs = np.zeros(n_vox, dtype=np.float64)
     first_residuals = None
-    G_per_weight: Dict[int, list[np.ndarray]] = {}
+    G_per_weight: Dict[int, dict[str, np.ndarray]] = {}
     ray_count_per_weight: Dict[int, np.ndarray] = {}
 
     for w_idx, (cell_index, epic, weight_val) in enumerate(
@@ -130,15 +147,17 @@ def _process_event(
         if first_residuals is None:
             first_residuals = residuals
         if log_G_per_weight:
-            G_per_weight[w_idx] = [G_fine[si] for si in range(G_fine.shape[0])]
+            G_per_weight[w_idx] = _sparsify_G_stations(G_fine)
         ray_count_per_weight[w_idx] = (G_stations > 0).sum(axis=0).astype(np.int16)
 
     log_data = (
         weights,
+        np.asarray(refined_positions, dtype=np.float64),
+        np.asarray(weights_values, dtype=np.float64),
         logged_misfit,
         first_residuals if first_residuals is not None else np.array([]),
         G_per_weight if log_G_per_weight else None,
-        ray_count_per_weight
+        ray_count_per_weight,
     )
     return hessian, rhs, log_data
 

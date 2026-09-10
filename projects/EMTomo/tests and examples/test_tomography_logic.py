@@ -222,6 +222,31 @@ def test_single_hypothesis_refinement_recovers_subcell_position():
     assert refined_misfit < 1e-8
 
 
+def test_surface_ray_finishes_after_entering_station_source_cell():
+    shape = (4, 4, 2)
+    gx = np.zeros(shape, dtype=np.float64)
+    gy = np.zeros(shape, dtype=np.float64)
+    gz = np.ones(shape, dtype=np.float64)
+    station = np.array([2.0, 2.0, 0.0])
+    epicenter = np.array([1.7, 2.0, 0.0])
+
+    path, reached = _trace_ray_nb(
+        gx,
+        gy,
+        gz,
+        station,
+        epicenter,
+        0.1,
+        0.1**2,
+        100,
+        np.zeros(3),
+        np.asarray(shape, dtype=np.float64) - 1.0,
+    )
+
+    assert reached
+    assert np.array_equal(path[-1], station)
+
+
 def test_station_positions_snap_to_fine_cell_centers():
     centers = snap_metric_points_to_cell_centers(
         [(281.25, 281.25, 0.0), (843.75, 281.25, 0.0)],

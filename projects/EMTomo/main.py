@@ -48,8 +48,8 @@ class ExampleConfig:
     # EM inversion. Change the version for every method release.
     run_name: str = "em"
     run_version: str = "1.1"
-    n_cycles: int = 4
-    weights_top_n: int = 1
+    n_cycles: int = 8
+    weights_top_n: int = 7
     weights_min_distance: int = 1
     temperature: float = 1
     lambda_reg: float = 0.01
@@ -70,7 +70,7 @@ class ExampleConfig:
     n_workers: int = 25
     save_runs: bool = True
     runs_dir: str = "runs"
-    log_g_per_weight: bool = False
+    log_g_per_weight: bool = True
     profiling_stats_limit: int = 30
 
 

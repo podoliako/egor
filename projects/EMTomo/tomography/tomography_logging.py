@@ -27,8 +27,8 @@ class TomographyLogger:
             event_<j>/
               weights.npz / residuals.npy
               weight_<w>/
-                G_station_<k>.npz   ← compressed (was .npy)
-                ray_count.npy       ← sum of |G| across stations (coarse grid)
+                G_stations_sparse.npz  ← compact fine-grid ray paths
+                ray_count.npy          ← station ray count (coarse grid)
     """
 
     def __init__(
@@ -119,37 +119,52 @@ class TomographyLogger:
         iteration: int,
         event_idx: int,
         weights: np.ndarray,
+        positions: Optional[np.ndarray] = None,
+        weight_values: Optional[np.ndarray] = None,
         misfit: Optional[np.ndarray] = None,
         residuals: Optional[np.ndarray] = None,
-        G_per_weight: Optional[Dict[int, List[np.ndarray]]] = None,
+        G_per_weight: Optional[
+            Dict[int, Dict[str, np.ndarray] | List[np.ndarray]]
+        ] = None,
         ray_count_per_weight: Optional[Dict[int, np.ndarray]] = None,
     ):
         event_dir = self.iter_dir(iteration) / f"event_{event_idx}"
         event_dir.mkdir(exist_ok=True)
 
-        np.savez_compressed(event_dir / "weights.npz", weights=weights)
+        payload = {"weights": weights}
+        if positions is not None:
+            payload["positions"] = np.asarray(positions, dtype=np.float64)
+        if weight_values is not None:
+            payload["weight_values"] = np.asarray(weight_values, dtype=np.float64)
+        np.savez_compressed(event_dir / "weights.npz", **payload)
 
         if misfit is not None and self.save_misfit:
             np.save(event_dir / "misfit.npy", misfit)
         if residuals is not None:
             np.save(event_dir / "residuals.npy", residuals)
 
-        if G_per_weight is not None:
-            if ray_count_per_weight is not None:
-                for w_idx, ray_count in ray_count_per_weight.items():
-                    w_dir = event_dir / f"weight_{w_idx}"
-                    w_dir.mkdir(exist_ok=True)
-                    np.save(w_dir / "ray_count.npy", ray_count)
+        if ray_count_per_weight is not None:
+            for w_idx, ray_count in ray_count_per_weight.items():
+                w_dir = event_dir / f"weight_{w_idx}"
+                w_dir.mkdir(exist_ok=True)
+                np.save(w_dir / "ray_count.npy", ray_count)
 
-            # Сохраняем саму матрицу G на точной сетке
-            if G_per_weight is not None:
-                for w_idx, g_list in G_per_weight.items():
-                    w_dir = event_dir / f"weight_{w_idx}"
-                    w_dir.mkdir(exist_ok=True)
-                    for si, g in enumerate(g_list):
+        # Fine-grid G is optional because it is substantially larger than coverage.
+        if G_per_weight is not None:
+            for w_idx, sparse_g in G_per_weight.items():
+                w_dir = event_dir / f"weight_{w_idx}"
+                w_dir.mkdir(exist_ok=True)
+                if isinstance(sparse_g, dict):
+                    np.savez_compressed(
+                        w_dir / "G_stations_sparse.npz",
+                        **sparse_g,
+                    )
+                else:
+                    # Backward compatibility for callers using the old logger API.
+                    for station_idx, g in enumerate(sparse_g):
                         np.savez_compressed(
-                            w_dir / f"G_station_{si}.npz",
-                            G=g.astype(np.float32),
+                            w_dir / f"G_station_{station_idx}.npz",
+                            G=np.asarray(g, dtype=np.float32),
                         )
 
     def start_iteration(self, iteration: int):

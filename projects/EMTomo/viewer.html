@@ -149,6 +149,13 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   flex: none;
   height: 52px;
 }
+.panel.panel-diagnostic.diagnostic-collapsed { height: auto; }
+.panel.panel-diagnostic.diagnostic-collapsed .panel-hdr { border-bottom: 0; }
+.panel.panel-diagnostic.diagnostic-collapsed .panel-body { display: none; }
+.btn-collapse {
+  width: 22px; padding: 2px 0; flex-shrink: 0;
+  font-family: var(--ff-mono); font-size: 11px;
+}
 .panel-hypoq .panel-body {
   display: grid;
   grid-template-rows: 1fr 1fr;
@@ -221,7 +228,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   display: flex; align-items: center; gap: 4px;
   flex-shrink: 0; color: var(--text2); font-size: 11px; white-space: nowrap;
 }
-.y-val { font-family: var(--ff-mono); font-size: 11px; color: var(--accent); min-width: 20px; }
+.y-val { display: none; }
 .btn-full {
   margin-left: auto; padding: 2px 7px; font-size: 12px;
   background: transparent; border: 1px solid var(--border);
@@ -374,9 +381,10 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   <!-- Row 2: Ray Count + G Matrix -->
   <div class="panel-row">
 
-    <div class="panel">
+    <div class="panel panel-diagnostic diagnostic-collapsed">
       <div class="panel-hdr">
-        <span class="panel-title">Ray Count</span>
+        <button class="btn-collapse" title="Expand ray coverage">▸</button>
+        <span class="panel-title">Ray Coverage</span>
         <button class="btn-dl" data-plot="plot-rc" data-fname="ray_count" title="Download PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
         <div class="ph-group" style="display: none;">Event <select id="rc-ev"></select></div>
@@ -400,15 +408,16 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel panel-diagnostic diagnostic-collapsed">
       <div class="panel-hdr">
-        <span class="panel-title">G Matrix</span>
+        <button class="btn-collapse" title="Expand ray path">▸</button>
+        <span class="panel-title">Ray: Hypothesis → Station</span>
         <button class="btn-dl" data-plot="plot-G" data-fname="g_matrix" title="Download PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
         <div class="ph-group">Ev <select id="g-ev"></select></div>
         <div class="ph-group">Sta <select id="g-sta"></select></div>
         <div class="ph-group">Wt <select id="g-wt"><option value="0">0</option></select></div>
-        <div class="ph-group">coarse <span class="badge" id="g-shape-badge">—</span></div>
+        <div class="ph-group">fine <span class="badge" id="g-shape-badge">—</span></div>
         <div class="ph-group y-group">
           Y
           <button class="y-btn" id="g-y-dec">◀</button>
@@ -664,10 +673,11 @@ function gridTrace(nx, nz) {
 }
 
 /* ── Overlay helpers ── */
-function csz(coarse) {
+function csz(coarseOrCellSize) {
+  if (typeof coarseOrCellSize === 'number') return coarseOrCellSize;
   const gi = ST.meta?.grid_info;
   if (!gi) return null;
-  return coarse ? gi.coarse_cell_size : (gi.fine_cell_size ?? gi.coarse_cell_size);
+  return coarseOrCellSize ? gi.coarse_cell_size : (gi.fine_cell_size ?? gi.coarse_cell_size);
 }
 
 function stationTraces(hilite, coarse, panelY, dim) {
@@ -726,13 +736,34 @@ function eventTraces(hilite, coarse, panelY, dim) {
   }).filter(Boolean);
 }
 
-function buildTraces(ht, nx, nz, hilSta, hilEv, coarse, panelY, dim) {
+function hypocenterTraces(hypocenters, panelY, dim) {
+  if (!hypocenters?.length) return [];
+  const cellSize = csz(false) || 1;
+  return hypocenters.map((hypo, i) => {
+    const coord = hypo.coord;
+    const offSlice = dim && Math.abs(coord[1] - panelY) >= 0.5;
+    const metric = coord.map(v => (v + 0.5) * cellSize);
+    return {
+      type: 'scatter', mode: 'markers', x: [coord[0]], y: [coord[2]],
+      marker: {
+        symbol: 'x', size: offSlice ? 7 : 13,
+        color: offSlice ? 'rgba(180,45,45,0.25)' : '#b82f2f',
+        line: { color: '#ffffff', width: 1 },
+      },
+      showlegend: false,
+      hovertemplate: `Hypo ${i}<br>x=${metric[0].toFixed(2)}m<br>y=${metric[1].toFixed(2)}m<br>z=${metric[2].toFixed(2)}m<br>w=${hypo.weight.toPrecision(5)}<extra></extra>`,
+    };
+  });
+}
+
+function buildTraces(ht, nx, nz, hilSta, hilEv, coarse, panelY, dim, hypocenters = []) {
   const g = gridTrace(nx, nz);
   return [
     ht,
     ...(g ? [g] : []),
     ...stationTraces(hilSta, coarse, panelY, dim ?? false),
-    ...eventTraces(hilEv,   coarse, panelY, dim ?? false),
+    ...eventTraces(hilEv, coarse, panelY, dim ?? false),
+    ...hypocenterTraces(hypocenters, panelY, dim ?? false),
   ];
 }
 
@@ -1279,10 +1310,11 @@ async function renderVelPair() {
   const sharedScale = ST.vel.sharedScale;
 
   if (mt === 'diff') {
-    const [dT, dI] = await Promise.all([
-      apiFetch(`/api/runs/${run}/slice?type=model&model_type=true&iter=0&y=${velY}`),
-      apiFetch(`/api/runs/${run}/slice?type=model&model_type=iter&iter=${iter}&y=${velY}`),
-    ]);
+    const dI = await apiFetch(`/api/runs/${run}/slice?type=model&model_type=iter&iter=${iter}&y=${velY}`);
+    if (!isCurrentPlotRequest(request, 'plot-vel')) return;
+    const target = dI?.full_shape;
+    const targetQuery = target ? `&nx=${target[0]}&ny=${target[1]}&nz=${target[2]}` : '';
+    const dT = await apiFetch(`/api/runs/${run}/slice?type=model&model_type=true&iter=0&y=${velY}${targetQuery}`);
     if (!isCurrentPlotRequest(request, 'plot-vel')) return;
     if (!dT?.slice || !dI?.slice) {
       emptyP('plot-vel','vel-empty', dT?.slice ? 'No iter model' : 'No true model — cannot diff'); return;
@@ -1294,7 +1326,7 @@ async function renderVelPair() {
     const absMax = Math.max(1e-12, ...diff.flat().map(Math.abs));
     await trackPlotRender('plot-vel',
       buildTraces(heatTrace(diff, CS_DIVERG, undefined, [-absMax, absMax]),
-        dI.shape[0], dI.shape[1], -1, -1, true, velY, false),
+        dI.shape[0], dI.shape[1], -1, -1, dI.cell_size ?? false, velY, false),
       mkLayout(dI.shape[0], dI.shape[1], 'True−Iter', [-absMax, absMax]), PLY_CFG);
     if (isCurrentPlotRequest(request, 'plot-vel')) await _renderTrAlone();
     return;
@@ -1328,19 +1360,19 @@ async function renderVelPair() {
       const zrange = [gMin, gMax];
       await Promise.all([
         trackPlotRender('plot-vel',
-          buildTraces(heatTrace(dV.slice, 'Viridis', undefined, zrange), dV.shape[0], dV.shape[1], -1, -1, true, velY, false),
-          mkLayout(dV.shape[0], dV.shape[1], 'Vp'), PLY_CFG),
+          buildTraces(heatTrace(dV.slice, 'Viridis', undefined, zrange), dV.shape[0], dV.shape[1], -1, -1, dV.cell_size ?? false, velY, false),
+          mkLayout(dV.shape[0], dV.shape[1], 'Vp', zrange), PLY_CFG),
         trackPlotRender('plot-tr',
-          buildTraces(heatTrace(dTr.slice, 'Viridis', undefined, zrange), dTr.shape[0], dTr.shape[1], -1, -1, true, trY, false),
-          mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true'), PLY_CFG),
+          buildTraces(heatTrace(dTr.slice, 'Viridis', undefined, zrange), dTr.shape[0], dTr.shape[1], -1, -1, dTr.cell_size ?? false, trY, false),
+          mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true', zrange), PLY_CFG),
       ]);
     } else {
       const renders = [];
       if (dV?.slice) renders.push(trackPlotRender('plot-vel',
-        buildTraces(heatTrace(dV.slice, 'Viridis'), dV.shape[0], dV.shape[1], -1, -1, true, velY, false),
+        buildTraces(heatTrace(dV.slice, 'Viridis'), dV.shape[0], dV.shape[1], -1, -1, dV.cell_size ?? false, velY, false),
         mkLayout(dV.shape[0], dV.shape[1], 'Vp'), PLY_CFG));
       if (dTr?.slice) renders.push(trackPlotRender('plot-tr',
-        buildTraces(heatTrace(dTr.slice, 'Viridis'), dTr.shape[0], dTr.shape[1], -1, -1, true, trY, false),
+        buildTraces(heatTrace(dTr.slice, 'Viridis'), dTr.shape[0], dTr.shape[1], -1, -1, dTr.cell_size ?? false, trY, false),
         mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true'), PLY_CFG));
       await Promise.all(renders);
     }
@@ -1359,7 +1391,7 @@ async function renderVelPair() {
       : undefined;
     await trackPlotRender('plot-vel',
       buildTraces(heatTrace(d.slice, isDelta ? CS_DIVERG : 'Viridis', undefined, velZrange),
-        d.shape[0], d.shape[1], -1, -1, true, velY, false),
+        d.shape[0], d.shape[1], -1, -1, d.cell_size ?? false, velY, false),
       mkLayout(d.shape[0], d.shape[1], isDelta ? 'Δs' : 'Vp', velZrange), PLY_CFG);
   }
   if (isCurrentPlotRequest(request, 'plot-vel')) await _renderTrAlone();
@@ -1377,7 +1409,7 @@ async function _renderTrAlone() {
   syncY('tr-y','tr-y-v','tr-y-num', d.full_shape[1], ST.tr);
   shapeBadge('tr-shape-badge', d.full_shape);
   await trackPlotRender('plot-tr',
-    buildTraces(heatTrace(d.slice, 'Viridis'), d.shape[0], d.shape[1], -1, -1, true, trY, false),
+    buildTraces(heatTrace(d.slice, 'Viridis'), d.shape[0], d.shape[1], -1, -1, d.cell_size ?? false, trY, false),
     mkLayout(d.shape[0], d.shape[1], 'Vp true'), PLY_CFG);
 }
 
@@ -1418,7 +1450,7 @@ async function renderWt() {
   shapeBadge('wt-shape-badge', d.full_shape);
   await trackPlotRender('plot-wt',
     buildTraces(heatTrace(d.slice, [[0,'#f0f4ff'],[0.5,'#6699dd'],[1,'#0a2a7a']]),
-      d.shape[0], d.shape[1], -1, event, false, y, dim),
+      d.shape[0], d.shape[1], -1, event, false, y, dim, d.hypocenters),
     mkLayout(d.shape[0], d.shape[1], 'w'), PLY_CFG);
 }
 
@@ -1437,7 +1469,7 @@ async function renderG() {
   syncY('g-y','g-y-v','g-y-num', d.full_shape[1], ST.G);
   shapeBadge('g-shape-badge', d.full_shape);
   await trackPlotRender('plot-G',
-    buildTraces(heatTrace(d.slice, CS_RDBU, 0), d.shape[0], d.shape[1], station, event, false, y, dim),
+    buildTraces(heatTrace(d.slice, CS_RDBU, 0), d.shape[0], d.shape[1], station, event, false, y, dim, d.hypocenters),
     mkLayout(d.shape[0], d.shape[1], 'G'), PLY_CFG);
 }
 
@@ -1661,6 +1693,16 @@ async function downloadPlot(plotId, filename) {
     filename: `${run}_iter_${iter}_${filename}`,
   });
 }
+
+document.querySelectorAll('.btn-collapse').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const panel = btn.closest('.panel-diagnostic');
+    const collapsed = panel.classList.toggle('diagnostic-collapsed');
+    btn.textContent = collapsed ? '▸' : '▾';
+    btn.title = collapsed ? 'Expand panel' : 'Collapse panel';
+    if (!collapsed) setTimeout(relayoutAll, 0);
+  });
+});
 
 document.querySelectorAll('.btn-dl').forEach(btn => {
   btn.addEventListener('click', async e => {
