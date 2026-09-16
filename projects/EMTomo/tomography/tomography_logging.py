@@ -18,7 +18,7 @@ class TomographyLogger:
     Directory layout:
         runs/run_<method>_v<version>_<tags>_<timestamp>/
           meta.json
-          initial_model.npy / true_model.npy
+          initial_model.npy / true_model.npy / true_model_fine.npy
           timing.jsonl / timing_summary.json
           profile.txt / profile_top30.json
           iter_<i>/
@@ -66,6 +66,14 @@ class TomographyLogger:
             raise ValueError(f"{field_name} must contain at least one letter or digit")
         return slug
 
+    @staticmethod
+    def _save_npy(path: Path, values) -> None:
+        """Write an array atomically so the live viewer never sees a partial file."""
+        temporary = path.with_suffix(path.suffix + ".tmp")
+        with temporary.open("wb") as stream:
+            np.save(stream, values)
+        temporary.replace(path)
+
     def save_meta(self, run_params, station_locs, event_locs, grid_info=None):
         meta = {
             "run_id": self.run_id,
@@ -78,15 +86,18 @@ class TomographyLogger:
             "event_locs": [list(e) for e in event_locs],
             "grid_info": grid_info or {},
         }
-        with open(self.run_dir / "meta.json", "w") as f:
-            json.dump(meta, f, indent=2)
+        path = self.run_dir / "meta.json"
+        temporary = path.with_suffix(".json.tmp")
+        with temporary.open("w") as stream:
+            json.dump(meta, stream, indent=2)
+        temporary.replace(path)
 
     def save_initial_model(self, model):
-        np.save(self.run_dir / "initial_model.npy", model.get_geo_grid(subdivision=1).vp)
+        self._save_npy(self.run_dir / "initial_model.npy", model.grid.vp)
 
-    def save_true_model(self, model):
+    def save_true_model(self, model, filename: str = "true_model.npy"):
         if model is not None:
-            np.save(self.run_dir / "true_model.npy", model.get_geo_grid(subdivision=1).vp)
+            self._save_npy(self.run_dir / filename, model.grid.vp)
 
     def iter_dir(self, iteration: int) -> Path:
         d = self.run_dir / f"iter_{iteration}"
@@ -94,7 +105,7 @@ class TomographyLogger:
         return d
 
     def save_iteration_model(self, iteration: int, model):
-        np.save(self.iter_dir(iteration) / "model.npy", model.get_geo_grid(subdivision=1).vp)
+        self._save_npy(self.iter_dir(iteration) / "model.npy", model.grid.vp)
 
     def save_delta_s(self, iteration: int, delta_s: np.ndarray):
         np.save(self.iter_dir(iteration) / "delta_s.npy", delta_s)
@@ -113,6 +124,9 @@ class TomographyLogger:
         if not self.save_timefields:
             return
         np.save(self.iter_dir(iteration) / "station_fields.npy", np.asarray(station_fields))
+
+    def save_ray_count(self, iteration: int, ray_count: np.ndarray):
+        np.save(self.iter_dir(iteration) / "ray_count.npy", np.asarray(ray_count))
 
     def save_event_data(
         self,

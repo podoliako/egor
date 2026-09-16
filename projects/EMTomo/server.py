@@ -10,6 +10,7 @@ Open:     http://localhost:5050
 import argparse
 import json
 import re
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
@@ -157,6 +158,17 @@ def _target_shape() -> tuple[int, int, int] | None:
     return values if all(value is not None and value > 0 for value in values) else None
 
 
+def _model_grid_step(meta: dict, source_shape, target_shape) -> list[int]:
+    mode = (meta.get("run_params") or {}).get("slowness_interpolation", "nearest")
+    if mode != "nearest":
+        return [1, 1]
+    steps = []
+    for axis in (0, 2):
+        ratio = target_shape[axis] / source_shape[axis]
+        steps.append(int(round(ratio)) if ratio >= 1 and float(ratio).is_integer() else 1)
+    return steps
+
+
 def _arr_resp(arr, y: int):
     """Turn 3-D array into a slice response dict, or a null response."""
     if arr is None or arr.ndim != 3:
@@ -172,13 +184,39 @@ def _arr_resp(arr, y: int):
     }
 
 
-def _slice_resp(s2d: np.ndarray, full_shape: list[int], cell_size: float) -> dict:
+@lru_cache(maxsize=32)
+def _sum_ray_counts(file_signature: tuple[tuple[str, int, int], ...]):
+    total = None
+    for filename, _mtime_ns, _size in file_signature:
+        ray_count = np.load(filename).astype(np.float32)
+        total = ray_count if total is None else total + ray_count
+    return total
+
+
+def _cached_ray_count(iter_dir: Path):
+    aggregate = iter_dir / "ray_count.npy"
+    if aggregate.exists():
+        return np.load(aggregate, mmap_mode="r")
+    files = sorted(iter_dir.glob("event_*/weight_*/ray_count.npy"))
+    signature = tuple(
+        (str(path), path.stat().st_mtime_ns, path.stat().st_size) for path in files
+    )
+    return _sum_ray_counts(signature)
+
+
+def _slice_resp(
+    s2d: np.ndarray,
+    full_shape: list[int],
+    cell_size: float,
+    grid_step: list[int] | None = None,
+) -> dict:
     fin = s2d[np.isfinite(s2d)]
     return {
         "slice": s2d.tolist(),
         "shape": list(s2d.shape),
         "full_shape": full_shape,
         "cell_size": cell_size,
+        "grid_step": grid_step or [1, 1],
         "vmin": float(fin.min()) if fin.size else 0.0,
         "vmax": float(fin.max()) if fin.size else 1.0,
     }
@@ -198,7 +236,7 @@ def api_runs():
     if not RUNS_DIR.exists():
         return jsonify([])
     run_dirs = sorted(
-        (d for d in RUNS_DIR.iterdir() if d.is_dir()),
+        (d for d in RUNS_DIR.iterdir() if d.is_dir() and (d / "meta.json").exists()),
         key=_run_sort_key,
         reverse=True,
     )
@@ -268,7 +306,8 @@ def api_info(rid):
         "iterations":     iters,
         "n_stations":     n_stations,
         "n_events":       n_events,
-        "has_true_model": (rd / "true_model.npy").exists(),
+        "has_true_model":      (rd / "true_model.npy").exists(),
+        "has_true_model_fine": (rd / "true_model_fine.npy").exists(),
     })
 
 
@@ -346,7 +385,6 @@ def _dist_to_true_hypo(ev_dir: Path, true_loc, cell_size: float) -> float | None
         return None
     try:
         with np.load(wp) as data:
-            w = data["weights"]
             if "positions" in data and len(data["positions"]):
                 values = (
                     data["weight_values"]
@@ -357,6 +395,7 @@ def _dist_to_true_hypo(ev_dir: Path, true_loc, cell_size: float) -> float | None
                     data["positions"][int(np.argmax(values))], dtype=np.float64
                 )
             else:
+                w = data["weights"]
                 coord = np.asarray(
                     np.unravel_index(int(np.argmax(w)), w.shape), dtype=np.float64
                 )
@@ -380,51 +419,80 @@ def _aggregate(vals: list[float]) -> dict | None:
     }
 
 
-def _collect_all_hypo_metrics(rd: Path, meta: dict, current_iter: int) -> dict:
-    """Single pass over all iterations — summaries + current-iter rows."""
+def _hypo_signature(rd: Path) -> tuple:
+    signature = []
+    for iter_dir in sorted(rd.glob("iter_*")):
+        event_dirs = list(iter_dir.glob("event_*"))
+        newest_event = max(
+            (event_dir.stat().st_mtime_ns for event_dir in event_dirs), default=0
+        )
+        signature.append((iter_dir.name, len(event_dirs), newest_event))
+    timing = rd / "timing.jsonl"
+    signature.append(("timing", timing.stat().st_size if timing.exists() else 0, 0))
+    return tuple(signature)
+
+
+@lru_cache(maxsize=16)
+def _collect_hypo_dataset(rd_name: str, _signature: tuple) -> dict:
+    """Read all expensive per-event metrics once for an unchanged run."""
+    rd = Path(rd_name)
+    meta = _read_meta(rd)
     event_locs = meta.get("event_locs") or []
     cell_size = _fine_cell_size(meta)
-    rms_by_iter: dict[int, list[float]] = {}
-    dist_by_iter: dict[int, list[float]] = {}
-    residual_iter, distance_iter = [], []
+    residual_by_iter: dict[int, list[dict]] = {}
+    distance_by_iter: dict[int, list[dict]] = {}
 
     iter_dirs = sorted(
         [d for d in rd.iterdir() if d.is_dir() and d.name.startswith("iter_")],
         key=lambda d: int(d.name.split("_")[1]),
     )
-
-    for it_dir in iter_dirs:
-        it = int(it_dir.name.split("_")[1])
-        for ev_dir in _sorted_event_dirs(it_dir):
-            ev = int(ev_dir.name.split("_")[1])
-            rms = _rms_from_residuals(ev_dir / "residuals.npy")
+    for iter_dir in iter_dirs:
+        iteration = int(iter_dir.name.split("_")[1])
+        for event_dir in _sorted_event_dirs(iter_dir):
+            event = int(event_dir.name.split("_")[1])
+            rms = _rms_from_residuals(event_dir / "residuals.npy")
             if rms is not None:
-                rms_by_iter.setdefault(it, []).append(rms)
-                if it == current_iter:
-                    residual_iter.append({"event": ev, "rms": rms})
-            true_loc = event_locs[ev] if ev < len(event_locs) else None
-            dist = _dist_to_true_hypo(ev_dir, true_loc, cell_size)
-            if dist is not None:
-                dist_by_iter.setdefault(it, []).append(dist)
-                if it == current_iter:
-                    distance_iter.append({"event": ev, "dist_m": dist})
+                residual_by_iter.setdefault(iteration, []).append(
+                    {"event": event, "rms": rms}
+                )
+            true_loc = event_locs[event] if event < len(event_locs) else None
+            distance = _dist_to_true_hypo(event_dir, true_loc, cell_size)
+            if distance is not None:
+                distance_by_iter.setdefault(iteration, []).append(
+                    {"event": event, "dist_m": distance}
+                )
 
-    def _summary_rows(by_iter: dict[int, list[float]]) -> list[dict]:
+    def summary_rows(by_iter: dict[int, list[dict]], value_key: str) -> list[dict]:
         rows = []
-        for it in sorted(by_iter):
-            agg = _aggregate(by_iter[it])
-            if agg:
+        for iteration in sorted(by_iter):
+            aggregate = _aggregate([row[value_key] for row in by_iter[iteration]])
+            if aggregate:
                 rows.append({
-                    "iter": it, "mean": agg["mean"], "median": agg["median"],
-                    "p10": agg["p10"], "p90": agg["p90"], "n_events": agg["n"],
+                    "iter": iteration,
+                    "mean": aggregate["mean"],
+                    "median": aggregate["median"],
+                    "p10": aggregate["p10"],
+                    "p90": aggregate["p90"],
+                    "n_events": aggregate["n"],
                 })
         return rows
 
     return {
-        "residual_summary": _summary_rows(rms_by_iter),
-        "distance_summary": _summary_rows(dist_by_iter),
-        "residual_iter": residual_iter,
-        "distance_iter": distance_iter,
+        "residual_summary": summary_rows(residual_by_iter, "rms"),
+        "distance_summary": summary_rows(distance_by_iter, "dist_m"),
+        "residual_by_iter": residual_by_iter,
+        "distance_by_iter": distance_by_iter,
+    }
+
+
+def _collect_all_hypo_metrics(rd: Path, meta: dict, current_iter: int) -> dict:
+    del meta  # Metadata is loaded inside the cache for a stable cache key.
+    dataset = _collect_hypo_dataset(str(rd.resolve()), _hypo_signature(rd))
+    return {
+        "residual_summary": dataset["residual_summary"],
+        "distance_summary": dataset["distance_summary"],
+        "residual_iter": dataset["residual_by_iter"].get(current_iter, []),
+        "distance_iter": dataset["distance_by_iter"].get(current_iter, []),
     }
 
 
@@ -434,7 +502,7 @@ def api_runs_latest():
     if not RUNS_DIR.exists():
         return jsonify({"run_id": None, "max_iter": 0})
     runs = sorted(
-        (d for d in RUNS_DIR.iterdir() if d.is_dir()),
+        (d for d in RUNS_DIR.iterdir() if d.is_dir() and (d / "meta.json").exists()),
         key=_run_sort_key,
         reverse=True,
     )
@@ -528,25 +596,37 @@ def api_slice(rid):
 
     if dtype == "model":
         mt = request.args.get("model_type", "iter")
+        fine_true_path = rd / "true_model_fine.npy"
         paths = {
             "initial": rd / "initial_model.npy",
-            "true":    rd / "true_model.npy",
-            "iter":    rd / f"iter_{it}" / "model.npy",
+            "true": rd / "true_model.npy",
+            "true_fine": (
+                fine_true_path if fine_true_path.exists() else rd / "true_model.npy"
+            ),
+            "iter": rd / f"iter_{it}" / "model.npy",
         }
         arr = _npy(paths.get(mt, Path("__none__")))
         if arr is not None and arr.ndim == 3:
+            meta = _read_meta(rd)
+            target_shape = _target_shape()
+            native = request.args.get("native", 0, type=int) == 1
+            if native or (mt == "true_fine" and fine_true_path.exists()):
+                target_shape = target_shape or tuple(arr.shape)
             s2d, full_shape, cell_size = _model_slice(
-                arr, y, _read_meta(rd), _target_shape()
+                arr, y, meta, target_shape
             )
-            return jsonify(_slice_resp(s2d, full_shape, cell_size))
+            grid_step = _model_grid_step(meta, arr.shape, full_shape)
+            return jsonify(_slice_resp(s2d, full_shape, cell_size, grid_step))
 
     elif dtype == "true_model":
         arr = _npy(rd / "true_model.npy")
         if arr is not None and arr.ndim == 3:
+            meta = _read_meta(rd)
             s2d, full_shape, cell_size = _model_slice(
-                arr, y, _read_meta(rd), _target_shape()
+                arr, y, meta, _target_shape()
             )
-            return jsonify(_slice_resp(s2d, full_shape, cell_size))
+            grid_step = _model_grid_step(meta, arr.shape, full_shape)
+            return jsonify(_slice_resp(s2d, full_shape, cell_size, grid_step))
 
     elif dtype == "delta_s":
         arr = _npy(rd / f"iter_{it}" / "delta_s.npy")
@@ -585,16 +665,7 @@ def api_slice(rid):
                     }]
 
     elif dtype == "ray_count":
-        iter_dir = rd / f"iter_{it}"
-        arr = None
-        
-        # Проходим по всем событиям и весам текущей итерации
-        for rc_file in iter_dir.glob("event_*/weight_*/ray_count.npy"):
-            rc = np.load(rc_file).astype(np.float32)
-            if arr is None:
-                arr = rc
-            else:
-                arr += rc
+        arr = _cached_ray_count(rd / f"iter_{it}")
 
     response = _arr_resp(arr, y)
     response.update(response_extra)

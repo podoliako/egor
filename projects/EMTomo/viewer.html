@@ -360,6 +360,12 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
         <label class="dim-toggle" title="Share colorscale with Velocity Model panel">
           <input type="checkbox" id="cb-shared-vel-scale"> Shared scale
         </label>
+        <div class="ph-group">
+          <select id="tr-resolution" title="True model resolution">
+            <option value="fine">Fine</option>
+            <option value="coarse">Coarse</option>
+          </select>
+        </div>
         <div class="ph-group"><span class="badge" id="tr-shape-badge">—</span></div>
         <div class="ph-group y-group">
           Y
@@ -578,7 +584,7 @@ const ST = {
   run: null, iter: 0, meta: null, info: null,
   showGrid: true, showStations: true, showEvents: true,
   vel:    { type: 'iter', y: 0, sharedScale: false },
-  tr:     { y: 0 },
+  tr:     { y: 0, resolution: 'fine' },
   rc:     { event: 0, weight: 0, y: 0, dim: true },
   G:      { event: 0, station: 0, weight: 0, y: 0, dim: true },
   wt:     { event: 0, y: 0, dim: true },
@@ -663,11 +669,15 @@ function mkLayout(nx, nz, cbTitle, zrange) {
   };
 }
 
-function gridTrace(nx, nz) {
+function gridTrace(nx, nz, gridStep = [1, 1]) {
   if (!ST.showGrid) return null;
+  const sx = Math.max(1, gridStep?.[0] || 1);
+  const sz = Math.max(1, gridStep?.[1] || 1);
   const x = [], y = [];
-  for (let i = 0; i <= nx; i++) { x.push(-0.5+i, -0.5+i, null); y.push(-0.5, nz-0.5, null); }
-  for (let j = 0; j <= nz; j++) { x.push(-0.5, nx-0.5, null); y.push(-0.5+j, -0.5+j, null); }
+  for (let i = 0; i <= nx; i += sx) { x.push(-0.5+i, -0.5+i, null); y.push(-0.5, nz-0.5, null); }
+  for (let j = 0; j <= nz; j += sz) { x.push(-0.5, nx-0.5, null); y.push(-0.5+j, -0.5+j, null); }
+  if (nx % sx) { x.push(nx-0.5, nx-0.5, null); y.push(-0.5, nz-0.5, null); }
+  if (nz % sz) { x.push(-0.5, nx-0.5, null); y.push(nz-0.5, nz-0.5, null); }
   return { type: 'scatter', mode: 'lines', x, y,
     line: { color: '#c5d1e4', width: 0.5 }, showlegend: false, hoverinfo: 'skip' };
 }
@@ -680,60 +690,52 @@ function csz(coarseOrCellSize) {
   return coarseOrCellSize ? gi.coarse_cell_size : (gi.fine_cell_size ?? gi.coarse_cell_size);
 }
 
+function locationTrace(locs, kind, hilite, coarse, panelY, dim, visible) {
+  if ((!visible && hilite < 0) || !locs?.length) return [];
+  const c = csz(coarse);
+  if (!c) return [];
+  const points = locs.map((loc, index) => ({ loc, index }))
+    .filter(point => visible || point.index === hilite);
+  const station = kind === 'station';
+  return [{
+    type: 'scatter', mode: 'markers+text',
+    x: points.map(p => p.loc[0] / c - 0.5),
+    y: points.map(p => p.loc[2] / c - 0.5),
+    text: points.map(p => `${station ? 'S' : 'E'}${p.index}`),
+    customdata: points.map(p => [p.index, p.loc[0], p.loc[2]]),
+    textposition: 'top center',
+    textfont: {
+      size: 8,
+      color: points.map(p => {
+        const off = dim && Math.abs(p.loc[1] / c - 0.5 - panelY) >= 0.5;
+        return off ? 'rgba(90,100,120,0.3)' : (p.index === hilite ? (station ? '#1a4ea8' : '#a04800') : 'rgba(60,70,85,0.55)');
+      }),
+    },
+    marker: {
+      symbol: station ? 'triangle-up' : 'star',
+      size: points.map(p => {
+        const off = dim && Math.abs(p.loc[1] / c - 0.5 - panelY) >= 0.5;
+        return p.index === hilite ? (station ? 13 : 14) : (off ? 5 : 7);
+      }),
+      color: points.map(p => {
+        const off = dim && Math.abs(p.loc[1] / c - 0.5 - panelY) >= 0.5;
+        const opacity = off ? 0.25 : (p.index === hilite ? 1 : 0.55);
+        if (station) return p.index === hilite ? `rgba(74,127,212,${opacity})` : `rgba(144,174,208,${opacity})`;
+        return p.index === hilite ? `rgba(212,104,32,${opacity})` : `rgba(212,168,112,${opacity})`;
+      }),
+      line: { color: '#ffffff', width: points.map(p => p.index === hilite ? 1.5 : 1) },
+    },
+    showlegend: false,
+    hovertemplate: `${station ? 'Sta' : 'Ev'} %{customdata[0]}<br>x=%{customdata[1]:.0f}m  z=%{customdata[2]:.0f}m<extra></extra>`,
+  }];
+}
+
 function stationTraces(hilite, coarse, panelY, dim) {
-  if (!ST.showStations && hilite < 0) return [];
-  const locs = ST.meta?.station_locs, c = csz(coarse);
-  if (!locs || !c) return [];
-  return locs.map((loc, i) => {
-    if (!ST.showStations && i !== hilite) return null;
-    const isHi = i === hilite;
-    const offSlice = dim && (Math.abs(loc[1] / c - 0.5 - panelY) >= 0.5);
-    const fillOpacity   = offSlice ? 0.25 : (isHi ? 1.0 : 0.55);
-    const borderOpacity = offSlice ? 0.15 : (isHi ? 1.0 : 0.4);
-    const fillColor  = isHi ? `rgba(74,127,212,${fillOpacity})` : `rgba(144,174,208,${fillOpacity})`;
-    const lineColor  = `rgba(255,255,255,${borderOpacity})`;
-    const textColor  = offSlice ? 'rgba(90,100,120,0.3)' : (isHi ? '#1a4ea8' : 'rgba(60,70,85,0.55)');
-    return {
-      type: 'scatter', mode: 'markers+text',
-      x: [loc[0] / c - 0.5], y: [loc[2] / c - 0.5],
-      text: [`S${i}`], textposition: 'top center',
-      textfont: { size: 8, color: textColor },
-      marker: {
-        symbol: 'triangle-up', size: isHi ? 13 : (offSlice ? 5 : 7),
-        color: fillColor, line: { color: lineColor, width: isHi ? 1.5 : 1 },
-      },
-      showlegend: false,
-      hovertemplate: `Sta ${i}<br>x=${loc[0].toFixed(0)}m  z=${loc[2].toFixed(0)}m<extra></extra>`,
-    };
-  }).filter(Boolean);
+  return locationTrace(ST.meta?.station_locs, 'station', hilite, coarse, panelY, dim, ST.showStations);
 }
 
 function eventTraces(hilite, coarse, panelY, dim) {
-  if (!ST.showEvents && hilite < 0) return [];
-  const locs = ST.meta?.event_locs, c = csz(coarse);
-  if (!locs || !c) return [];
-  return locs.map((loc, i) => {
-    if (!ST.showEvents && i !== hilite) return null;
-    const isHi = i === hilite;
-    const offSlice = dim && (Math.abs(loc[1] / c - 0.5 - panelY) >= 0.5);
-    const fillOpacity   = offSlice ? 0.25 : (isHi ? 1.0 : 0.55);
-    const borderOpacity = offSlice ? 0.15 : (isHi ? 1.0 : 0.4);
-    const fillColor  = isHi ? `rgba(212,104,32,${fillOpacity})` : `rgba(212,168,112,${fillOpacity})`;
-    const lineColor  = `rgba(255,255,255,${borderOpacity})`;
-    const textColor  = offSlice ? 'rgba(90,100,120,0.3)' : (isHi ? '#a04800' : 'rgba(60,70,85,0.55)');
-    return {
-      type: 'scatter', mode: 'markers+text',
-      x: [loc[0] / c - 0.5], y: [loc[2] / c - 0.5],
-      text: [`E${i}`], textposition: 'top center',
-      textfont: { size: 8, color: textColor },
-      marker: {
-        symbol: 'star', size: isHi ? 14 : (offSlice ? 5 : 7),
-        color: fillColor, line: { color: lineColor, width: isHi ? 1.5 : 1 },
-      },
-      showlegend: false,
-      hovertemplate: `Ev ${i}<br>x=${loc[0].toFixed(0)}m  z=${loc[2].toFixed(0)}m<extra></extra>`,
-    };
-  }).filter(Boolean);
+  return locationTrace(ST.meta?.event_locs, 'event', hilite, coarse, panelY, dim, ST.showEvents);
 }
 
 function hypocenterTraces(hypocenters, panelY, dim) {
@@ -756,8 +758,8 @@ function hypocenterTraces(hypocenters, panelY, dim) {
   });
 }
 
-function buildTraces(ht, nx, nz, hilSta, hilEv, coarse, panelY, dim, hypocenters = []) {
-  const g = gridTrace(nx, nz);
+function buildTraces(ht, nx, nz, hilSta, hilEv, coarse, panelY, dim, hypocenters = [], gridStep = [1, 1]) {
+  const g = gridTrace(nx, nz, gridStep);
   return [
     ht,
     ...(g ? [g] : []),
@@ -917,7 +919,8 @@ async function refreshLiveData() {
   ST.info = info || ST.info;
   ST.timing.data = timing || ST.timing.data;
   ST.quality.data = quality || ST.quality.data;
-  renderAll();
+  renderTiming();
+  renderQuality();
 }
 
 function scheduleAutoRefresh() {
@@ -1299,7 +1302,13 @@ function _highlightHypoEvent(ev, which) {
 
 /* ── Render functions ── */
 
-async function renderVelPair() {
+function trueModelUrl(y, targetQuery = '') {
+  const modelType = ST.tr.resolution === 'coarse' ? 'true' : 'true_fine';
+  const nativeQuery = ST.tr.resolution === 'coarse' ? '&native=1' : '';
+  return `/api/runs/${ST.run}/slice?type=model&model_type=${modelType}&iter=0&y=${y}${nativeQuery}${targetQuery}`;
+}
+
+async function renderVelPair(renderTruePanel = true) {
   if (!ST.run) return;
   const request = beginPlotRequest('plot-vel', 'plot-tr');
   const run = ST.run;
@@ -1314,7 +1323,7 @@ async function renderVelPair() {
     if (!isCurrentPlotRequest(request, 'plot-vel')) return;
     const target = dI?.full_shape;
     const targetQuery = target ? `&nx=${target[0]}&ny=${target[1]}&nz=${target[2]}` : '';
-    const dT = await apiFetch(`/api/runs/${run}/slice?type=model&model_type=true&iter=0&y=${velY}${targetQuery}`);
+    const dT = await apiFetch(`/api/runs/${run}/slice?type=model&model_type=true_fine&iter=0&y=${velY}${targetQuery}`);
     if (!isCurrentPlotRequest(request, 'plot-vel')) return;
     if (!dT?.slice || !dI?.slice) {
       emptyP('plot-vel','vel-empty', dT?.slice ? 'No iter model' : 'No true model — cannot diff'); return;
@@ -1326,9 +1335,9 @@ async function renderVelPair() {
     const absMax = Math.max(1e-12, ...diff.flat().map(Math.abs));
     await trackPlotRender('plot-vel',
       buildTraces(heatTrace(diff, CS_DIVERG, undefined, [-absMax, absMax]),
-        dI.shape[0], dI.shape[1], -1, -1, dI.cell_size ?? false, velY, false),
+        dI.shape[0], dI.shape[1], -1, -1, dI.cell_size ?? false, velY, false, [], dI.grid_step),
       mkLayout(dI.shape[0], dI.shape[1], 'True−Iter', [-absMax, absMax]), PLY_CFG);
-    if (isCurrentPlotRequest(request, 'plot-vel')) await _renderTrAlone();
+    if (renderTruePanel && isCurrentPlotRequest(request, 'plot-vel')) await _renderTrAlone();
     return;
   }
 
@@ -1340,7 +1349,7 @@ async function renderVelPair() {
   if (sharedScale && !isDelta) {
     const [dV, dTr] = await Promise.all([
       apiFetch(velUrl),
-      apiFetch(`/api/runs/${run}/slice?type=model&model_type=true&iter=0&y=${trY}`),
+      apiFetch(trueModelUrl(trY)),
     ]);
     if (!isCurrentPlotRequest(request, 'plot-vel', 'plot-tr')) return;
     if (dV?.slice) {
@@ -1360,19 +1369,19 @@ async function renderVelPair() {
       const zrange = [gMin, gMax];
       await Promise.all([
         trackPlotRender('plot-vel',
-          buildTraces(heatTrace(dV.slice, 'Viridis', undefined, zrange), dV.shape[0], dV.shape[1], -1, -1, dV.cell_size ?? false, velY, false),
+          buildTraces(heatTrace(dV.slice, 'Viridis', undefined, zrange), dV.shape[0], dV.shape[1], -1, -1, dV.cell_size ?? false, velY, false, [], dV.grid_step),
           mkLayout(dV.shape[0], dV.shape[1], 'Vp', zrange), PLY_CFG),
         trackPlotRender('plot-tr',
-          buildTraces(heatTrace(dTr.slice, 'Viridis', undefined, zrange), dTr.shape[0], dTr.shape[1], -1, -1, dTr.cell_size ?? false, trY, false),
+          buildTraces(heatTrace(dTr.slice, 'Viridis', undefined, zrange), dTr.shape[0], dTr.shape[1], -1, -1, dTr.cell_size ?? false, trY, false, [], dTr.grid_step),
           mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true', zrange), PLY_CFG),
       ]);
     } else {
       const renders = [];
       if (dV?.slice) renders.push(trackPlotRender('plot-vel',
-        buildTraces(heatTrace(dV.slice, 'Viridis'), dV.shape[0], dV.shape[1], -1, -1, dV.cell_size ?? false, velY, false),
+        buildTraces(heatTrace(dV.slice, 'Viridis'), dV.shape[0], dV.shape[1], -1, -1, dV.cell_size ?? false, velY, false, [], dV.grid_step),
         mkLayout(dV.shape[0], dV.shape[1], 'Vp'), PLY_CFG));
       if (dTr?.slice) renders.push(trackPlotRender('plot-tr',
-        buildTraces(heatTrace(dTr.slice, 'Viridis'), dTr.shape[0], dTr.shape[1], -1, -1, dTr.cell_size ?? false, trY, false),
+        buildTraces(heatTrace(dTr.slice, 'Viridis'), dTr.shape[0], dTr.shape[1], -1, -1, dTr.cell_size ?? false, trY, false, [], dTr.grid_step),
         mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true'), PLY_CFG));
       await Promise.all(renders);
     }
@@ -1391,10 +1400,10 @@ async function renderVelPair() {
       : undefined;
     await trackPlotRender('plot-vel',
       buildTraces(heatTrace(d.slice, isDelta ? CS_DIVERG : 'Viridis', undefined, velZrange),
-        d.shape[0], d.shape[1], -1, -1, d.cell_size ?? false, velY, false),
+        d.shape[0], d.shape[1], -1, -1, d.cell_size ?? false, velY, false, [], d.grid_step),
       mkLayout(d.shape[0], d.shape[1], isDelta ? 'Δs' : 'Vp', velZrange), PLY_CFG);
   }
-  if (isCurrentPlotRequest(request, 'plot-vel')) await _renderTrAlone();
+  if (renderTruePanel && isCurrentPlotRequest(request, 'plot-vel')) await _renderTrAlone();
 }
 
 async function _renderTrAlone() {
@@ -1402,23 +1411,27 @@ async function _renderTrAlone() {
   const request = beginPlotRequest('plot-tr');
   const run = ST.run;
   const trY = ST.tr.y;
-  const d = await apiFetch(`/api/runs/${run}/slice?type=model&model_type=true&iter=0&y=${trY}`);
+  const d = await apiFetch(trueModelUrl(trY));
   if (!isCurrentPlotRequest(request, 'plot-tr')) return;
   if (!d?.slice) { emptyP('plot-tr','tr-empty','No true model saved'); return; }
   showP('plot-tr','tr-empty');
   syncY('tr-y','tr-y-v','tr-y-num', d.full_shape[1], ST.tr);
   shapeBadge('tr-shape-badge', d.full_shape);
   await trackPlotRender('plot-tr',
-    buildTraces(heatTrace(d.slice, 'Viridis'), d.shape[0], d.shape[1], -1, -1, d.cell_size ?? false, trY, false),
+    buildTraces(heatTrace(d.slice, 'Viridis'), d.shape[0], d.shape[1], -1, -1, d.cell_size ?? false, trY, false, [], d.grid_step),
     mkLayout(d.shape[0], d.shape[1], 'Vp true'), PLY_CFG);
 }
 
-const renderVel = () => renderVelPair();
+const renderVel = () => ST.vel.sharedScale ? renderVelPair() : renderVelPair(false);
 const renderTr  = () => ST.vel.sharedScale ? renderVelPair() : _renderTrAlone();
 
 /* ── Ray Count panel ── */
-async function renderRayCount() {
-  if (!ST.run) return;
+function diagnosticExpanded(plotId) {
+  return !document.getElementById(plotId)?.closest('.panel-diagnostic')?.classList.contains('diagnostic-collapsed');
+}
+
+async function renderRayCount(force = false) {
+  if (!ST.run || (!force && !diagnosticExpanded('plot-rc'))) return;
   const request = beginPlotRequest('plot-rc');
   const run = ST.run;
   const iter = ST.iter;
@@ -1454,8 +1467,8 @@ async function renderWt() {
     mkLayout(d.shape[0], d.shape[1], 'w'), PLY_CFG);
 }
 
-async function renderG() {
-  if (!ST.run) return;
+async function renderG(force = false) {
+  if (!ST.run || (!force && !diagnosticExpanded('plot-G'))) return;
   const request = beginPlotRequest('plot-G');
   const run = ST.run;
   const iter = ST.iter;
@@ -1473,9 +1486,18 @@ async function renderG() {
     mkLayout(d.shape[0], d.shape[1], 'G'), PLY_CFG);
 }
 
+function renderSpatialPlots() {
+  renderVelPair();
+  renderRayCount();
+  renderWt();
+  renderG();
+}
+
 function renderAll() {
-  renderVelPair(); renderRayCount(); renderWt(); renderG();
-  renderTiming(); renderQuality(); renderHypoMetrics();
+  renderSpatialPlots();
+  renderTiming();
+  renderQuality();
+  renderHypoMetrics();
 }
 
 function setY(prefix, stateObj, value, renderFn) {
@@ -1606,27 +1628,35 @@ async function loadRun(rid, targetIter = null) {
 }
 
 /* ── Wire-up ── */
-function setIter(v) {
+let ITER_RENDER_TIMER = null;
+function setIter(v, debounce = false) {
   const max = +document.getElementById('iter-slider').max || 0;
   v = Math.max(0, Math.min(max, +v || 0));
   ST.iter = v;
   document.getElementById('iter-slider').value = v;
-  document.getElementById('iter-num').value    = v;
-  renderAll();
+  document.getElementById('iter-num').value = v;
+  clearTimeout(ITER_RENDER_TIMER);
+  if (debounce) ITER_RENDER_TIMER = setTimeout(renderAll, 90);
+  else renderAll();
 }
 
-document.getElementById('iter-slider').addEventListener('input',  e => setIter(e.target.value));
-document.getElementById('iter-num').addEventListener('change',    e => setIter(e.target.value));
+document.getElementById('iter-slider').addEventListener('input', e => setIter(e.target.value, true));
+document.getElementById('iter-num').addEventListener('change', e => setIter(e.target.value));
 document.getElementById('run-select').addEventListener('change',  e => { if (e.target.value) loadRun(e.target.value); });
-document.getElementById('cb-grid').addEventListener('change',     e => { ST.showGrid     = e.target.checked; renderAll(); });
-document.getElementById('cb-stations').addEventListener('change', e => { ST.showStations = e.target.checked; renderAll(); });
-document.getElementById('cb-events').addEventListener('change',   e => { ST.showEvents   = e.target.checked; renderAll(); });
+document.getElementById('cb-grid').addEventListener('change', e => { ST.showGrid = e.target.checked; renderSpatialPlots(); });
+document.getElementById('cb-stations').addEventListener('change', e => { ST.showStations = e.target.checked; renderSpatialPlots(); });
+document.getElementById('cb-events').addEventListener('change', e => { ST.showEvents = e.target.checked; renderSpatialPlots(); });
 
 document.getElementById('timing-mode').addEventListener('change', e => {
   ST.timing.mode = e.target.value; renderTiming();
 });
 
 document.getElementById('cb-shared-vel-scale').addEventListener('change', e => { ST.vel.sharedScale = e.target.checked; renderVelPair(); });
+document.getElementById('tr-resolution').addEventListener('change', e => {
+  ST.tr.resolution = e.target.value;
+  ST.tr.y = 0;
+  renderVelPair();
+});
 
 // Vel
 document.getElementById('vel-type').addEventListener('change', e => { ST.vel.type = e.target.value; renderVel(); });
@@ -1667,9 +1697,9 @@ async function renderPlotForDownload(plotId) {
   switch (plotId) {
     case 'plot-vel': await renderVelPair(); break;
     case 'plot-tr': await (ST.vel.sharedScale ? renderVelPair() : _renderTrAlone()); break;
-    case 'plot-rc': await renderRayCount(); break;
+    case 'plot-rc': await renderRayCount(true); break;
     case 'plot-wt': await renderWt(); break;
-    case 'plot-G': await renderG(); break;
+    case 'plot-G': await renderG(true); break;
     case 'plot-timing': renderTiming(); break;
     case 'plot-quality': renderQuality(); break;
     case 'plot-hypoq-trend':
@@ -1700,7 +1730,11 @@ document.querySelectorAll('.btn-collapse').forEach(btn => {
     const collapsed = panel.classList.toggle('diagnostic-collapsed');
     btn.textContent = collapsed ? '▸' : '▾';
     btn.title = collapsed ? 'Expand panel' : 'Collapse panel';
-    if (!collapsed) setTimeout(relayoutAll, 0);
+    if (!collapsed) {
+      if (panel.querySelector('#plot-rc')) renderRayCount(true);
+      if (panel.querySelector('#plot-G')) renderG(true);
+      setTimeout(relayoutAll, 0);
+    }
   });
 });
 

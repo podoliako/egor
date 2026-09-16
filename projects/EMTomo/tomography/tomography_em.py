@@ -61,6 +61,7 @@ def run_em(
     max_velocity_step_fraction: Optional[float] = None,
     run_name: str = "em",
     run_version: str = "1.0",
+    true_model_fine=None,
 ):
     if save_runs and logger is None:
         logger = TomographyLogger(
@@ -99,14 +100,16 @@ def run_em(
             coarse_side_m=round(coarse_side, 2),
             fine_side_m=round(fine_side, 2),
         )
+        logger.save_initial_model(initial_model)
+        logger.save_true_model(true_model)
+        logger.save_true_model(true_model_fine, "true_model_fine.npy")
+        # meta.json is the ready marker consumed by the live viewer.
         logger.save_meta(
             run_params=run_params,
             station_locs=station_locs,
             event_locs=event_locs or [],
             grid_info=grid_info,
         )
-        logger.save_initial_model(initial_model)
-        logger.save_true_model(true_model)
 
     model = initial_model
 
@@ -278,6 +281,7 @@ def make_tomography_step(
 
     hessian_acc = []
     rhs_acc = []
+    ray_count_acc = []
     for event_idx, (hessian_ev, rhs_ev, log_data) in enumerate(results):
         hessian_acc.append(hessian_ev)
         rhs_acc.append(rhs_ev)
@@ -302,6 +306,10 @@ def make_tomography_step(
                 G_per_weight=G_per_weight,
                 ray_count_per_weight=rc_per_weight,
             )
+            ray_count_acc.extend(rc_per_weight.values())
+
+    if logger is not None and ray_count_acc:
+        logger.save_ray_count(iteration, np.add.reduce(ray_count_acc))
 
     return _solve_delta_s(
         hessian=np.add.reduce(hessian_acc),

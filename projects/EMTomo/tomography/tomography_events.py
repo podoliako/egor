@@ -20,6 +20,7 @@ from .tomography_math import (
 )
 
 _MP: dict = {}
+_THREADPOOL_LIMITER = None
 
 
 def _sparsify_G_stations(G_fine: np.ndarray) -> dict[str, np.ndarray]:
@@ -40,13 +41,21 @@ def _sparsify_G_stations(G_fine: np.ndarray) -> dict[str, np.ndarray]:
 
 
 def _mp_worker_init(state: Optional[dict] = None) -> None:
-    global _MP
+    global _MP, _THREADPOOL_LIMITER
     if state is not None:
         _MP = state
     try:
         from numba import set_num_threads # pyright: ignore[reportMissingImports]
 
         set_num_threads(1)
+    except Exception:
+        pass
+    try:
+        from threadpoolctl import threadpool_limits
+
+        # Event-level multiprocessing already provides CPU parallelism. Letting
+        # every worker start a full OpenBLAS pool heavily oversubscribes the host.
+        _THREADPOOL_LIMITER = threadpool_limits(limits=1)
     except Exception:
         pass
 

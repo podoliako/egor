@@ -1,0 +1,25 @@
+{
+  "source": {
+    "catalog": "NCEDC Enhanced Geothermal Systems catalog, BG network",
+    "station_service": "NCEDC FDSN Station service",
+    "event_period": "2011-01-01T00:00:00 to 2011-12-31T23:59:59"
+  },
+  "geometry": {
+    "top_face_center_latitude": 38.80275,
+    "top_face_center_longitude": -122.7707,
+    "azimuth_degrees": 135.0,
+    "width_x_m": 20000.0,
+    "width_y_m": 7000.0,
+    "depth_m": 7000.0,
+    "station_z_m": 0.0
+  },
+  "counts": {
+    "stations": 26,
+    "events_in_window": 50591,
+    "events_sampled": 300
+  },
+  "sampling": {
+    "method": "uniform random without replacement",
+    "seed": 20260912
+  }
+}

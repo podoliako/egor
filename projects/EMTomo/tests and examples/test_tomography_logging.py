@@ -5,7 +5,7 @@ import re
 
 import numpy as np
 
-from server import _load_G_station
+from server import _load_G_station, _model_grid_step
 from tomography.tomography_events import _sparsify_G_stations
 from tomography.tomography_logging import TomographyLogger
 
@@ -55,6 +55,17 @@ def test_event_log_keeps_refined_positions_and_coverage_without_g(tmp_path):
     np.testing.assert_array_equal(
         np.load(event_dir / "weight_0" / "ray_count.npy"), ray_count
     )
+    logger.save_ray_count(0, ray_count * 3)
+    np.testing.assert_array_equal(
+        np.load(logger.run_dir / "iter_0" / "ray_count.npy"), ray_count * 3
+    )
+
+
+def test_nearest_model_uses_coarse_grid_boundaries():
+    meta = {"run_params": {"slowness_interpolation": "nearest"}}
+    assert _model_grid_step(meta, (20, 7, 7), (180, 63, 63)) == [9, 9]
+    meta["run_params"]["slowness_interpolation"] = "trilinear"
+    assert _model_grid_step(meta, (20, 7, 7), (180, 63, 63)) == [1, 1]
 
 
 def test_sparse_g_log_round_trip(tmp_path):
