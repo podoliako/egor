@@ -6,7 +6,11 @@ import numpy as np
 
 from instruments.instruments import compute_station_travel_time_fields, metric_to_cell_index
 from raytracing import compute_G_all_stations, compute_G_all_stations_serial
-from .tomography_events import _process_event_single, _run_events_parallel
+from .tomography_events import (
+    _aggregate_event_results,
+    _process_event_single,
+    _run_events_parallel,
+)
 from .tomography_logging import TomographyLogger
 from .tomography_math import _solve_delta_s
 
@@ -238,7 +242,7 @@ def make_tomography_step(
         logger.save_station_fields(iteration, sf_array)
 
     if n_workers > 1:
-        results = _run_events_parallel(
+        hessian, rhs, event_logs = _run_events_parallel(
             arrivals_table,
             gx,
             gy,
@@ -255,37 +259,37 @@ def make_tomography_step(
             weights_min_distance,
             n_workers,
             log_G_per_weight=log_G_per_weight and logger is not None,
+            log_misfit=logger is not None and logger.save_misfit,
         )
     else:
-        results = [
-            _process_event_single(
-                event_idx=i,
-                observed=np.asarray(obs, dtype=np.float64),
-                sf=sf_array,
-                gx=gx,
-                gy=gy,
-                gz=gz,
-                sl=sl,
-                x_lo=x_lo,
-                x_hi=x_hi,
-                fine_cell_size=fine_cell_size,
-                subdivision=subdivision,
-                slowness_interpolation=slowness_interpolation,
-                temperature=temperature,
-                weights_top_n=weights_top_n,
-                weights_min_distance=weights_min_distance,
-                log_G_per_weight=log_G_per_weight and logger is not None,
-            )
-            for i, obs in enumerate(arrivals_table)
-        ]
+        def serial_results():
+            for event_idx, observed in enumerate(arrivals_table):
+                hessian_event, rhs_event, log_data = _process_event_single(
+                    event_idx=event_idx,
+                    observed=np.asarray(observed, dtype=np.float64),
+                    sf=sf_array,
+                    gx=gx,
+                    gy=gy,
+                    gz=gz,
+                    sl=sl,
+                    x_lo=x_lo,
+                    x_hi=x_hi,
+                    fine_cell_size=fine_cell_size,
+                    subdivision=subdivision,
+                    slowness_interpolation=slowness_interpolation,
+                    temperature=temperature,
+                    weights_top_n=weights_top_n,
+                    weights_min_distance=weights_min_distance,
+                    log_G_per_weight=log_G_per_weight and logger is not None,
+                    log_misfit=logger is not None and logger.save_misfit,
+                )
+                yield event_idx, hessian_event, rhs_event, log_data
 
-    hessian_acc = []
-    rhs_acc = []
+        hessian, rhs, event_logs = _aggregate_event_results(serial_results())
+
     ray_count_acc = []
-    for event_idx, (hessian_ev, rhs_ev, log_data) in enumerate(results):
-        hessian_acc.append(hessian_ev)
-        rhs_acc.append(rhs_ev)
-        if logger is not None:
+    if logger is not None:
+        for event_idx, log_data in event_logs:
             (
                 weights,
                 positions,
@@ -308,12 +312,12 @@ def make_tomography_step(
             )
             ray_count_acc.extend(rc_per_weight.values())
 
-    if logger is not None and ray_count_acc:
-        logger.save_ray_count(iteration, np.add.reduce(ray_count_acc))
+        if ray_count_acc:
+            logger.save_ray_count(iteration, np.add.reduce(ray_count_acc))
 
     return _solve_delta_s(
-        hessian=np.add.reduce(hessian_acc),
-        rhs=np.add.reduce(rhs_acc),
+        hessian=hessian,
+        rhs=rhs,
         model_shape=coarse_shape,
         lambda_reg=lambda_reg,
         coverage_damping_power=coverage_damping_power,

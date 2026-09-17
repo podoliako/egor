@@ -132,7 +132,7 @@ class TomographyLogger:
         self,
         iteration: int,
         event_idx: int,
-        weights: np.ndarray,
+        weights: np.ndarray | Mapping[str, np.ndarray],
         positions: Optional[np.ndarray] = None,
         weight_values: Optional[np.ndarray] = None,
         misfit: Optional[np.ndarray] = None,
@@ -145,7 +145,14 @@ class TomographyLogger:
         event_dir = self.iter_dir(iteration) / f"event_{event_idx}"
         event_dir.mkdir(exist_ok=True)
 
-        payload = {"weights": weights}
+        payload = {}
+        if isinstance(weights, Mapping):
+            payload["weight_shape"] = np.asarray(weights["shape"], dtype=np.int32)
+            payload["weight_indices"] = np.asarray(
+                weights["indices"], dtype=np.int32
+            )
+        else:
+            payload["weights"] = np.asarray(weights)
         if positions is not None:
             payload["positions"] = np.asarray(positions, dtype=np.float64)
         if weight_values is not None:

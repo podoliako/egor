@@ -49,6 +49,7 @@ class ExampleConfig:
     event_z_offset: float = 250.0
     slowness_interpolation: str = "nearest"
     arrival_noise_std: float = 0.01  # Gaussian pick noise: 10 ms per station.
+    synthetic_arrivals_cache: str | None = None
 
     # EM inversion. Change the version for every method release.
     run_name: str = "em"
@@ -157,6 +158,51 @@ def load_metric_points_csv(filepath: str) -> list[tuple[float, float, float]]:
     if not points:
         raise ValueError(f"No metric points found in {path}")
     return points
+
+
+def load_or_generate_synthetic_arrivals(
+    config: ExampleConfig,
+    forward_true_model: VelocityModel,
+    stations_metric: list[tuple[float, float, float]],
+    events_metric: list[tuple[float, float, float]],
+) -> list[list[float]]:
+    """Load a geometry-validated arrival cache or generate and optionally save it."""
+    cache_path = (
+        Path(config.synthetic_arrivals_cache)
+        if config.synthetic_arrivals_cache is not None
+        else None
+    )
+    if cache_path is not None and cache_path.is_file():
+        with np.load(cache_path, allow_pickle=False) as cache:
+            arrivals = np.asarray(cache["arrivals"], dtype=np.float64)
+            cached_stations = np.asarray(cache["stations"], dtype=np.float64)
+            cached_events = np.asarray(cache["events"], dtype=np.float64)
+        if not np.array_equal(cached_stations, np.asarray(stations_metric)):
+            raise ValueError(f"Station geometry does not match arrival cache: {cache_path}")
+        if not np.array_equal(cached_events, np.asarray(events_metric)):
+            raise ValueError(f"Event geometry does not match arrival cache: {cache_path}")
+        print(f"Loaded synthetic arrivals: {cache_path}", flush=True)
+        return arrivals.tolist()
+
+    arrivals_table, _ = generate_synthetic_arrivals_table(
+        forward_true_model,
+        station_locs=stations_metric,
+        event_locs=events_metric,
+        random_seed=config.random_seed,
+        subdivision=1,
+        slowness_interpolation=config.slowness_interpolation,
+        arrival_noise_std=config.arrival_noise_std,
+    )
+    if cache_path is not None:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        np.savez_compressed(
+            cache_path,
+            arrivals=np.asarray(arrivals_table, dtype=np.float64),
+            stations=np.asarray(stations_metric, dtype=np.float64),
+            events=np.asarray(events_metric, dtype=np.float64),
+        )
+        print(f"Saved synthetic arrivals: {cache_path}", flush=True)
+    return arrivals_table
 
 
 def load_initial_vp(model: VelocityModel, filepath: str) -> None:
@@ -289,14 +335,11 @@ def main(config: ExampleConfig = CONFIG) -> None:
             depth_bias=config.event_depth_bias,
         )
     )
-    arrivals_table, _ = generate_synthetic_arrivals_table(
+    arrivals_table = load_or_generate_synthetic_arrivals(
+        config,
         forward_true_model,
-        station_locs=stations_metric,
-        event_locs=events_metric,
-        random_seed=config.random_seed,
-        subdivision=1,
-        slowness_interpolation=config.slowness_interpolation,
-        arrival_noise_std=config.arrival_noise_std,
+        stations_metric,
+        events_metric,
     )
 
     warm_up_jit()

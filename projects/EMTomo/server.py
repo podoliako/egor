@@ -41,6 +41,28 @@ def _npz(path: Path, key: str):
         return data[key]
 
 
+def _load_weights(path: Path) -> np.ndarray | None:
+    """Load legacy dense or compact sparse event weights."""
+    if not path.exists():
+        return None
+    with np.load(path) as data:
+        if "weights" in data:
+            return data["weights"]
+        if "weight_shape" not in data or "weight_indices" not in data:
+            return None
+        shape = tuple(int(value) for value in data["weight_shape"])
+        indices = np.asarray(data["weight_indices"], dtype=np.intp)
+        values = (
+            np.asarray(data["weight_values"], dtype=np.float64)
+            if "weight_values" in data
+            else np.ones(len(indices), dtype=np.float64)
+        )
+        result = np.zeros(shape, dtype=np.float64)
+        if len(indices):
+            result[tuple(indices.T)] = values
+        return result
+
+
 def _load_G_station(path_stem: Path) -> np.ndarray | None:
     """Load one station G from compact sparse, NPZ, or legacy NPY storage."""
     sparse_path = path_stem.parent / "G_stations_sparse.npz"
@@ -395,9 +417,12 @@ def _dist_to_true_hypo(ev_dir: Path, true_loc, cell_size: float) -> float | None
                     data["positions"][int(np.argmax(values))], dtype=np.float64
                 )
             else:
-                w = data["weights"]
+                weights = _load_weights(wp)
+                if weights is None:
+                    return None
                 coord = np.asarray(
-                    np.unravel_index(int(np.argmax(w)), w.shape), dtype=np.float64
+                    np.unravel_index(int(np.argmax(weights)), weights.shape),
+                    dtype=np.float64,
                 )
         est = (coord + 0.5) * cell_size
         true = np.asarray(true_loc, dtype=np.float64)
@@ -634,7 +659,7 @@ def api_slice(rid):
     elif dtype == "weights":
         ev = request.args.get("event", 0, type=int)
         path = rd / f"iter_{it}" / f"event_{ev}" / "weights.npz"
-        arr = _npz(path, "weights")
+        arr = _load_weights(path)
         if path.exists():
             with np.load(path) as data:
                 if "positions" in data:
