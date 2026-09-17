@@ -1,0 +1,205 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+
+\usepackage{times}
+
+\usepackage[
+  top=2.5cm,
+  bottom=2.5cm,
+  left=2.5cm,
+  right=2.5cm
+]{geometry}
+\usepackage{setspace}
+\doublespacing
+
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{bm}
+\usepackage{mathtools}
+\usepackage{mathrsfs}
+
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage[labelfont=bf, font=small]{caption}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage[
+  colorlinks=true,
+  linkcolor=black,
+  citecolor=blue,
+  urlcolor=blue
+]{hyperref}
+\usepackage{url}
+\usepackage{csquotes}
+\usepackage[
+  backend=biber,
+  style=apa,
+  sorting=nyt,
+  maxcitenames=2,
+  doi=true,
+  url=false
+]{biblatex}
+\addbibresource{references.bib}
+
+\usepackage{xcolor}
+\usepackage{lineno}
+\linenumbers
+\usepackage{microtype}
+\usepackage{siunitx}
+
+\newcommand{\vp}{V_\text{P}}
+\newcommand{\vs}{V_\text{S}}
+\newcommand{\vpvs}{V_\text{P}/V_\text{S}}
+\newcommand{\dt}{\Delta t}
+\newcommand{\dm}{\Delta \mathbf{m}}
+
+\newcommand{\svec}{\mathbf{s}}
+\newcommand{\ds}{\Delta \mathbf{s}}
+\newcommand{\Gtil}{\tilde{\mathbf{G}}}
+\newcommand{\rvec}{\mathbf{r}}
+\newcommand{\tauijk}[1]{\tau_{#1}^{ijk}}
+
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+\newcommand{\note}[1]{\textcolor{blue}{\textit{[Note: #1]}}}
+
+\title{
+  \Large\textbf{
+    3D Seismic Tomography with Simultaneous Hypocenter Estimation
+    via Expectation--Maximization: Method and Application
+  }
+}
+
+\author{
+  Egor Podoliako\textsuperscript{1} \and
+  Alexander Derendyaev\textsuperscript{1}
+}
+
+\date{
+  \small
+  \textsuperscript{1}Institute for Information Transmission Problems, Moscow, Russia \\
+  \textit{Corresponding author:} Egor Podoliako
+  (\href{mailto:podoliako.e@gmail.com}{podoliako.e@gmail.com}) \\[6pt]
+  \today
+}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+  \noindent
+
+  \vspace{6pt}
+  \noindent\textbf{Keywords:} seismic tomography; hypocenter estimation;
+  expectation--maximization; local earthquake tomography; 3D velocity model
+\end{abstract}
+
+\newpage
+
+\section{Introduction}
+\label{sec:introduction}
+
+Seismic activity has led to many tragedies in the history of mankind. But the same waves that bring destruction carry a huge amount of information about the bowels of our planet. Just as medical computed tomography shows how a person works inside, the algorithm first proposed in the 70s \parencite{aki1976} makes it possible to identify local anomalies in the structure of the Earth.
+
+The creation of new local velocity models, as well as the refinement of existing ones, remains an urgent problem. In particular, higher spatial resolution can be achieved by utilizing all the information from waves arriving at seismic stations (full waveform inversion methods) versus using only arrival times. As noted in the Tomography 2024 review article \parencite{fichtner2024seismic}, the quality of the initial models for such methods critically affects convergence and avoidance of local minima. Thus, there is an obvious need for methods that are close to FWI in resolution, but do not require the same high computing power.
+
+Limited data on the sources of seismic waves is a significant challenge for seismic tomography. In controlled-source tasks (e.g., seismic vibrators or mine explosions), source coordinates and origin times are known with high precision. In the case of earthquakes, however, we only have estimated values for hypocenters and origin times, the accuracy of which directly depends on the quality of the velocity model used. This creates a problem of interdependence between the medium and source parameters.
+
+Classical joint inversion methods such as SIMULPS \parencite{thurber1983} and tomoDD \parencite{zhang2003} address the hypocenter--velocity coupling by iteratively updating both sets of parameters. However, they treat hypocenters as point estimates and require initial hypocenter coordinates, introducing bias when those coordinates are poorly constrained. Probabilistic hypocenter inversion without initial locations was demonstrated by HypoSVI \parencite{smith2022}, but with a fixed, pre-trained  velocity model. The most conceptually related approach, DeepGEM \parencite{gao2021}, performs blind joint inversion via a variational EM framework but is limited to 2D geometry and requires approximately 6 GPU-hours per synthetic experiment. A recent variational extension of tomoDD to 3D \parencite{yang2025} recovers full posterior distributions over hypocenters but still requires catalog coordinates for initialization. To our knowledge, no existing EM-based method performs 3D joint tomography and hypocenter localization simultaneously without initial hypocenter positions.
+
+We propose EMTomo, an iterative EM-based framework that takes only P and S arrival times and a standard 1D initial velocity model as input. In the E-step, we approximate the posterior over hypocenter locations as an importance weighted particle set; in the M-step, we update the 3D velocity model via regularized inversion.
+
+\todo{
+  Structure:\\
+  -- Significance of local earthquake tomography for crustal imaging.\\
+  -- Classical problem: coupled hypocenter--velocity inversion
+     (Aki \& Lee 1976; Thurber 1983, 1992; Kissling 1988).\\
+  -- Limitations of existing approaches (SIMULPS, tomoDD): require
+     initial hypocenter locations as input.\\
+  -- Gap: no rigorous probabilistic formulation treating hypocenters
+     as latent variables.\\
+  -- Our contribution: EM framework; only arrival times + initial
+     velocity model required.\\
+  -- Practical motivation: sloppily known or unknown source locations
+     in under-instrumented regions.\\
+  -- Roadmap to 4D (2016 japan noise Vp change; our method is a initial model maker for the FWI); structure of the paper.
+}
+
+\section{Method}
+\label{sec:method}
+
+  \subsection{Forward Problem: Ray-Based Travel-Time Computation}
+  \label{subsec:forward}
+
+  \todo{Ray tracing scheme, eikonal solver / shooting. Reference to initial velocity model parameterization.
+  -- anisotropy is not included in our method}
+
+  The travel time $\tauijk{n}$ from a candidate hypocenter cell $(i,j,k)$ to station $n$
+  is a functional of the 3D slowness field $S(\mathbf{x})$, discretized into $L$ cells.
+  The \emph{sensitivity matrix} $\mathbf{G}$ relates perturbations in slowness to
+  perturbations in travel time:
+
+  \begin{equation}
+    G_{n\ell}^{\,ijk} \;=\; \frac{\partial \tauijk{n}}{\partial S_{\ell}},
+    \label{eq:sensitivity}
+  \end{equation}
+
+  where $S_{\ell}$ is the slowness of cell $\ell$ and $G_{n\ell}^{\,ijk}$ equals the
+  ray-path length through cell $\ell$ for the ray connecting $(i,j,k)$ to station $n$.
+  \todo{Add eikonal / shooting reference here.}
+
+  \subsection{Probabilistic Formulation}
+  \label{subsec:probabilistic}
+  \todo{
+    Observed data: arrival times $\{t_{ij}\}$.\\
+    Model parameters: velocity field $\mathbf{m}$.\\
+    Latent variables: hypocenter locations $\{\mathbf{h}_i\}$ and origin times.\\
+    Likelihood, prior, and complete-data log-likelihood.
+  }
+
+  \subsection{EM Algorithm}
+  \label{subsec:em}
+
+  \todo{
+    Connecting text: formal EM interpretation --- complete data, incomplete data,
+    Q-function. Cite Dempster et al.\ (1977).
+  }
+
+  The full algorithm alternates between the two steps above until convergence
+  (Algorithm~\ref{alg:em}).
+
+  \begin{algorithm}[t]
+  \caption{EM-based 3D seismic tomography}
+  \label{alg:em}
+  \begin{algorithmic}[1]
+    \Require Arrival times $\{t_{ni}\}$; initial slowness model $\svec^{(0)}$
+    \Ensure  Updated slowness model $\svec^{*}$; hypocenter set $\{(i^*,j^*,k^*)_e\}$
+    \State $k \leftarrow 0$
+    \Repeat
+      \State \textbf{E-step:} for each event $e$, evaluate $\Phi_{ijk}$ and locate
+             $(i^*,j^*,k^*)_e \leftarrow \arg\min_{ijk}\,\Phi_{ijk}$
+      \State \textbf{M-step:} assemble $\Gtil$ and $\rvec$;
+             solve the regularized inverse problem for $\ds^{(k)}$;
+             update $\svec^{(k+1)} \leftarrow \svec^{(k)} + \ds^{(k)}$
+      \State $k \leftarrow k + 1$
+    \Until{$\|\ds^{(k)}\| < \varepsilon$ \textbf{ or } $k = k_{\max}$}
+    \State \Return $\svec^{(k)}$, hypocenter estimates
+  \end{algorithmic}
+  \end{algorithm}
+
+  \subsubsection{E-step: Hypocenter Estimation}
+  \label{subsubsec:estep}
+
+  \todo{Intro sentence: given fixed $\svec^{(k)}$, find the best-fit hypocenter for each event.}
+
+\printbibliography
+
+\end{document}

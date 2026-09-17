@@ -8,3 +8,13 @@ services:
       - "10.0.62.59:5050:5050"
     volumes:
       - ./runs:/runs:ro
+
+  paperpdf:
+    image: nginx:alpine
+    container_name: emtomo-paperpdf
+    restart: unless-stopped
+    ports:
+      - "10.0.62.59:8765:80"
+    volumes:
+      - ./paper/main.pdf:/srv/main.pdf:ro
+      - ./paper/pdf-viewer.nginx.conf:/etc/nginx/nginx.conf:ro

@@ -1,0 +1,47 @@
+[
+  {
+    "label": "LaTeX: build EMTomo paper",
+    "command": "/mnt/disk01/egor/.TinyTeX/bin/x86_64-linux/latexmk",
+    "args": [
+      "-pdf",
+      "-synctex=1",
+      "-interaction=nonstopmode",
+      "-file-line-error",
+      "main.tex"
+    ],
+    "cwd": "$ZED_WORKTREE_ROOT/projects/EMTomo/paper",
+    "env": {
+      "PATH": "/mnt/disk01/egor/.TinyTeX/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    },
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "hide": "on_success",
+    "save": "all"
+  },
+  {
+    "label": "LaTeX: clean EMTomo paper",
+    "command": "/mnt/disk01/egor/.TinyTeX/bin/x86_64-linux/latexmk",
+    "args": ["-C", "main.tex"],
+    "cwd": "$ZED_WORKTREE_ROOT/projects/EMTomo/paper",
+    "env": {
+      "PATH": "/mnt/disk01/egor/.TinyTeX/bin/x86_64-linux:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    },
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "hide": "on_success",
+    "save": "none"
+  },
+  {
+    "label": "PDF: start Docker viewer on port 8765",
+    "command": "docker",
+    "args": ["compose", "up", "-d", "paperpdf"],
+    "cwd": "$ZED_WORKTREE_ROOT/projects/EMTomo",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always",
+    "hide": "on_success",
+    "save": "none"
+  }
+]
