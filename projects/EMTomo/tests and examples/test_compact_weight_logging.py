@@ -38,10 +38,10 @@ def test_compact_weights_round_trip_without_dense_storage():
         np.testing.assert_array_equal(restored, expected)
 
 
-def test_legacy_dense_weights_remain_supported():
+def test_unlinked_dense_weights_are_not_loaded_as_new_run_data():
     with TemporaryDirectory() as directory:
         path = Path(directory) / "weights.npz"
         expected = np.arange(24, dtype=np.float64).reshape(2, 3, 4)
         np.savez_compressed(path, weights=expected)
 
-        np.testing.assert_array_equal(_load_weights(path), expected)
+        assert _load_weights(path) is None

@@ -84,14 +84,26 @@ def _normal_equation_contribution(
 
     rows = station_sensitivities[valid].reshape(-1, n_vox)
     residual = np.asarray(station_residuals, dtype=np.float64)[valid]
-    rows_centered = rows - np.mean(rows, axis=0, keepdims=True)
+    active = np.flatnonzero(np.any(rows != 0.0, axis=0))
+    if active.size == 0:
+        return (
+            np.zeros((n_vox, n_vox), dtype=np.float64),
+            np.zeros(n_vox, dtype=np.float64),
+        )
+
+    # Ray sensitivities occupy only a small subset of model cells. Centering
+    # cannot make an all-zero column nonzero, so evaluate the dense Gram matrix
+    # only on active columns and scatter it into the full normal system.
+    rows_active = rows[:, active]
+    rows_centered = rows_active - np.mean(rows_active, axis=0, keepdims=True)
     residual_centered = residual - np.mean(residual)
     n_valid = rows.shape[0]
-
-    return (
-        weight * n_valid * (rows_centered.T @ rows_centered),
-        weight * n_valid * (rows_centered.T @ residual_centered),
-    )
+    scale = weight * n_valid
+    hessian = np.zeros((n_vox, n_vox), dtype=np.float64)
+    rhs = np.zeros(n_vox, dtype=np.float64)
+    hessian[np.ix_(active, active)] = scale * (rows_centered.T @ rows_centered)
+    rhs[active] = scale * (rows_centered.T @ residual_centered)
+    return hessian, rhs
 
 
 def _solve_delta_s(

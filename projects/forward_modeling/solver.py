@@ -14,6 +14,7 @@ from itertools import product
 import numpy as np
 
 from .model import Arrival, ForwardConfig, PointSet, VelocityGrid
+from .noise import NoiseConfig, add_arrival_noise
 
 __version__ = "1"
 
@@ -136,9 +137,13 @@ def compute_arrivals(
     stations: PointSet,
     events: PointSet,
     config: ForwardConfig = ForwardConfig(),
+    *,
+    noise: NoiseConfig | None = None,
 ) -> list[Arrival]:
-    """All event/station pairs; the first arrival of each event is exactly zero."""
+    """All pairs, optionally noisy; each event's earliest observed pick is zero."""
     times = compute_travel_times(model, stations, events, config)
+    if noise is not None:
+        times = add_arrival_noise(times, events.ids, stations.ids, noise)
     times -= times.min(axis=1, keepdims=True)
     return [Arrival(station_id, event_id, float(times[e, s]))
             for e, event_id in enumerate(events.ids)

@@ -8,6 +8,8 @@ services:
       - "10.0.62.59:5050:5050"
     volumes:
       - ./runs:/runs:ro
+      - ../forward_modeling/experiments/input:/experiments/input:ro
+      - ../forward_modeling/experiments/output:/experiments/output:ro
 
   paperpdf:
     image: nginx:alpine

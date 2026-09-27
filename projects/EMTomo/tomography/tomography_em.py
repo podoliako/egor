@@ -66,6 +66,7 @@ def run_em(
     run_name: str = "em",
     run_version: str = "1.0",
     true_model_fine=None,
+    source_experiment=None,
 ):
     if save_runs and logger is None:
         logger = TomographyLogger(
@@ -88,6 +89,7 @@ def run_em(
             run_name=run_name,
             run_version=run_version,
             n_cycles=n_cycles,
+            n_events=len(arrivals_table),
             wave_type=wave_type,
             solver=str(solver),
             lambda_reg=lambda_reg,
@@ -105,14 +107,16 @@ def run_em(
             fine_side_m=round(fine_side, 2),
         )
         logger.save_initial_model(initial_model)
-        logger.save_true_model(true_model)
-        logger.save_true_model(true_model_fine, "true_model_fine.npy")
+        if source_experiment is None:
+            logger.save_true_model(true_model)
+            logger.save_true_model(true_model_fine, "true_model_fine.npy")
         # meta.json is the ready marker consumed by the live viewer.
         logger.save_meta(
             run_params=run_params,
             station_locs=station_locs,
             event_locs=event_locs or [],
             grid_info=grid_info,
+            source_experiment=source_experiment,
         )
 
     model = initial_model

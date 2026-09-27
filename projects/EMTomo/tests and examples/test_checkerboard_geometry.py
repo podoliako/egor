@@ -43,6 +43,40 @@ def test_anisotropic_checkerboard_blocks_follow_coarse_cell_shape():
     assert model.grid.vp[0, 0, 2] != model.grid.vp[0, 0, 0]
 
 
+def test_checkerboard_pattern_shape_counts_blocks_not_cells():
+    config = replace(
+        CONFIG,
+        cell_size=10_000.0,
+        grid_shape=(24, 12, 12),
+        checkerboard_block_shape=None,
+        checkerboard_pattern_shape=(4, 2, 2),
+        checkerboard_rotation_degrees=0.0,
+    )
+    model = VelocityModel.from_config({
+        "lon": config.lon,
+        "lat": config.lat,
+        "height": config.height,
+        "azimuth": config.azimuth,
+        "side_size": config.cell_size,
+        "n_x": config.grid_shape[0],
+        "n_y": config.grid_shape[1],
+        "n_z": config.grid_shape[2],
+    })
+
+    build_true_model(model, config)
+
+    assert np.all(model.grid.vp[0:6, 0:6, 0:6] == model.grid.vp[0, 0, 0])
+    assert model.grid.vp[6, 0, 0] != model.grid.vp[0, 0, 0]
+    assert model.grid.vp[0, 6, 0] != model.grid.vp[0, 0, 0]
+    assert model.grid.vp[0, 0, 6] != model.grid.vp[0, 0, 0]
+    transitions = [
+        np.count_nonzero(np.diff(model.grid.vp[:, 0, 0])),
+        np.count_nonzero(np.diff(model.grid.vp[0, :, 0])),
+        np.count_nonzero(np.diff(model.grid.vp[0, 0, :])),
+    ]
+    assert transitions == [3, 1, 1]
+
+
 def test_depth_biased_event_grid_is_regular_and_denser_below():
     events = build_uniform_volume_events(
         (24, 12, 6), (24, 12, 12), 10_000.0, depth_bias=0.5

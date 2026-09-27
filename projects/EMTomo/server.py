@@ -8,7 +8,10 @@ Open:     http://localhost:5050
 """
 
 import argparse
+import csv
+import hashlib
 import json
+import math
 import re
 from functools import lru_cache
 from pathlib import Path
@@ -17,37 +20,245 @@ import numpy as np
 from flask import Flask, abort, jsonify, request, send_from_directory
 
 app = Flask(__name__)
-RUNS_DIR   = Path("runs")
-VIEWER_DIR = Path(__file__).parent
+VIEWER_DIR = Path(__file__).resolve().parent
+RUNS_DIR = VIEWER_DIR / "runs"
+EXPERIMENTS_ROOT = VIEWER_DIR.parent / "forward_modeling" / "experiments"
+_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*\Z")
+_SHA = re.compile(r"[0-9a-f]{64}\Z")
+_MAX_AXIS = 512
+_MAX_PIXELS = 65536
 
 
 # ─── helpers ──────────────────────────────────────────────────────────────────
 
+def _contained(path: Path, root: Path) -> bool:
+    return path.resolve().is_relative_to(root.resolve())
+
+
+def _file_signature(path: Path) -> tuple:
+    stat = path.stat()
+    return (str(path.resolve()), stat.st_dev, stat.st_ino, stat.st_size,
+            stat.st_mtime_ns, stat.st_ctime_ns)
+
+
+@lru_cache(maxsize=128)
+def _file_sha256(path: Path, signature: tuple) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    if _file_signature(path) != signature:
+        raise ValueError("Source changed during validation")
+    return digest.hexdigest()
+
+
+def _source_model(rd: Path, meta: dict) -> Path | None:
+    source = meta.get("source_experiment")
+    if not isinstance(source, dict):
+        return None
+    identifier, expected = source.get("id"), source.get("model_sha256")
+    if not isinstance(identifier, str) or not _ID.fullmatch(identifier) or identifier in (".", ".."):
+        return None
+    if not isinstance(expected, str) or not _SHA.fullmatch(expected):
+        return None
+    input_root = EXPERIMENTS_ROOT / "input"
+    directory = input_root / identifier
+    path = directory / "model.npz"
+    if directory.is_symlink() or not _contained(directory, input_root) or not _contained(path, directory) or not path.is_file():
+        return None
+    try:
+        digest = _file_sha256(path, _file_signature(path))
+    except (OSError, ValueError):
+        return None
+    return path if digest == expected else None
+
+
+def _reference_points(path: Path, id_column: str, extent: np.ndarray) -> tuple:
+    # Match forward input parsing: preserve string IDs and CSV row order.
+    with path.open(encoding="utf-8", newline="") as stream:
+        reader = csv.reader(stream)
+        if next(reader, None) != [id_column, "x_m", "y_m", "z_m"]:
+            raise ValueError("Invalid reference CSV header")
+        ids, coordinates = [], []
+        for row in reader:
+            if len(row) != 4 or not row[0].strip():
+                raise ValueError("Invalid reference CSV row")
+            ids.append(row[0])
+            coordinates.append(tuple(float(v) for v in row[1:]))
+    points = np.asarray(coordinates, dtype=float)
+    if (not ids or len(set(ids)) != len(ids) or not np.all(np.isfinite(points))
+            or np.any(points < 0) or np.any(points > extent)):
+        raise ValueError("Invalid reference IDs or coordinates")
+    return tuple(ids), tuple(coordinates)
+
+
+def _check_reference_order(metadata: dict, event_ids: tuple, station_ids: tuple):
+    for name, ids in (("event", event_ids), ("station", station_ids)):
+        if name + "_ids" in metadata and metadata[name + "_ids"] != list(ids):
+            raise ValueError("Reference ID order mismatch")
+        count = "n_" + name + "s"
+        if count in metadata and (type(metadata[count]) is not int or metadata[count] != len(ids)):
+            raise ValueError("Reference count mismatch")
+
+
+@lru_cache(maxsize=32)
+def _validated_reference_inputs(paths: tuple, signatures: tuple) -> tuple:
+    """Cache only validated, immutable geometry; arrivals are not viewer inputs."""
+    model_path, stations_path, events_path, *rest = paths
+    metadata = json.loads(rest[-1].read_text(encoding="utf-8"))
+    if not isinstance(metadata, dict):
+        raise ValueError("Invalid forward metadata")
+    units = {"coordinates": "m", "cell_size": "m", "velocity": "m/s",
+             "arrival_time": "s", "elapsed_time": "s"}
+    if (metadata.get("time_reference") != "earliest_station_arrival_per_event"
+            or not isinstance(metadata.get("units"), dict)
+            or any(metadata["units"].get(k) != v for k, v in units.items())):
+        raise ValueError("Unsupported forward conventions")
+    hashes = metadata.get("input_sha256")
+    if not isinstance(hashes, dict) or set(hashes) != {p.name for p in paths[:-1]}:
+        raise ValueError("Invalid forward input hash list")
+    for path, signature in zip(paths[:-1], signatures[:-1]):
+        if hashes[path.name] != _file_sha256(path, signature):
+            raise ValueError("Forward input hash mismatch")
+    with np.load(model_path, allow_pickle=False) as model:
+        if set(model.files) != {"velocity", "cell_size_m", "origin_m"}:
+            raise ValueError("Invalid reference model fields")
+        velocity = np.asarray(model["velocity"], dtype=float)
+        cell_size = model["cell_size_m"]
+        origin = model["origin_m"]
+        if (velocity.ndim != 3 or any(n == 0 for n in velocity.shape)
+                or not np.all(np.isfinite(velocity)) or np.any(velocity <= 0)
+                or cell_size.shape != () or not np.isfinite(cell_size) or cell_size <= 0
+                or origin.shape != (3,) or not np.all(origin == 0)):
+            raise ValueError("Invalid reference model geometry")
+        extent = np.asarray(velocity.shape) * float(cell_size)
+        if not np.all(np.isfinite(extent)):
+            raise ValueError("Invalid reference model bounds")
+    station_ids, stations = _reference_points(stations_path, "station_id", extent)
+    event_ids, events = _reference_points(events_path, "event_id", extent)
+    if len(station_ids) < 2:
+        raise ValueError("At least two stations required")
+    _check_reference_order(metadata, event_ids, station_ids)
+    if tuple(_file_signature(path) for path in paths) != signatures:
+        raise ValueError("Source changed during validation")
+    return event_ids, events, station_ids, stations
+
+
+def _reference_events(rd: Path, meta: dict) -> tuple:
+    """Viewer-only truth in input row order, matching experiment_data's indexing."""
+    if _source_model(rd, meta) is None:
+        return (), ()
+    identifier = meta["source_experiment"]["id"]
+    try:
+        paths = []
+        for section, names in (
+            ("input", ("model.npz", "stations.csv", "events.csv", "generation.json")),
+            ("output", ("metadata.json",)),
+        ):
+            root = EXPERIMENTS_ROOT / section
+            directory = root / identifier
+            if directory.is_symlink() or not _contained(directory, root):
+                return (), ()
+            for name in names:
+                path = directory / name
+                if not _contained(path, directory):
+                    return (), ()
+                if name == "generation.json" and not path.exists():
+                    continue
+                paths.append(path)
+        signatures = tuple(_file_signature(path) for path in paths)
+        event_ids, events, station_ids, stations = _validated_reference_inputs(tuple(paths), signatures)
+        params = meta.get("run_params", {})
+        if type(params.get("n_events")) is not int or len(event_ids) != params["n_events"]:
+            return (), ()
+        _check_reference_order(meta, event_ids, station_ids)
+        _check_reference_order(params, event_ids, station_ids)
+        if not np.array_equal(np.asarray(meta.get("station_locs", []), dtype=float), stations):
+            return (), ()
+        return event_ids, events
+    except (OSError, ValueError, TypeError, KeyError, csv.Error):
+        return (), ()
+
+
+def _eligible(rd: Path) -> bool:
+    if not rd.is_dir() or not _contained(rd, RUNS_DIR):
+        return False
+    meta_path = rd / "meta.json"
+    if not _contained(meta_path, rd):
+        return False
+    try:
+        meta = json.loads(meta_path.read_text())
+    except (OSError, ValueError):
+        return False
+    return isinstance(meta, dict) and _source_model(rd, meta) is not None
+
+
 def _rd(run_id: str) -> Path:
+    if not _ID.fullmatch(run_id) or run_id in (".", ".."):
+        abort(404)
     d = RUNS_DIR / run_id
-    if not d.is_dir():
+    if not _eligible(d):
         abort(404, description=f"Run not found: {run_id}")
     return d
+
+
+def _child(rd: Path, *parts: str) -> Path:
+    path = rd.joinpath(*parts)
+    if not _contained(path, rd):
+        abort(404)
+    return path
+
+
+def _index(name: str, default: int = 0) -> int:
+    raw = request.args.get(name, str(default))
+    if not re.fullmatch(r"\d+", raw):
+        abort(400, description=f"Invalid {name}")
+    return int(raw)
+
+
+def _y_index(y_km: float, shape: tuple[int, ...], cell_size: float) -> int:
+    extent = shape[1] * cell_size / 1000
+    if not math.isfinite(y_km) or y_km < 0 or y_km > extent:
+        abort(400, description="y_km outside model bounds")
+    return min(int(y_km * 1000 / cell_size), shape[1] - 1)
+
+
+def _requested_y(shape: tuple[int, ...], cell_size: float) -> tuple[float, int]:
+    raw = request.args.get("y_km")
+    if raw is None:
+        # Default to the first cell centre; y_km is always a physical coordinate.
+        y_km = cell_size / 2000
+    else:
+        try:
+            y_km = float(raw)
+        except ValueError:
+            abort(400, description="Invalid y_km")
+    return y_km, _y_index(y_km, shape, cell_size)
+
+
+def _axes(response: dict, cell_size: float, y_km: float, extents_m=None) -> dict:
+    nx, _, nz = response["full_shape"]
+    sx, _, sz = extents_m if extents_m is not None else (nx * cell_size, 0, nz * cell_size)
+    response.update({
+        "origin_m": [0, 0, 0], "y_km": y_km,
+        "x_km": ((np.arange(nx) + 0.5) * sx / nx / 1000).tolist(),
+        "z_km": ((np.arange(nz) + 0.5) * sz / nz / 1000).tolist(),
+        "x_edges_km": (np.arange(nx + 1) * sx / nx / 1000).tolist(),
+        "z_edges_km": (np.arange(nz + 1) * sz / nz / 1000).tolist(),
+    })
+    return response
 
 
 def _npy(path: Path):
     return np.load(path, mmap_mode="r") if path.exists() else None
 
 
-def _npz(path: Path, key: str):
-    if not path.exists():
-        return None
-    with np.load(path) as data:
-        return data[key]
-
 
 def _load_weights(path: Path) -> np.ndarray | None:
-    """Load legacy dense or compact sparse event weights."""
+    """Load compact sparse event weights."""
     if not path.exists():
         return None
-    with np.load(path) as data:
-        if "weights" in data:
-            return data["weights"]
+    with np.load(path, allow_pickle=False) as data:
         if "weight_shape" not in data or "weight_indices" not in data:
             return None
         shape = tuple(int(value) for value in data["weight_shape"])
@@ -64,11 +275,11 @@ def _load_weights(path: Path) -> np.ndarray | None:
 
 
 def _load_G_station(path_stem: Path) -> np.ndarray | None:
-    """Load one station G from compact sparse, NPZ, or legacy NPY storage."""
+    """Load one station G from the compact sparse event log."""
     sparse_path = path_stem.parent / "G_stations_sparse.npz"
     if sparse_path.exists():
         station = int(path_stem.name.rsplit("_", 1)[1])
-        with np.load(sparse_path) as data:
+        with np.load(sparse_path, allow_pickle=False) as data:
             offsets = data["offsets"]
             if station < 0 or station + 1 >= len(offsets):
                 return None
@@ -78,13 +289,6 @@ def _load_G_station(path_stem: Path) -> np.ndarray | None:
             result[tuple(coords.T)] = data["values"][start:stop]
             return result
 
-    npz_path = path_stem.with_suffix(".npz")
-    npy_path = path_stem.with_suffix(".npy")
-    if npz_path.exists():
-        with np.load(npz_path) as data:
-            return data["G"]
-    if npy_path.exists():
-        return np.load(npy_path)
     return None
 
 
@@ -176,8 +380,15 @@ def _model_slice(
 
 
 def _target_shape() -> tuple[int, int, int] | None:
-    values = tuple(request.args.get(name, type=int) for name in ("nx", "ny", "nz"))
-    return values if all(value is not None and value > 0 for value in values) else None
+    names = ("nx", "ny", "nz")
+    if not any(name in request.args for name in names):
+        return None
+    if not all(name in request.args for name in names):
+        abort(400, description="nx, ny, nz must be specified together")
+    values = tuple(_index(name) for name in names)
+    if any(value < 1 or value > _MAX_AXIS for value in values) or values[0] * values[2] > _MAX_PIXELS:
+        abort(400, description="Requested model grid too large")
+    return values
 
 
 def _model_grid_step(meta: dict, source_shape, target_shape) -> list[int]:
@@ -258,7 +469,7 @@ def api_runs():
     if not RUNS_DIR.exists():
         return jsonify([])
     run_dirs = sorted(
-        (d for d in RUNS_DIR.iterdir() if d.is_dir() and (d / "meta.json").exists()),
+        (d for d in RUNS_DIR.iterdir() if _ID.fullmatch(d.name) and _eligible(d)),
         key=_run_sort_key,
         reverse=True,
     )
@@ -269,10 +480,18 @@ def api_runs():
 
 @app.route("/api/runs/<rid>/meta")
 def api_meta(rid):
-    p = _rd(rid) / "meta.json"
+    rd = _rd(rid)
+    p = rd / "meta.json"
     if not p.exists():
         return jsonify({})
     meta = json.loads(p.read_text())
+
+    event_ids, coordinates = _reference_events(rd, meta)
+    meta["reference_event_ids"] = event_ids
+    meta["reference_event_coordinates_m"] = coordinates
+    meta["has_reference_events"] = bool(coordinates)
+    # Compatibility alias for existing viewer overlays, not inversion metadata.
+    meta["event_locs"] = coordinates
 
     gi = meta.get("grid_info", {})
     meta["coarse_ny"] = gi.get("coarse_shape", [1, 1, 1])[1] if "coarse_shape" in gi else 1
@@ -287,7 +506,8 @@ def api_info(rid):
 
     iters = sorted(
         int(d.name[5:]) for d in rd.iterdir()
-        if d.is_dir() and d.name.startswith("iter_")
+        if d.is_dir() and re.fullmatch(r"iter_\d+", d.name) and _contained(d, rd)
+        and _contained(d / "model.npy", rd) and (d / "model.npy").is_file()
     )
 
     n_stations = 0
@@ -322,14 +542,14 @@ def api_info(rid):
     meta_path = rd / "meta.json"
     n_events = 0
     if meta_path.exists():
-        n_events = len(json.loads(meta_path.read_text()).get("event_locs", []))
+        m = json.loads(meta_path.read_text())
+        n_events = m.get("run_params", {}).get("n_events", len(m.get("event_locs", [])))
 
     return jsonify({
         "iterations":     iters,
         "n_stations":     n_stations,
         "n_events":       n_events,
-        "has_true_model":      (rd / "true_model.npy").exists(),
-        "has_true_model_fine": (rd / "true_model_fine.npy").exists(),
+        "has_true_model":      True,
     })
 
 
@@ -371,7 +591,8 @@ def api_quality(rid):
 
 def _sorted_event_dirs(iter_dir: Path):
     return sorted(
-        [d for d in iter_dir.iterdir() if d.is_dir() and d.name.startswith("event_")],
+        [d for d in iter_dir.iterdir() if d.is_dir() and re.fullmatch(r"event_\d+", d.name)
+         and _contained(d, iter_dir)],
         key=lambda d: int(d.name.split("_")[1]),
     )
 
@@ -403,7 +624,7 @@ def _rms_from_residuals(rfile: Path) -> float | None:
 def _dist_to_true_hypo(ev_dir: Path, true_loc, cell_size: float) -> float | None:
     """Euclidean distance (m) from the best refined hypothesis to truth."""
     wp = ev_dir / "weights.npz"
-    if not wp.exists() or not true_loc:
+    if not wp.exists() or not _contained(wp, ev_dir) or true_loc is None:
         return None
     try:
         with np.load(wp) as data:
@@ -413,12 +634,14 @@ def _dist_to_true_hypo(ev_dir: Path, true_loc, cell_size: float) -> float | None
                     if "weight_values" in data
                     else np.ones(len(data["positions"]))
                 )
+                if values.shape != (len(data["positions"]),) or not np.all(np.isfinite(values)) or np.any(values < 0) or not np.any(values > 0):
+                    return None
                 coord = np.asarray(
                     data["positions"][int(np.argmax(values))], dtype=np.float64
                 )
             else:
                 weights = _load_weights(wp)
-                if weights is None:
+                if weights is None or not np.all(np.isfinite(weights)) or np.any(weights < 0) or not np.any(weights > 0):
                     return None
                 coord = np.asarray(
                     np.unravel_index(int(np.argmax(weights)), weights.shape),
@@ -426,6 +649,8 @@ def _dist_to_true_hypo(ev_dir: Path, true_loc, cell_size: float) -> float | None
                 )
         est = (coord + 0.5) * cell_size
         true = np.asarray(true_loc, dtype=np.float64)
+        if est.shape != (3,) or true.shape != (3,) or not np.all(np.isfinite(est)) or not np.all(np.isfinite(true)):
+            return None
         return float(np.linalg.norm(est - true))
     except Exception:
         return None
@@ -446,36 +671,37 @@ def _aggregate(vals: list[float]) -> dict | None:
 
 def _hypo_signature(rd: Path) -> tuple:
     signature = []
-    for iter_dir in sorted(rd.glob("iter_*")):
-        event_dirs = list(iter_dir.glob("event_*"))
-        newest_event = max(
-            (event_dir.stat().st_mtime_ns for event_dir in event_dirs), default=0
-        )
-        signature.append((iter_dir.name, len(event_dirs), newest_event))
-    timing = rd / "timing.jsonl"
-    signature.append(("timing", timing.stat().st_size if timing.exists() else 0, 0))
+    paths = [rd / "meta.json"]
+    for pattern in ("iter_*/event_*/weights.npz", "iter_*/event_*/residuals.npy"):
+        paths.extend(sorted(rd.glob(pattern)))
+    for path in paths:
+        if _contained(path, rd) and path.is_file():
+            stat = path.stat()
+            signature.append((str(path.relative_to(rd)), stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns))
     return tuple(signature)
 
 
 @lru_cache(maxsize=16)
-def _collect_hypo_dataset(rd_name: str, _signature: tuple) -> dict:
+def _collect_hypo_dataset(rd_name: str, _signature: tuple, event_locs: tuple) -> dict:
     """Read all expensive per-event metrics once for an unchanged run."""
     rd = Path(rd_name)
     meta = _read_meta(rd)
-    event_locs = meta.get("event_locs") or []
+
     cell_size = _fine_cell_size(meta)
     residual_by_iter: dict[int, list[dict]] = {}
     distance_by_iter: dict[int, list[dict]] = {}
 
     iter_dirs = sorted(
-        [d for d in rd.iterdir() if d.is_dir() and d.name.startswith("iter_")],
+        [d for d in rd.iterdir() if d.is_dir() and re.fullmatch(r"iter_\d+", d.name)
+         and _contained(d, rd)],
         key=lambda d: int(d.name.split("_")[1]),
     )
     for iter_dir in iter_dirs:
         iteration = int(iter_dir.name.split("_")[1])
         for event_dir in _sorted_event_dirs(iter_dir):
             event = int(event_dir.name.split("_")[1])
-            rms = _rms_from_residuals(event_dir / "residuals.npy")
+            residual_file = event_dir / "residuals.npy"
+            rms = _rms_from_residuals(residual_file) if _contained(residual_file, event_dir) else None
             if rms is not None:
                 residual_by_iter.setdefault(iteration, []).append(
                     {"event": event, "rms": rms}
@@ -511,8 +737,8 @@ def _collect_hypo_dataset(rd_name: str, _signature: tuple) -> dict:
 
 
 def _collect_all_hypo_metrics(rd: Path, meta: dict, current_iter: int) -> dict:
-    del meta  # Metadata is loaded inside the cache for a stable cache key.
-    dataset = _collect_hypo_dataset(str(rd.resolve()), _hypo_signature(rd))
+    _, event_locs = _reference_events(rd, meta)
+    dataset = _collect_hypo_dataset(str(rd.resolve()), _hypo_signature(rd), event_locs)
     return {
         "residual_summary": dataset["residual_summary"],
         "distance_summary": dataset["distance_summary"],
@@ -527,19 +753,21 @@ def api_runs_latest():
     if not RUNS_DIR.exists():
         return jsonify({"run_id": None, "max_iter": 0})
     runs = sorted(
-        (d for d in RUNS_DIR.iterdir() if d.is_dir() and (d / "meta.json").exists()),
+        (d for d in RUNS_DIR.iterdir() if _ID.fullmatch(d.name) and _eligible(d)),
         key=_run_sort_key,
         reverse=True,
     )
     if not runs:
         return jsonify({"run_id": None, "max_iter": 0})
-    rd = runs[0]
-    rid = rd.name
-    iters = [
-        int(d.name[5:]) for d in rd.iterdir()
-        if d.is_dir() and d.name.startswith("iter_")
-    ]
-    return jsonify({"run_id": rid, "max_iter": max(iters) if iters else 0})
+    for rd in runs:
+        iters = [
+            int(d.name[5:]) for d in rd.iterdir()
+            if d.is_dir() and re.fullmatch(r"iter_\d+", d.name)
+            and _contained(d / "model.npy", rd) and (d / "model.npy").is_file()
+        ]
+        if iters:
+            return jsonify({"run_id": rd.name, "max_iter": max(iters)})
+    return jsonify({"run_id": None, "max_iter": 0})
 
 
 @app.route("/api/runs/<rid>/hypo_metrics")
@@ -557,7 +785,7 @@ def api_hypo_metrics(rid):
 def api_iters_list(rid):
     rd = _rd(rid)
     iters = sorted(
-        [d.name for d in rd.iterdir() if d.is_dir() and d.name.startswith("iter_")],
+        [d.name for d in rd.iterdir() if d.is_dir() and re.fullmatch(r"iter_\d+", d.name) and _contained(d, rd) and (d / "model.npy").is_file()],
         key=lambda x: int(x.split("_")[1]),
     )
     return jsonify(iters)
@@ -566,8 +794,8 @@ def api_iters_list(rid):
 @app.route("/api/runs/<rid>/events_list")
 def api_events_list(rid):
     rd  = _rd(rid)
-    itr = request.args.get("iter", "0")
-    d   = rd / f"iter_{itr}"
+    itr = _index("iter")
+    d   = _child(rd, f"iter_{itr}")
     if not d.exists():
         return jsonify([])
     evs = sorted(
@@ -580,9 +808,9 @@ def api_events_list(rid):
 @app.route("/api/runs/<rid>/weights_list")
 def api_weights_list(rid):
     rd  = _rd(rid)
-    itr = request.args.get("iter",  "0")
-    ev  = request.args.get("event", "0")
-    d   = rd / f"iter_{itr}" / f"event_{ev}"
+    itr = _index("iter")
+    ev  = _index("event")
+    d   = _child(rd, f"iter_{itr}", f"event_{ev}")
     if not d.exists():
         return jsonify([])
     ws = sorted(
@@ -601,8 +829,8 @@ def api_slice(rid):
 
     Query params
     ────────────
-    type        model | true_model | station_field | weights | G | delta_s | ray_count
-    y           int   y-slice index
+    type        model | weights | G | delta_s | ray_count
+    y_km        float physical y coordinate in kilometres
     iter        int   iteration number
 
     type=model      model_type: initial | true | iter
@@ -613,52 +841,50 @@ def api_slice(rid):
     """
     rd    = _rd(rid)
     dtype = request.args.get("type", "model")
-    y     = request.args.get("y",    0, type=int)
-    it    = request.args.get("iter", 0, type=int)
+    it    = _index("iter")
+    meta = _read_meta(rd)
+    grid = meta.get("grid_info") or {}
 
     arr = None
     response_extra = {}
 
     if dtype == "model":
         mt = request.args.get("model_type", "iter")
-        fine_true_path = rd / "true_model_fine.npy"
-        paths = {
-            "initial": rd / "initial_model.npy",
-            "true": rd / "true_model.npy",
-            "true_fine": (
-                fine_true_path if fine_true_path.exists() else rd / "true_model.npy"
-            ),
-            "iter": rd / f"iter_{it}" / "model.npy",
-        }
-        arr = _npy(paths.get(mt, Path("__none__")))
+        if mt == "true":
+            if any(name in request.args for name in ("nx", "ny", "nz")):
+                abort(400, description="Truth is only available on its native grid")
+            with np.load(_source_model(rd, meta), allow_pickle=False) as data:
+                arr = data["velocity"]
+                cell_size = float(data["cell_size_m"])
+                origin = data["origin_m"]
+            if arr.ndim != 3 or not np.array_equal(origin, [0, 0, 0]) or not math.isfinite(cell_size) or cell_size <= 0:
+                abort(404)
+            y_km, y = _requested_y(arr.shape, cell_size)
+            return jsonify(_axes(_slice_resp(arr[:, y, :], list(arr.shape), cell_size), cell_size, y_km))
+        if mt not in ("initial", "iter"):
+            abort(400, description="Invalid model_type")
+        path = _child(rd, "initial_model.npy") if mt == "initial" else _child(rd, f"iter_{it}", "model.npy")
+        arr = _npy(path)
         if arr is not None and arr.ndim == 3:
-            meta = _read_meta(rd)
             target_shape = _target_shape()
-            native = request.args.get("native", 0, type=int) == 1
-            if native or (mt == "true_fine" and fine_true_path.exists()):
-                target_shape = target_shape or tuple(arr.shape)
-            s2d, full_shape, cell_size = _model_slice(
-                arr, y, meta, target_shape
-            )
+            full_shape = target_shape or tuple(int(size) * max(1, int(meta.get("run_params", {}).get("subdivision") or 1)) for size in arr.shape)
+            if any(size < 1 or size > _MAX_AXIS for size in full_shape) or full_shape[0] * full_shape[2] > _MAX_PIXELS:
+                abort(400, description="Model grid too large; specify a smaller nx, ny, nz")
+            extent_x = float(grid.get("coarse_side_m", [arr.shape[0] * float(grid.get("coarse_cell_size", 1))])[0])
+            extents = grid.get("coarse_side_m") or [arr.shape[axis] * float(grid.get("coarse_cell_size", 1)) for axis in range(3)]
+            cell_size = extent_x / full_shape[0]
+            # The inversion domain is unchanged by resampling on each axis.
+            y_km, y = _requested_y(full_shape, float(extents[1]) / full_shape[1])
+            s2d, full_shape, cell_size = _model_slice(arr, y, meta, target_shape)
             grid_step = _model_grid_step(meta, arr.shape, full_shape)
-            return jsonify(_slice_resp(s2d, full_shape, cell_size, grid_step))
-
-    elif dtype == "true_model":
-        arr = _npy(rd / "true_model.npy")
-        if arr is not None and arr.ndim == 3:
-            meta = _read_meta(rd)
-            s2d, full_shape, cell_size = _model_slice(
-                arr, y, meta, _target_shape()
-            )
-            grid_step = _model_grid_step(meta, arr.shape, full_shape)
-            return jsonify(_slice_resp(s2d, full_shape, cell_size, grid_step))
+            return jsonify(_axes(_slice_resp(s2d, full_shape, cell_size, grid_step), cell_size, y_km, extents))
 
     elif dtype == "delta_s":
-        arr = _npy(rd / f"iter_{it}" / "delta_s.npy")
+        arr = _npy(_child(rd, f"iter_{it}", "delta_s.npy"))
 
     elif dtype == "weights":
-        ev = request.args.get("event", 0, type=int)
-        path = rd / f"iter_{it}" / f"event_{ev}" / "weights.npz"
+        ev = _index("event")
+        path = _child(rd, f"iter_{it}", f"event_{ev}", "weights.npz")
         arr = _load_weights(path)
         if path.exists():
             with np.load(path) as data:
@@ -674,13 +900,12 @@ def api_slice(rid):
                     ]
 
     elif dtype == "G":
-        ev = request.args.get("event", 0, type=int)
-        wt = request.args.get("weight", 0, type=int)
-        sta = request.args.get("station", 0, type=int)
-        # Try new npz path, fall back to old npy path.
-        stem = rd / f"iter_{it}" / f"event_{ev}" / f"weight_{wt}" / f"G_station_{sta}"
+        ev = _index("event")
+        wt = _index("weight")
+        sta = _index("station")
+        stem = _child(rd, f"iter_{it}", f"event_{ev}", f"weight_{wt}", f"G_station_{sta}")
         arr = _load_G_station(stem)
-        weights_path = rd / f"iter_{it}" / f"event_{ev}" / "weights.npz"
+        weights_path = _child(rd, f"iter_{it}", f"event_{ev}", "weights.npz")
         if weights_path.exists():
             with np.load(weights_path) as data:
                 if "positions" in data and wt < len(data["positions"]):
@@ -690,9 +915,18 @@ def api_slice(rid):
                     }]
 
     elif dtype == "ray_count":
-        arr = _cached_ray_count(rd / f"iter_{it}")
+        arr = _cached_ray_count(_child(rd, f"iter_{it}"))
+    else:
+        abort(400, description="Invalid slice type")
 
-    response = _arr_resp(arr, y)
+    if arr is None or arr.ndim != 3:
+        response = _arr_resp(arr, 0)
+    else:
+        extent_x = float(grid.get("coarse_side_m", [arr.shape[0] * float(grid.get("coarse_cell_size", 1))])[0])
+        extents = grid.get("coarse_side_m") or [arr.shape[axis] * float(grid.get("coarse_cell_size", 1)) for axis in range(3)]
+        cell_size = extent_x / arr.shape[0]
+        y_km, y = _requested_y(arr.shape, float(extents[1]) / arr.shape[1])
+        response = _axes(_slice_resp(arr[:, y, :], list(arr.shape), cell_size), cell_size, y_km, extents)
     response.update(response_extra)
     return jsonify(response)
 
@@ -701,12 +935,14 @@ def api_slice(rid):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Tomography viewer server")
-    ap.add_argument("--runs-dir", default="runs")
+    ap.add_argument("--runs-dir", default=str(RUNS_DIR))
+    ap.add_argument("--experiments-root", default=str(EXPERIMENTS_ROOT))
     ap.add_argument("--host",     default="0.0.0.0")
     ap.add_argument("--port",     type=int, default=5050)
     args = ap.parse_args()
 
     RUNS_DIR = Path(args.runs_dir)
+    EXPERIMENTS_ROOT = Path(args.experiments_root)
     print(f"  Runs dir : {RUNS_DIR.resolve()}")
     print(f"  Viewer   : http://localhost:{args.port}\n")
     app.run(host=args.host, port=args.port, debug=False)

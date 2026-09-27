@@ -67,7 +67,11 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   width: 18px; height: 18px; padding: 0; line-height: 16px;
   border-radius: 3px; font-size: 10px;
 }
-.y-num { width: 44px; }
+.y-num { width: 58px; }
+.y-step { width: 55px; }
+.y-val { display: inline-block; min-width: 50px; }
+
+.dim-toggle { display: flex; align-items: center; gap: 3px; color: var(--text3); white-space: nowrap; }
 
 /* ── Auto-refresh ── */
 #refresh-bar label { display: flex; align-items: center; gap: 4px; color: var(--text2); font-size: 11px; cursor: pointer; flex-shrink: 0; }
@@ -77,15 +81,17 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 
 /* ── Header ── */
 #header {
-  height: 44px; min-height: 44px; background: var(--bg1);
+  min-height: 44px; background: var(--bg1);
   border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 10px; padding: 0 14px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 8px 14px;
   flex-shrink: 0; z-index: 10;
 }
 .logo { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
 .logo span { color: var(--accent); }
 .vsep { width: 1px; height: 20px; background: var(--border); flex-shrink: 0; }
 .ctrl-group { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+#run-control { flex: 0 1 360px; min-width: 0; max-width: 100%; }
+#run-select { width: 100%; min-width: 0; text-overflow: ellipsis; }
 .ctrl-label { color: var(--text3); font-size: 11px; white-space: nowrap; }
 .toggle-row { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .toggle-item { display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--text2); user-select: none; font-size: 11px; }
@@ -100,7 +106,8 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   display: flex; background: var(--bg2); border-bottom: 1px solid var(--border);
   padding: 5px 14px; flex-shrink: 0; flex-wrap: wrap; gap: 16px; align-items: center;
 }
-.param-chip { display: flex; gap: 5px; align-items: baseline; }
+.param-chip { display: flex; gap: 5px; align-items: baseline; min-width: 0; max-width: 100%; }
+.param-v { overflow-wrap: anywhere; }
 .param-k { color: var(--text3); font-size: 10px; }
 .param-v { color: var(--green); font-family: var(--ff-mono); font-size: 10px; }
 
@@ -115,7 +122,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 /* ── Panel rows: two columns, flow downward ── */
 .panel-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
   margin-bottom: 10px;
 }
@@ -211,10 +218,9 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 .panel-hdr {
   background: var(--bg2);
   border-bottom: 1px solid var(--border);
-  padding: 0 8px;
-  display: flex; align-items: center; gap: 7px;
-  height: 34px; min-height: 34px; flex-shrink: 0;
-  overflow-x: auto; overflow-y: hidden; scrollbar-width: none;
+  padding: 6px 8px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 7px;
+  min-height: 34px; flex-shrink: 0;
   border-radius: 6px 6px 0 0;
 }
 .panel-hdr::-webkit-scrollbar { display: none; }
@@ -228,7 +234,6 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   display: flex; align-items: center; gap: 4px;
   flex-shrink: 0; color: var(--text2); font-size: 11px; white-space: nowrap;
 }
-.y-val { display: none; }
 .btn-full {
   margin-left: auto; padding: 2px 7px; font-size: 12px;
   background: transparent; border: 1px solid var(--border);
@@ -236,12 +241,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 }
 .btn-full:hover { border-color: var(--accent); color: var(--accent); }
 
-.dim-toggle {
-  display: flex; align-items: center; gap: 3px;
-  font-size: 10px; color: var(--text3); flex-shrink: 0; cursor: pointer;
-  user-select: none;
-}
-.dim-toggle input { cursor: pointer; }
+
 
 .panel-body { flex: 1; min-height: 0; position: relative; overflow: hidden; }
 .no-data-msg {
@@ -266,9 +266,9 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   <div class="logo">Tomo<span>Viewer</span></div>
   <div class="vsep"></div>
 
-  <div class="ctrl-group">
+  <div class="ctrl-group" id="run-control">
     <span class="ctrl-label">Run</span>
-    <select id="run-select" style="min-width:160px"><option value="">— loading —</option></select>
+    <select id="run-select"></select><option value="">— loading —</option></select>
   </div>
   <div class="vsep"></div>
 
@@ -333,17 +333,20 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
             <option value="iter">Iter</option>
             <option value="initial">Initial</option>
             <option value="delta_s">ΔS</option>
-            <option value="diff">True − Iter</option>
+
           </select>
         </div>
         <div class="ph-group"><span class="badge" id="vel-shape-badge">—</span></div>
         <div class="ph-group y-group">
-          Y
+          Y (km)
           <button class="y-btn" id="vel-y-dec">◀</button>
-          <input type="range" id="vel-y" min="0" max="0" value="0" step="1" style="width:60px">
+          <input type="range" id="vel-y" min="0" max="0" value="0" step="1" style="width:100px">
           <button class="y-btn" id="vel-y-inc">▶</button>
           <input type="number" id="vel-y-num" min="0" max="0" value="0" class="y-num">
-          <span class="y-val" id="vel-y-v">0</span>
+          <span class="y-val" id="vel-y-v">0 km</span>
+          <label title="Step of the Y slider and arrows in kilometres">Step
+            <input type="number" id="vel-y-step" class="y-step" min="0.01" step="any" value="1"> km
+          </label>
         </div>
       </div>
       <div class="panel-body">
@@ -357,24 +360,9 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
         <span class="panel-title">True Model</span>
         <button class="btn-dl" data-plot="plot-tr" data-fname="true_model" title="Download PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
-        <label class="dim-toggle" title="Share colorscale with Velocity Model panel">
-          <input type="checkbox" id="cb-shared-vel-scale"> Shared scale
-        </label>
-        <div class="ph-group">
-          <select id="tr-resolution" title="True model resolution">
-            <option value="fine">Fine</option>
-            <option value="coarse">Coarse</option>
-          </select>
-        </div>
+
         <div class="ph-group"><span class="badge" id="tr-shape-badge">—</span></div>
-        <div class="ph-group y-group">
-          Y
-          <button class="y-btn" id="tr-y-dec">◀</button>
-          <input type="range" id="tr-y" min="0" max="0" value="0" step="1" style="width:60px">
-          <button class="y-btn" id="tr-y-inc">▶</button>
-          <input type="number" id="tr-y-num" min="0" max="0" value="0" class="y-num">
-          <span class="y-val" id="tr-y-v">0</span>
-        </div>
+        <div class="ph-group"><span class="badge" id="tr-y-v">Y: 0 km</span></div>
       </div>
       <div class="panel-body">
         <div class="no-data-msg" id="tr-empty">No true model saved</div>
@@ -397,7 +385,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
         <div class="ph-group" style="display: none;">Wt <select id="rc-wt"><option value="0">0</option></select></div>
         <div class="ph-group">coarse <span class="badge" id="rc-shape-badge">—</span></div>
         <div class="ph-group y-group">
-          Y
+          Y (km)
           <button class="y-btn" id="rc-y-dec">◀</button>
           <input type="range" id="rc-y" min="0" max="0" value="0" step="1" style="width:60px">
           <button class="y-btn" id="rc-y-inc">▶</button>
@@ -425,7 +413,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
         <div class="ph-group">Wt <select id="g-wt"><option value="0">0</option></select></div>
         <div class="ph-group">fine <span class="badge" id="g-shape-badge">—</span></div>
         <div class="ph-group y-group">
-          Y
+          Y (km)
           <button class="y-btn" id="g-y-dec">◀</button>
           <input type="range" id="g-y" min="0" max="0" value="0" step="1" style="width:60px">
           <button class="y-btn" id="g-y-inc">▶</button>
@@ -453,17 +441,17 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
         <button class="btn-dl" data-plot="plot-wt" data-fname="hypo_weights" title="Download PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
         <div class="ph-group">Event <select id="wt-ev"></select></div>
-        <div class="ph-group">coarse <span class="badge" id="wt-shape-badge">—</span></div>
+        <div class="ph-group">fine <span class="badge" id="wt-shape-badge">—</span></div>
+        <button id="wt-true-y" title="Go to the fine Y layer containing the selected true event">True Y</button>
         <div class="ph-group y-group">
-          Y
+          Y layer
           <button class="y-btn" id="wt-y-dec">◀</button>
           <input type="range" id="wt-y" min="0" max="0" value="0" step="1" style="width:60px">
           <button class="y-btn" id="wt-y-inc">▶</button>
           <input type="number" id="wt-y-num" min="0" max="0" value="0" class="y-num">
           <span class="y-val" id="wt-y-v">0</span>
         </div>
-        <button style="font-size:10px;padding:2px 6px" id="wt-go-layer">Go to layer</button>
-        <span class="badge" id="wt-layer-status">Layer: —</span>
+
         <label class="dim-toggle">
           <input type="checkbox" id="cb-dim-wt" checked> Dim
         </label>
@@ -583,8 +571,9 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 const ST = {
   run: null, iter: 0, meta: null, info: null,
   showGrid: true, showStations: true, showEvents: true,
-  vel:    { type: 'iter', y: 0, sharedScale: false },
-  tr:     { y: 0, resolution: 'fine' },
+  vel:    { type: 'iter', y: 0, yStep: 1 },
+  tr:     { y: 0 },
+  truthEdges: null,
   rc:     { event: 0, weight: 0, y: 0, dim: true },
   G:      { event: 0, station: 0, weight: 0, y: 0, dim: true },
   wt:     { event: 0, y: 0, dim: true },
@@ -641,7 +630,12 @@ function trackPlotRender(plotId, traces, layout, config) {
 }
 
 /* ── Layout factory ── */
-function mkLayout(nx, nz, cbTitle, zrange) {
+function modelExtentKm() {
+  const size = ST.meta?.grid_info?.coarse_side_m;
+  return Array.isArray(size) ? size.map(v => v / 1000) : [1, 1, 1];
+}
+
+function mkLayout(nx, nz, cbTitle, zrange, fineGrid = false) {
   const coloraxis = {
     colorbar: {
       thickness: 10, len: 0.85,
@@ -653,33 +647,35 @@ function mkLayout(nx, nz, cbTitle, zrange) {
   return {
     paper_bgcolor: '#ffffff', plot_bgcolor: '#f8f9fb',
     font: { color: '#1e2530', size: 9, family: "Menlo, Consolas, monospace" },
-    margin: { l: 40, r: 14, t: 8, b: 38 },
+    margin: { l: 40, r: 14, t: 26, b: 38 },
     xaxis: {
-      title: { text: 'X (grid idx)', font: { size: 9 }, standoff: 2 },
-      showgrid: false, zeroline: false,
-      range: [-0.5, nx - 0.5], tickfont: { size: 8 },
+      title: { text: 'X (km)', font: { size: 9 }, standoff: 2 },
+      showgrid: false, zeroline: false, layer: 'below traces',
+      range: [0, modelExtentKm()[0]], tickfont: { size: 8 },
+      ...(ST.truthEdges && !fineGrid ? {tickmode: 'array', tickvals: ST.truthEdges.x} : {}),
     },
     yaxis: {
-      title: { text: 'Z depth ↓', font: { size: 9 }, standoff: 2 },
-      showgrid: false, zeroline: false,
-      autorange: 'reversed', tickfont: { size: 8 },
+      title: { text: 'Z depth (km) ↓', font: { size: 9 }, standoff: 2 },
+      showgrid: false, zeroline: false, layer: 'below traces',
+      range: [modelExtentKm()[2], 0], tickfont: { size: 8 },
+      ...(ST.truthEdges && !fineGrid ? {tickmode: 'array', tickvals: ST.truthEdges.z} : {}),
     },
     showlegend: false,
     coloraxis,
   };
 }
 
-function gridTrace(nx, nz, gridStep = [1, 1]) {
+function gridTrace(nx, nz, gridStep = [1, 1], fineGrid = false) {
   if (!ST.showGrid) return null;
-  const sx = Math.max(1, gridStep?.[0] || 1);
-  const sz = Math.max(1, gridStep?.[1] || 1);
+  const [width, , depth] = modelExtentKm();
+  // Truth blocks, not inversion-grid indices, define the comparison overlay.
+  const xs = (!fineGrid && ST.truthEdges?.x) || Array.from({length: nx + 1}, (_, i) => i * width / nx);
+  const zs = (!fineGrid && ST.truthEdges?.z) || Array.from({length: nz + 1}, (_, i) => i * depth / nz);
   const x = [], y = [];
-  for (let i = 0; i <= nx; i += sx) { x.push(-0.5+i, -0.5+i, null); y.push(-0.5, nz-0.5, null); }
-  for (let j = 0; j <= nz; j += sz) { x.push(-0.5, nx-0.5, null); y.push(-0.5+j, -0.5+j, null); }
-  if (nx % sx) { x.push(nx-0.5, nx-0.5, null); y.push(-0.5, nz-0.5, null); }
-  if (nz % sz) { x.push(-0.5, nx-0.5, null); y.push(nz-0.5, nz-0.5, null); }
+  for (const edge of xs) { x.push(edge, edge, null); y.push(0, depth, null); }
+  for (const edge of zs) { x.push(0, width, null); y.push(edge, edge, null); }
   return { type: 'scatter', mode: 'lines', x, y,
-    line: { color: '#c5d1e4', width: 0.5 }, showlegend: false, hoverinfo: 'skip' };
+    line: { color: '#c5d1e4', width: 0.7 }, showlegend: false, hoverinfo: 'skip' };
 }
 
 /* ── Overlay helpers ── */
@@ -690,43 +686,36 @@ function csz(coarseOrCellSize) {
   return coarseOrCellSize ? gi.coarse_cell_size : (gi.fine_cell_size ?? gi.coarse_cell_size);
 }
 
+function sliceOpacity(yKm, panelY) {
+  // Physical falloff: independent of the velocity/FMM mesh and slider step.
+  const scale = Math.max(modelExtentKm()[1] / 10, 1e-9);
+  return 0.06 + 0.94 * Math.exp(-Math.abs(yKm - panelY) / scale);
+}
+
 function locationTrace(locs, kind, hilite, coarse, panelY, dim, visible) {
   if ((!visible && hilite < 0) || !locs?.length) return [];
-  const c = csz(coarse);
-  if (!c) return [];
+  const station = kind === 'station';
   const points = locs.map((loc, index) => ({ loc, index }))
     .filter(point => visible || point.index === hilite);
-  const station = kind === 'station';
+  const alpha = p => (!station || dim) ? sliceOpacity(p.loc[1] / 1000, panelY) : 1;
   return [{
-    type: 'scatter', mode: 'markers+text',
-    x: points.map(p => p.loc[0] / c - 0.5),
-    y: points.map(p => p.loc[2] / c - 0.5),
-    text: points.map(p => `${station ? 'S' : 'E'}${p.index}`),
-    customdata: points.map(p => [p.index, p.loc[0], p.loc[2]]),
+    type: 'scatter', mode: 'markers+text', cliponaxis: false,
+    x: points.map(p => p.loc[0] / 1000),
+    y: points.map(p => p.loc[2] / 1000),
+    // Keep a thousand event labels from obscuring the model; IDs remain in hover.
+    text: points.map(p => station || p.index === hilite ? `${station ? 'S' : 'E'}${p.index}` : ''),
+    customdata: points.map(p => [p.index, ...p.loc.map(v => v / 1000)]),
     textposition: 'top center',
-    textfont: {
-      size: 8,
-      color: points.map(p => {
-        const off = dim && Math.abs(p.loc[1] / c - 0.5 - panelY) >= 0.5;
-        return off ? 'rgba(90,100,120,0.3)' : (p.index === hilite ? (station ? '#1a4ea8' : '#a04800') : 'rgba(60,70,85,0.55)');
-      }),
-    },
+    textfont: { size: 8, color: points.map(p => `rgba(60,70,85,${alpha(p)})`) },
     marker: {
       symbol: station ? 'triangle-up' : 'star',
-      size: points.map(p => {
-        const off = dim && Math.abs(p.loc[1] / c - 0.5 - panelY) >= 0.5;
-        return p.index === hilite ? (station ? 13 : 14) : (off ? 5 : 7);
-      }),
-      color: points.map(p => {
-        const off = dim && Math.abs(p.loc[1] / c - 0.5 - panelY) >= 0.5;
-        const opacity = off ? 0.25 : (p.index === hilite ? 1 : 0.55);
-        if (station) return p.index === hilite ? `rgba(74,127,212,${opacity})` : `rgba(144,174,208,${opacity})`;
-        return p.index === hilite ? `rgba(212,104,32,${opacity})` : `rgba(212,168,112,${opacity})`;
-      }),
-      line: { color: '#ffffff', width: points.map(p => p.index === hilite ? 1.5 : 1) },
+      size: points.map(p => p.index === hilite ? 13 : (station ? 8 : 6)),
+      opacity: points.map(alpha),
+      color: points.map(p => station ? '#4a7fd4' : (p.index === hilite ? '#a04800' : '#d46820')),
+      line: { color: '#ffffff', width: points.map(p => p.index === hilite ? 1.5 : 0.5) },
     },
     showlegend: false,
-    hovertemplate: `${station ? 'Sta' : 'Ev'} %{customdata[0]}<br>x=%{customdata[1]:.0f}m  z=%{customdata[2]:.0f}m<extra></extra>`,
+    hovertemplate: `${station ? 'Sta' : 'Ev'} %{customdata[0]}<br>x=%{customdata[1]:.2f} km  y=%{customdata[2]:.2f} km  z=%{customdata[3]:.2f} km<extra></extra>`,
   }];
 }
 
@@ -743,13 +732,13 @@ function hypocenterTraces(hypocenters, panelY, dim) {
   const cellSize = csz(false) || 1;
   return hypocenters.map((hypo, i) => {
     const coord = hypo.coord;
-    const offSlice = dim && Math.abs(coord[1] - panelY) >= 0.5;
     const metric = coord.map(v => (v + 0.5) * cellSize);
+    const opacity = dim ? sliceOpacity(metric[1] / 1000, panelY) : 1;
     return {
-      type: 'scatter', mode: 'markers', x: [coord[0]], y: [coord[2]],
+      type: 'scatter', mode: 'markers', x: [metric[0] / 1000], y: [metric[2] / 1000],
       marker: {
-        symbol: 'x', size: offSlice ? 7 : 13,
-        color: offSlice ? 'rgba(180,45,45,0.25)' : '#b82f2f',
+        symbol: 'x', size: 13, opacity,
+        color: '#b82f2f',
         line: { color: '#ffffff', width: 1 },
       },
       showlegend: false,
@@ -758,8 +747,8 @@ function hypocenterTraces(hypocenters, panelY, dim) {
   });
 }
 
-function buildTraces(ht, nx, nz, hilSta, hilEv, coarse, panelY, dim, hypocenters = [], gridStep = [1, 1]) {
-  const g = gridTrace(nx, nz, gridStep);
+function buildTraces(ht, nx, nz, hilSta, hilEv, coarse, panelY, dim, hypocenters = [], gridStep = [1, 1], fineGrid = false) {
+  const g = gridTrace(nx, nz, gridStep, fineGrid);
   return [
     ht,
     ...(g ? [g] : []),
@@ -782,11 +771,14 @@ function T(mat) {
   return out;
 }
 
-function sub2d(a, b) { return a.map((row, i) => row.map((v, j) => v - b[i][j])); }
 
-function heatTrace(slice, colorscale, _unused, zrange) {
+function heatTrace(slice, colorscale, axes, zrange) {
+  const nx = slice.length, nz = slice[0]?.length || 0;
+  const [width, , depth] = modelExtentKm();
   const t = { type: 'heatmap', z: T(slice), colorscale, showscale: true, coloraxis: 'coloraxis',
-    hovertemplate: 'x=%{x}  z=%{y}  val=%{z:.4g}<extra></extra>' };
+    x: axes?.x_km || Array.from({length: nx}, (_, i) => (i + 0.5) * width / nx),
+    y: axes?.z_km || Array.from({length: nz}, (_, i) => (i + 0.5) * depth / nz),
+    hovertemplate: 'x=%{x:.2f} km  z=%{y:.2f} km  val=%{z:.4g}<extra></extra>' };
   t._zrange = zrange || null;
   return t;
 }
@@ -815,15 +807,14 @@ function emptyP(pid, eid, msg) {
 }
 
 function syncY(slId, lblId, numId, ny, stObj) {
-  const sl = document.getElementById(slId);
-  const num = document.getElementById(numId);
-  const max = Math.max(0, ny - 1);
-  if (+sl.max !== max) sl.max = max;
-  if (+num.max !== max) num.max = max;
-  if (stObj.y > max) stObj.y = 0;
+  const sl = document.getElementById(slId), num = document.getElementById(numId);
+  const max = modelExtentKm()[1];
+  stObj.y = Math.max(0, Math.min(max, stObj.y));
+  sl.max = max; sl.step = ST.vel.yStep;
+  num.max = max; num.step = 'any';
   sl.value = stObj.y;
   num.value = stObj.y;
-  document.getElementById(lblId).textContent = stObj.y;
+  document.getElementById(lblId).textContent = `${stObj.y.toFixed(2)} km`;
 }
 
 function relayoutAll() {
@@ -840,7 +831,7 @@ function populateRunSelect(runs, selectedId) {
   const groups = new Map();
   const other = [];
   runs.forEach(r => {
-    // Supports both legacy run_YYYYMMDD_HHMMSS and descriptive run IDs.
+    // Run IDs contain a descriptive name and timestamp.
     const m = r.match(/(?:^|_)(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})(?:$|_)/);
     if (!m) { other.push(r); return; }
     const [_, Y, M, D, h, m2, s] = m;
@@ -1302,128 +1293,61 @@ function _highlightHypoEvent(ev, which) {
 
 /* ── Render functions ── */
 
-function trueModelUrl(y, targetQuery = '') {
-  const modelType = ST.tr.resolution === 'coarse' ? 'true' : 'true_fine';
-  const nativeQuery = ST.tr.resolution === 'coarse' ? '&native=1' : '';
-  return `/api/runs/${ST.run}/slice?type=model&model_type=${modelType}&iter=0&y=${y}${nativeQuery}${targetQuery}`;
+function trueModelUrl(yKm) {
+  return `/api/runs/${ST.run}/slice?type=model&model_type=true&y_km=${yKm}`;
 }
 
-async function renderVelPair(renderTruePanel = true) {
+function inversionResolution() {
+  const shape = ST.meta?.grid_info?.coarse_shape || [12, 12, 12];
+  // At most 57,600 pixels per slice. Upsample in x/z, never a 3-D volume.
+  const n = shape.map(size => Math.min(240, Math.max(48, size * 8)));
+  return `&nx=${n[0]}&ny=${n[1]}&nz=${n[2]}`;
+}
+
+function sliceRange(data) {
+  return [Math.min(data.vmin, data.vmax), Math.max(data.vmin, data.vmax)];
+}
+
+async function renderVelPair() {
   if (!ST.run) return;
   const request = beginPlotRequest('plot-vel', 'plot-tr');
-  const run = ST.run;
-  const iter = ST.iter;
-  const mt = ST.vel.type;
-  const velY = ST.vel.y;
-  const trY = ST.tr.y;
-  const sharedScale = ST.vel.sharedScale;
-
-  if (mt === 'diff') {
-    const dI = await apiFetch(`/api/runs/${run}/slice?type=model&model_type=iter&iter=${iter}&y=${velY}`);
-    if (!isCurrentPlotRequest(request, 'plot-vel')) return;
-    const target = dI?.full_shape;
-    const targetQuery = target ? `&nx=${target[0]}&ny=${target[1]}&nz=${target[2]}` : '';
-    const dT = await apiFetch(`/api/runs/${run}/slice?type=model&model_type=true_fine&iter=0&y=${velY}${targetQuery}`);
-    if (!isCurrentPlotRequest(request, 'plot-vel')) return;
-    if (!dT?.slice || !dI?.slice) {
-      emptyP('plot-vel','vel-empty', dT?.slice ? 'No iter model' : 'No true model — cannot diff'); return;
-    }
-    showP('plot-vel','vel-empty');
-    syncY('vel-y','vel-y-v','vel-y-num', dI.full_shape[1], ST.vel);
-    shapeBadge('vel-shape-badge', dI.full_shape);
-    const diff = sub2d(dT.slice, dI.slice);
-    const absMax = Math.max(1e-12, ...diff.flat().map(Math.abs));
-    await trackPlotRender('plot-vel',
-      buildTraces(heatTrace(diff, CS_DIVERG, undefined, [-absMax, absMax]),
-        dI.shape[0], dI.shape[1], -1, -1, dI.cell_size ?? false, velY, false, [], dI.grid_step),
-      mkLayout(dI.shape[0], dI.shape[1], 'True−Iter', [-absMax, absMax]), PLY_CFG);
-    if (renderTruePanel && isCurrentPlotRequest(request, 'plot-vel')) await _renderTrAlone();
-    return;
-  }
-
-  const isDelta = mt === 'delta_s';
+  const run = ST.run, yKm = ST.vel.y;
+  const isDelta = ST.vel.type === 'delta_s';
   const velUrl = isDelta
-    ? `/api/runs/${run}/slice?type=delta_s&iter=${iter}&y=${velY}`
-    : `/api/runs/${run}/slice?type=model&model_type=${mt}&iter=${iter}&y=${velY}`;
-
-  if (sharedScale && !isDelta) {
-    const [dV, dTr] = await Promise.all([
-      apiFetch(velUrl),
-      apiFetch(trueModelUrl(trY)),
-    ]);
-    if (!isCurrentPlotRequest(request, 'plot-vel', 'plot-tr')) return;
-    if (dV?.slice) {
-      showP('plot-vel','vel-empty');
-      syncY('vel-y','vel-y-v','vel-y-num', dV.full_shape[1], ST.vel);
-      shapeBadge('vel-shape-badge', dV.full_shape);
-    } else { emptyP('plot-vel','vel-empty','No data'); }
-    if (dTr?.slice) {
-      showP('plot-tr','tr-empty');
-      syncY('tr-y','tr-y-v','tr-y-num', dTr.full_shape[1], ST.tr);
-      shapeBadge('tr-shape-badge', dTr.full_shape);
-    } else { emptyP('plot-tr','tr-empty','No true model saved'); }
-
-    if (dV?.slice && dTr?.slice) {
-      const allVals = [...dV.slice.flat(), ...dTr.slice.flat()].filter(isFinite);
-      const gMin = Math.min(...allVals), gMax = Math.max(...allVals);
-      const zrange = [gMin, gMax];
-      await Promise.all([
-        trackPlotRender('plot-vel',
-          buildTraces(heatTrace(dV.slice, 'Viridis', undefined, zrange), dV.shape[0], dV.shape[1], -1, -1, dV.cell_size ?? false, velY, false, [], dV.grid_step),
-          mkLayout(dV.shape[0], dV.shape[1], 'Vp', zrange), PLY_CFG),
-        trackPlotRender('plot-tr',
-          buildTraces(heatTrace(dTr.slice, 'Viridis', undefined, zrange), dTr.shape[0], dTr.shape[1], -1, -1, dTr.cell_size ?? false, trY, false, [], dTr.grid_step),
-          mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true', zrange), PLY_CFG),
-      ]);
-    } else {
-      const renders = [];
-      if (dV?.slice) renders.push(trackPlotRender('plot-vel',
-        buildTraces(heatTrace(dV.slice, 'Viridis'), dV.shape[0], dV.shape[1], -1, -1, dV.cell_size ?? false, velY, false, [], dV.grid_step),
-        mkLayout(dV.shape[0], dV.shape[1], 'Vp'), PLY_CFG));
-      if (dTr?.slice) renders.push(trackPlotRender('plot-tr',
-        buildTraces(heatTrace(dTr.slice, 'Viridis'), dTr.shape[0], dTr.shape[1], -1, -1, dTr.cell_size ?? false, trY, false, [], dTr.grid_step),
-        mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true'), PLY_CFG));
-      await Promise.all(renders);
-    }
+    ? `/api/runs/${run}/slice?type=delta_s&iter=${ST.iter}&y_km=${yKm}`
+    : `/api/runs/${run}/slice?type=model&model_type=${ST.vel.type}&iter=${ST.iter}&y_km=${yKm}${inversionResolution()}`;
+  const [dV, dTr] = await Promise.all([apiFetch(velUrl), apiFetch(trueModelUrl(yKm))]);
+  if (!isCurrentPlotRequest(request, 'plot-vel', 'plot-tr')) return;
+  if (!dV?.slice || !dTr?.slice) {
+    emptyP('plot-vel', 'vel-empty', 'Model data unavailable');
+    emptyP('plot-tr', 'tr-empty', 'Independent true model unavailable');
     return;
   }
-
-  const d = await apiFetch(velUrl);
-  if (!isCurrentPlotRequest(request, 'plot-vel')) return;
-  if (!d?.slice) { emptyP('plot-vel','vel-empty','No data'); }
-  else {
-    showP('plot-vel','vel-empty');
-    syncY('vel-y','vel-y-v','vel-y-num', d.full_shape[1], ST.vel);
-    shapeBadge('vel-shape-badge', d.full_shape);
-    const velZrange = isDelta
-      ? (() => { const m = Math.max(1e-12, ...d.slice.flat().map(Math.abs)); return [-m, m]; })()
-      : undefined;
-    await trackPlotRender('plot-vel',
-      buildTraces(heatTrace(d.slice, isDelta ? CS_DIVERG : 'Viridis', undefined, velZrange),
-        d.shape[0], d.shape[1], -1, -1, d.cell_size ?? false, velY, false, [], d.grid_step),
-      mkLayout(d.shape[0], d.shape[1], isDelta ? 'Δs' : 'Vp', velZrange), PLY_CFG);
-  }
-  if (renderTruePanel && isCurrentPlotRequest(request, 'plot-vel')) await _renderTrAlone();
+  ST.truthEdges = {x: dTr.x_edges_km, z: dTr.z_edges_km};
+  shapeBadge('vel-shape-badge', dV.full_shape);
+  shapeBadge('tr-shape-badge', dTr.full_shape);
+  document.getElementById('tr-y-v').textContent = `Y: ${yKm.toFixed(2)} km`;
+  showP('plot-vel', 'vel-empty');
+  showP('plot-tr', 'tr-empty');
+  // Δs has different physical units; only two velocity images share the range.
+  const zrange = isDelta
+    ? [-Math.max(1e-12, Math.abs(dV.vmin), Math.abs(dV.vmax)),
+        Math.max(1e-12, Math.abs(dV.vmin), Math.abs(dV.vmax))]
+    : [Math.min(dV.vmin, dTr.vmin), Math.max(dV.vmax, dTr.vmax)];
+  await Promise.all([
+    trackPlotRender('plot-vel',
+      buildTraces(heatTrace(dV.slice, isDelta ? CS_DIVERG : 'Viridis', dV, zrange),
+        dV.shape[0], dV.shape[1], -1, -1, dV.cell_size, yKm, false, [], dV.grid_step),
+      mkLayout(dV.shape[0], dV.shape[1], isDelta ? 'Δs' : 'Vp', zrange), PLY_CFG),
+    trackPlotRender('plot-tr',
+      buildTraces(heatTrace(dTr.slice, 'Viridis', dTr, isDelta ? sliceRange(dTr) : zrange),
+        dTr.shape[0], dTr.shape[1], -1, -1, dTr.cell_size, yKm, false, [], dTr.grid_step),
+      mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true', isDelta ? sliceRange(dTr) : zrange), PLY_CFG),
+  ]);
 }
 
-async function _renderTrAlone() {
-  if (!ST.run) return;
-  const request = beginPlotRequest('plot-tr');
-  const run = ST.run;
-  const trY = ST.tr.y;
-  const d = await apiFetch(trueModelUrl(trY));
-  if (!isCurrentPlotRequest(request, 'plot-tr')) return;
-  if (!d?.slice) { emptyP('plot-tr','tr-empty','No true model saved'); return; }
-  showP('plot-tr','tr-empty');
-  syncY('tr-y','tr-y-v','tr-y-num', d.full_shape[1], ST.tr);
-  shapeBadge('tr-shape-badge', d.full_shape);
-  await trackPlotRender('plot-tr',
-    buildTraces(heatTrace(d.slice, 'Viridis'), d.shape[0], d.shape[1], -1, -1, d.cell_size ?? false, trY, false, [], d.grid_step),
-    mkLayout(d.shape[0], d.shape[1], 'Vp true'), PLY_CFG);
-}
+const renderVel = renderVelPair;
 
-const renderVel = () => ST.vel.sharedScale ? renderVelPair() : renderVelPair(false);
-const renderTr  = () => ST.vel.sharedScale ? renderVelPair() : _renderTrAlone();
 
 /* ── Ray Count panel ── */
 function diagnosticExpanded(plotId) {
@@ -1437,7 +1361,7 @@ async function renderRayCount(force = false) {
   const iter = ST.iter;
   const { event, weight, y, dim } = ST.rc;
   const d = await apiFetch(
-    `/api/runs/${run}/slice?type=ray_count&event=${event}&weight=${weight}&iter=${iter}&y=${y}`
+    `/api/runs/${run}/slice?type=ray_count&event=${event}&weight=${weight}&iter=${iter}&y_km=${y}`
   );
   if (!isCurrentPlotRequest(request, 'plot-rc')) return;
   if (!d?.slice) { emptyP('plot-rc','rc-empty','No ray_count data — check G is saved'); return; }
@@ -1445,7 +1369,7 @@ async function renderRayCount(force = false) {
   syncY('rc-y','rc-y-v','rc-y-num', d.full_shape[1], ST.rc);
   shapeBadge('rc-shape-badge', d.full_shape);
   await trackPlotRender('plot-rc',
-    buildTraces(heatTrace(d.slice, CS_RAYS), d.shape[0], d.shape[1], -1, event, true, y, dim),
+    buildTraces(heatTrace(d.slice, CS_RAYS, d), d.shape[0], d.shape[1], -1, event, true, y, dim),
     mkLayout(d.shape[0], d.shape[1], 'rays'), PLY_CFG);
 }
 
@@ -1455,16 +1379,16 @@ async function renderWt() {
   const run = ST.run;
   const iter = ST.iter;
   const { event, y, dim } = ST.wt;
-  const d = await apiFetch(`/api/runs/${run}/slice?type=weights&event=${event}&iter=${iter}&y=${y}`);
+  const d = await apiFetch(`/api/runs/${run}/slice?type=weights&event=${event}&iter=${iter}&y_km=${y}`);
   if (!isCurrentPlotRequest(request, 'plot-wt')) return;
   if (!d?.slice) { emptyP('plot-wt','wt-empty','No data'); return; }
   showP('plot-wt','wt-empty');
-  syncY('wt-y','wt-y-v','wt-y-num', d.full_shape[1], ST.wt);
+  syncWeightsY();
   shapeBadge('wt-shape-badge', d.full_shape);
   await trackPlotRender('plot-wt',
-    buildTraces(heatTrace(d.slice, [[0,'#f0f4ff'],[0.5,'#6699dd'],[1,'#0a2a7a']]),
-      d.shape[0], d.shape[1], -1, event, false, y, dim, d.hypocenters),
-    mkLayout(d.shape[0], d.shape[1], 'w'), PLY_CFG);
+    buildTraces(heatTrace(d.slice, [[0,'#f0f4ff'],[0.5,'#6699dd'],[1,'#0a2a7a']], d),
+      d.shape[0], d.shape[1], -1, event, false, y, dim, d.hypocenters, [1, 1], true),
+    mkLayout(d.shape[0], d.shape[1], 'w', null, true), PLY_CFG);
 }
 
 async function renderG(force = false) {
@@ -1474,7 +1398,7 @@ async function renderG(force = false) {
   const iter = ST.iter;
   const { event, station, weight, y, dim } = ST.G;
   const d = await apiFetch(
-    `/api/runs/${run}/slice?type=G&event=${event}&station=${station}&weight=${weight}&iter=${iter}&y=${y}`
+    `/api/runs/${run}/slice?type=G&event=${event}&station=${station}&weight=${weight}&iter=${iter}&y_km=${y}`
   );
   if (!isCurrentPlotRequest(request, 'plot-G')) return;
   if (!d?.slice) { emptyP('plot-G','g-empty','No data — check event/station/weight'); return; }
@@ -1482,9 +1406,10 @@ async function renderG(force = false) {
   syncY('g-y','g-y-v','g-y-num', d.full_shape[1], ST.G);
   shapeBadge('g-shape-badge', d.full_shape);
   await trackPlotRender('plot-G',
-    buildTraces(heatTrace(d.slice, CS_RDBU, 0), d.shape[0], d.shape[1], station, event, false, y, dim, d.hypocenters),
+    buildTraces(heatTrace(d.slice, CS_RDBU, d), d.shape[0], d.shape[1], station, event, false, y, dim, d.hypocenters),
     mkLayout(d.shape[0], d.shape[1], 'G'), PLY_CFG);
 }
+
 
 function renderSpatialPlots() {
   renderVelPair();
@@ -1500,37 +1425,86 @@ function renderAll() {
   renderHypoMetrics();
 }
 
+function snapYKm(value) {
+  const width = modelExtentKm()[1];
+  return Math.max(0, Math.min(width,
+    Number((Math.round(value / ST.vel.yStep) * ST.vel.yStep).toFixed(8))));
+}
+
+function configureModelY(resetStep = false) {
+  const width = modelExtentKm()[1];
+  if (!Number.isFinite(width) || width <= 0) return;
+  if (resetStep) ST.vel.yStep = width / 10;
+  const slider = document.getElementById('vel-y');
+  const num = document.getElementById('vel-y-num');
+  const step = document.getElementById('vel-y-step');
+  slider.max = width; slider.step = ST.vel.yStep;
+  num.max = width; num.step = 'any';
+  step.max = width; step.value = Number(ST.vel.yStep.toFixed(3));
+  ST.vel.y = snapYKm(ST.vel.y);
+  slider.value = ST.vel.y;
+  num.value = ST.vel.y;
+  document.getElementById('vel-y-v').textContent = `${ST.vel.y.toFixed(2)} km`;
+  document.getElementById('tr-y-v').textContent = `Y: ${ST.vel.y.toFixed(2)} km`;
+}
+
+function setModelY(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return;
+  ST.vel.y = snapYKm(parsed);
+  configureModelY();
+  renderVelPair();
+}
+
 function setY(prefix, stateObj, value, renderFn) {
-  const max = +document.getElementById(`${prefix}-y`).max || 0;
-  const v = Math.max(0, Math.min(max, +value || 0));
-  stateObj.y = v;
-  document.getElementById(`${prefix}-y`).value = v;
-  document.getElementById(`${prefix}-y-num`).value = v;
-  document.getElementById(`${prefix}-y-v`).textContent = v;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return;
+  stateObj.y = snapYKm(parsed);
+  const slider = document.getElementById(`${prefix}-y`);
+  slider.value = stateObj.y;
+  document.getElementById(`${prefix}-y-num`).value = stateObj.y;
+  document.getElementById(`${prefix}-y-v`).textContent = `${stateObj.y.toFixed(2)} km`;
   renderFn();
+}
+
+function weightsGeometry() {
+  const grid = ST.meta?.grid_info;
+  return { ny: grid?.fine_shape?.[1] || 1, step: (grid?.fine_cell_size || 1000) / 1000 };
+}
+
+function syncWeightsY() {
+  const { ny, step } = weightsGeometry();
+  const layer = Math.max(0, Math.min(ny - 1, Math.floor(ST.wt.y / step)));
+  ST.wt.y = (layer + 0.5) * step;
+  for (const id of ['wt-y', 'wt-y-num']) {
+    const element = document.getElementById(id);
+    element.max = ny - 1; element.step = 1; element.value = layer;
+  }
+  document.getElementById('wt-y-v').textContent = `${ST.wt.y.toFixed(3)} km`;
+  document.getElementById('wt-true-y').disabled = !ST.meta?.event_locs?.[ST.wt.event];
+}
+
+function setWeightsLayer(value) {
+  const layer = Number(value);
+  if (!Number.isFinite(layer)) return;
+  const { ny, step } = weightsGeometry();
+  ST.wt.y = (Math.max(0, Math.min(ny - 1, Math.round(layer))) + 0.5) * step;
+  syncWeightsY();
+  renderWt();
+}
+
+function jumpWeightsToTrueY() {
+  const loc = ST.meta?.event_locs?.[ST.wt.event];
+  if (loc) setWeightsLayer(Math.floor(loc[1] / 1000 / weightsGeometry().step));
 }
 
 function bindYControls(prefix, stateObj, renderFn) {
   document.getElementById(`${prefix}-y`).addEventListener('input', e => setY(prefix, stateObj, e.target.value, renderFn));
   document.getElementById(`${prefix}-y-num`).addEventListener('change', e => setY(prefix, stateObj, e.target.value, renderFn));
-  document.getElementById(`${prefix}-y-dec`).addEventListener('click', () => setY(prefix, stateObj, stateObj.y - 1, renderFn));
-  document.getElementById(`${prefix}-y-inc`).addEventListener('click', () => setY(prefix, stateObj, stateObj.y + 1, renderFn));
+  document.getElementById(`${prefix}-y-dec`).addEventListener('click', () => setY(prefix, stateObj, stateObj.y - ST.vel.yStep, renderFn));
+  document.getElementById(`${prefix}-y-inc`).addEventListener('click', () => setY(prefix, stateObj, stateObj.y + ST.vel.yStep, renderFn));
 }
 
-function goToEventLayer() {
-  const locs = ST.meta?.event_locs;
-  const c = csz(false);
-  const status = document.getElementById('wt-layer-status');
-  if (!locs?.[ST.wt.event] || !c) {
-    status.textContent = 'Layer: —';
-    return;
-  }
-  const y = Math.round(locs[ST.wt.event][1] / c - 0.5);
-  const max = +document.getElementById('wt-y').max || 0;
-  const clamped = Math.max(0, Math.min(max, y));
-  setY('wt', ST.wt, clamped, renderWt);
-  status.textContent = `Layer: y=${clamped}`;
-}
 
 /* ── Populate helpers ── */
 function fillSelect(id, count, prefix) {
@@ -1583,13 +1557,16 @@ async function loadRun(rid, targetIter = null) {
   ST.hypoQ.hilightEv = -1;
   ST.hypoD.hilightEv = -1;
   ['vel','tr','rc','wt','G'].forEach(k => { if (ST[k]) ST[k].y = 0; });
-  ['vel-y','tr-y','rc-y','wt-y','g-y'].forEach(id => {
+  ST.truthEdges = null;
+  ST.vel.type = 'iter';
+  document.getElementById('vel-type').value = 'iter';
+  ['vel-y','rc-y','wt-y','g-y'].forEach(id => {
     const el = document.getElementById(id); if (el) { el.value = 0; el.max = 0; }
   });
-  ['vel-y-num','tr-y-num','rc-y-num','wt-y-num','g-y-num'].forEach(id => {
+  ['vel-y-num','rc-y-num','wt-y-num','g-y-num'].forEach(id => {
     const el = document.getElementById(id); if (el) { el.value = 0; el.max = 0; }
   });
-  document.getElementById('wt-layer-status').textContent = 'Layer: —';
+
 
   const [meta, info, timing, quality] = await Promise.all([
     apiFetch(`/api/runs/${rid}/meta`),
@@ -1600,6 +1577,9 @@ async function loadRun(rid, targetIter = null) {
   if (loadToken !== LOAD_RUN_TOKEN || ST.run !== rid) return;
   ST.meta = meta || {};
   ST.info = info || {};
+  configureModelY(true);
+  syncWeightsY();
+  document.getElementById('run-select').title = rid;
   ST.timing.data = timing || [];
   ST.quality.data = quality || [];
 
@@ -1651,17 +1631,29 @@ document.getElementById('timing-mode').addEventListener('change', e => {
   ST.timing.mode = e.target.value; renderTiming();
 });
 
-document.getElementById('cb-shared-vel-scale').addEventListener('change', e => { ST.vel.sharedScale = e.target.checked; renderVelPair(); });
-document.getElementById('tr-resolution').addEventListener('change', e => {
-  ST.tr.resolution = e.target.value;
-  ST.tr.y = 0;
-  renderVelPair();
-});
-
-// Vel
+// The velocity panels always use a shared scale and the same physical Y.
 document.getElementById('vel-type').addEventListener('change', e => { ST.vel.type = e.target.value; renderVel(); });
-bindYControls('vel', ST.vel, renderVel);
-bindYControls('tr', ST.tr, () => (ST.vel.sharedScale ? renderVelPair() : _renderTrAlone()));
+document.getElementById('vel-y').addEventListener('input', e => setModelY(e.target.value));
+document.getElementById('vel-y-num').addEventListener('change', e => setModelY(e.target.value));
+document.getElementById('vel-y-dec').addEventListener('click', () => setModelY(ST.vel.y - ST.vel.yStep));
+document.getElementById('vel-y-inc').addEventListener('click', () => setModelY(ST.vel.y + ST.vel.yStep));
+document.getElementById('vel-y-step').addEventListener('change', e => {
+  const step = Number(e.target.value), width = modelExtentKm()[1];
+  if (!Number.isFinite(step) || step <= 0 || step > width) {
+    e.target.value = ST.vel.yStep;
+    return;
+  }
+  ST.vel.yStep = step;
+  configureModelY();
+  for (const prefix of ['rc', 'g']) {
+    const slider = document.getElementById(`${prefix}-y`);
+    slider.step = step;
+    const state = prefix === 'g' ? ST.G : ST[prefix];
+    state.y = snapYKm(state.y);
+    if (Number(slider.max) > 0) syncY(`${prefix}-y`, `${prefix}-y-v`, `${prefix}-y-num`, 1, state);
+  }
+  renderSpatialPlots();
+});
 
 // Ray Count
 document.getElementById('rc-ev').addEventListener('change', async e => { ST.rc.event = +e.target.value; await reloadRcWeights(); renderRayCount(); });
@@ -1670,11 +1662,14 @@ document.getElementById('cb-dim-rc').addEventListener('change', e => { ST.rc.dim
 bindYControls('rc', ST.rc, renderRayCount);
 
 // Wt
-document.getElementById('wt-go-layer').addEventListener('click', goToEventLayer);
-document.getElementById('cb-dim-wt').addEventListener('change', e => { ST.wt.dim = e.target.checked; renderWt(); });
-document.getElementById('wt-ev').addEventListener('change', e => { ST.wt.event = +e.target.value; goToEventLayer(); renderWt(); });
 
-bindYControls('wt', ST.wt, renderWt);
+document.getElementById('cb-dim-wt').addEventListener('change', e => { ST.wt.dim = e.target.checked; renderWt(); });
+document.getElementById('wt-ev').addEventListener('change', e => { ST.wt.event = +e.target.value; syncWeightsY(); renderWt(); });
+document.getElementById('wt-y').addEventListener('input', e => setWeightsLayer(e.target.value));
+document.getElementById('wt-y-num').addEventListener('change', e => setWeightsLayer(e.target.value));
+document.getElementById('wt-y-dec').addEventListener('click', () => setWeightsLayer(Number(document.getElementById('wt-y').value) - 1));
+document.getElementById('wt-y-inc').addEventListener('click', () => setWeightsLayer(Number(document.getElementById('wt-y').value) + 1));
+document.getElementById('wt-true-y').addEventListener('click', jumpWeightsToTrueY);
 
 // G
 document.getElementById('g-ev').addEventListener('change', async e => { ST.G.event = +e.target.value; await reloadGWeights(); renderG(); });
@@ -1696,7 +1691,7 @@ document.getElementById('hypod-topn').addEventListener('change', e => {
 async function renderPlotForDownload(plotId) {
   switch (plotId) {
     case 'plot-vel': await renderVelPair(); break;
-    case 'plot-tr': await (ST.vel.sharedScale ? renderVelPair() : _renderTrAlone()); break;
+    case 'plot-tr': await renderVelPair(); break;
     case 'plot-rc': await renderRayCount(true); break;
     case 'plot-wt': await renderWt(); break;
     case 'plot-G': await renderG(true); break;

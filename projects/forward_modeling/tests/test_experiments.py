@@ -43,6 +43,49 @@ def solver_mock(monkeypatch):
     return compute, convergence
 
 
+def test_noise_metadata_and_clean_convergence(tmp_path, inputs, solver_mock):
+    from projects.forward_modeling import NoiseConfig
+
+    io.save_inputs(tmp_path, "noisy", *inputs)
+    noise = NoiseConfig(0.01, 0.05, 123)
+    destination = io.run_experiment(tmp_path, "noisy", noise=noise, check_accuracy=True)
+    metadata = json.loads((destination / "metadata.json").read_text())
+    assert metadata["noise"]["enabled"] is True
+    assert metadata["noise"]["config"] == asdict(noise)
+    assert metadata["noise"]["sigma_reference"] == "noiseless_absolute_travel_time_s"
+    assert metadata["noise"]["convergence"] == "noiseless"
+    compute, convergence = solver_mock
+    assert compute.call_args.kwargs["noise"] == noise
+    assert "noise" not in convergence.call_args.kwargs
+
+
+@pytest.mark.parametrize("extra,expected", [
+    (["--noise"], {"relative_sigma": 0.01, "absolute_sigma_s": 0.05, "seed": 42}),
+    (["--noise", "--noise-relative-sigma", "0", "--noise-absolute-sigma-s", "0.1", "--noise-seed", "7"],
+     {"relative_sigma": 0., "absolute_sigma_s": 0.1, "seed": 7}),
+])
+def test_cli_noise(monkeypatch, extra, expected):
+    run = Mock(return_value=Path("output/noisy"))
+    monkeypatch.setattr(cli, "run_experiment", run)
+    assert cli.main(["noisy", *extra]) == 0
+    assert asdict(run.call_args.kwargs["noise"]) == expected
+
+
+@pytest.mark.parametrize("extra", [
+    ["--noise-relative-sigma", "0.01"],
+    ["--noise", "--noise-relative-sigma", "nan"],
+    ["--noise", "--noise-absolute-sigma-s", "-0.1"],
+    ["--noise", "--noise-seed", "-1"],
+])
+def test_cli_rejects_invalid_noise(monkeypatch, extra):
+    run = Mock()
+    monkeypatch.setattr(cli, "run_experiment", run)
+    with pytest.raises(SystemExit) as error:
+        cli.main(["noisy", *extra])
+    assert error.value.code == 1
+    run.assert_not_called()
+
+
 def test_inputs_roundtrip(tmp_path, inputs):
     directory = io.save_inputs(tmp_path, "case-1", *inputs)
     assert directory == tmp_path / "input" / "case-1"

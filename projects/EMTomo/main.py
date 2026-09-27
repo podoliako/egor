@@ -1,7 +1,8 @@
+import argparse
 import cProfile
 import csv
 import pstats
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from pstats import SortKey
 
@@ -39,6 +40,7 @@ class ExampleConfig:
     checkerboard_anomaly_fraction: float = 0.05
     checkerboard_cell_size: float = 20_000.0
     checkerboard_block_shape: tuple[int, int, int] | None = None
+    checkerboard_pattern_shape: tuple[int, int, int] | None = None
     checkerboard_rotation_degrees: float = 45.0
 
     # Synthetic arrival generation: events are placed on a uniform volume grid.
@@ -235,6 +237,20 @@ def build_true_model(model: VelocityModel, config: ExampleConfig) -> None:
         raise ValueError(
             "checkerboard_block_shape must contain three positive values"
         )
+    if config.checkerboard_pattern_shape is not None and (
+        len(config.checkerboard_pattern_shape) != 3
+        or min(config.checkerboard_pattern_shape) <= 0
+    ):
+        raise ValueError(
+            "checkerboard_pattern_shape must contain three positive values"
+        )
+    if (
+        config.checkerboard_block_shape is not None
+        and config.checkerboard_pattern_shape is not None
+    ):
+        raise ValueError(
+            "Set either checkerboard_block_shape or checkerboard_pattern_shape, not both"
+        )
 
     n_x, n_y, n_z = model.grid.vp.shape
     cell_size = model.geometry.side_size
@@ -250,11 +266,19 @@ def build_true_model(model: VelocityModel, config: ExampleConfig) -> None:
     angle = np.deg2rad(config.checkerboard_rotation_degrees)
     rotated_x = np.cos(angle) * x + np.sin(angle) * y
     rotated_y = -np.sin(angle) * x + np.cos(angle) * y
-    checker_sizes = (
-        tuple(size * config.cell_size for size in config.checkerboard_block_shape)
-        if config.checkerboard_block_shape is not None
-        else (config.checkerboard_cell_size,) * 3
-    )
+    if config.checkerboard_pattern_shape is not None:
+        checker_sizes = tuple(
+            model_size * cell_size / pattern_size
+            for model_size, pattern_size in zip(
+                (n_x, n_y, n_z), config.checkerboard_pattern_shape
+            )
+        )
+    elif config.checkerboard_block_shape is not None:
+        checker_sizes = tuple(
+            size * config.cell_size for size in config.checkerboard_block_shape
+        )
+    else:
+        checker_sizes = (config.checkerboard_cell_size,) * 3
     checker_index = (
         np.floor(rotated_x / checker_sizes[0]).astype(np.int64)
         + np.floor(rotated_y / checker_sizes[1]).astype(np.int64)
@@ -267,7 +291,20 @@ def build_true_model(model: VelocityModel, config: ExampleConfig) -> None:
     )
 
 
-def main(config: ExampleConfig = CONFIG) -> None:
+def main(config: ExampleConfig = CONFIG, *, experiment_id: str | None = None,
+         experiments_root: str | Path | None = None, validate_only: bool = False):
+    if experiment_id is not None:
+        from experiment_runner import run_saved_experiment
+
+        kwargs = {"validate_only": validate_only}
+        if experiments_root is not None:
+            kwargs["experiments_root"] = experiments_root
+        return run_saved_experiment(experiment_id, config, **kwargs)
+    if validate_only:
+        raise ValueError("validate_only requires an experiment_id")
+
+    # Legacy synthetic scenarios can still call main(config). New invocations
+    # use the experiment ID entry point below; no forward solve happens here.
     n_x, n_y, n_z = config.grid_shape
     model_config = {
         "lon": config.lon,
@@ -389,4 +426,32 @@ def main(config: ExampleConfig = CONFIG) -> None:
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Run EMTomo on a saved forward experiment")
+    parser.add_argument("experiment_id", help="Name of matching input/ and output/ experiment directories")
+    parser.add_argument("--experiments-root", type=Path, default=None)
+    parser.add_argument("--cell-size-m", type=float, default=CONFIG.cell_size,
+                        help="Inversion cell side in metres (must tile the forward domain)")
+    parser.add_argument("--subdivision", type=int, default=CONFIG.subdivision)
+    parser.add_argument("--cycles", type=int, default=CONFIG.n_cycles)
+    parser.add_argument("--workers", type=int, default=CONFIG.n_workers)
+    parser.add_argument("--lambda-reg", type=float, default=CONFIG.lambda_reg)
+    parser.add_argument("--coverage-damping-power", type=float, default=CONFIG.coverage_damping_power)
+    parser.add_argument("--max-velocity-step-fraction", type=float, default=CONFIG.max_velocity_step_fraction)
+    parser.add_argument("--run-name", type=str, default=CONFIG.run_name)
+    parser.add_argument("--runs-dir", type=str, default=CONFIG.runs_dir)
+    parser.add_argument("--validate-only", action="store_true",
+                        help="Check the experiment and inversion setup without running EM")
+    args = parser.parse_args()
+    if args.subdivision < 1 or args.cycles < 1 or args.workers < 1:
+        parser.error("--subdivision, --cycles and --workers must be positive")
+    if args.lambda_reg < 0 or args.coverage_damping_power < 0 or not 0 < args.max_velocity_step_fraction <= 1:
+        parser.error("--lambda-reg and --coverage-damping-power must be nonnegative; --max-velocity-step-fraction must be in (0, 1]")
+    config = replace(CONFIG, cell_size=args.cell_size_m, subdivision=args.subdivision,
+                     n_cycles=args.cycles, n_workers=args.workers, runs_dir=args.runs_dir,
+                     lambda_reg=args.lambda_reg, coverage_damping_power=args.coverage_damping_power,
+                     max_velocity_step_fraction=args.max_velocity_step_fraction, run_name=args.run_name)
+    try:
+        main(config, experiment_id=args.experiment_id,
+             experiments_root=args.experiments_root, validate_only=args.validate_only)
+    except (FileNotFoundError, ValueError) as error:
+        parser.error(str(error))

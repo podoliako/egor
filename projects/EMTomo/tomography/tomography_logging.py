@@ -8,7 +8,7 @@ import time
 from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 import numpy as np
 
@@ -74,7 +74,7 @@ class TomographyLogger:
             np.save(stream, values)
         temporary.replace(path)
 
-    def save_meta(self, run_params, station_locs, event_locs, grid_info=None):
+    def save_meta(self, run_params, station_locs, event_locs, grid_info=None, source_experiment=None):
         meta = {
             "run_id": self.run_id,
             "started_at": self.started_at.isoformat(),
@@ -85,6 +85,7 @@ class TomographyLogger:
             "station_locs": [list(s) for s in station_locs],
             "event_locs": [list(e) for e in event_locs],
             "grid_info": grid_info or {},
+            "source_experiment": source_experiment,
         }
         path = self.run_dir / "meta.json"
         temporary = path.with_suffix(".json.tmp")
@@ -132,27 +133,21 @@ class TomographyLogger:
         self,
         iteration: int,
         event_idx: int,
-        weights: np.ndarray | Mapping[str, np.ndarray],
+        weights: Mapping[str, np.ndarray],
         positions: Optional[np.ndarray] = None,
         weight_values: Optional[np.ndarray] = None,
         misfit: Optional[np.ndarray] = None,
         residuals: Optional[np.ndarray] = None,
-        G_per_weight: Optional[
-            Dict[int, Dict[str, np.ndarray] | List[np.ndarray]]
-        ] = None,
+        G_per_weight: Optional[Dict[int, Dict[str, np.ndarray]]] = None,
         ray_count_per_weight: Optional[Dict[int, np.ndarray]] = None,
     ):
         event_dir = self.iter_dir(iteration) / f"event_{event_idx}"
         event_dir.mkdir(exist_ok=True)
 
-        payload = {}
-        if isinstance(weights, Mapping):
-            payload["weight_shape"] = np.asarray(weights["shape"], dtype=np.int32)
-            payload["weight_indices"] = np.asarray(
-                weights["indices"], dtype=np.int32
-            )
-        else:
-            payload["weights"] = np.asarray(weights)
+        payload = {
+            "weight_shape": np.asarray(weights["shape"], dtype=np.int32),
+            "weight_indices": np.asarray(weights["indices"], dtype=np.int32),
+        }
         if positions is not None:
             payload["positions"] = np.asarray(positions, dtype=np.float64)
         if weight_values is not None:
@@ -175,18 +170,7 @@ class TomographyLogger:
             for w_idx, sparse_g in G_per_weight.items():
                 w_dir = event_dir / f"weight_{w_idx}"
                 w_dir.mkdir(exist_ok=True)
-                if isinstance(sparse_g, dict):
-                    np.savez_compressed(
-                        w_dir / "G_stations_sparse.npz",
-                        **sparse_g,
-                    )
-                else:
-                    # Backward compatibility for callers using the old logger API.
-                    for station_idx, g in enumerate(sparse_g):
-                        np.savez_compressed(
-                            w_dir / f"G_station_{station_idx}.npz",
-                            G=np.asarray(g, dtype=np.float32),
-                        )
+                np.savez_compressed(w_dir / "G_stations_sparse.npz", **sparse_g)
 
     def start_iteration(self, iteration: int):
         self._iter_start = time.perf_counter()

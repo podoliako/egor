@@ -32,8 +32,10 @@ def test_logger_uses_descriptive_run_id_and_persists_identity(tmp_path):
 
 def test_event_log_keeps_refined_positions_and_coverage_without_g(tmp_path):
     logger = TomographyLogger(base_dir=tmp_path)
-    weights = np.zeros((2, 2, 2), dtype=np.float64)
-    weights[1, 0, 1] = 1.0
+    weights = {
+        "shape": np.array([2, 2, 2], dtype=np.int32),
+        "indices": np.array([[1, 0, 1]], dtype=np.int32),
+    }
     positions = np.array([[1.25, 0.1, 0.75]])
     ray_count = np.ones((1, 1, 1), dtype=np.int16)
 
@@ -49,7 +51,8 @@ def test_event_log_keeps_refined_positions_and_coverage_without_g(tmp_path):
 
     event_dir = logger.run_dir / "iter_0" / "event_0"
     with np.load(event_dir / "weights.npz") as saved:
-        np.testing.assert_array_equal(saved["weights"], weights)
+        np.testing.assert_array_equal(saved["weight_shape"], weights["shape"])
+        np.testing.assert_array_equal(saved["weight_indices"], weights["indices"])
         np.testing.assert_array_equal(saved["positions"], positions)
         np.testing.assert_array_equal(saved["weight_values"], [1.0])
     np.testing.assert_array_equal(
@@ -78,7 +81,7 @@ def test_sparse_g_log_round_trip(tmp_path):
     logger.save_event_data(
         iteration=0,
         event_idx=0,
-        weights=np.ones((1, 1, 1)),
+        weights={"shape": np.ones(3, dtype=np.int32), "indices": np.array([[0, 0, 0]], dtype=np.int32)},
         G_per_weight={0: _sparsify_G_stations(dense)},
     )
 

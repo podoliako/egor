@@ -8,6 +8,7 @@ from tomography.tomography_events import (
     _mp_event_chunk_task,
     _partition_event_tasks,
 )
+from tomography.tomography_math import _normal_equation_contribution
 
 
 def test_event_tasks_are_partitioned_once_into_balanced_ordered_chunks():
@@ -84,6 +85,29 @@ def test_chunk_worker_returns_one_normal_system_with_explicit_event_indices():
     np.testing.assert_allclose(hessian, np.full((2, 2), 11.0))
     np.testing.assert_allclose(rhs, np.full(2, 10.0))
     assert logs == [(4, ("event", 4)), (5, ("event", 5))]
+
+
+def test_sparse_normal_equations_match_explicit_dense_centering():
+    rng = np.random.default_rng(17)
+    sensitivities = np.zeros((7, 3, 2, 2), dtype=np.float64)
+    flat = sensitivities.reshape(7, -1)
+    flat[:, [1, 4, 9]] = rng.normal(size=(7, 3))
+    residuals = rng.normal(size=7)
+    valid = np.asarray([True, True, False, True, True, False, True])
+    weight = 0.37
+
+    hessian, rhs = _normal_equation_contribution(
+        sensitivities, residuals, sensitivities.shape[1:], weight, valid
+    )
+    rows = flat[valid]
+    centered_rows = rows - rows.mean(axis=0, keepdims=True)
+    centered_residuals = residuals[valid] - residuals[valid].mean()
+    scale = weight * len(rows)
+
+    np.testing.assert_allclose(hessian, scale * centered_rows.T @ centered_rows)
+    np.testing.assert_allclose(rhs, scale * centered_rows.T @ centered_residuals)
+    assert not np.any(hessian[0])
+    assert not np.any(hessian[:, 0])
 
 
 def test_512_events_produce_at_most_one_dense_result_per_worker():

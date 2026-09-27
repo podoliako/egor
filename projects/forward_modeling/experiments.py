@@ -167,7 +167,7 @@ def _sha256(path):
 
 
 def run_experiment(root, experiment_id, config=ForwardConfig(), check_accuracy=False,
-                   max_difference_s=None) -> Path:
+                   max_difference_s=None, *, noise=None) -> Path:
     """Compute existing inputs and atomically publish results exactly once.
 
     Times are relative to the earliest station arrival for each event, not
@@ -192,7 +192,8 @@ def run_experiment(root, experiment_id, config=ForwardConfig(), check_accuracy=F
         arrivals = _validated_arrivals(
             (arrival.station_id, arrival.event_id, arrival.arrival_time_s)
             for arrival in solver.compute_arrivals(
-                model=model, stations=stations, events=events, config=config
+                model=model, stations=stations, events=events, config=config,
+                **({"noise": noise} if noise is not None else {}),
             )
         )
         convergence = None
@@ -243,6 +244,17 @@ def run_experiment(root, experiment_id, config=ForwardConfig(), check_accuracy=F
                       "arrival_time": "s", "elapsed_time": "s"},
             "input_sha256": hashes,
             "elapsed_seconds": elapsed,
+        }
+        metadata["noise"] = {
+            "enabled": noise is not None,
+            "model": "independent_gaussian_relative_plus_absolute",
+            "config": asdict(noise) if noise is not None else None,
+            "sigma_reference": "noiseless_absolute_travel_time_s",
+            "application": "before_subtracting_earliest_noisy_arrival_per_event",
+            "negative_picks": "not_clipped_before_normalization",
+            "rng": "PCG64_pair_sha256_v1",
+            "numpy_version": np.__version__,
+            "convergence": "noiseless",
         }
         if max_difference_s is not None:
             metadata["max_difference_s"] = max_difference_s
