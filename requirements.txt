@@ -16,6 +16,7 @@ pandas==2.3.3
 pillow==12.0.0
 psycopg2==2.9.11
 pyogrio==0.12.1
+pykonal==0.4.1
 pyparsing==3.2.5
 pyproj==3.7.2
 pyshp==3.0.3
