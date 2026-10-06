@@ -4,14 +4,16 @@ from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 
-from .instruments_coords import (
-    MetricPoint,
+from archive.legacy_synthetics.locations import (
     _resolve_event_locs_metric,
     _resolve_station_locs_metric,
+)
+from instruments.instruments_coords import (
+    MetricPoint,
     metric_to_cell_coord,
     sample_cell_centered_trilinear,
 )
-from .instruments_travel import compute_station_travel_time_fields
+from instruments.instruments_travel import compute_station_travel_time_fields
 
 
 def generate_synthetic_arrivals_table(

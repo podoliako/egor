@@ -25,6 +25,7 @@ __pycache__/
 *.gif
 *.png
 runs/
+projects/forward_modeling/experiments/logs/
 LOTOS/
 TomoDD/
 

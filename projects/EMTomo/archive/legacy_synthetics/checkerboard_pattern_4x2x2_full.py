@@ -12,14 +12,14 @@ Coverage is scaled from the successful reduced 16 x 8 x 8 experiment:
 - noise-free synthetic arrivals.
 
 Run from the EMTomo directory:
-    python -u checkerboard_pattern_4x2x2_full.py
+    python -u -m archive.legacy_synthetics.checkerboard_pattern_4x2x2_full
 """
 from dataclasses import replace
 
-from checkerboard_4x2x2_sub8_final import (
+from .checkerboard_4x2x2_sub8_final import (
     CHECKERBOARD_4X2X2_SUB8_FINAL_CONFIG,
 )
-from main import main
+from .runner import main
 
 
 CHECKERBOARD_PATTERN_4X2X2_FULL_CONFIG = replace(

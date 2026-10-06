@@ -8,15 +8,14 @@ import numpy as np
 from instruments.instruments import (
     coarsen_G_all,
     compute_cellwise_pairwise_misfit,
-    compute_weights_from_misfit,
 )
+from instruments.instruments_coords import sample_cell_centered_trilinear_batch
+from instruments.instruments_weights import candidate_posterior_weights, candidate_station_sigmas
 from raytracing import compute_G_all_stations, compute_G_all_stations_serial
 from .tomography_math import (
-    _calculate_residuals,
     _normal_equation_contribution,
     _refine_epicenter_in_cell,
     _select_top_n_cells_by_misfit,
-    _station_residuals_at_coord,
 )
 
 _MP: dict = {}
@@ -75,10 +74,16 @@ def _process_event(
     temperature: float,
     weights_top_n: int,
     weights_min_distance: int,
+    weight_noise_relative_sigma: float,
+    weight_noise_absolute_sigma_s: float,
+    weight_model_sigma_s: float,
     compute_G: Callable[..., tuple[np.ndarray, np.ndarray]],
     log_G_per_weight: bool,
     log_misfit: bool,
+    candidate_mode: str = "soft",
 ) -> tuple:
+    if candidate_mode not in ("soft", "hard"):
+        raise ValueError("candidate_mode must be 'soft' or 'hard'")
     step = 0.1
 
     misfit = compute_cellwise_pairwise_misfit(sf, observed)
@@ -95,10 +100,21 @@ def _process_event(
         refined_positions.append(position)
         refined_misfits.append(refined_misfit)
 
-    weights_values = compute_weights_from_misfit(
-        np.asarray(refined_misfits, dtype=np.float64),
+    predicted_times = np.stack([
+        sample_cell_centered_trilinear_batch(sf, position)
+        for position in refined_positions
+    ])
+    weights_values = candidate_posterior_weights(
+        predicted_times, observed,
+        relative_sigma=weight_noise_relative_sigma,
+        absolute_sigma_s=weight_noise_absolute_sigma_s,
+        model_sigma_s=weight_model_sigma_s,
         temperature=temperature,
     )
+    if candidate_mode == "hard":
+        best = int(np.argmax(weights_values))
+        weights_values = np.zeros_like(weights_values)
+        weights_values[best] = 1.0
     logged_misfit = misfit.copy() if log_misfit else None
     if logged_misfit is not None:
         for cell_index, refined_misfit in zip(weights_indices, refined_misfits):
@@ -142,20 +158,26 @@ def _process_event(
             subdivision,
             slowness_interpolation=slowness_interpolation,
         )
-        residuals = _calculate_residuals(sf, observed, epic)
-        station_residuals = _station_residuals_at_coord(sf, observed, epic)
+        station_residuals = observed - predicted_times[w_idx]
+        station_sigmas = candidate_station_sigmas(
+            predicted_times[w_idx],
+            relative_sigma=weight_noise_relative_sigma,
+            absolute_sigma_s=weight_noise_absolute_sigma_s,
+            model_sigma_s=weight_model_sigma_s,
+        )
         hessian_w, rhs_w = _normal_equation_contribution(
             station_sensitivities=G_stations,
             station_residuals=station_residuals,
             model_shape=coarse_shape,
             weight=float(weight_val),
             valid_stations=ray_reached,
+            station_sigmas=station_sigmas,
         )
         hessian += hessian_w
         rhs += rhs_w
 
         if first_residuals is None:
-            first_residuals = residuals
+            first_residuals = station_residuals[:, None] - station_residuals[None, :]
         if log_G_per_weight:
             G_per_weight[w_idx] = _sparsify_G_stations(G_fine)
         ray_count_per_weight[w_idx] = (G_stations > 0).sum(axis=0).astype(np.int16)
@@ -190,6 +212,7 @@ def _mp_event_task(packed: tuple) -> tuple:
     wmd = _MP["weights_min_distance"]
     log_G = _MP.get("log_G_per_weight", False)
     log_misfit = _MP.get("log_misfit", False)
+    candidate_mode = _MP.get("candidate_mode", "soft")
 
     observed = np.asarray(observed, dtype=np.float64)
 
@@ -208,9 +231,13 @@ def _mp_event_task(packed: tuple) -> tuple:
         temperature=T,
         weights_top_n=wtn,
         weights_min_distance=wmd,
+        weight_noise_relative_sigma=_MP["weight_noise_relative_sigma"],
+        weight_noise_absolute_sigma_s=_MP["weight_noise_absolute_sigma_s"],
+        weight_model_sigma_s=_MP["weight_model_sigma_s"],
         compute_G=compute_G_all_stations_serial,
         log_G_per_weight=log_G,
         log_misfit=log_misfit,
+        candidate_mode=candidate_mode,
     )
 
 
@@ -288,8 +315,12 @@ def _process_event_single(
     temperature,
     weights_top_n,
     weights_min_distance,
+    weight_noise_relative_sigma=0.0,
+    weight_noise_absolute_sigma_s=0.0,
+    weight_model_sigma_s=0.2,
     log_G_per_weight: bool = False,
     log_misfit: bool = False,
+    candidate_mode: str = "soft",
 ):
     observed = np.asarray(observed, dtype=np.float64)
     return _process_event(
@@ -307,9 +338,13 @@ def _process_event_single(
         temperature=temperature,
         weights_top_n=weights_top_n,
         weights_min_distance=weights_min_distance,
+        weight_noise_relative_sigma=weight_noise_relative_sigma,
+        weight_noise_absolute_sigma_s=weight_noise_absolute_sigma_s,
+        weight_model_sigma_s=weight_model_sigma_s,
         compute_G=compute_G_all_stations,
         log_G_per_weight=log_G_per_weight,
         log_misfit=log_misfit,
+        candidate_mode=candidate_mode,
     )
 
 
@@ -329,8 +364,12 @@ def _run_events_parallel(
     weights_top_n,
     weights_min_distance,
     n_workers,
+    weight_noise_relative_sigma=0.0,
+    weight_noise_absolute_sigma_s=0.0,
+    weight_model_sigma_s=0.2,
     log_G_per_weight: bool = False,
     log_misfit: bool = False,
+    candidate_mode: str = "soft",
 ):
     global _MP
     _MP = dict(
@@ -347,8 +386,12 @@ def _run_events_parallel(
         temperature=temperature,
         weights_top_n=weights_top_n,
         weights_min_distance=weights_min_distance,
+        weight_noise_relative_sigma=weight_noise_relative_sigma,
+        weight_noise_absolute_sigma_s=weight_noise_absolute_sigma_s,
+        weight_model_sigma_s=weight_model_sigma_s,
         log_G_per_weight=log_G_per_weight,
         log_misfit=log_misfit,
+        candidate_mode=candidate_mode,
     )
 
     chunks = _partition_event_tasks(arrivals_table, n_workers)

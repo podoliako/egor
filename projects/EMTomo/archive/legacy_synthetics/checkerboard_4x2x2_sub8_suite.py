@@ -5,12 +5,12 @@ progressively more conservative velocity updates and regularization because the
 subdivision-2 experiment started diverging after its second iteration.
 
 Run from the EMTomo directory:
-    python -u checkerboard_4x2x2_sub8_suite.py
+    python -u -m archive.legacy_synthetics.checkerboard_4x2x2_sub8_suite
 """
 from dataclasses import replace
 
-from checkerboard_4x2x2_small import CHECKERBOARD_4X2X2_SMALL_CONFIG
-from main import main
+from .checkerboard_4x2x2_small import CHECKERBOARD_4X2X2_SMALL_CONFIG
+from .runner import main
 
 
 ARRIVALS_CACHE = "runs/cache/checkerboard_4x2x2_small_sub8_no_noise.npz"

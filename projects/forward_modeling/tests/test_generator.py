@@ -22,6 +22,7 @@ def test_default_checkerboard_shape_and_parity():
         "velocities_m_s": (4750.0, 5250.0),
         "surface_stations": (14, 7),
         "n_events": 1000,
+        "event_grid_shape": None,
         "min_depth_km": 10.0,
         "bottom_bias": 0.15,
         "seed": 42,
@@ -85,6 +86,35 @@ def test_seed_reproduces_events_without_changing_model_or_stations():
     assert not np.array_equal(first[2].coordinates_m, other[2].coordinates_m)
 
 
+def test_structured_hypocentres_have_their_own_grid_and_keep_reference_geometry():
+    grid_config = CheckerboardConfig(n_events=1200, event_grid_shape=(20, 10, 6),
+                                     min_depth_km=30., bottom_bias=0.15)
+    model, stations, events = generate_checkerboard(grid_config)
+    base_model, base_stations, _ = generate_checkerboard()
+    np.testing.assert_array_equal(model.velocity, base_model.velocity)
+    np.testing.assert_array_equal(stations.coordinates_m, base_stations.coordinates_m)
+
+    coords = events.coordinates_m
+    x, y, z = [np.unique(coords[:, axis]) for axis in range(3)]
+    np.testing.assert_allclose(x, (np.arange(20) + 0.5) * 240_000 / 20)
+    np.testing.assert_allclose(y, (np.arange(10) + 0.5) * 120_000 / 10)
+    unit_z = (np.arange(6) + 0.5) / 6
+    bias = grid_config.bottom_bias
+    expected_z = (30 + 90 * 2 * unit_z /
+                  (1 - bias + np.sqrt((1 - bias) ** 2 + 4 * bias * unit_z))) * 1000
+    np.testing.assert_allclose(z, expected_z)
+    assert coords.shape == (1200, 3)
+    np.testing.assert_allclose(coords, np.column_stack(
+        tuple(axis.ravel() for axis in np.meshgrid(x, y, z, indexing="ij"))))
+    model.validate_points(events, "events")
+    assert len(set(events.ids)) == len(events.ids) == 1200
+    # The grid is deterministic: the seed affects Sobol samples, not grid nodes.
+    np.testing.assert_array_equal(
+        events.coordinates_m,
+        generate_checkerboard(replace(grid_config, seed=11))[2].coordinates_m,
+    )
+
+
 @pytest.mark.parametrize("changes, message", [
     ({"lengths_km": (240, 120)}, "lengths_km"),
     ({"lengths_km": (240, 120, 0)}, "lengths_km"),
@@ -102,6 +132,10 @@ def test_seed_reproduces_events_without_changing_model_or_stations():
     ({"surface_stations": (True, 7)}, "surface_stations"),
     ({"n_events": 0}, "n_events"),
     ({"n_events": 1.5}, "n_events"),
+    ({"event_grid_shape": (20, 10)}, "event_grid_shape"),
+    ({"event_grid_shape": (20, 10, 0)}, "event_grid_shape"),
+    ({"event_grid_shape": (20, 10, True)}, "event_grid_shape"),
+    ({"event_grid_shape": (20, 10, 6)}, "n_events"),
     ({"min_depth_km": 0}, "min_depth_km"),
     ({"min_depth_km": 120}, "min_depth_km"),
     ({"min_depth_km": float("nan")}, "min_depth_km"),
@@ -148,6 +182,19 @@ def test_generated_inputs_and_run_metadata_include_provenance_hashes(tmp_path, m
         name: hashlib.sha256((source / name).read_bytes()).hexdigest() for name in names
     }
     assert len(experiments.load_arrivals(tmp_path, "small")) == 2
+
+
+def test_cli_infers_event_count_for_grid(tmp_path, capsys):
+    assert main(["structured", "--root", str(tmp_path),
+                 "--event-grid-shape", "20", "10", "6",
+                 "--min-depth-km", "30"]) == 0
+    source = tmp_path / "input" / "structured"
+    assert capsys.readouterr().out.strip() == str(source)
+    config = json.loads((source / "generation.json").read_text())["parameters"]
+    assert config["n_events"] == 1200
+    assert config["event_grid_shape"] == [20, 10, 6]
+    assert len(experiments.load_inputs(tmp_path, "structured")[2].ids) == 1200
+    assert not (tmp_path / "output").exists()
 
 
 def test_cli_generates_inputs_only_and_roundtrips_options(tmp_path, capsys):

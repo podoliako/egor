@@ -128,10 +128,62 @@ def test_native_truth_block_axes_and_inversion_share_color_scale():
     for key, expected in (("cmin", 4750), ("cmax", 5250), ("cauto", False)):
         assert _value(context, f"rendered['plot-vel'].layout.coloraxis.{key}") == expected
         assert _value(context, f"rendered['plot-tr'].layout.coloraxis.{key}") == expected
-    assert _value(context, "rendered['plot-vel'].layout.xaxis.tickvals") == [0, 60, 120, 180, 240]
+    for plot in ('plot-vel', 'plot-tr'):
+        for axis in ('xaxis', 'yaxis'):
+            assert _value(context, f"rendered['{plot}'].layout.{axis}.tickmode") == 'auto'
+            assert _value(context, f"rendered['{plot}'].layout.{axis}.nticks") == 6
+            assert _value(context, f"rendered['{plot}'].layout.{axis}.tickvals || null") is None
     assert _value(context, "rendered['plot-tr'].traces[0].x") == [30, 90, 150, 210]
     assert _value(context, "rendered['plot-tr'].traces[0].y") == [30, 90]
     assert _value(context, "rendered['plot-vel'].traces[1].x.slice(0,6)") == [0, 0, None, 60, 60, None]
+    assert _value(context, "rendered['plot-vel'].traces[1].x.length") == (5 + 3) * 3
+
+
+def test_dense_truth_edges_stay_in_grid_not_axis_labels():
+    context = _context()
+    context.eval("ST.truthEdges = {x: Array.from({length:25}, (_, i) => i * 10), "
+                 "z: Array.from({length:13}, (_, i) => i * 10)}")
+    for axis in ('xaxis', 'yaxis'):
+        assert _value(context, f"mkLayout(24,12).{axis}.tickmode") == 'auto'
+        assert _value(context, f"mkLayout(24,12).{axis}.nticks") == 6
+        assert _value(context, f"mkLayout(24,12).{axis}.tickvals || null") is None
+    assert _value(context, "gridTrace(24,12).x.slice(0,9)") == [0, 0, None, 20, 20, None, 40, 40, None]
+    assert _value(context, "gridTrace(24,12).y.length") == (13 + 13) * 3
+    context.eval("ST.meta.grid_info.coarse_side_m = [8000, 4000, 4000]; ST.truthEdges = null")
+    assert _value(context, "mkLayout(8,4).xaxis.range") == [0, 8]
+    assert _value(context, "mkLayout(8,4).yaxis.range") == [4, 0]
+    assert _value(context, "mkLayout(8,4).xaxis.tickmode") == 'auto'
+    assert _value(context, "mkLayout(8,4).xaxis.nticks") == 6
+
+
+def test_dense_true_grid_overlay_uses_real_boundaries_and_keeps_endpoints():
+    context = _context()
+    context.eval("ST.truthEdges = {x: Array.from({length:97}, (_, i) => i * 2.5), "
+                 "z: Array.from({length:49}, (_, i) => i * 2.5)}; ST.truthEdges.x[7] = 17.75")
+    trace = _value(context, "gridTrace(96,48)")
+    x_edges = [i * 2.5 for i in range(0, 97, 7)] + [240]
+    x_edges[1] = 17.75
+    z_edges = [i * 2.5 for i in range(0, 49, 4)]
+    assert len(x_edges) <= 16 and len(z_edges) <= 16
+    assert trace['x'][::3][:len(x_edges)] == x_edges
+    assert trace['y'][len(x_edges) * 3::3] == z_edges
+    assert len(trace['x']) == (len(x_edges) + len(z_edges)) * 3
+    assert _value(context, "ST.truthEdges.x[7]") == 17.75
+    assert _value(context, "ST.truthEdges.x.length") == 97
+    assert _value(context, "gridTrace(96,48,[1,1],true).x.slice(0,9)") == [0, 0, None, 2.5, 2.5, None, 5, 5, None]
+    assert _value(context, "gridTrace(96,48,[1,1],true).x.length") == (97 + 49) * 3
+    context.eval("ST.showGrid = false")
+    assert _value(context, "gridTrace(96,48)") is None
+
+
+def test_small_true_grid_overlay_keeps_every_boundary():
+    context = _context()
+    context.eval("ST.truthEdges = {x: Array.from({length:13}, (_, i) => i * 20), "
+                 "z: Array.from({length:7}, (_, i) => i * 20)}")
+    trace = _value(context, "gridTrace(12,6)")
+    assert trace['x'][::3][:13] == [i * 20 for i in range(13)]
+    assert trace['y'][13 * 3::3] == [i * 20 for i in range(7)]
+    assert len(trace['x']) == (13 + 7) * 3
 
 
 def test_events_fade_continuously_without_grid_snapping():
@@ -167,7 +219,7 @@ def test_weights_navigate_fine_layers_and_find_reference_event():
     assert _value(context, "Number(document.getElementById('wt-y').step)") == 1
     context.eval("ST.truthEdges = {x:[0,60,120,180,240],z:[0,60,120]}")
     assert _value(context, "gridTrace(96,48,[1,1],true).x.slice(0,6)") == [0, 0, None, 2.5, 2.5, None]
-    assert _value(context, "mkLayout(96,48,'w',null,true).xaxis.tickmode || null") is None
+    assert _value(context, "mkLayout(96,48,'w',null).xaxis.tickmode") == 'auto'
 
 
 def test_header_bounds_run_selector_and_removes_scale_badge():

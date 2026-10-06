@@ -1,7 +1,7 @@
 """P-wave checkerboard test using the real 2011 The Geysers geometry.
 
 Run from the EMTomo directory:
-    python geysers_checkerboard.py
+    python -m archive.legacy_synthetics.geysers_checkerboard
 
 The geometry is prepared by ``prepare_geysers_geometry.py``.  Arrival times are
 synthetic: every selected real hypocentre is paired with every selected real BG
@@ -9,7 +9,8 @@ station, as required by EMTomo's dense arrival table.
 """
 from dataclasses import replace
 
-from main import CONFIG, main
+from main import CONFIG
+from .runner import main
 
 
 GEYSERS_CONFIG = replace(

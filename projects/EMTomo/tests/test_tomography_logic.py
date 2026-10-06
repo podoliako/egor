@@ -1,10 +1,11 @@
 """Regression tests for the tomography normal equations and ray geometry."""
 
 import numpy as np
+import pytest
 
-from instruments.instruments import generate_synthetic_arrivals_table
+from archive.legacy_synthetics.instruments_synthetic import generate_synthetic_arrivals_table
+from archive.legacy_synthetics.locations import _resolve_event_locs_metric
 from instruments.instruments_coords import (
-    _resolve_event_locs_metric,
     metric_to_cell_coord,
     metric_to_cell_index,
     sample_cell_centered_trilinear,
@@ -12,6 +13,7 @@ from instruments.instruments_coords import (
 )
 from instruments.instruments_ops import coarsen_G, coarsen_G_all
 from instruments.instruments_travel import compute_station_travel_time_fields
+from instruments.instruments_weights import candidate_posterior_weights, candidate_station_sigmas
 from interpolation import prolongate_cell_centered_trilinear
 from raytracing import (
     _trace_ray_nb,
@@ -27,6 +29,27 @@ from tomography.tomography_math import (
 )
 from velocity_model import VelocityModel
 from wave_propagation import SKFMMSolver
+
+
+def test_candidate_station_sigmas_match_posterior_uncertainty_model():
+    times = np.array([[1., 2.], [3., 4.]])
+    sigmas = candidate_station_sigmas(times, 0.1, 0.2, 0.3)
+    np.testing.assert_allclose(sigmas ** 2, (0.1 * times) ** 2 + 0.2 ** 2 + 0.3 ** 2)
+    assert sigmas.shape == times.shape
+    observed = np.array([0., 1.])
+    weights = candidate_posterior_weights(
+        times, observed, relative_sigma=0.1, absolute_sigma_s=0.2, model_sigma_s=0.3,
+    )
+    precision = 1 / sigmas ** 2
+    residuals = observed - times
+    means = np.sum(precision * residuals, axis=1) / precision.sum(axis=1)
+    chi2 = np.sum(precision * (residuals - means[:, None]) ** 2, axis=1)
+    likelihood = np.exp(-chi2 / 2) / (np.prod(sigmas, axis=1) * np.sqrt(precision.sum(axis=1)))
+    np.testing.assert_allclose(weights, likelihood / likelihood.sum())
+    with pytest.raises(ValueError, match="positive sigma"):
+        candidate_station_sigmas(times, 0., 0., 0.)
+    with pytest.raises(ValueError, match="relative_sigma"):
+        candidate_station_sigmas(times, -0.1, 0.2, 0.3)
 
 
 def _two_station_system(g_value: float, residual: float):
@@ -54,8 +77,8 @@ def test_em_weight_enters_normal_equations_linearly():
 
     h, b = _normal_equation_contribution(g1, r1, (1, 1, 1), 0.25, valid)
 
-    assert np.isclose(h.item(), 0.25 * 2.0**2)
-    assert np.isclose(b.item(), 0.25 * 2.0 * 3.0)
+    assert np.isclose(h.item(), 0.25 * 2.0**2 / 2)
+    assert np.isclose(b.item(), 0.25 * 2.0 * 3.0 / 2)
 
 
 def test_centered_station_formula_matches_explicit_pairs():
@@ -80,8 +103,33 @@ def test_centered_station_formula_matches_explicit_pairs():
     pair_rows = np.asarray(pair_rows)
     pair_residuals = np.asarray(pair_residuals)
 
-    assert np.allclose(h, weight * pair_rows.T @ pair_rows)
-    assert np.allclose(b, weight * pair_rows.T @ pair_residuals)
+    assert np.allclose(h, weight / len(rows) * pair_rows.T @ pair_rows)
+    assert np.allclose(b, weight / len(rows) * pair_rows.T @ pair_residuals)
+
+
+def test_unequal_station_sigmas_profile_origin_and_exclude_failed_ray():
+    station_g = np.array([1., 3., 100., 5.]).reshape(4, 1, 1, 1)
+    station_r = np.array([2., -1., 100., 4.])
+    sigmas = np.array([1., 2., np.nan, 4.])
+    valid = np.array([True, True, False, True])
+    weight = 0.6
+
+    h, b = _normal_equation_contribution(
+        station_g, station_r, (1, 1, 1), weight, valid,
+        station_sigmas=sigmas,
+    )
+    rows = station_g[valid].reshape(-1, 1)
+    residuals = station_r[valid]
+    precision = 1 / sigmas[valid] ** 2
+    pair_h = 0.0
+    pair_b = 0.0
+    for i in range(len(rows)):
+        for j in range(i + 1, len(rows)):
+            pair_weight = weight * precision[i] * precision[j] / precision.sum()
+            pair_h += pair_weight * (rows[i, 0] - rows[j, 0]) ** 2
+            pair_b += pair_weight * (rows[i, 0] - rows[j, 0]) * (residuals[i] - residuals[j])
+    assert h.item() == pytest.approx(pair_h)
+    assert b.item() == pytest.approx(pair_b)
 
 
 def test_pairs_with_failed_rays_are_excluded():
@@ -110,6 +158,109 @@ def test_coverage_damping_suppresses_poorly_resolved_cell_update():
 
     assert adaptive[0].item() == uniform[0].item()
     assert abs(adaptive[1].item()) < abs(uniform[1].item())
+
+
+@pytest.mark.parametrize("coverage_power", [0.0, 1.0])
+def test_zero_smoothness_matches_previous_solver_exactly(coverage_power):
+    hessian = np.diag([2.0, 0.5, 0.0])
+    rhs = np.array([1.0, -0.5, 0.25])
+    shape = (3, 1, 1)
+    scale = np.trace(hessian) / 3
+    sensitivity = np.maximum(np.diag(hessian), 0.0)
+    positive = sensitivity[sensitivity > 0.0]
+    reference = float(np.percentile(positive, 75.0))
+    confidence = np.clip(sensitivity / max(reference, np.finfo(float).tiny), 0.0, 1.0)
+    damping = 0.2 * scale / np.power(np.maximum(confidence, 0.05), coverage_power)
+    expected = np.linalg.solve(hessian + np.diag(damping), rhs).reshape(shape)
+
+    default = _solve_delta_s(
+        hessian, rhs, shape, 0.2, coverage_damping_power=coverage_power,
+        return_diagnostics=True,
+    )
+    explicit_zero = _solve_delta_s(
+        hessian, rhs, shape, 0.2, coverage_damping_power=coverage_power,
+        return_diagnostics=True, smoothness_reg=0.0,
+    )
+    assert all(np.array_equal(a, b) for a, b in zip(default, explicit_zero))
+    assert np.array_equal(default[0], expected)
+    assert np.array_equal(default[1], sensitivity.reshape(shape))
+    assert np.array_equal(default[2], confidence.reshape(shape))
+
+
+def test_smoothness_does_not_penalize_uniform_updates():
+    shape = (2, 2, 2)
+    hessian = np.eye(8)
+    rhs = np.full(8, 2.0)
+
+    delta_s = _solve_delta_s(hessian, rhs, shape, lambda_reg=0.0, smoothness_reg=5.0)
+
+    assert np.allclose(delta_s, 2.0)
+    assert np.allclose(hessian @ delta_s.ravel(), rhs)
+
+
+def test_smoothness_interpolates_underdetermined_updates_without_absolute_prior():
+    hessian = np.diag([1.0, 0.0, 0.0])
+    rhs = np.array([2.0, 0.0, 0.0])
+    shape = (3, 1, 1)
+
+    without = _solve_delta_s(hessian, rhs, shape, lambda_reg=0.0)
+    with_smoothness = _solve_delta_s(
+        hessian, rhs, shape, lambda_reg=0.0, smoothness_reg=2.0,
+    )
+
+    assert np.array_equal(without.ravel(), [2.0, 0.0, 0.0])
+    assert np.allclose(with_smoothness, 2.0)
+    assert np.sum(np.diff(with_smoothness[:, 0, 0]) ** 2) < np.sum(
+        np.diff(without[:, 0, 0]) ** 2
+    )
+
+
+@pytest.mark.parametrize("shape", [(2, 2, 2), (2, 3, 1), (1, 2, 3)])
+def test_smoothness_uses_only_face_neighbours_and_six_degree_normalization(shape):
+    n_vox = int(np.prod(shape))
+    hessian = np.eye(n_vox)
+    rhs = np.arange(1.0, n_vox + 1.0)
+    laplacian = np.zeros((n_vox, n_vox))
+    for cell in np.ndindex(shape):
+        i = np.ravel_multi_index(cell, shape)
+        for axis in range(3):
+            neighbour = list(cell)
+            neighbour[axis] += 1
+            if neighbour[axis] >= shape[axis]:
+                continue
+            j = np.ravel_multi_index(tuple(neighbour), shape)
+            laplacian[i, i] += 1.0
+            laplacian[j, j] += 1.0
+            laplacian[i, j] -= 1.0
+            laplacian[j, i] -= 1.0
+
+    result = _solve_delta_s(hessian, rhs, shape, lambda_reg=0.0, smoothness_reg=3.0)
+
+    assert np.allclose(result.ravel(), np.linalg.solve(hessian + laplacian / 2.0, rhs))
+    assert np.array_equal(laplacian @ np.ones(n_vox), np.zeros(n_vox))
+
+
+def test_smoothness_scales_with_data_sensitivity_only():
+    shape = (2, 1, 2)
+    hessian = np.diag([1.0, 0.0, 2.0, 0.0])
+    rhs = np.array([2.0, 0.0, -1.0, 0.0])
+    baseline = _solve_delta_s(hessian, rhs, shape, lambda_reg=0.0, smoothness_reg=1.0)
+
+    for factor in (1e-4, 1e4):
+        scaled = _solve_delta_s(
+            factor * hessian, factor * rhs, shape, lambda_reg=0.0, smoothness_reg=1.0,
+        )
+        assert np.allclose(scaled, baseline)
+    assert np.array_equal(
+        _solve_delta_s(np.zeros((4, 4)), np.zeros(4), shape, 0.0, smoothness_reg=1.0),
+        np.zeros(shape),
+    )
+
+
+@pytest.mark.parametrize("invalid", [-1.0, np.nan, np.inf, -np.inf])
+def test_smoothness_requires_nonnegative_finite_strength(invalid):
+    with pytest.raises(ValueError, match="smoothness_reg must be finite and >= 0"):
+        _solve_delta_s(np.eye(2), np.ones(2), (2, 1, 1), 0.0, smoothness_reg=invalid)
 
 
 def test_velocity_update_trust_region_is_cellwise_and_relative():

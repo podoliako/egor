@@ -23,6 +23,7 @@ class CheckerboardConfig:
     velocities_m_s: tuple[float, float] = (4750.0, 5250.0)
     surface_stations: tuple[int, int] = (14, 7)
     n_events: int = 1000
+    event_grid_shape: tuple[int, int, int] | None = None
     min_depth_km: float = 10.0
     bottom_bias: float = 0.15
     seed: int = 42
@@ -47,6 +48,13 @@ class CheckerboardConfig:
             raise ValueError("surface_stations must contain two positive integers")
         if type(self.n_events) is not int or self.n_events < 1:
             raise ValueError("n_events must be a positive integer")
+        if self.event_grid_shape is not None:
+            if len(self.event_grid_shape) != 3 or any(
+                type(value) is not int or value < 1 for value in self.event_grid_shape
+            ):
+                raise ValueError("event_grid_shape must contain three positive integers")
+            if int(np.prod(self.event_grid_shape)) != self.n_events:
+                raise ValueError("n_events must equal the product of event_grid_shape")
         if not np.isfinite(self.min_depth_km) or not 0 < self.min_depth_km < self.lengths_km[2]:
             raise ValueError("min_depth_km must be strictly inside (0, depth)")
         if not np.isfinite(self.bottom_bias) or not 0 <= self.bottom_bias < 1:
@@ -58,9 +66,10 @@ class CheckerboardConfig:
 def generate_checkerboard(config: CheckerboardConfig = CheckerboardConfig()) -> tuple[VelocityGrid, PointSet, PointSet]:
     """Return a single-wave checkerboard, surface stations and interior events.
 
-    A scrambled Sobol sequence distributes events quasi-uniformly in x/y and
-    volume. A slight linear probability-density gradient in depth favours the
-    bottom; exclusion depth applies to every event, not just on average.
+    By default, a scrambled Sobol sequence distributes events quasi-uniformly.
+    When event_grid_shape is given, hypocentres form an independent Cartesian
+    product of cell-centre coordinates in x/y/z (not tied to velocity or FMM
+    cells). The optional depth bias warps only the z levels toward the bottom.
     """
     indices = np.indices(config.blocks)
     parity = np.sum(indices, axis=0) % 2
@@ -78,10 +87,15 @@ def generate_checkerboard(config: CheckerboardConfig = CheckerboardConfig()) -> 
         station_xyz,
     )
 
-    # Power-of-two Sobol draw retains balanced coverage; truncation only removes
-    # the final (at most ~half) of the ordered low-discrepancy samples.
-    sampler = qmc.Sobol(d=3, scramble=True, seed=config.seed)
-    unit = sampler.random_base2(m=(config.n_events - 1).bit_length())[:config.n_events]
+    if config.event_grid_shape is None:
+        # Power-of-two Sobol draw retains balanced coverage; truncation only
+        # removes the final low-discrepancy samples.
+        sampler = qmc.Sobol(d=3, scramble=True, seed=config.seed)
+        unit = sampler.random_base2(m=(config.n_events - 1).bit_length())[:config.n_events]
+    else:
+        levels = [(np.arange(count) + 0.5) / count for count in config.event_grid_shape]
+        x_unit, y_unit, z_unit = np.meshgrid(*levels, indexing="ij")
+        unit = np.column_stack((x_unit.ravel(), y_unit.ravel(), z_unit.ravel()))
     bias = config.bottom_bias
     # Invert F(t) = (1-b)t + b*t², density p(t) = 1-b+2bt.
     # Rationalized form avoids cancellation as b approaches zero.
@@ -115,7 +129,10 @@ def main(argv=None):
     parser.add_argument("--blocks", type=int, nargs=3, default=(4, 2, 2), metavar=("NX", "NY", "NZ"))
     parser.add_argument("--velocities-m-s", type=float, nargs=2, default=(4750., 5250.), metavar=("V1", "V2"))
     parser.add_argument("--surface-stations", type=int, nargs=2, default=(14, 7), metavar=("NX", "NY"))
-    parser.add_argument("--events", type=int, default=1000)
+    parser.add_argument("--events", type=int, default=None,
+                        help="Event count (in grid mode defaults to the product of grid dimensions)")
+    parser.add_argument("--event-grid-shape", type=int, nargs=3, metavar=("NX", "NY", "NZ"),
+                        help="Independent structured hypocentre grid instead of Sobol events")
     parser.add_argument("--min-depth-km", type=float, default=10.)
     parser.add_argument("--bottom-bias", type=float, default=0.15)
     parser.add_argument("--seed", type=int, default=42)
@@ -124,8 +141,10 @@ def main(argv=None):
         config = CheckerboardConfig(
             lengths_km=tuple(args.lengths_km), blocks=tuple(args.blocks),
             velocities_m_s=tuple(args.velocities_m_s), surface_stations=tuple(args.surface_stations),
-            n_events=args.events, min_depth_km=args.min_depth_km,
-            bottom_bias=args.bottom_bias, seed=args.seed,
+            n_events=(args.events if args.events is not None else
+                      int(np.prod(args.event_grid_shape)) if args.event_grid_shape is not None else 1000),
+            event_grid_shape=(tuple(args.event_grid_shape) if args.event_grid_shape is not None else None),
+            min_depth_km=args.min_depth_km, bottom_bias=args.bottom_bias, seed=args.seed,
         )
         destination = save_checkerboard(args.root, args.experiment_id, config)
     except (OSError, ValueError) as error:

@@ -9,14 +9,14 @@ retain the configured downward density bias.
 All inversion parameters match ``checkerboard_pattern_4x2x2_full.py``.
 
 Run from the EMTomo directory:
-    python -u checkerboard_pattern_4x2x2_event_grid.py
+    python -u -m archive.legacy_synthetics.checkerboard_pattern_4x2x2_event_grid
 """
 from dataclasses import replace
 
-from checkerboard_pattern_4x2x2_full import (
+from .checkerboard_pattern_4x2x2_full import (
     CHECKERBOARD_PATTERN_4X2X2_FULL_CONFIG,
 )
-from main import main
+from .runner import main
 
 
 CHECKERBOARD_PATTERN_4X2X2_EVENT_GRID_CONFIG = replace(

@@ -67,12 +67,14 @@ def _normal_equation_contribution(
     model_shape,
     weight: float,
     valid_stations: np.ndarray,
+    *,
+    station_sigmas: np.ndarray | None = None,
 ):
-    """Return ``w GᵀG`` and ``w Gᵀr`` for all valid station pairs.
+    """Return weighted normal equations after profiling out event origin time.
 
-    For station rows ``X_i`` and residuals ``q_i``, the identity
-    ``sum_{i<j}(X_i-X_j)ᵀ(X_i-X_j) = n X_cᵀX_c`` avoids explicitly
-    constructing the quadratic number of pair rows.
+    Valid station rows and residuals are centered by station precision
+    ``1 / sigma_i²``; omitted sigmas default to one second. This is
+    equivalent to pair differences weighted by ``p_i * p_j / sum(p)``.
     """
     n_vox = int(np.prod(model_shape))
     valid = np.asarray(valid_stations, dtype=bool)
@@ -84,6 +86,16 @@ def _normal_equation_contribution(
 
     rows = station_sensitivities[valid].reshape(-1, n_vox)
     residual = np.asarray(station_residuals, dtype=np.float64)[valid]
+    if station_sigmas is None:
+        precision = np.ones(rows.shape[0], dtype=np.float64)
+    else:
+        sigmas = np.asarray(station_sigmas, dtype=np.float64)
+        if sigmas.shape != valid.shape:
+            raise ValueError("station_sigmas must match valid_stations shape")
+        sigmas = sigmas[valid]
+        if not np.all(np.isfinite(sigmas)) or np.any(sigmas <= 0):
+            raise ValueError("Valid station sigmas must be finite and positive")
+        precision = 1.0 / np.square(sigmas)
     active = np.flatnonzero(np.any(rows != 0.0, axis=0))
     if active.size == 0:
         return (
@@ -95,14 +107,12 @@ def _normal_equation_contribution(
     # cannot make an all-zero column nonzero, so evaluate the dense Gram matrix
     # only on active columns and scatter it into the full normal system.
     rows_active = rows[:, active]
-    rows_centered = rows_active - np.mean(rows_active, axis=0, keepdims=True)
-    residual_centered = residual - np.mean(residual)
-    n_valid = rows.shape[0]
-    scale = weight * n_valid
+    rows_centered = rows_active - np.average(rows_active, axis=0, weights=precision)
+    residual_centered = residual - np.average(residual, weights=precision)
     hessian = np.zeros((n_vox, n_vox), dtype=np.float64)
     rhs = np.zeros(n_vox, dtype=np.float64)
-    hessian[np.ix_(active, active)] = scale * (rows_centered.T @ rows_centered)
-    rhs[active] = scale * (rows_centered.T @ residual_centered)
+    hessian[np.ix_(active, active)] = weight * (rows_centered.T @ (precision[:, None] * rows_centered))
+    rhs[active] = weight * (rows_centered.T @ (precision * residual_centered))
     return hessian, rhs
 
 
@@ -115,17 +125,24 @@ def _solve_delta_s(
     coverage_floor: float = 0.05,
     coverage_reference_percentile: float = 75.0,
     return_diagnostics: bool = False,
+    smoothness_reg: float = 0.0,
 ):
-    """Solve the normal system with optional coverage-aware damping.
+    """Solve the normal system with optional coverage damping and smoothing.
 
     ``diag(G.T @ W @ G)`` measures differential sensitivity, which is more
     informative than raw ray counts. When ``coverage_damping_power`` is
     positive, poorly constrained cells receive a stronger zero-update prior.
-    No coupling between neighbouring cells is introduced.
+    ``smoothness_reg`` adds a graph Laplacian to the normal matrix with
+    weight ``smoothness_reg * max(mean(diag(H)), 0) / 6`` per face-adjacent
+    pair. This penalizes differences in the update, not its absolute value;
+    a constant update has zero smoothing cost.
     """
     n_vox = int(np.prod(model_shape))
     hessian = np.asarray(hessian, dtype=np.float64).reshape(n_vox, n_vox)
     rhs = np.asarray(rhs, dtype=np.float64).reshape(n_vox)
+    smoothness_reg = float(smoothness_reg)
+    if not np.isfinite(smoothness_reg) or smoothness_reg < 0.0:
+        raise ValueError("smoothness_reg must be finite and >= 0")
     if coverage_damping_power < 0.0:
         raise ValueError("coverage_damping_power must be >= 0")
     if not 0.0 < coverage_floor <= 1.0:
@@ -152,6 +169,20 @@ def _solve_delta_s(
         / np.power(safe_confidence, float(coverage_damping_power))
     )
     hessian_reg = hessian + np.diag(regularization_diagonal)
+    smoothness_scale = smoothness_reg * max(float(scale), 0.0) / 6.0
+    if smoothness_scale > 0.0:
+        indices = np.arange(n_vox).reshape(model_shape)
+        for axis in range(3):
+            first = [slice(None)] * 3
+            second = [slice(None)] * 3
+            first[axis] = slice(None, -1)
+            second[axis] = slice(1, None)
+            i = indices[tuple(first)].ravel()
+            j = indices[tuple(second)].ravel()
+            hessian_reg[i, i] += smoothness_scale
+            hessian_reg[j, j] += smoothness_scale
+            hessian_reg[i, j] -= smoothness_scale
+            hessian_reg[j, i] -= smoothness_scale
 
     try:
         delta_s = np.linalg.solve(hessian_reg, rhs)

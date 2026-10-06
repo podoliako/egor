@@ -102,12 +102,38 @@ def test_sparse_normal_equations_match_explicit_dense_centering():
     rows = flat[valid]
     centered_rows = rows - rows.mean(axis=0, keepdims=True)
     centered_residuals = residuals[valid] - residuals[valid].mean()
-    scale = weight * len(rows)
+    scale = weight
 
     np.testing.assert_allclose(hessian, scale * centered_rows.T @ centered_rows)
     np.testing.assert_allclose(rhs, scale * centered_rows.T @ centered_residuals)
     assert not np.any(hessian[0])
     assert not np.any(hessian[:, 0])
+
+
+def test_sparse_normal_equations_with_unequal_sigmas_and_failed_ray():
+    sensitivities = np.zeros((4, 2, 2, 1))
+    flat = sensitivities.reshape(4, -1)
+    flat[:, 1] = [1., 2., 100., 3.]
+    flat[:, 3] = [0., 4., 100., 2.]
+    residuals = np.array([1., -2., 100., 3.])
+    valid = np.array([True, True, False, True])
+    sigmas = np.array([1., 2., np.nan, 4.])
+    weight = 0.4
+
+    hessian, rhs = _normal_equation_contribution(
+        sensitivities, residuals, (2, 2, 1), weight, valid,
+        station_sigmas=sigmas,
+    )
+    rows = flat[valid]
+    precision = 1 / sigmas[valid] ** 2
+    centered_rows = rows - np.average(rows, axis=0, weights=precision)
+    centered_residuals = residuals[valid] - np.average(residuals[valid], weights=precision)
+    np.testing.assert_allclose(
+        hessian, weight * centered_rows.T @ (precision[:, None] * centered_rows)
+    )
+    np.testing.assert_allclose(rhs, weight * centered_rows.T @ (precision * centered_residuals))
+    assert not np.any(hessian[0])
+    assert not np.any(hessian[:, 2])
 
 
 def test_512_events_produce_at_most_one_dense_result_per_worker():

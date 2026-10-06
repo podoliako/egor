@@ -3,8 +3,8 @@ from dataclasses import replace
 
 import numpy as np
 
-from main import (
-    CONFIG,
+from main import CONFIG
+from archive.legacy_synthetics.runner import (
     build_top_surface_stations,
     build_true_model,
     build_uniform_volume_events,

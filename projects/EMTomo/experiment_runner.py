@@ -25,13 +25,38 @@ class PreparedInversion:
     event_ids: tuple[str, ...]
     station_locs: list[tuple[float, float, float]]
     arrivals_table: np.ndarray
+    noise_sigmas: tuple[float, float]
+
+
+def resolve_weight_sigmas(config, noise_sigmas: tuple[float, float]) -> tuple[float, float, float]:
+    """Resolve explicit overrides against the observation noise, then validate."""
+    values = (
+        noise_sigmas[0] if config.weight_noise_relative_sigma is None else config.weight_noise_relative_sigma,
+        noise_sigmas[1] if config.weight_noise_absolute_sigma_s is None else config.weight_noise_absolute_sigma_s,
+        config.weight_model_sigma_s,
+    )
+    names = ("weight_noise_relative_sigma", "weight_noise_absolute_sigma_s", "weight_model_sigma_s")
+    resolved = []
+    for name, value in zip(names, values):
+        if isinstance(value, bool):
+            raise ValueError(f"{name} must be finite and nonnegative")
+        try:
+            sigma = float(value)
+        except (TypeError, ValueError, OverflowError) as error:
+            raise ValueError(f"{name} must be finite and nonnegative") from error
+        if not np.isfinite(sigma) or sigma < 0:
+            raise ValueError(f"{name} must be finite and nonnegative")
+        resolved.append(sigma)
+    if not any(value > 0 for value in resolved):
+        raise ValueError("weight noise/model sigmas must have positive combined variance")
+    return tuple(resolved)
 
 
 def prepare_inversion(experiment_id: str, config, experiments_root=DEFAULT_EXPERIMENTS_ROOT) -> PreparedInversion:
     """Validate observations and match the inversion geometry to the input domain.
 
     The saved velocity is only sampled for reference metrics; initial velocities
-    come from the explicit homogeneous inversion configuration.
+    come from the explicitly configured homogeneous, gradient or horizontal layers.
     """
     data = load_tomography_experiment(experiment_id, experiments_root)
     side = float(config.cell_size)
@@ -50,7 +75,34 @@ def prepare_inversion(experiment_id: str, config, experiments_root=DEFAULT_EXPER
         "n_x": int(shape[0]), "n_y": int(shape[1]), "n_z": int(shape[2]),
     }
     initial = VelocityModel.from_config(model_config)
-    initial.fill_linear_gradient("vp", config.background_vp, config.background_vp)
+    boundaries = config.initial_layer_boundaries_km
+    velocities = config.initial_layer_velocities_m_s
+    if boundaries is not None or velocities is not None:
+        if config.initial_gradient_m_s is not None:
+            raise ValueError("initial layers and initial_gradient_m_s are mutually exclusive")
+        if boundaries is None or velocities is None:
+            raise ValueError("initial layers require both boundaries and velocities")
+        boundaries = np.asarray(boundaries, dtype=np.float64)
+        velocities = np.asarray(velocities, dtype=np.float64)
+        if (boundaries.ndim != 1 or len(boundaries) < 1 or not np.all(np.isfinite(boundaries))
+                or boundaries[0] <= 0 or boundaries[-1] >= extent[2] / 1000
+                or np.any(np.diff(boundaries) <= 0)):
+            raise ValueError("initial_layer_boundaries_km must increase strictly inside the depth range")
+        if (velocities.ndim != 1 or len(velocities) != len(boundaries) + 1
+                or not np.all(np.isfinite(velocities)) or np.any(velocities <= 0)):
+            raise ValueError("initial_layer_velocities_m_s must contain one finite positive speed per layer")
+        depths_km = (np.arange(shape[2], dtype=np.float64) + 0.5) * side / 1000
+        profile = velocities[np.searchsorted(boundaries, depths_km, side="right")]
+        initial.set_vp_array(np.broadcast_to(profile, tuple(shape)))
+    elif config.initial_gradient_m_s is None:
+        initial.fill_linear_gradient("vp", config.background_vp, config.background_vp)
+    else:
+        endpoints = np.asarray(config.initial_gradient_m_s, dtype=np.float64)
+        if endpoints.shape != (2,) or not np.all(np.isfinite(endpoints)) or np.any(endpoints <= 0):
+            raise ValueError("initial_gradient_m_s must contain two finite positive velocities")
+        depths = (np.arange(shape[2], dtype=np.float64) + 0.5) / shape[2]
+        profile = endpoints[0] + (endpoints[1] - endpoints[0]) * depths
+        initial.set_vp_array(np.broadcast_to(profile, tuple(shape)))
 
     reference = VelocityModel.from_config(model_config)
     # Sample at the centres of inversion cells. The reference truth is only
@@ -61,13 +113,14 @@ def prepare_inversion(experiment_id: str, config, experiments_root=DEFAULT_EXPER
     reference.set_vp_array(data.source_model.velocity[np.ix_(*cell_indices)])
     stations = [tuple(float(value) for value in row) for row in data.station_coordinates_m]
     return PreparedInversion(initial, reference, data.station_ids, data.event_ids,
-                             stations, data.arrival_times_s)
+                             stations, data.arrival_times_s, data.noise_sigmas)
 
 
 def run_saved_experiment(experiment_id: str, config, experiments_root=DEFAULT_EXPERIMENTS_ROOT,
                          *, validate_only: bool = False):
     """Run EM on saved observations or validate and report the prepared inputs."""
     prepared = prepare_inversion(experiment_id, config, experiments_root)
+    relative_sigma, absolute_sigma_s, model_sigma_s = resolve_weight_sigmas(config, prepared.noise_sigmas)
     print(
         f"Experiment {experiment_id}: {len(prepared.event_ids)} events, "
         f"{len(prepared.station_ids)} stations, inversion grid "
@@ -90,9 +143,17 @@ def run_saved_experiment(experiment_id: str, config, experiments_root=DEFAULT_EX
         station_locs=prepared.station_locs,
         weights_top_n=config.weights_top_n,
         weights_min_distance=config.weights_min_distance,
+        candidate_mode=config.candidate_mode,
         temperature=config.temperature,
+        weight_noise_relative_sigma=relative_sigma,
+        weight_noise_absolute_sigma_s=absolute_sigma_s,
+        weight_model_sigma_s=model_sigma_s,
         lambda_reg=config.lambda_reg,
         subdivision=config.subdivision,
+        smoothness_reg=config.smoothness_reg,
+        initial_gradient_m_s=config.initial_gradient_m_s,
+        initial_layer_boundaries_km=config.initial_layer_boundaries_km,
+        initial_layer_velocities_m_s=config.initial_layer_velocities_m_s,
         coverage_damping_power=config.coverage_damping_power,
         coverage_floor=config.coverage_floor,
         coverage_reference_percentile=config.coverage_reference_percentile,

@@ -5,12 +5,12 @@ coverage damping to observe longer-term convergence without regenerating the
 shared noise-free synthetic arrivals.
 
 Run from the EMTomo directory:
-    python -u checkerboard_4x2x2_sub8_final.py
+    python -u -m archive.legacy_synthetics.checkerboard_4x2x2_sub8_final
 """
 from dataclasses import replace
 
-from checkerboard_4x2x2_sub8_suite import SUB8_BASE_CONFIG
-from main import main
+from .checkerboard_4x2x2_sub8_suite import SUB8_BASE_CONFIG
+from .runner import main
 
 
 CHECKERBOARD_4X2X2_SUB8_FINAL_CONFIG = replace(

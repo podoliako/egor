@@ -37,6 +37,8 @@ def compute_epicenter_weight_matrix(
     abs_misfit_threshold: Optional[float] = None,
     temperature: float = 1.0,
     return_misfit: bool = False,
+    *,
+    misfit_scale: float,
 ):
     if temperature <= 0:
         raise ValueError("temperature must be > 0")
@@ -44,7 +46,7 @@ def compute_epicenter_weight_matrix(
         raise ValueError("abs_misfit_threshold must be >= 0 when provided")
 
     misfit = compute_cellwise_pairwise_misfit(station_fields, observed)
-    weights = _weights_from_misfit(misfit, abs_misfit_threshold, temperature)
+    weights = _weights_from_misfit(misfit, abs_misfit_threshold, temperature, misfit_scale)
 
     if return_misfit:
         return weights, misfit
@@ -55,21 +57,32 @@ def compute_weights_from_misfit(
     misfit: np.ndarray,
     temperature: float = 1.0,
     abs_misfit_threshold: Optional[float] = None,
+    *,
+    misfit_scale: float,
 ) -> np.ndarray:
-    """Convert arbitrary-dimensional misfit values to normalized weights."""
+    """Convert a cost to weights with an externally specified, fixed cost scale.
+
+    These weights become probabilities only if the cost and scale define a
+    negative log likelihood. For arrival data prefer ``candidate_posterior_weights``.
+    """
     if temperature <= 0:
         raise ValueError("temperature must be > 0")
     values = np.asarray(misfit, dtype=np.float64)
     if values.size == 0 or not np.all(np.isfinite(values)):
         raise ValueError("misfit must contain finite values")
-    return _weights_from_misfit(values, abs_misfit_threshold, temperature)
+    return _weights_from_misfit(values, abs_misfit_threshold, temperature, misfit_scale)
 
 
 def _weights_from_misfit(
     misfit: np.ndarray,
     abs_misfit_threshold: Optional[float],
     temperature: float,
+    misfit_scale: float,
 ) -> np.ndarray:
+    if not np.isfinite(misfit_scale) or misfit_scale <= 0:
+        raise ValueError("misfit_scale must be finite and positive")
+    if not np.isfinite(temperature) or temperature <= 0:
+        raise ValueError("temperature must be finite and positive")
     if abs_misfit_threshold is None:
         mask = np.ones(misfit.shape, dtype=bool)
     else:
@@ -83,11 +96,7 @@ def _weights_from_misfit(
 
     selected = misfit[mask]
     delta = selected - float(np.min(selected))
-    positive = delta[delta > 0]
-    scale = float(np.median(positive)) if positive.size else 1.0
-    scale = max(scale, 1e-12)
-
-    raw = np.exp(-delta / (temperature * scale))
+    raw = np.exp(-delta / (temperature * misfit_scale))
     raw_sum = float(np.sum(raw, dtype=np.float64))
 
     weights = np.zeros_like(misfit, dtype=np.float64)
@@ -102,3 +111,68 @@ def _weights_from_misfit(
     if total > 0 and not np.isclose(total, 1.0):
         weights /= total
     return weights
+
+
+def candidate_station_sigmas(
+    predicted_times_s: np.ndarray,
+    relative_sigma: float,
+    absolute_sigma_s: float,
+    model_sigma_s: float,
+) -> np.ndarray:
+    """Return independent pick uncertainties for each candidate and station."""
+    times = np.asarray(predicted_times_s, dtype=np.float64)
+    if not np.all(np.isfinite(times)) or np.any(times < 0):
+        raise ValueError("Predicted travel times must be finite and nonnegative")
+    for name, value in (("relative_sigma", relative_sigma),
+                        ("absolute_sigma_s", absolute_sigma_s),
+                        ("model_sigma_s", model_sigma_s)):
+        if not np.isfinite(value) or value < 0:
+            raise ValueError(f"{name} must be finite and nonnegative")
+    sigma = np.hypot(np.hypot(relative_sigma * times, absolute_sigma_s), model_sigma_s)
+    if np.any(sigma <= 0) or not np.all(np.isfinite(sigma)):
+        raise ValueError("Every candidate/station needs a finite, positive sigma")
+    return sigma
+
+
+def candidate_posterior_weights(
+    predicted_times_s: np.ndarray,
+    observed_relative_s: np.ndarray,
+    *,
+    relative_sigma: float,
+    absolute_sigma_s: float,
+    model_sigma_s: float,
+    temperature: float = 1.0,
+) -> np.ndarray:
+    """Likelihood weights conditional on the supplied candidate hypocentres.
+
+    Absolute station picks have independent Gaussian uncertainty with
+    sigma_i² = (relative_sigma * predicted_time_i)² + absolute_sigma_s²
+    + model_sigma_s². The observed earliest-pick subtraction introduces one
+    shared unknown offset, which is integrated out under a flat origin-time
+    prior. Thus the reference station is *not* treated as independent noise
+    in every pair. Candidate priors are equal; the selection step can omit
+    other locations. Temperature=1 yields the likelihood under these
+    assumptions; other temperatures give tempered, not calibrated weights.
+    """
+    times = np.asarray(predicted_times_s, dtype=np.float64)
+    observed = np.asarray(observed_relative_s, dtype=np.float64)
+    if (times.ndim != 2 or times.shape[0] < 1 or times.shape[1] < 2
+            or observed.shape != (times.shape[1],)
+            or not np.all(np.isfinite(times)) or np.any(times < 0)
+            or not np.all(np.isfinite(observed))):
+        raise ValueError("Expected finite candidate x station travel times and station arrivals")
+    if not np.isfinite(temperature) or temperature <= 0:
+        raise ValueError("temperature must be finite and positive")
+
+    sigma = candidate_station_sigmas(times, relative_sigma, absolute_sigma_s, model_sigma_s)
+    precision = 1.0 / np.square(sigma)
+    total_precision = precision.sum(axis=1)
+    residual = observed[None, :] - times
+    weighted_mean = np.sum(precision * residual, axis=1) / total_precision
+    chi2 = np.sum(precision * (residual - weighted_mean[:, None]) ** 2, axis=1)
+    # Marginalizing the shared origin time contributes 1/sqrt(sum precision).
+    log_likelihood = (-0.5 * chi2 - np.sum(np.log(sigma), axis=1)
+                      - 0.5 * np.log(total_precision))
+    shifted = (log_likelihood - np.max(log_likelihood)) / temperature
+    weights = np.exp(shifted)
+    return weights / weights.sum()

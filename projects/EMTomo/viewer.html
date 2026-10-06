@@ -635,7 +635,7 @@ function modelExtentKm() {
   return Array.isArray(size) ? size.map(v => v / 1000) : [1, 1, 1];
 }
 
-function mkLayout(nx, nz, cbTitle, zrange, fineGrid = false) {
+function mkLayout(nx, nz, cbTitle, zrange) {
   const coloraxis = {
     colorbar: {
       thickness: 10, len: 0.85,
@@ -652,25 +652,34 @@ function mkLayout(nx, nz, cbTitle, zrange, fineGrid = false) {
       title: { text: 'X (km)', font: { size: 9 }, standoff: 2 },
       showgrid: false, zeroline: false, layer: 'below traces',
       range: [0, modelExtentKm()[0]], tickfont: { size: 8 },
-      ...(ST.truthEdges && !fineGrid ? {tickmode: 'array', tickvals: ST.truthEdges.x} : {}),
+      tickmode: 'auto', nticks: 6,
     },
     yaxis: {
       title: { text: 'Z depth (km) ↓', font: { size: 9 }, standoff: 2 },
       showgrid: false, zeroline: false, layer: 'below traces',
       range: [modelExtentKm()[2], 0], tickfont: { size: 8 },
-      ...(ST.truthEdges && !fineGrid ? {tickmode: 'array', tickvals: ST.truthEdges.z} : {}),
+      tickmode: 'auto', nticks: 6,
     },
     showlegend: false,
     coloraxis,
   };
 }
 
+function sparseTruthEdges(edges) {
+  const maxLines = 16;
+  if (edges.length <= maxLines) return edges;
+  const stride = Math.ceil((edges.length - 1) / (maxLines - 1));
+  const selected = edges.filter((_, i) => i % stride === 0);
+  if ((edges.length - 1) % stride !== 0) selected.push(edges[edges.length - 1]);
+  return selected;
+}
+
 function gridTrace(nx, nz, gridStep = [1, 1], fineGrid = false) {
   if (!ST.showGrid) return null;
   const [width, , depth] = modelExtentKm();
   // Truth blocks, not inversion-grid indices, define the comparison overlay.
-  const xs = (!fineGrid && ST.truthEdges?.x) || Array.from({length: nx + 1}, (_, i) => i * width / nx);
-  const zs = (!fineGrid && ST.truthEdges?.z) || Array.from({length: nz + 1}, (_, i) => i * depth / nz);
+  const xs = (!fineGrid && ST.truthEdges?.x && sparseTruthEdges(ST.truthEdges.x)) || Array.from({length: nx + 1}, (_, i) => i * width / nx);
+  const zs = (!fineGrid && ST.truthEdges?.z && sparseTruthEdges(ST.truthEdges.z)) || Array.from({length: nz + 1}, (_, i) => i * depth / nz);
   const x = [], y = [];
   for (const edge of xs) { x.push(edge, edge, null); y.push(0, depth, null); }
   for (const edge of zs) { x.push(0, width, null); y.push(edge, edge, null); }
@@ -1388,7 +1397,7 @@ async function renderWt() {
   await trackPlotRender('plot-wt',
     buildTraces(heatTrace(d.slice, [[0,'#f0f4ff'],[0.5,'#6699dd'],[1,'#0a2a7a']], d),
       d.shape[0], d.shape[1], -1, event, false, y, dim, d.hypocenters, [1, 1], true),
-    mkLayout(d.shape[0], d.shape[1], 'w', null, true), PLY_CFG);
+    mkLayout(d.shape[0], d.shape[1], 'w', null), PLY_CFG);
 }
 
 async function renderG(force = false) {

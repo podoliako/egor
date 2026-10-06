@@ -48,6 +48,7 @@ class TomographyExperiment:
     station_coordinates_m: np.ndarray
     reference_event_coordinates_m: np.ndarray
     arrival_times_s: np.ndarray
+    noise_sigmas: tuple[float, float]  # relative, absolute seconds
 
 
 def _sha256(path):
@@ -56,6 +57,34 @@ def _sha256(path):
         for block in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def _noise_sigmas(metadata: dict) -> tuple[float, float]:
+    noise = metadata.get("noise")
+    if noise is None:
+        return (0.0, 0.0)
+    if not isinstance(noise, dict) or type(noise.get("enabled")) is not bool:
+        raise ValueError("Invalid metadata noise.enabled")
+    if not noise["enabled"]:
+        return (0.0, 0.0)
+    if noise.get("model") != "independent_gaussian_relative_plus_absolute":
+        raise ValueError("Unsupported metadata noise.model")
+    config = noise.get("config")
+    if not isinstance(config, dict):
+        raise ValueError("Missing metadata noise.config")
+    sigmas = []
+    for name in ("relative_sigma", "absolute_sigma_s"):
+        value = config.get(name)
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(f"metadata noise.config.{name} must be finite and nonnegative")
+        try:
+            sigma = float(value)
+        except OverflowError as error:
+            raise ValueError(f"metadata noise.config.{name} must be finite and nonnegative") from error
+        if not np.isfinite(sigma) or sigma < 0:
+            raise ValueError(f"metadata noise.config.{name} must be finite and nonnegative")
+        sigmas.append(sigma)
+    return (sigmas[0], sigmas[1])
 
 
 def load_tomography_experiment(experiment_id, experiments_root=DEFAULT_EXPERIMENTS_ROOT) -> TomographyExperiment:
@@ -81,6 +110,7 @@ def load_tomography_experiment(experiment_id, experiments_root=DEFAULT_EXPERIMEN
     units = metadata.get("units")
     if not isinstance(units, dict) or any(units.get(k) != v for k, v in _UNITS.items()):
         raise ValueError("Unsupported or missing metadata units (expected SI units)")
+    noise_sigmas = _noise_sigmas(metadata)
     input_dir = root / "input" / experiment_id
     names = ("model.npz", "stations.csv", "events.csv")
     if (input_dir / "generation.json").exists():
@@ -111,4 +141,4 @@ def load_tomography_experiment(experiment_id, experiments_root=DEFAULT_EXPERIMEN
         raise ValueError("Each event must have a zero earliest-station arrival (within 1e-8 s)")
     times.flags.writeable = False
     return TomographyExperiment(model, stations.ids, events.ids, stations.coordinates_m,
-                                events.coordinates_m, times)
+                                events.coordinates_m, times, noise_sigmas)

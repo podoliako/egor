@@ -21,7 +21,6 @@ from .instruments_coords import (
     snap_metric_points_to_cell_centers,
 )
 from .instruments_ops import coarsen_G, coarsen_G_all
-from .instruments_synthetic import generate_synthetic_arrivals_table
 from .instruments_travel import compute_station_travel_time_fields
 from .instruments_weights import (
     compute_cellwise_pairwise_misfit,
@@ -50,7 +49,6 @@ __all__ = [
     "compute_epicenter_weight_matrix",
     "compute_station_travel_time_fields",
     "compute_weights_from_misfit",
-    "generate_synthetic_arrivals_table",
     "metric_to_cell_coord",
     "metric_to_cell_index",
     "metric_to_index",

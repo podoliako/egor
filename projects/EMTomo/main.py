@@ -1,24 +1,13 @@
 import argparse
-import cProfile
-import csv
-import pstats
 from dataclasses import dataclass, replace
 from pathlib import Path
-from pstats import SortKey
 
 import numpy as np
-
-from instruments.instruments import (
-    generate_synthetic_arrivals_table,
-    snap_metric_points_to_cell_centers,
-)
-from tomography.tomography import run_em, warm_up_jit
-from velocity_model import VelocityModel
 
 
 @dataclass(frozen=True)
 class ExampleConfig:
-    """All parameters of the synthetic tomography example."""
+    """Saved-experiment inversion options, with legacy synthetic scenario fields."""
 
     # Model geometry and geographic reference: 350 x 150 x 70 km.
     cell_size: float = 10_000.0
@@ -28,15 +17,15 @@ class ExampleConfig:
     height: float = 50.0
     azimuth: float = 45.0
 
-    # Initial model: homogeneous background; loading a saved model is disabled.
-    # initial_model_path: str | None = "runs/run_20260903_195317/iter_17/model.npy"
 
-    # Station layout and true velocity model. Stations form a uniform surface grid;
-    # events are distributed uniformly in the model volume.
+    # Legacy in-process synthetic scenarios (archive/legacy_synthetics).
     station_grid_shape: tuple[int, int] = (7, 5)
     station_locations_csv: str | None = None
     event_locations_csv: str | None = None
     background_vp: float = 5000.0
+    initial_gradient_m_s: tuple[float, float] | None = None
+    initial_layer_boundaries_km: tuple[float, ...] | None = None
+    initial_layer_velocities_m_s: tuple[float, ...] | None = None
     checkerboard_anomaly_fraction: float = 0.05
     checkerboard_cell_size: float = 20_000.0
     checkerboard_block_shape: tuple[int, int, int] | None = None
@@ -55,12 +44,17 @@ class ExampleConfig:
 
     # EM inversion. Change the version for every method release.
     run_name: str = "em"
-    run_version: str = "1.1"
+    run_version: str = "1.3"
     n_cycles: int = 7
     weights_top_n: int = 1
     weights_min_distance: int = 1
+    candidate_mode: str = "soft"
     temperature: float = 1
+    weight_noise_relative_sigma: float | None = None
+    weight_noise_absolute_sigma_s: float | None = None
+    weight_model_sigma_s: float = 0.2
     lambda_reg: float = 0.01
+    smoothness_reg: float = 0.0
     coverage_damping_power: float = 1
     coverage_floor: float = 0.05
     coverage_reference_percentile: float = 75.0
@@ -85,212 +79,6 @@ class ExampleConfig:
 CONFIG = ExampleConfig()
 
 
-def build_top_surface_stations(
-    n_stations_x: int,
-    n_stations_y: int,
-    model_n_x: int,
-    model_n_y: int,
-    cell_size: float,
-):
-    """Return an evenly spaced station grid above the model's top surface."""
-    model_width_x = model_n_x * cell_size
-    model_width_y = model_n_y * cell_size
-    return [
-        (
-            (i + 0.5) * model_width_x / n_stations_x,
-            (j + 0.5) * model_width_y / n_stations_y,
-            0.0,
-        )
-        for i in range(n_stations_x)
-        for j in range(n_stations_y)
-    ]
-
-
-def build_uniform_volume_events(
-    event_grid_shape: tuple[int, int, int],
-    model_shape: tuple[int, int, int],
-    cell_size: float,
-    depth_bias: float = 0.0,
-):
-    """Return a regular event grid, optionally concentrated toward the bottom.
-
-    ``depth_bias=0`` gives uniformly spaced depths. Positive values transform
-    normalized depth quantiles with exponent ``1 / (1 + depth_bias)``, reducing
-    vertical spacing toward the bottom while keeping every event inside the model.
-    """
-    if min(event_grid_shape) <= 0:
-        raise ValueError("event_grid_shape values must be positive")
-    if depth_bias < 0.0 or not np.isfinite(depth_bias):
-        raise ValueError("depth_bias must be a finite value >= 0")
-
-    event_n_x, event_n_y, event_n_z = event_grid_shape
-    model_n_x, model_n_y, model_n_z = model_shape
-    model_width_x = model_n_x * cell_size
-    model_width_y = model_n_y * cell_size
-    model_depth = model_n_z * cell_size
-    depth_exponent = 1.0 / (1.0 + depth_bias)
-    event_depths = model_depth * (
-        (np.arange(event_n_z, dtype=np.float64) + 0.5) / event_n_z
-    ) ** depth_exponent
-
-    return [
-        (
-            (i + 0.5) * model_width_x / event_n_x,
-            (j + 0.5) * model_width_y / event_n_y,
-            float(event_depths[k]),
-        )
-        for i in range(event_n_x)
-        for j in range(event_n_y)
-        for k in range(event_n_z)
-    ]
-
-
-def load_metric_points_csv(filepath: str) -> list[tuple[float, float, float]]:
-    """Load EMTomo local metric coordinates from a CSV with x_m, y_m, z_m."""
-    path = Path(filepath)
-    with path.open(newline="") as source:
-        reader = csv.DictReader(source)
-        required_columns = {"x_m", "y_m", "z_m"}
-        if reader.fieldnames is None or not required_columns.issubset(reader.fieldnames):
-            raise ValueError(f"{path} must contain columns: {sorted(required_columns)}")
-        points = [
-            (float(row["x_m"]), float(row["y_m"]), float(row["z_m"]))
-            for row in reader
-        ]
-    if not points:
-        raise ValueError(f"No metric points found in {path}")
-    return points
-
-
-def load_or_generate_synthetic_arrivals(
-    config: ExampleConfig,
-    forward_true_model: VelocityModel,
-    stations_metric: list[tuple[float, float, float]],
-    events_metric: list[tuple[float, float, float]],
-) -> list[list[float]]:
-    """Load a geometry-validated arrival cache or generate and optionally save it."""
-    cache_path = (
-        Path(config.synthetic_arrivals_cache)
-        if config.synthetic_arrivals_cache is not None
-        else None
-    )
-    if cache_path is not None and cache_path.is_file():
-        with np.load(cache_path, allow_pickle=False) as cache:
-            arrivals = np.asarray(cache["arrivals"], dtype=np.float64)
-            cached_stations = np.asarray(cache["stations"], dtype=np.float64)
-            cached_events = np.asarray(cache["events"], dtype=np.float64)
-        if not np.array_equal(cached_stations, np.asarray(stations_metric)):
-            raise ValueError(f"Station geometry does not match arrival cache: {cache_path}")
-        if not np.array_equal(cached_events, np.asarray(events_metric)):
-            raise ValueError(f"Event geometry does not match arrival cache: {cache_path}")
-        print(f"Loaded synthetic arrivals: {cache_path}", flush=True)
-        return arrivals.tolist()
-
-    arrivals_table, _ = generate_synthetic_arrivals_table(
-        forward_true_model,
-        station_locs=stations_metric,
-        event_locs=events_metric,
-        random_seed=config.random_seed,
-        subdivision=1,
-        slowness_interpolation=config.slowness_interpolation,
-        arrival_noise_std=config.arrival_noise_std,
-    )
-    if cache_path is not None:
-        cache_path.parent.mkdir(parents=True, exist_ok=True)
-        np.savez_compressed(
-            cache_path,
-            arrivals=np.asarray(arrivals_table, dtype=np.float64),
-            stations=np.asarray(stations_metric, dtype=np.float64),
-            events=np.asarray(events_metric, dtype=np.float64),
-        )
-        print(f"Saved synthetic arrivals: {cache_path}", flush=True)
-    return arrivals_table
-
-
-def load_initial_vp(model: VelocityModel, filepath: str) -> None:
-    """Load a saved coarse-grid Vp array as the inversion starting model."""
-    path = Path(filepath)
-    if not path.is_file():
-        raise FileNotFoundError(f"Initial model file not found: {path}")
-
-    vp = np.load(path, allow_pickle=False)
-    expected_shape = model.grid.vp.shape
-    if vp.shape != expected_shape:
-        raise ValueError(
-            f"Initial Vp shape {vp.shape} does not match the configured "
-            f"coarse-grid shape {expected_shape}"
-        )
-    if not np.all(np.isfinite(vp)) or np.any(vp <= 0.0):
-        raise ValueError("Initial Vp must contain only finite positive velocities")
-
-    model.set_vp_array(vp)
-
-
-def build_true_model(model: VelocityModel, config: ExampleConfig) -> None:
-    """Create a physical 3D checkerboard rotated around the vertical axis."""
-    if config.checkerboard_cell_size <= 0.0:
-        raise ValueError("checkerboard_cell_size must be positive")
-    if config.checkerboard_block_shape is not None and (
-        len(config.checkerboard_block_shape) != 3
-        or min(config.checkerboard_block_shape) <= 0
-    ):
-        raise ValueError(
-            "checkerboard_block_shape must contain three positive values"
-        )
-    if config.checkerboard_pattern_shape is not None and (
-        len(config.checkerboard_pattern_shape) != 3
-        or min(config.checkerboard_pattern_shape) <= 0
-    ):
-        raise ValueError(
-            "checkerboard_pattern_shape must contain three positive values"
-        )
-    if (
-        config.checkerboard_block_shape is not None
-        and config.checkerboard_pattern_shape is not None
-    ):
-        raise ValueError(
-            "Set either checkerboard_block_shape or checkerboard_pattern_shape, not both"
-        )
-
-    n_x, n_y, n_z = model.grid.vp.shape
-    cell_size = model.geometry.side_size
-    x = (np.arange(n_x, dtype=np.float64) + 0.5) * cell_size
-    y = (np.arange(n_y, dtype=np.float64) + 0.5) * cell_size
-    z = (np.arange(n_z, dtype=np.float64) + 0.5) * cell_size
-    x, y, z = np.meshgrid(x, y, z, indexing="ij")
-
-    # Rotate horizontal coordinates about the model centre. Rotation does not
-    # affect the vertical checkerboard axis.
-    x -= n_x * cell_size / 2.0
-    y -= n_y * cell_size / 2.0
-    angle = np.deg2rad(config.checkerboard_rotation_degrees)
-    rotated_x = np.cos(angle) * x + np.sin(angle) * y
-    rotated_y = -np.sin(angle) * x + np.cos(angle) * y
-    if config.checkerboard_pattern_shape is not None:
-        checker_sizes = tuple(
-            model_size * cell_size / pattern_size
-            for model_size, pattern_size in zip(
-                (n_x, n_y, n_z), config.checkerboard_pattern_shape
-            )
-        )
-    elif config.checkerboard_block_shape is not None:
-        checker_sizes = tuple(
-            size * config.cell_size for size in config.checkerboard_block_shape
-        )
-    else:
-        checker_sizes = (config.checkerboard_cell_size,) * 3
-    checker_index = (
-        np.floor(rotated_x / checker_sizes[0]).astype(np.int64)
-        + np.floor(rotated_y / checker_sizes[1]).astype(np.int64)
-        + np.floor(z / checker_sizes[2]).astype(np.int64)
-    )
-    anomaly_sign = np.where(checker_index % 2 == 0, 1.0, -1.0)
-    model.set_vp_array(
-        config.background_vp
-        * (1.0 + anomaly_sign * config.checkerboard_anomaly_fraction)
-    )
-
-
 def main(config: ExampleConfig = CONFIG, *, experiment_id: str | None = None,
          experiments_root: str | Path | None = None, validate_only: bool = False):
     if experiment_id is not None:
@@ -300,128 +88,9 @@ def main(config: ExampleConfig = CONFIG, *, experiment_id: str | None = None,
         if experiments_root is not None:
             kwargs["experiments_root"] = experiments_root
         return run_saved_experiment(experiment_id, config, **kwargs)
-    if validate_only:
-        raise ValueError("validate_only requires an experiment_id")
-
-    # Legacy synthetic scenarios can still call main(config). New invocations
-    # use the experiment ID entry point below; no forward solve happens here.
-    n_x, n_y, n_z = config.grid_shape
-    model_config = {
-        "lon": config.lon,
-        "lat": config.lat,
-        "height": config.height,
-        "azimuth": config.azimuth,
-        "side_size": config.cell_size,
-        "n_x": n_x,
-        "n_y": n_y,
-        "n_z": n_z,
-    }
-
-    # Snap surface stations to centres of the upper fine-grid cells so their
-    # metric coordinates match the cell-centred FMM source locations exactly.
-    fine_cell_size = config.cell_size / config.subdivision
-    fine_shape: tuple[int, int, int] = (
-        n_x * config.subdivision,
-        n_y * config.subdivision,
-        n_z * config.subdivision,
-    )
-    raw_stations_metric = (
-        load_metric_points_csv(config.station_locations_csv)
-        if config.station_locations_csv is not None
-        else build_top_surface_stations(
-            *config.station_grid_shape,
-            n_x,
-            n_y,
-            config.cell_size,
-        )
-    )
-    stations_metric = snap_metric_points_to_cell_centers(
-        raw_stations_metric, fine_cell_size, fine_shape
-    )
-
-    initial_model = VelocityModel.from_config(model_config)
-    initial_model.fill_linear_gradient(
-        "vp", config.background_vp, config.background_vp
-    )
-
-    # To resume from a saved coarse-grid model instead, replace the block above with:
-    # load_initial_vp(initial_model, "runs/run_20260903_195317/iter_17/model.npy")
-
-    # This coarse reference is used for quality metrics and run visualisation.
-    # It samples the same physical pattern as the detailed forward model below.
-    true_model = VelocityModel.from_config(model_config)
-    build_true_model(true_model, config)
-
-    forward_model_config = {
-        **model_config,
-        "side_size": fine_cell_size,
-        "n_x": fine_shape[0],
-        "n_y": fine_shape[1],
-        "n_z": fine_shape[2],
-    }
-    forward_true_model = VelocityModel.from_config(forward_model_config)
-    build_true_model(forward_true_model, config)
-
-    events_metric = (
-        load_metric_points_csv(config.event_locations_csv)
-        if config.event_locations_csv is not None
-        else build_uniform_volume_events(
-            config.event_grid_shape,
-            config.grid_shape,
-            config.cell_size,
-            depth_bias=config.event_depth_bias,
-        )
-    )
-    arrivals_table = load_or_generate_synthetic_arrivals(
-        config,
-        forward_true_model,
-        stations_metric,
-        events_metric,
-    )
-
-    warm_up_jit()
-
-    profiler = cProfile.Profile()
-    profiler.enable()
-    logger = run_em(
-        n_cycles=config.n_cycles,
-        initial_model=initial_model,
-        arrivals_table=arrivals_table,
-        station_locs=stations_metric,
-        weights_top_n=config.weights_top_n,
-        weights_min_distance=config.weights_min_distance,
-        temperature=config.temperature,
-        lambda_reg=config.lambda_reg,
-        subdivision=config.subdivision,
-        coverage_damping_power=config.coverage_damping_power,
-        coverage_floor=config.coverage_floor,
-        coverage_reference_percentile=config.coverage_reference_percentile,
-        max_velocity_step_fraction=config.max_velocity_step_fraction,
-        run_name=config.run_name,
-        run_version=config.run_version,
-        slowness_interpolation=config.slowness_interpolation,
-        v_bounds=config.v_bounds,
-        v_reg_strength=config.v_reg_strength,
-        v_left_mode=config.v_left_mode,
-        v_right_mode=config.v_right_mode,
-        v_left_rate=config.v_left_rate,
-        v_right_rate=config.v_right_rate,
-        v_left_power=config.v_left_power,
-        v_right_power=config.v_right_power,
-        true_model=true_model,
-        true_model_fine=forward_true_model,
-        event_locs=events_metric,
-        save_runs=config.save_runs,
-        runs_dir=config.runs_dir,
-        n_workers=config.n_workers,
-        log_G_per_weight=config.log_g_per_weight,
-    )
-    profiler.disable()
-
-    print(f"Run saved: {logger.run_dir}")
-    logger.save_profiling(profiler)
-    pstats.Stats(profiler).strip_dirs().sort_stats(SortKey.CUMULATIVE).print_stats(
-        config.profiling_stats_limit
+    raise ValueError(
+        "main(config) requires an experiment_id; use "
+        "archive.legacy_synthetics.runner.main(config) for legacy synthetics"
     )
 
 
@@ -431,10 +100,32 @@ if __name__ == "__main__":
     parser.add_argument("--experiments-root", type=Path, default=None)
     parser.add_argument("--cell-size-m", type=float, default=CONFIG.cell_size,
                         help="Inversion cell side in metres (must tile the forward domain)")
+    parser.add_argument("--initial-gradient-m-s", type=float, nargs=2, metavar=("TOP", "BOTTOM"),
+                        help="Approximate 1-D initial speed at the domain top and bottom; default: homogeneous 5000 m/s")
+    parser.add_argument("--initial-layer-boundaries-km", type=float, nargs="+", metavar="Z",
+                        help="Horizontal depth boundaries for an approximate layered initial model")
+    parser.add_argument("--initial-layer-velocities-m-s", type=float, nargs="+", metavar="V",
+                        help="Initial layer speeds from top to bottom (one more than boundaries)")
     parser.add_argument("--subdivision", type=int, default=CONFIG.subdivision)
     parser.add_argument("--cycles", type=int, default=CONFIG.n_cycles)
     parser.add_argument("--workers", type=int, default=CONFIG.n_workers)
+    parser.add_argument("--weights-top-n", type=int, default=CONFIG.weights_top_n,
+                        help="Number of candidate hypocentres per event (default: 1)")
+    parser.add_argument("--weights-min-distance", type=int, default=CONFIG.weights_min_distance,
+                        help="Chebyshev separation of candidate hypocentres in fine-grid cells")
+    parser.add_argument("--candidate-mode", choices=("soft", "hard"), default=CONFIG.candidate_mode,
+                        help="Soft: all shortlisted hypotheses; hard: most likely of the same refined shortlist")
+    parser.add_argument("--temperature", type=float, default=CONFIG.temperature,
+                        help="Candidate likelihood temperature: 1 for untempered, >1 for softer weights")
+    parser.add_argument("--weight-noise-relative-sigma", type=float, default=None,
+                        help="Override the relative pick-noise sigma in saved metadata")
+    parser.add_argument("--weight-noise-absolute-sigma-s", type=float, default=None,
+                        help="Override the absolute pick-noise sigma in saved metadata (seconds)")
+    parser.add_argument("--weight-model-sigma-s", type=float, default=CONFIG.weight_model_sigma_s,
+                        help="Model/numerical mismatch sigma in seconds (default: 0.2)")
     parser.add_argument("--lambda-reg", type=float, default=CONFIG.lambda_reg)
+    parser.add_argument("--smoothness-reg", type=float, default=CONFIG.smoothness_reg,
+                        help="Dimensionless six-neighbor penalty on slowness updates (default: off)")
     parser.add_argument("--coverage-damping-power", type=float, default=CONFIG.coverage_damping_power)
     parser.add_argument("--max-velocity-step-fraction", type=float, default=CONFIG.max_velocity_step_fraction)
     parser.add_argument("--run-name", type=str, default=CONFIG.run_name)
@@ -442,13 +133,29 @@ if __name__ == "__main__":
     parser.add_argument("--validate-only", action="store_true",
                         help="Check the experiment and inversion setup without running EM")
     args = parser.parse_args()
-    if args.subdivision < 1 or args.cycles < 1 or args.workers < 1:
-        parser.error("--subdivision, --cycles and --workers must be positive")
-    if args.lambda_reg < 0 or args.coverage_damping_power < 0 or not 0 < args.max_velocity_step_fraction <= 1:
-        parser.error("--lambda-reg and --coverage-damping-power must be nonnegative; --max-velocity-step-fraction must be in (0, 1]")
+    if args.subdivision < 1 or args.cycles < 1 or args.workers < 1 or args.weights_top_n < 1 or args.weights_min_distance < 1:
+        parser.error("--subdivision, --cycles, --workers, --weights-top-n and --weights-min-distance must be positive")
+    if not np.isfinite(args.temperature) or args.temperature <= 0:
+        parser.error("--temperature must be finite and positive")
+    for name in ("weight_noise_relative_sigma", "weight_noise_absolute_sigma_s", "weight_model_sigma_s"):
+        value = getattr(args, name)
+        if value is not None and (not np.isfinite(value) or value < 0):
+            parser.error(f"--{name.replace('_', '-')} must be finite and nonnegative")
+    if args.lambda_reg < 0 or not np.isfinite(args.smoothness_reg) or args.smoothness_reg < 0 or args.coverage_damping_power < 0 or not 0 < args.max_velocity_step_fraction <= 1:
+        parser.error("--lambda-reg, --smoothness-reg and --coverage-damping-power must be nonnegative; --max-velocity-step-fraction must be in (0, 1]")
     config = replace(CONFIG, cell_size=args.cell_size_m, subdivision=args.subdivision,
-                     n_cycles=args.cycles, n_workers=args.workers, runs_dir=args.runs_dir,
-                     lambda_reg=args.lambda_reg, coverage_damping_power=args.coverage_damping_power,
+                     initial_gradient_m_s=(tuple(args.initial_gradient_m_s) if args.initial_gradient_m_s is not None else None),
+                     initial_layer_boundaries_km=(tuple(args.initial_layer_boundaries_km) if args.initial_layer_boundaries_km is not None else None),
+                     initial_layer_velocities_m_s=(tuple(args.initial_layer_velocities_m_s) if args.initial_layer_velocities_m_s is not None else None),
+                     n_cycles=args.cycles, n_workers=args.workers, weights_top_n=args.weights_top_n,
+                     weights_min_distance=args.weights_min_distance, candidate_mode=args.candidate_mode,
+                     temperature=args.temperature,
+                     weight_noise_relative_sigma=args.weight_noise_relative_sigma,
+                     weight_noise_absolute_sigma_s=args.weight_noise_absolute_sigma_s,
+                     weight_model_sigma_s=args.weight_model_sigma_s,
+                     runs_dir=args.runs_dir,
+                     lambda_reg=args.lambda_reg, smoothness_reg=args.smoothness_reg,
+                     coverage_damping_power=args.coverage_damping_power,
                      max_velocity_step_fraction=args.max_velocity_step_fraction, run_name=args.run_name)
     try:
         main(config, experiment_id=args.experiment_id,

@@ -64,10 +64,20 @@ def run_em(
     coverage_reference_percentile: float = 75.0,
     max_velocity_step_fraction: Optional[float] = None,
     run_name: str = "em",
-    run_version: str = "1.0",
+    run_version: str = "1.3",
     true_model_fine=None,
     source_experiment=None,
+    smoothness_reg: float = 0.0,
+    initial_gradient_m_s: Optional[Tuple[float, float]] = None,
+    initial_layer_boundaries_km: Optional[Tuple[float, ...]] = None,
+    initial_layer_velocities_m_s: Optional[Tuple[float, ...]] = None,
+    weight_noise_relative_sigma: float = 0.0,
+    weight_noise_absolute_sigma_s: float = 0.0,
+    weight_model_sigma_s: float = 0.2,
+    candidate_mode: str = "soft",
 ):
+    if candidate_mode not in ("soft", "hard"):
+        raise ValueError("candidate_mode must be 'soft' or 'hard'")
     if save_runs and logger is None:
         logger = TomographyLogger(
             base_dir=runs_dir,
@@ -75,6 +85,7 @@ def run_em(
             run_version=run_version,
             run_tags={
                 "topn": weights_top_n,
+                "mode": candidate_mode,
                 "dmin": weights_min_distance,
                 "lam": lambda_reg,
                 "temp": temperature,
@@ -93,7 +104,18 @@ def run_em(
             wave_type=wave_type,
             solver=str(solver),
             lambda_reg=lambda_reg,
+            smoothness_reg=smoothness_reg,
+            initial_gradient_m_s=initial_gradient_m_s,
+            initial_layer_boundaries_km=initial_layer_boundaries_km,
+            initial_layer_velocities_m_s=initial_layer_velocities_m_s,
             temperature=temperature,
+            weight_noise_relative_sigma=weight_noise_relative_sigma,
+            weight_noise_absolute_sigma_s=weight_noise_absolute_sigma_s,
+            weight_model_sigma_s=weight_model_sigma_s,
+            weight_likelihood="gaussian_independent_absolute_picks_marginal_origin_uniform_candidates",
+            normal_equations="station_precision_weighted_profiled_origin",
+            candidate_mode=candidate_mode,
+            candidate_selection="pairwise_misfit_shortlist_refined_within_cells",
             weights_top_n=weights_top_n,
             weights_min_distance=weights_min_distance,
             subdivision=subdivision,
@@ -139,6 +161,10 @@ def run_em(
             weights_min_distance,
             subdivision,
             n_workers=n_workers,
+            weight_noise_relative_sigma=weight_noise_relative_sigma,
+            weight_noise_absolute_sigma_s=weight_noise_absolute_sigma_s,
+            weight_model_sigma_s=weight_model_sigma_s,
+            candidate_mode=candidate_mode,
             slowness_interpolation=slowness_interpolation,
             log_G_per_weight=log_G_per_weight,
             iteration=i,
@@ -146,6 +172,7 @@ def run_em(
             coverage_damping_power=coverage_damping_power,
             coverage_floor=coverage_floor,
             coverage_reference_percentile=coverage_reference_percentile,
+            smoothness_reg=smoothness_reg,
             return_diagnostics=True,
         )
 
@@ -212,7 +239,14 @@ def make_tomography_step(
     coverage_floor: float = 0.05,
     coverage_reference_percentile: float = 75.0,
     return_diagnostics: bool = False,
+    smoothness_reg: float = 0.0,
+    weight_noise_relative_sigma: float = 0.0,
+    weight_noise_absolute_sigma_s: float = 0.0,
+    weight_model_sigma_s: float = 0.2,
+    candidate_mode: str = "soft",
 ):
+    if candidate_mode not in ("soft", "hard"):
+        raise ValueError("candidate_mode must be 'soft' or 'hard'")
     coarse_grid = initial_model.get_geo_grid(
         subdivision=1,
         slowness_interpolation=slowness_interpolation,
@@ -262,6 +296,10 @@ def make_tomography_step(
             weights_top_n,
             weights_min_distance,
             n_workers,
+            weight_noise_relative_sigma=weight_noise_relative_sigma,
+            weight_noise_absolute_sigma_s=weight_noise_absolute_sigma_s,
+            weight_model_sigma_s=weight_model_sigma_s,
+            candidate_mode=candidate_mode,
             log_G_per_weight=log_G_per_weight and logger is not None,
             log_misfit=logger is not None and logger.save_misfit,
         )
@@ -284,6 +322,10 @@ def make_tomography_step(
                     temperature=temperature,
                     weights_top_n=weights_top_n,
                     weights_min_distance=weights_min_distance,
+                    weight_noise_relative_sigma=weight_noise_relative_sigma,
+                    weight_noise_absolute_sigma_s=weight_noise_absolute_sigma_s,
+                    weight_model_sigma_s=weight_model_sigma_s,
+                    candidate_mode=candidate_mode,
                     log_G_per_weight=log_G_per_weight and logger is not None,
                     log_misfit=logger is not None and logger.save_misfit,
                 )
@@ -327,6 +369,7 @@ def make_tomography_step(
         coverage_damping_power=coverage_damping_power,
         coverage_floor=coverage_floor,
         coverage_reference_percentile=coverage_reference_percentile,
+        smoothness_reg=smoothness_reg,
         return_diagnostics=return_diagnostics,
     )
 

@@ -15,12 +15,12 @@ Geometry
 - synthetic arrival noise: disabled.
 
 Run from the EMTomo directory:
-    python checkerboard_4x2x2_small.py
+    python -m archive.legacy_synthetics.checkerboard_4x2x2_small
 """
 from dataclasses import replace
 
-from checkerboard_4x2x2 import CHECKERBOARD_4X2X2_CONFIG
-from main import main
+from .checkerboard_4x2x2 import CHECKERBOARD_4X2X2_CONFIG
+from .runner import main
 
 
 CHECKERBOARD_4X2X2_SMALL_CONFIG = replace(
