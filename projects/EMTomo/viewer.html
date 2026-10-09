@@ -74,6 +74,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 .dim-toggle { display: flex; align-items: center; gap: 3px; color: var(--text3); white-space: nowrap; }
 
 /* ── Auto-refresh ── */
+#refresh-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 #refresh-bar label { display: flex; align-items: center; gap: 4px; color: var(--text2); font-size: 11px; cursor: pointer; flex-shrink: 0; }
 
 /* ── App shell ── */
@@ -136,6 +137,15 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   flex-direction: column;
   overflow: hidden;
   height: var(--panel-h);
+}
+
+#model-row .y-group { flex-wrap: wrap; flex-shrink: 1; min-width: 0; max-width: 100%; }
+
+/* Share the complete wrapped header track, not just its first line. */
+@supports (grid-template-rows: subgrid) {
+  #model-row { height: var(--panel-h); grid-template-rows: auto minmax(0, 1fr); row-gap: 0; }
+  #model-row > .panel { display: grid; grid-row: span 2; grid-template-rows: subgrid; height: auto; }
+  #model-row > .panel.fullscreen { display: flex; height: calc(100vh - 44px); }
 }
 
 /* Timing / quality panel: shorter, full width */
@@ -268,7 +278,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 
   <div class="ctrl-group" id="run-control">
     <span class="ctrl-label">Run</span>
-    <select id="run-select"></select><option value="">— loading —</option></select>
+    <select id="run-select"><option value="">— loading —</option></select>
   </div>
   <div class="vsep"></div>
 
@@ -290,6 +300,9 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   <!-- Auto-refresh -->
   <div id="refresh-bar">
     <label><input type="checkbox" id="cb-autorefresh"> Auto-refresh (1s)</label>
+    <label><input type="checkbox" id="cb-follow-iter"> Follow latest iteration</label>
+    <label><input type="checkbox" id="cb-follow-run"> Follow new runs</label>
+    <span id="refresh-status" role="status"></span>
   </div>
   <div class="vsep"></div>
 
@@ -321,10 +334,10 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   </div><!-- /row 0 -->
 
   <!-- Row 1: Velocity Model + True Model -->
-  <div class="panel-row">
+  <div class="panel-row" id="model-row">
 
-    <div class="panel">
-      <div class="panel-hdr">
+    <div class="panel" id="panel-vel">
+      <div class="panel-hdr" id="vel-header">
         <span class="panel-title">Velocity Model</span>
         <button class="btn-dl" data-plot="plot-vel" data-fname="velocity" title="Download PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
@@ -332,11 +345,17 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
           <select id="vel-type">
             <option value="iter">Iter</option>
             <option value="initial">Initial</option>
-            <option value="delta_s">ΔS</option>
+            <option value="delta_s">ΔS (update i → i+1)</option>
+            <option value="sensitivity_diagonal">Sensitivity diagonal</option>
+            <option value="coverage_confidence">Coverage confidence</option>
 
           </select>
         </div>
         <div class="ph-group"><span class="badge" id="vel-shape-badge">—</span></div>
+        <div class="ph-group"><select id="vel-scale" aria-label="Color scale">
+          <option value="auto">Auto scale</option><option value="fixed">Fixed per run / field</option>
+        </select></div>
+        <span class="badge" id="model-state-label"></span>
         <div class="ph-group y-group">
           Y (km)
           <button class="y-btn" id="vel-y-dec">◀</button>
@@ -355,8 +374,8 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
       </div>
     </div>
 
-    <div class="panel">
-      <div class="panel-hdr">
+    <div class="panel" id="panel-tr">
+      <div class="panel-hdr" id="tr-header">
         <span class="panel-title">True Model</span>
         <button class="btn-dl" data-plot="plot-tr" data-fname="true_model" title="Download PNG">↓</button>
         <button class="btn-full" title="Fullscreen">⤢</button>
@@ -489,7 +508,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
         </div>
 
         <div class="hypoq-cell">
-          <span class="hypoq-cell-title">Distribution — current iter</span>
+          <span class="hypoq-cell-title">By event — current iter</span>
           <div class="hypoq-no-data" id="hypoq-hist-empty">No data</div>
           <div id="plot-hypoq-hist" style="width:100%;height:100%"></div>
         </div>
@@ -525,7 +544,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
         </div>
 
         <div class="hypoq-cell">
-          <span class="hypoq-cell-title">Distribution — current iter</span>
+          <span class="hypoq-cell-title">By event — current iter</span>
           <div class="hypoq-no-data" id="hypod-hist-empty">No data</div>
           <div id="plot-hypod-hist" style="width:100%;height:100%"></div>
         </div>
@@ -571,7 +590,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 const ST = {
   run: null, iter: 0, meta: null, info: null,
   showGrid: true, showStations: true, showEvents: true,
-  vel:    { type: 'iter', y: 0, yStep: 1 },
+  vel:    { type: 'iter', y: 0, yStep: 1, scale: 'auto' },
   tr:     { y: 0 },
   truthEdges: null,
   rc:     { event: 0, weight: 0, y: 0, dim: true },
@@ -582,6 +601,8 @@ const ST = {
   hypoQ:  { residualSummary: [], residualIter: [], topN: 8, hilightEv: -1 },
   hypoD:  { distanceSummary: [], distanceIter: [], topN: 8, hilightEv: -1 },
   autoRefresh: false,
+    followIteration: false, followRun: false,
+    summaries: [], colorRanges: new Map(),
   refreshInterval: 1,
   _refreshTimer: null,
   _refreshing: false,
@@ -606,7 +627,9 @@ let LOAD_RUN_TOKEN = 0;
 
 function beginPlotRequest(...plotIds) {
   const token = Symbol('plot-request');
-  plotIds.forEach(id => PLOT_REQUEST_TOKENS.set(id, token));
+  plotIds.forEach(id => {
+      PLOT_REQUEST_TOKENS.set(id, token); PLOT_RENDER_TOKENS.delete(id);
+    });
   return token;
 }
 
@@ -618,12 +641,28 @@ function trackPlotRender(plotId, traces, layout, config) {
   const el = document.getElementById(plotId);
   const renderedRun = ST.run;
   const renderedIter = ST.iter;
+  const context = plotContext(plotId);
+  layout.uirevision = `${renderedRun}:${plotId}`;
+    if (layout.coloraxis && traces[0]?.colorscale) layout.coloraxis.colorscale = traces[0].colorscale;
+  // Plotly mutates input axis ranges after pan/zoom/reset. Carry those inputs
+  // forward, not fresh explicit extents, when updating the same plot in a run.
+  if (el.dataset.renderRun === renderedRun && el.layout) {
+    for (const axis of ['xaxis', 'yaxis']) {
+      if (!el.layout[axis] || !layout[axis]) continue;
+      for (const key of ['range', 'autorange']) {
+        if (el.layout[axis][key] !== undefined) layout[axis][key] = el.layout[axis][key];
+      }
+    }
+  }
   const renderToken = Symbol('plot-render');
   PLOT_RENDER_TOKENS.set(plotId, renderToken);
   const promise = Promise.resolve(Plotly.react(el, traces, layout, config)).then(() => {
     if (PLOT_RENDER_TOKENS.get(plotId) !== renderToken) return;
     el.dataset.renderRun = renderedRun || 'plot';
     el.dataset.renderIter = String(renderedIter);
+        el.dataset.renderField = context.field;
+        el.dataset.renderY = String(context.y);
+        el.dataset.renderContext = context.label;
   });
   PLOT_RENDER_PROMISES.set(plotId, promise);
   return promise;
@@ -712,8 +751,8 @@ function locationTrace(locs, kind, hilite, coarse, panelY, dim, visible) {
     x: points.map(p => p.loc[0] / 1000),
     y: points.map(p => p.loc[2] / 1000),
     // Keep a thousand event labels from obscuring the model; IDs remain in hover.
-    text: points.map(p => station || p.index === hilite ? `${station ? 'S' : 'E'}${p.index}` : ''),
-    customdata: points.map(p => [p.index, ...p.loc.map(v => v / 1000)]),
+    text: points.map(p => station || p.index === hilite ? (station ? `S${p.index}` : escapeText(eventLabel(p.index))) : ''),
+    customdata: points.map(p => [station ? p.index : escapeText(eventLabel(p.index)), ...p.loc.map(v => v / 1000)]),
     textposition: 'top center',
     textfont: { size: 8, color: points.map(p => `rgba(60,70,85,${alpha(p)})`) },
     marker: {
@@ -769,8 +808,43 @@ function buildTraces(ht, nx, nz, hilSta, hilEv, coarse, panelY, dim, hypocenters
 
 /* ── API / data utils ── */
 async function apiFetch(url) {
-  try { const r = await fetch(url); return r.ok ? r.json() : null; }
-  catch { return null; }
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return { apiError: `HTTP ${r.status}`, missing: r.status === 404 };
+    return await r.json();
+  } catch (error) { return { apiError: `API error: ${error.message || error}` }; }
+}
+
+function dataMessage(data, missing) {
+  return data?.apiError && !data.missing ? data.apiError : missing;
+}
+function eventLabel(index) {
+  return String(ST.meta?.reference_event_ids?.[index] ?? index);
+}
+function escapeText(value) {
+  return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function publishedIterations(info = ST.info) {
+  return (info?.iterations || []).filter(i => Number.isInteger(i) && i >= 0).sort((a, b) => a - b);
+}
+function hasPublishedIteration() { return publishedIterations().includes(ST.iter); }
+function selectedUpdateState() {
+  return ST.vel.type === 'initial' || !publishedIterations().length ? 0
+    : ST.vel.type === 'delta_s' ? ST.iter + 1 : ST.iter;
+}
+function syncIterationControls() {
+  ST.iter = clampIteration(ST.iter);
+  const iterations = publishedIterations();
+  const max = iterations.length ? Math.max(...iterations) : 0;
+  ['iter-slider', 'iter-num'].forEach(id => {
+    const el = document.getElementById(id);
+    el.max = max; el.value = ST.iter; el.disabled = !iterations.length;
+  });
+  document.getElementById('iter-max-badge').textContent = iterations.length ? `/ ${max}` : 'No completed iterations';
+  document.getElementById('model-state-label').textContent = ST.vel.type === 'delta_s'
+    ? (hasPublishedIteration() ? `Update ${ST.iter} → ${ST.iter + 1}` : 'No completed update')
+        : `Applied updates: ${selectedUpdateState()}`;
 }
 
 function T(mat) {
@@ -809,10 +883,10 @@ function showP(pid, eid) {
   setPanelCollapsed(pid, false);
 }
 function emptyP(pid, eid, msg) {
-  Plotly.purge(pid);
+  // Hide temporarily unavailable data without discarding the run's viewport.
   document.getElementById(pid).style.display  = 'none';
   const el = document.getElementById(eid); el.style.display = 'flex'; el.textContent = msg || 'No data';
-  setPanelCollapsed(pid, true);
+  setPanelCollapsed(pid, false);
 }
 
 function syncY(slId, lblId, numId, ny, stObj) {
@@ -829,44 +903,70 @@ function syncY(slId, lblId, numId, ny, stObj) {
 function relayoutAll() {
   ALL_PLOTS.forEach(id => {
     const el = document.getElementById(id);
-    if (el?._fullLayout) Plotly.relayout(id, { autosize: true });
+    if (el?._fullLayout) Plotly.Plots.resize(el);
   });
+}
+
+function runLabelParts(summary, description) {
+  const suppliedName = typeof summary.run_name === 'string' ? summary.run_name.trim() : '';
+    const metadataName = suppliedName === summary.id ? '' : suppliedName;
+  if (metadataName) {
+    // Logger IDs use a slug; remove only a matching, complete leading name.
+    // A mismatched metadata name must not silently discard ID version/tag context.
+    const slug = metadataName.replace(/[^A-Za-z0-9.]+/g, '-').replace(/^[-.]+|[-.]+$/g, '').toLowerCase();
+    const prefix = [metadataName, slug].filter(Boolean).find(name =>
+      description.toLowerCase() === name.toLowerCase() || description.toLowerCase().startsWith(`${name.toLowerCase()}_`));
+    return {name: metadataName, context: prefix ? description.slice(prefix.length).replace(/^_/, '') : description};
+  }
+  // Older summaries have no metadata name. An explicit version token is a safe
+  // boundary; otherwise retain the entire description rather than guessing tags.
+  const tokens = description.split('_');
+  const version = tokens.findIndex(token => /^v\d/i.test(token));
+  return version > 0
+    ? {name: tokens.slice(0, version).join(' · '), context: tokens.slice(version).join('_')}
+    : {name: description.replace(/_/g, ' · '), context: ''};
 }
 
 function populateRunSelect(runs, selectedId) {
   const sel = document.getElementById('run-select');
-  if (!runs?.length) { sel.innerHTML = '<option value="">No runs found</option>'; return; }
-
+  sel.innerHTML = '';
+  if (!runs?.length) {
+    const option = document.createElement('option');
+    option.value = ''; option.textContent = 'No runs found'; sel.appendChild(option);
+    return;
+  }
   const groups = new Map();
-  const other = [];
-  runs.forEach(r => {
-    // Run IDs contain a descriptive name and timestamp.
-    const m = r.match(/(?:^|_)(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})(?:$|_)/);
-    if (!m) { other.push(r); return; }
-    const [_, Y, M, D, h, m2, s] = m;
-    const date = `${Y}-${M}-${D}`;
-    const timestamp = `${Y}${M}${D}_${h}${m2}${s}`;
-    const description = r
-      .replace(/^run_/, '')
-      .replace(new RegExp(`_?${timestamp}$`), '')
-      .replace(/_/g, ' · ');
+  runs.forEach(summary => {
+    const id = summary.id;
+    const m = id.match(/(?:^|_)(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})(?:$|_)/);
+    const date = m ? `${m[1]}-${m[2]}-${m[3]}` : 'Other';
+    const timestamp = m ? `${m[1]}${m[2]}${m[3]}_${m[4]}${m[5]}${m[6]}` : '';
+    const description = id.replace(/^run_/, '')
+      .replace(timestamp ? new RegExp(`(?:^|_)${timestamp}(?=_|$)`) : /$^/, '').replace(/^_+|_+$/g, '');
+    const {name, context} = runLabelParts(summary, description);
+    const count = `${summary.completed_iterations ?? 0}/${summary.planned_iterations ?? '?'} ит.`;
+    const label = [`${name || id} — ${count}`, ...context.split('_').filter(Boolean),
+      ...(m ? [`${m[4]}:${m[5]}:${m[6]}`] : [])].join(' · ');
     if (!groups.has(date)) groups.set(date, []);
-    groups.get(date).push({ id: r, label: `${h}:${m2}:${s} • ${description || r}` });
+    groups.get(date).push({id, label});
   });
-
-  let html = '';
-  for (const [date, items] of groups.entries()) {
-    html += `<optgroup label="${date}">`;
-    html += items.map(it => `<option value="${it.id}">${it.label}</option>`).join('');
-    html += `</optgroup>`;
+  for (const [date, items] of groups) {
+    const group = document.createElement('optgroup'); group.label = date;
+    for (const item of items) {
+      const option = document.createElement('option');
+      option.value = item.id; option.textContent = item.label; group.appendChild(option);
+    }
+    sel.appendChild(group);
   }
-  if (other.length) {
-    html += `<optgroup label="Other">` + other.map(r => `<option value="${r}">${r}</option>`).join('') + `</optgroup>`;
-  }
-  sel.innerHTML = html;
-  if (selectedId && runs.includes(selectedId)) sel.value = selectedId;
+  if (selectedId && runs.some(r => r.id === selectedId)) sel.value = selectedId;
 }
 
+function publicationSignature(info) {
+  return JSON.stringify([info?.completed_iterations, info?.planned_iterations, publishedIterations(info)]);
+}
+
+// Absolute velocities use a sequential, color-vision-friendly luminance scale.
+const CS_VELOCITY = 'Cividis';
 const CS_DIVERG = [[0,'#3a78c9'],[0.5,'#f5f5f5'],[1,'#c94040']];
 const CS_RDBU   = [[0,'#3a78c9'],[0.25,'#90b8e8'],[0.5,'#f5f5f5'],[0.75,'#e89090'],[1,'#c94040']];
 const CS_RAYS   = [[0,'#f8faff'],[0.2,'#c5d9f7'],[0.5,'#5a9bd4'],[0.8,'#1a4ea8'],[1,'#0a1e6e']];
@@ -875,52 +975,65 @@ const CS_RAYS   = [[0,'#f8faff'],[0.2,'#c5d9f7'],[0.5,'#5a9bd4'],[0.8,'#1a4ea8']
 async function doAutoRefresh() {
   if (ST._refreshing) return;
   ST._refreshing = true;
-
+  const run = ST.run, loadToken = LOAD_RUN_TOKEN;
   try {
-    const [runs, latest] = await Promise.all([
-      apiFetch('/api/runs'),
-      apiFetch('/api/runs/latest'),
-    ]);
-    if (!latest?.run_id) return;
-
-    if (latest.run_id !== ST.run) {
-      populateRunSelect(runs || [], latest.run_id);
-      await loadRun(latest.run_id, latest.max_iter);
+    const summaries = await apiFetch('/api/runs/summary');
+    if (loadToken !== LOAD_RUN_TOKEN || ST.run !== run) return;
+    if (!Array.isArray(summaries)) {
+      document.getElementById('refresh-status').textContent = dataMessage(summaries, 'Run summary API unavailable');
       return;
     }
-
-    const maxIter = latest.max_iter ?? 0;
-    const prevMax = +document.getElementById('iter-slider').max;
-    if (maxIter > prevMax) {
-      ['iter-slider','iter-num'].forEach(id => {
-        document.getElementById(id).max = maxIter;
-      });
-      document.getElementById('iter-max-badge').textContent = `/ ${maxIter}`;
+    ST.summaries = summaries;
+    populateRunSelect(summaries, run);
+    document.getElementById('refresh-status').textContent = '';
+    // Summary order is the same newest-first order as /api/runs.
+    const newest = summaries[0];
+    if (ST.followRun && newest && newest.id !== run) {
+      const iterations = publishedIterations(newest);
+      await loadRun(newest.id, ST.followIteration && iterations.length ? Math.max(...iterations) : null);
+      return;
     }
-    if (maxIter !== ST.iter) {
-      setIter(maxIter);
+    const summary = summaries.find(r => r.id === run);
+    if (!summary || publicationSignature(summary) === publicationSignature(ST.info)) return;
+    const info = await apiFetch(`/api/runs/${run}/info`);
+    if (loadToken !== LOAD_RUN_TOKEN || ST.run !== run) return;
+    if (info?.apiError || !Array.isArray(info?.iterations)) {
+      document.getElementById('refresh-status').textContent = dataMessage(info, 'Invalid run info');
+      return;
+    }
+    const previouslyAvailable = hasPublishedIteration();
+    const previousIter = ST.iter;
+    const changed = JSON.stringify(publishedIterations(info)) !== JSON.stringify(publishedIterations());
+    ST.info = info;
+    syncIterationControls(); syncSelections();
+    if (!changed) return;
+    await refreshLiveData(run, loadToken);
+    if (loadToken !== LOAD_RUN_TOKEN || ST.run !== run) return;
+    const iterations = publishedIterations();
+    if (ST.followIteration && iterations.length) {
+      if (ST.autoInitial) {
+        ST.vel.type = 'iter'; ST.autoInitial = false;
+        document.getElementById('vel-type').value = 'iter';
+      }
+      setIter(Math.max(...iterations));
+    } else if (previousIter !== ST.iter || (!previouslyAvailable && hasPublishedIteration())) {
+      setIter(ST.iter);
     } else {
-      await refreshLiveData();
+      renderTiming(); renderQuality();
+      await renderHypoMetrics();
     }
-  } finally {
-    ST._refreshing = false;
-  }
+  } finally { ST._refreshing = false; }
 }
 
-async function refreshLiveData() {
-  if (!ST.run) return;
-  const run = ST.run;
-  const [info, timing, quality] = await Promise.all([
-    apiFetch(`/api/runs/${run}/info`),
-    apiFetch(`/api/runs/${run}/timing`),
-    apiFetch(`/api/runs/${run}/quality`),
+async function refreshLiveData(run = ST.run, loadToken = LOAD_RUN_TOKEN) {
+  const [timing, quality] = await Promise.all([
+    apiFetch(`/api/runs/${run}/timing`), apiFetch(`/api/runs/${run}/quality`),
   ]);
-  if (ST.run !== run) return;
-  ST.info = info || ST.info;
-  ST.timing.data = timing || ST.timing.data;
-  ST.quality.data = quality || ST.quality.data;
-  renderTiming();
-  renderQuality();
+  if (ST.run !== run || loadToken !== LOAD_RUN_TOKEN) return;
+  ST.timing.error = timing?.apiError ? dataMessage(timing, 'No timing artefact') : null;
+  ST.quality.error = quality?.apiError ? dataMessage(quality, 'No quality artefact') : null;
+  ST.timing.data = Array.isArray(timing) ? timing : [];
+  ST.quality.data = Array.isArray(quality) ? quality : [];
 }
 
 function scheduleAutoRefresh() {
@@ -937,11 +1050,18 @@ document.getElementById('cb-autorefresh').addEventListener('change', e => {
   scheduleAutoRefresh();
 });
 
+document.getElementById('cb-follow-iter').addEventListener('change', e => {
+  ST.followIteration = e.target.checked;
+  const iterations = publishedIterations();
+  if (ST.followIteration && iterations.length && ST.iter !== Math.max(...iterations)) setIter(Math.max(...iterations));
+});
+document.getElementById('cb-follow-run').addEventListener('change', e => { ST.followRun = e.target.checked; });
+
 /* ── Timing render ── */
 function renderTiming() {
-  const rows = ST.timing.data;
+  const rows = ST.timing.data.filter(r => !ST.info || publishedIterations().includes(r.iter));
   if (!rows || rows.length === 0) {
-    emptyP('plot-timing', 'timing-empty', 'No timing.jsonl found');
+    emptyP('plot-timing', 'timing-empty', ST.timing.error || 'No published timing artefact');
     return;
   }
 
@@ -991,21 +1111,22 @@ function renderTiming() {
 }
 
 function renderQuality() {
-  const rows = ST.quality.data;
+  const rows = ST.quality.data.filter(r => !ST.info || publishedIterations().includes(r.iter));
   if (!rows || rows.length === 0) {
-    emptyP('plot-quality', 'quality-empty', 'No quality.jsonl found');
+    emptyP('plot-quality', 'quality-empty', ST.quality.error || 'No published quality artefact');
     return;
   }
 
   const sorted = [...rows].sort((a, b) => a.iter - b.iter);
-  const iters = sorted.map(r => r.iter);
+  const iters = sorted.map(r => r.iter + 1);
   const vals  = sorted.map(r => r.avg_abs_pct_dev);
 
-  // vertical line at current iter
+  // quality[i] is post-update i+1; iter_i/model is pre-update state i.
+  const selected = selectedUpdateState();
   const shapes = [];
-  if (iters.includes(ST.iter)) {
+  if (iters.includes(selected)) {
     shapes.push({
-      type: 'line', x0: ST.iter, x1: ST.iter, y0: 0, y1: 1,
+      type: 'line', x0: selected, x1: selected, y0: 0, y1: 1,
       xref: 'x', yref: 'paper',
       line: { color: '#4a7fd4', width: 1.5, dash: 'dot' },
     });
@@ -1016,14 +1137,14 @@ function renderQuality() {
     x: iters, y: vals,
     line: { color: '#2e9e6b', width: 2 },
     marker: { size: 5, color: '#2e9e6b' },
-    hovertemplate: 'iter %{x}<br>%{y:.3f}%<extra></extra>',
+    hovertemplate: 'Applied updates %{x}<br>%{y:.3f}%<extra></extra>',
   }];
 
   const layout = {
     paper_bgcolor: '#ffffff', plot_bgcolor: '#f8f9fb',
     font: { color: '#1e2530', size: 9, family: "Menlo, Consolas, monospace" },
     margin: { l: 58, r: 14, t: 6, b: 36 },
-    xaxis: { title: { text: 'Iteration', font: { size: 9 }, standoff: 2 },
+    xaxis: { title: { text: 'Applied updates', font: { size: 9 }, standoff: 2 },
       showgrid: false, zeroline: false, tickmode: 'linear', dtick: 1, tickfont: { size: 8 } },
     yaxis: { title: { text: 'Avg abs % deviation', font: { size: 9 }, standoff: 2 },
       showgrid: true, gridcolor: '#e8ecf0', zeroline: false, tickfont: { size: 8 } },
@@ -1036,19 +1157,27 @@ function renderQuality() {
 
 /* ── Hypo Residuals + Hypo Distance panels ── */
 async function renderHypoMetrics() {
-  if (!ST.run) return;
+  if (!ST.run || !ST.meta) return;
   const plotIds = ['plot-hypoq-trend', 'plot-hypoq-hist', 'plot-hypod-trend', 'plot-hypod-hist'];
   const request = beginPlotRequest(...plotIds);
   const run = ST.run;
   const iter = ST.iter;
 
-  const data = await apiFetch(`/api/runs/${run}/hypo_metrics?iter=${iter}`);
+  const data = hasPublishedIteration() ? await apiFetch(`/api/runs/${run}/hypo_metrics?iter=${iter}`) : {};
   if (!isCurrentPlotRequest(request, ...plotIds)) return;
   ST.hypoQ.residualSummary = data?.residual_summary || [];
   ST.hypoQ.residualIter    = data?.residual_iter || [];
   ST.hypoD.distanceSummary = data?.distance_summary || [];
   ST.hypoD.distanceIter    = data?.distance_iter || [];
+  renderHypoData();
+  if (data?.apiError) {
+    for (const [pid, eid] of [['plot-hypoq-trend', 'hypoq-trend-empty'], ['plot-hypoq-hist', 'hypoq-hist-empty'], ['plot-hypod-trend', 'hypod-trend-empty'], ['plot-hypod-hist', 'hypod-hist-empty']]) {
+      emptyP(pid, eid, dataMessage(data, 'No hypocentre metrics artefact'));
+    }
+  }
+}
 
+function renderHypoData() {
   _renderHypoTrend({
     summary: ST.hypoQ.residualSummary,
     plotId: 'plot-hypoq-trend',
@@ -1139,7 +1268,6 @@ function _renderHypoTrend({ summary, plotId, emptyId, meanKey, p10Key, p90Key, y
   const emptyEl = document.getElementById(emptyId);
 
   if (!summary?.length) {
-    Plotly.purge(plotId);
     trendEl.style.display = 'none';
     emptyEl.style.display = 'flex';
     return;
@@ -1191,12 +1319,11 @@ function _renderHypoTrend({ summary, plotId, emptyId, meanKey, p10Key, p90Key, y
 }
 
 function _renderHypoHist({ rows, valueKey, plotId, emptyId, yLabel, hoverFmt, topN, hilightEv }) {
-  const valid = (rows || []).filter(r => r[valueKey] != null);
+  const valid = (rows || []).filter(r => Number.isFinite(r[valueKey]));
   const histEl = document.getElementById(plotId);
   const emptyEl = document.getElementById(emptyId);
 
   if (!valid.length) {
-    Plotly.purge(plotId);
     histEl.style.display = 'none';
     emptyEl.style.display = 'flex';
     return;
@@ -1207,21 +1334,21 @@ function _renderHypoHist({ rows, valueKey, plotId, emptyId, yLabel, hoverFmt, to
   const vals = valid.map(r => r[valueKey]);
   const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
   const shapes = [{
-    type: 'line', x0: mean, x1: mean, y0: 0, y1: 1,
-    xref: 'x', yref: 'paper',
+    type: 'line', x0: 0, x1: 1, y0: mean, y1: mean,
+    xref: 'paper', yref: 'y',
     line: { color: '#c94040', width: 1.5, dash: 'dash' },
   }];
 
-  const sorted = [...vals].sort((a, b) => b - a);
-  const thresh = sorted[Math.min(topN - 1, sorted.length - 1)] ?? Infinity;
-  const colors = vals.map(v => v >= thresh ? 'rgba(201,64,64,0.75)' : 'rgba(74,127,212,0.55)');
+  const worst = new Set(rankedEvents(valid, valueKey, topN).map(r => r.event));
+  const colors = valid.map(r => r.event === hilightEv ? '#a04800' : worst.has(r.event) ? 'rgba(201,64,64,0.75)' : 'rgba(74,127,212,0.55)');
 
   const traces = [{
     type: 'bar',
     x: valid.map(r => r.event),
     y: vals,
-    marker: { color: colors, line: { width: 0 } },
-    hovertemplate: `Ev %{x}<br>${hoverFmt}<extra></extra>`,
+    customdata: valid.map(r => escapeText(eventLabel(r.event))),
+    marker: { color: colors, line: { color: '#a04800', width: valid.map(r => r.event === hilightEv ? 2 : 0) } },
+    hovertemplate: `Ev %{customdata}<br>${hoverFmt}<extra></extra>`,
   }];
 
   const layout = _hypoqLayout('Event index', yLabel, { shapes, bargap: 0.15,
@@ -1233,8 +1360,13 @@ function _renderHypoHist({ rows, valueKey, plotId, emptyId, yLabel, hoverFmt, to
   trackPlotRender(plotId, traces, layout, PLY_CFG);
 }
 
+function rankedEvents(rows, valueKey, topN) {
+  return [...rows].sort((a, b) => b[valueKey] - a[valueKey] || a.event - b.event)
+    .slice(0, Math.max(0, Math.floor(topN)));
+}
+
 function _renderHypoWorst({ rows, valueKey, listId, topN, hilightEv, fmt, onClick }) {
-  const valid = (rows || []).filter(r => r[valueKey] != null);
+  const valid = (rows || []).filter(r => Number.isFinite(r[valueKey]));
   const el = document.getElementById(listId);
 
   if (!valid.length) {
@@ -1242,7 +1374,7 @@ function _renderHypoWorst({ rows, valueKey, listId, topN, hilightEv, fmt, onClic
     return;
   }
 
-  const worst = [...valid].sort((a, b) => b[valueKey] - a[valueKey]).slice(0, Math.max(1, topN));
+  const worst = rankedEvents(valid, valueKey, topN);
 
   el.innerHTML = worst.map((r, i) => {
     const isHi = r.event === hilightEv;
@@ -1250,7 +1382,7 @@ function _renderHypoWorst({ rows, valueKey, listId, topN, hilightEv, fmt, onClic
       <div class="hypoq-ev-row${isHi ? ' active' : ''}" data-ev="${r.event}"
            style="${isHi ? 'background:#eaf0fb;' : ''}">
         <span class="hypoq-ev-rank">${i + 1}.</span>
-        <span class="hypoq-ev-id">Ev ${r.event}</span>
+        <span class="hypoq-ev-id">Ev ${escapeText(eventLabel(r.event))}</span>
         <span class="hypoq-ev-val">${fmt(r[valueKey])}</span>
       </div>`;
   }).join('');
@@ -1261,44 +1393,22 @@ function _renderHypoWorst({ rows, valueKey, listId, topN, hilightEv, fmt, onClic
 }
 
 function _highlightHypoEvent(ev, which) {
-  const st = ST[which];
-  st.hilightEv = (st.hilightEv === ev) ? -1 : ev;
+  const selected = ST[which].hilightEv === ev ? -1 : ev;
+  ST.hypoQ.hilightEv = ST.hypoD.hilightEv = selected;
   const nEv = ST.info?.n_events || 0;
-  if (ev < nEv) {
-    ST.wt.event = ev;
-    ST.G.event  = ev;
-    document.getElementById('wt-ev').value = ev;
-    document.getElementById('g-ev').value  = ev;
+  if (ev >= 0 && ev < nEv) {
+    ST.wt.event = ST.G.event = ST.rc.event = ev;
+    syncSelections();
+    beginPlotRequest('plot-wt', 'plot-G', 'plot-rc');
+    const run = ST.run, iter = ST.iter;
     Promise.all([reloadGWeights(), reloadRcWeights()]).then(() => {
+      if (ST.run !== run || ST.iter !== iter || ST.wt.event !== ev) return;
       renderWt(); renderG(); renderRayCount();
     });
   }
-  if (which === 'hypoQ') {
-    _renderHypoHist({
-      rows: ST.hypoQ.residualIter, valueKey: 'rms',
-      plotId: 'plot-hypoq-hist', emptyId: 'hypoq-hist-empty',
-      yLabel: 'RMS residual (s)', hoverFmt: 'RMS = %{y:.4f}',
-      topN: ST.hypoQ.topN, hilightEv: ST.hypoQ.hilightEv,
-    });
-    _renderHypoWorst({
-      rows: ST.hypoQ.residualIter, valueKey: 'rms', listId: 'hypoq-worst-list',
-      topN: ST.hypoQ.topN, hilightEv: ST.hypoQ.hilightEv,
-      fmt: v => v.toFixed(4), onClick: e => _highlightHypoEvent(e, 'hypoQ'),
-    });
-  } else {
-    _renderHypoHist({
-      rows: ST.hypoD.distanceIter, valueKey: 'dist_m',
-      plotId: 'plot-hypod-hist', emptyId: 'hypod-hist-empty',
-      yLabel: 'Distance (m)', hoverFmt: 'dist = %{y:.1f} m',
-      topN: ST.hypoD.topN, hilightEv: ST.hypoD.hilightEv,
-    });
-    _renderHypoWorst({
-      rows: ST.hypoD.distanceIter, valueKey: 'dist_m', listId: 'hypod-worst-list',
-      topN: ST.hypoD.topN, hilightEv: ST.hypoD.hilightEv,
-      fmt: v => `${v.toFixed(1)} m`, onClick: e => _highlightHypoEvent(e, 'hypoD'),
-    });
-  }
+  renderVelPair(); renderHypoData();
 }
+
 
 /* ── Render functions ── */
 
@@ -1317,42 +1427,70 @@ function sliceRange(data) {
   return [Math.min(data.vmin, data.vmax), Math.max(data.vmin, data.vmax)];
 }
 
+function fieldRange(field, range) {
+  if (ST.vel.scale !== 'fixed') return range;
+  if (!ST.colorRanges.has(field)) ST.colorRanges.set(field, range);
+  return ST.colorRanges.get(field);
+}
+
 async function renderVelPair() {
-  if (!ST.run) return;
+  if (!ST.run || !ST.meta) return;
   const request = beginPlotRequest('plot-vel', 'plot-tr');
   const run = ST.run, yKm = ST.vel.y;
-  const isDelta = ST.vel.type === 'delta_s';
-  const velUrl = isDelta
-    ? `/api/runs/${run}/slice?type=delta_s&iter=${ST.iter}&y_km=${yKm}`
-    : `/api/runs/${run}/slice?type=model&model_type=${ST.vel.type}&iter=${ST.iter}&y_km=${yKm}${inversionResolution()}`;
-  const [dV, dTr] = await Promise.all([apiFetch(velUrl), apiFetch(trueModelUrl(yKm))]);
-  if (!isCurrentPlotRequest(request, 'plot-vel', 'plot-tr')) return;
-  if (!dV?.slice || !dTr?.slice) {
-    emptyP('plot-vel', 'vel-empty', 'Model data unavailable');
-    emptyP('plot-tr', 'tr-empty', 'Independent true model unavailable');
-    return;
-  }
-  ST.truthEdges = {x: dTr.x_edges_km, z: dTr.z_edges_km};
-  shapeBadge('vel-shape-badge', dV.full_shape);
-  shapeBadge('tr-shape-badge', dTr.full_shape);
-  document.getElementById('tr-y-v').textContent = `Y: ${yKm.toFixed(2)} km`;
-  showP('plot-vel', 'vel-empty');
-  showP('plot-tr', 'tr-empty');
-  // Δs has different physical units; only two velocity images share the range.
-  const zrange = isDelta
-    ? [-Math.max(1e-12, Math.abs(dV.vmin), Math.abs(dV.vmax)),
-        Math.max(1e-12, Math.abs(dV.vmin), Math.abs(dV.vmax))]
-    : [Math.min(dV.vmin, dTr.vmin), Math.max(dV.vmax, dTr.vmax)];
-  await Promise.all([
-    trackPlotRender('plot-vel',
-      buildTraces(heatTrace(dV.slice, isDelta ? CS_DIVERG : 'Viridis', dV, zrange),
-        dV.shape[0], dV.shape[1], -1, -1, dV.cell_size, yKm, false, [], dV.grid_step),
-      mkLayout(dV.shape[0], dV.shape[1], isDelta ? 'Δs' : 'V', zrange), PLY_CFG),
-    trackPlotRender('plot-tr',
-      buildTraces(heatTrace(dTr.slice, 'Viridis', dTr, isDelta ? sliceRange(dTr) : zrange),
-        dTr.shape[0], dTr.shape[1], -1, -1, dTr.cell_size, yKm, false, [], dTr.grid_step),
-      mkLayout(dTr.shape[0], dTr.shape[1], 'V true', isDelta ? sliceRange(dTr) : zrange), PLY_CFG),
+  const type = ST.vel.type;
+  const model = type === 'iter' || type === 'initial';
+  const effectiveType = type === 'iter' && !publishedIterations().length ? 'initial' : type;
+  const velUrl = model
+    ? `/api/runs/${run}/slice?type=model&model_type=${effectiveType}&iter=${ST.iter}&y_km=${yKm}${inversionResolution()}`
+    : `/api/runs/${run}/slice?type=${type}&iter=${ST.iter}&y_km=${yKm}`;
+  const available = effectiveType === 'initial' || hasPublishedIteration();
+  emptyP('plot-vel', 'vel-empty', 'Loading model / field…');
+  emptyP('plot-tr', 'tr-empty', 'Loading true model…');
+  const [dV, dTr] = await Promise.all([
+    available ? apiFetch(velUrl) : Promise.resolve(null), apiFetch(trueModelUrl(yKm)),
   ]);
+  if (!isCurrentPlotRequest(request, 'plot-vel', 'plot-tr')) return;
+  ST.truthEdges = dTr?.slice ? {x: dTr.x_edges_km, z: dTr.z_edges_km} : null;
+  document.getElementById('tr-y-v').textContent = `Y: ${yKm.toFixed(2)} km`;
+  syncIterationControls();
+  // Only physical velocities share a range; update/coverage fields have their own units.
+  const velocities = [model ? dV : null, dTr].filter(d => d?.slice);
+  const velocityRange = velocities.length ? fieldRange('velocity', [
+    Math.min(...velocities.map(d => d.vmin)), Math.max(...velocities.map(d => d.vmax)),
+  ]) : null;
+  let range = velocityRange;
+  if (!model && dV?.slice) {
+    range = sliceRange(dV);
+    if (type === 'delta_s') {
+      const bound = Math.max(1e-12, ...range.map(Math.abs)); range = [-bound, bound];
+    }
+    if (type === 'coverage_confidence') range = [0, 1];
+    range = fieldRange(type, range);
+  }
+  const renders = [];
+  if (dV?.slice) {
+    showP('plot-vel', 'vel-empty'); shapeBadge('vel-shape-badge', dV.full_shape);
+    const units = model ? 'V (m/s)' : type === 'delta_s' ? 'Δs (s/m)' : type === 'coverage_confidence' ? 'Confidence (0–1)' : 'diag(H) (m²/s²)';
+    const colors = model ? CS_VELOCITY : type === 'delta_s' ? CS_DIVERG : CS_RAYS;
+    renders.push(trackPlotRender('plot-vel',
+      buildTraces(heatTrace(dV.slice, colors, dV, range), dV.shape[0], dV.shape[1], -1, ST.hypoQ.hilightEv,
+        dV.cell_size, yKm, false, [], dV.grid_step),
+      mkLayout(dV.shape[0], dV.shape[1], units, range), PLY_CFG));
+  } else {
+    shapeBadge('vel-shape-badge', null);
+    emptyP('plot-vel', 'vel-empty', dataMessage(dV, available ? 'No model / field artefact saved' : 'No completed iteration — choose Initial'));
+  }
+  if (dTr?.slice) {
+    showP('plot-tr', 'tr-empty'); shapeBadge('tr-shape-badge', dTr.full_shape);
+    renders.push(trackPlotRender('plot-tr',
+      buildTraces(heatTrace(dTr.slice, CS_VELOCITY, dTr, velocityRange), dTr.shape[0], dTr.shape[1], -1, ST.hypoQ.hilightEv,
+        dTr.cell_size, yKm, false, [], dTr.grid_step),
+      mkLayout(dTr.shape[0], dTr.shape[1], 'V true (m/s)', velocityRange), PLY_CFG));
+  } else {
+    shapeBadge('tr-shape-badge', null);
+    emptyP('plot-tr', 'tr-empty', dataMessage(dTr, 'No true model saved'));
+  }
+  await Promise.all(renders);
 }
 
 const renderVel = renderVelPair;
@@ -1364,16 +1502,21 @@ function diagnosticExpanded(plotId) {
 }
 
 async function renderRayCount(force = false) {
-  if (!ST.run || (!force && !diagnosticExpanded('plot-rc'))) return;
+  if (!ST.run || !ST.meta || (!force && !diagnosticExpanded('plot-rc'))) return;
+  // The ray-count slice is a run-wide aggregate, also saved without G/weight folders.
+    if (!hasPublishedIteration()) {
+      emptyP('plot-rc', 'rc-empty', 'No completed iteration / ray-count artefact'); return;
+    }
   const request = beginPlotRequest('plot-rc');
+  emptyP('plot-rc', 'rc-empty', 'Loading ray counts…');
   const run = ST.run;
   const iter = ST.iter;
   const { event, weight, y, dim } = ST.rc;
   const d = await apiFetch(
-    `/api/runs/${run}/slice?type=ray_count&event=${event}&weight=${weight}&iter=${iter}&y_km=${y}`
+    `/api/runs/${run}/slice?type=ray_count&event=${event}&weight=${weight ?? 0}&iter=${iter}&y_km=${y}`
   );
   if (!isCurrentPlotRequest(request, 'plot-rc')) return;
-  if (!d?.slice) { emptyP('plot-rc','rc-empty','No ray_count data — check G is saved'); return; }
+  if (!d?.slice) { emptyP('plot-rc','rc-empty',dataMessage(d, 'No ray_count artefact saved')); return; }
   showP('plot-rc','rc-empty');
   syncY('rc-y','rc-y-v','rc-y-num', d.full_shape[1], ST.rc);
   shapeBadge('rc-shape-badge', d.full_shape);
@@ -1383,14 +1526,18 @@ async function renderRayCount(force = false) {
 }
 
 async function renderWt() {
-  if (!ST.run) return;
+  if (!ST.run || !ST.meta) return;
+  if (!hasPublishedIteration() || !ST.info?.n_events) {
+    emptyP('plot-wt', 'wt-empty', 'No completed iteration / hypotheses'); return;
+  }
   const request = beginPlotRequest('plot-wt');
+  emptyP('plot-wt', 'wt-empty', 'Loading hypotheses…');
   const run = ST.run;
   const iter = ST.iter;
   const { event, y, dim } = ST.wt;
   const d = await apiFetch(`/api/runs/${run}/slice?type=weights&event=${event}&iter=${iter}&y_km=${y}`);
   if (!isCurrentPlotRequest(request, 'plot-wt')) return;
-  if (!d?.slice) { emptyP('plot-wt','wt-empty','No data'); return; }
+  if (!d?.slice) { emptyP('plot-wt','wt-empty',dataMessage(d, 'No hypotheses artefact saved')); return; }
   showP('plot-wt','wt-empty');
   syncWeightsY();
   shapeBadge('wt-shape-badge', d.full_shape);
@@ -1401,8 +1548,13 @@ async function renderWt() {
 }
 
 async function renderG(force = false) {
-  if (!ST.run || (!force && !diagnosticExpanded('plot-G'))) return;
+  if (!ST.run || !ST.meta || (!force && !diagnosticExpanded('plot-G'))) return;
+  if (ST.G.weightsLoading) { emptyP('plot-G', 'g-empty', 'Loading hypotheses…'); return; }
+    if (!hasPublishedIteration() || !ST.info?.n_events || !ST.info?.n_stations || ST.G.weight == null) {
+    emptyP('plot-G', 'g-empty', ST.G.weightError || 'No published G / hypothesis artefact'); return;
+  }
   const request = beginPlotRequest('plot-G');
+  emptyP('plot-G', 'g-empty', 'Loading G…');
   const run = ST.run;
   const iter = ST.iter;
   const { event, station, weight, y, dim } = ST.G;
@@ -1410,7 +1562,7 @@ async function renderG(force = false) {
     `/api/runs/${run}/slice?type=G&event=${event}&station=${station}&weight=${weight}&iter=${iter}&y_km=${y}`
   );
   if (!isCurrentPlotRequest(request, 'plot-G')) return;
-  if (!d?.slice) { emptyP('plot-G','g-empty','No data — check event/station/weight'); return; }
+  if (!d?.slice) { emptyP('plot-G','g-empty',dataMessage(d, 'No G artefact saved for event / station / hypothesis')); return; }
   showP('plot-G','g-empty');
   syncY('g-y','g-y-v','g-y-num', d.full_shape[1], ST.G);
   shapeBadge('g-shape-badge', d.full_shape);
@@ -1516,52 +1668,98 @@ function bindYControls(prefix, stateObj, renderFn) {
 
 
 /* ── Populate helpers ── */
-function fillSelect(id, count, prefix) {
-  const el = document.getElementById(id), cur = +el.value || 0;
+function fillSelect(id, count, prefix, current) {
+  const el = document.getElementById(id);
+  const selected = Math.max(0, Math.min(Math.max(0, count - 1), Number(current) || 0));
   el.innerHTML = '';
   for (let i = 0; i < count; i++) {
     const o = document.createElement('option');
-    o.value = i; o.textContent = `${prefix}${i}`; el.appendChild(o);
+    o.value = i; o.textContent = prefix === 'Ev ' ? `Ev ${eventLabel(i)}` : `${prefix}${i}`;
+    el.appendChild(o);
   }
-  el.value = Math.min(cur, Math.max(0, count - 1));
+  el.value = count ? selected : ''; el.disabled = !count;
+  return selected;
 }
 
-async function reloadGWeights() {
-  const ev = ST.G.event;
-  const d = await apiFetch(`/api/runs/${ST.run}/weights_list?iter=${ST.iter}&event=${ev}`);
-  const sel = document.getElementById('g-wt');
-  sel.innerHTML = '';
-  const count = d?.length || 1;
-  for (let i = 0; i < count; i++) {
-    const o = document.createElement('option'); o.value = i; o.textContent = `wt ${i}`; sel.appendChild(o);
+function syncSelections() {
+  const nEv = ST.info?.n_events || 0;
+  for (const [key, id] of [['wt', 'wt-ev'], ['G', 'g-ev'], ['rc', 'rc-ev']]) {
+    ST[key].event = fillSelect(id, nEv, 'Ev ', ST[key].event);
   }
-  sel.value = 0; ST.G.weight = 0;
+  ST.G.station = fillSelect('g-sta', ST.info?.n_stations || 0, 'Sta ', ST.G.station);
+  for (const key of ['hypoQ', 'hypoD']) {
+    if (ST[key].hilightEv >= nEv) ST[key].hilightEv = -1;
+  }
 }
 
-async function reloadRcWeights() {
-  const ev = ST.rc.event;
-  const d = await apiFetch(`/api/runs/${ST.run}/weights_list?iter=${ST.iter}&event=${ev}`);
-  const sel = document.getElementById('rc-wt');
-  sel.innerHTML = '';
-  const count = d?.length || 1;
-  for (let i = 0; i < count; i++) {
-    const o = document.createElement('option'); o.value = i; o.textContent = `wt ${i}`; sel.appendChild(o);
+const WEIGHT_REQUESTS = new Map();
+async function reloadWeights(key, selectId, plotId) {
+  const state = ST[key], run = ST.run, iter = ST.iter, event = state.event;
+  const loadToken = LOAD_RUN_TOKEN;
+  const token = Symbol('weights'); WEIGHT_REQUESTS.set(key, token);
+  state.weightsLoading = true; document.getElementById(selectId).disabled = true;
+  beginPlotRequest(plotId);
+  const d = hasPublishedIteration() && ST.info?.n_events > 0
+    ? await apiFetch(`/api/runs/${run}/weights_list?iter=${iter}&event=${event}`) : [];
+  if (WEIGHT_REQUESTS.get(key) !== token || ST.run !== run || ST.iter !== iter || state.event !== event || LOAD_RUN_TOKEN !== loadToken) return false;
+  const indices = (Array.isArray(d) ? d : []).map(name => /^weight_(\d+)$/.exec(name))
+    .filter(Boolean).map(m => Number(m[1])).sort((a, b) => a - b);
+  const sel = document.getElementById(selectId); sel.innerHTML = '';
+  for (const index of indices) {
+    const option = document.createElement('option');
+    option.value = index; option.textContent = `wt ${index}`; sel.appendChild(option);
   }
-  sel.value = 0; ST.rc.weight = 0;
+  state.weight = indices.includes(state.weight) ? state.weight : indices[0] ?? null;
+  state.weightError = d?.apiError ? dataMessage(d, 'No hypotheses saved') : null;
+  sel.value = state.weight ?? ''; sel.disabled = !indices.length;
+    state.weightsLoading = false;
+  return true;
 }
+function reloadGWeights() { return reloadWeights('G', 'g-wt', 'plot-G'); }
+function reloadRcWeights() { return reloadWeights('rc', 'rc-wt', 'plot-rc'); }
 
 function updateParamsBar() {
   const bar = document.getElementById('params-bar'), p = ST.meta?.run_params;
   if (!p) { bar.innerHTML = ''; return; }
   bar.innerHTML = Object.entries(p)
-    .map(([k, v]) => `<div class="param-chip"><span class="param-k">${k}</span><span class="param-v">${v}</span></div>`)
+    .map(([k, v]) => `<div class="param-chip"><span class="param-k">${escapeText(k)}</span><span class="param-v">${escapeText(v)}</span></div>`)
     .join('');
 }
 
+const EMPTY_IDS = {
+  'plot-vel':'vel-empty', 'plot-tr':'tr-empty', 'plot-rc':'rc-empty', 'plot-wt':'wt-empty', 'plot-G':'g-empty',
+  'plot-timing':'timing-empty', 'plot-quality':'quality-empty',
+  'plot-hypoq-trend':'hypoq-trend-empty', 'plot-hypoq-hist':'hypoq-hist-empty',
+  'plot-hypod-trend':'hypod-trend-empty', 'plot-hypod-hist':'hypod-hist-empty',
+};
+
 async function loadRun(rid, targetIter = null) {
+  if (rid === ST.run && ST.meta && ST.info) {
+    if (targetIter != null) setIter(targetIter);
+    return;
+  }
   const loadToken = ++LOAD_RUN_TOKEN;
-  ST.run = rid;
+  ++SELECTION_TOKEN; clearTimeout(ITER_RENDER_TIMER);
+  ST.run = rid; ST.meta = ST.info = null;
+  ST.timing.data = []; ST.quality.data = [];
+  ST.hypoQ.residualSummary = ST.hypoQ.residualIter = [];
+  ST.hypoD.distanceSummary = ST.hypoD.distanceIter = [];
+  ST.colorRanges.clear(); WEIGHT_REQUESTS.clear();
   beginPlotRequest(...ALL_PLOTS);
+  for (const id of ALL_PLOTS) {
+    const el = document.getElementById(id);
+    PLOT_RENDER_TOKENS.delete(id); PLOT_RENDER_PROMISES.delete(id);
+    Plotly.purge(el);
+    delete el.dataset.renderRun; delete el.dataset.renderIter;
+    emptyP(id, EMPTY_IDS[id], 'Loading run…');
+  }
+  document.getElementById('hypoq-worst-list').textContent = 'Loading…';
+  document.getElementById('hypod-worst-list').textContent = 'Loading…';
+  document.getElementById('params-bar').textContent = '';
+  for (const id of ['vel-shape-badge', 'tr-shape-badge', 'rc-shape-badge', 'wt-shape-badge', 'g-shape-badge']) shapeBadge(id, null);
+  for (const key of ['wt', 'G', 'rc']) { ST[key].event = 0; ST[key].weightsLoading = false; ST[key].weightError = null; }
+    ST.iter = 0; syncIterationControls(); syncSelections();
+  ST.G.station = 0; ST.G.weight = ST.rc.weight = null;
   document.getElementById('run-select').value = rid;
   ST.hypoQ.hilightEv = -1;
   ST.hypoD.hilightEv = -1;
@@ -1584,30 +1782,32 @@ async function loadRun(rid, targetIter = null) {
     apiFetch(`/api/runs/${rid}/quality`),
   ]);
   if (loadToken !== LOAD_RUN_TOKEN || ST.run !== rid) return;
+  if (info?.apiError || meta?.apiError || !Array.isArray(info?.iterations)) {
+    const message = dataMessage(info?.apiError ? info : meta, 'Invalid run info / publication contract');
+    for (const id of ALL_PLOTS) emptyP(id, EMPTY_IDS[id], message);
+    document.getElementById('refresh-status').textContent = message;
+    return;
+  }
   ST.meta = meta || {};
-  ST.info = info || {};
+  ST.info = info;
+  ST.autoInitial = !publishedIterations().length;
+  if (ST.autoInitial) {
+    ST.vel.type = 'initial'; document.getElementById('vel-type').value = 'initial';
+  }
   configureModelY(true);
   syncWeightsY();
   document.getElementById('run-select').title = rid;
-  ST.timing.data = timing || [];
-  ST.quality.data = quality || [];
+  ST.timing.data = Array.isArray(timing) ? timing : [];
+  ST.quality.data = Array.isArray(quality) ? quality : [];
+  ST.timing.error = timing?.apiError ? dataMessage(timing, 'No timing artefact') : null;
+  ST.quality.error = quality?.apiError ? dataMessage(quality, 'No quality artefact') : null;
+  document.getElementById('refresh-status').textContent = '';
 
   document.getElementById('warn-no-grid').style.display =
     ST.meta?.grid_info?.coarse_cell_size ? 'none' : 'inline';
 
-  const maxIter = ST.info.iterations?.length ? Math.max(...ST.info.iterations) : 0;
-  const iter = targetIter != null ? Math.min(targetIter, maxIter) : 0;
-  ['iter-slider','iter-num'].forEach(id => {
-    const el = document.getElementById(id); el.max = maxIter; el.value = iter;
-  });
-  document.getElementById('iter-max-badge').textContent = `/ ${maxIter}`;
-  ST.iter = iter;
-
-  const nSta = ST.info.n_stations || 0, nEv = ST.info.n_events || 0;
-  fillSelect('wt-ev',  nEv,  'Ev ');
-  fillSelect('g-ev',   nEv,  'Ev ');
-  fillSelect('rc-ev',  nEv,  'Ev ');
-  fillSelect('g-sta',  nSta, 'Sta ');
+  ST.iter = clampIteration(targetIter ?? 0);
+  syncIterationControls(); syncSelections();
 
   await Promise.all([reloadGWeights(), reloadRcWeights()]);
   if (loadToken !== LOAD_RUN_TOKEN || ST.run !== rid) return;
@@ -1618,15 +1818,27 @@ async function loadRun(rid, targetIter = null) {
 
 /* ── Wire-up ── */
 let ITER_RENDER_TIMER = null;
+let SELECTION_TOKEN = 0;
+function clampIteration(value) {
+  const iterations = publishedIterations();
+  if (!iterations.length) return 0;
+  const requested = Number(value) || 0;
+  return iterations.reduce((best, i) => Math.abs(i - requested) < Math.abs(best - requested) ? i : best, iterations[0]);
+}
 function setIter(v, debounce = false) {
-  const max = +document.getElementById('iter-slider').max || 0;
-  v = Math.max(0, Math.min(max, +v || 0));
-  ST.iter = v;
-  document.getElementById('iter-slider').value = v;
-  document.getElementById('iter-num').value = v;
+  ST.iter = clampIteration(v);
+  syncIterationControls(); syncSelections();
+  beginPlotRequest(...ALL_PLOTS);
+  for (const id of ALL_PLOTS) emptyP(id, EMPTY_IDS[id], 'Loading iteration…');
+  const selection = ++SELECTION_TOKEN;
   clearTimeout(ITER_RENDER_TIMER);
-  if (debounce) ITER_RENDER_TIMER = setTimeout(renderAll, 90);
-  else renderAll();
+  const render = async () => {
+    await Promise.all([reloadGWeights(), reloadRcWeights()]);
+    if (selection !== SELECTION_TOKEN) return;
+    renderAll();
+  };
+  if (debounce) ITER_RENDER_TIMER = setTimeout(render, 90);
+  else render();
 }
 
 document.getElementById('iter-slider').addEventListener('input', e => setIter(e.target.value, true));
@@ -1640,8 +1852,12 @@ document.getElementById('timing-mode').addEventListener('change', e => {
   ST.timing.mode = e.target.value; renderTiming();
 });
 
-// The velocity panels always use a shared scale and the same physical Y.
-document.getElementById('vel-type').addEventListener('change', e => { ST.vel.type = e.target.value; renderVel(); });
+// Physical velocities share a scale and Y; diagnostic fields have separate units.
+document.getElementById('vel-type').addEventListener('change', e => {
+  ST.vel.type = e.target.value; ST.autoInitial = false;
+  syncIterationControls(); renderVel(); renderQuality();
+});
+document.getElementById('vel-scale').addEventListener('change', e => { ST.vel.scale = e.target.value; renderVel(); });
 document.getElementById('vel-y').addEventListener('input', e => setModelY(e.target.value));
 document.getElementById('vel-y-num').addEventListener('change', e => setModelY(e.target.value));
 document.getElementById('vel-y-dec').addEventListener('click', () => setModelY(ST.vel.y - ST.vel.yStep));
@@ -1665,7 +1881,10 @@ document.getElementById('vel-y-step').addEventListener('change', e => {
 });
 
 // Ray Count
-document.getElementById('rc-ev').addEventListener('change', async e => { ST.rc.event = +e.target.value; await reloadRcWeights(); renderRayCount(); });
+document.getElementById('rc-ev').addEventListener('change', async e => {
+  ST.rc.event = +e.target.value; syncSelections();
+  if (await reloadRcWeights()) renderRayCount();
+});
 document.getElementById('rc-wt').addEventListener('change',  e => { ST.rc.weight = +e.target.value; renderRayCount(); });
 document.getElementById('cb-dim-rc').addEventListener('change', e => { ST.rc.dim = e.target.checked; renderRayCount(); });
 bindYControls('rc', ST.rc, renderRayCount);
@@ -1673,7 +1892,7 @@ bindYControls('rc', ST.rc, renderRayCount);
 // Wt
 
 document.getElementById('cb-dim-wt').addEventListener('change', e => { ST.wt.dim = e.target.checked; renderWt(); });
-document.getElementById('wt-ev').addEventListener('change', e => { ST.wt.event = +e.target.value; syncWeightsY(); renderWt(); });
+document.getElementById('wt-ev').addEventListener('change', e => { ST.wt.event = +e.target.value; syncSelections(); syncWeightsY(); renderWt(); });
 document.getElementById('wt-y').addEventListener('input', e => setWeightsLayer(e.target.value));
 document.getElementById('wt-y-num').addEventListener('change', e => setWeightsLayer(e.target.value));
 document.getElementById('wt-y-dec').addEventListener('click', () => setWeightsLayer(Number(document.getElementById('wt-y').value) - 1));
@@ -1681,20 +1900,23 @@ document.getElementById('wt-y-inc').addEventListener('click', () => setWeightsLa
 document.getElementById('wt-true-y').addEventListener('click', jumpWeightsToTrueY);
 
 // G
-document.getElementById('g-ev').addEventListener('change', async e => { ST.G.event = +e.target.value; await reloadGWeights(); renderG(); });
-document.getElementById('g-sta').addEventListener('change', e => { ST.G.station = +e.target.value; renderG(); });
+document.getElementById('g-ev').addEventListener('change', async e => {
+  ST.G.event = +e.target.value; syncSelections();
+  if (await reloadGWeights()) renderG();
+});
+document.getElementById('g-sta').addEventListener('change', e => { ST.G.station = +e.target.value; syncSelections(); renderG(); });
 document.getElementById('g-wt').addEventListener('change',  e => { ST.G.weight  = +e.target.value; renderG(); });
 document.getElementById('cb-dim-g').addEventListener('change',  e => { ST.G.dim  = e.target.checked; renderG();  });
 bindYControls('g', ST.G, renderG);
 
 // Hypo Quality
 document.getElementById('hypoq-topn').addEventListener('change', e => {
-  ST.hypoQ.topN = Math.max(1, Math.min(50, +e.target.value || 8));
-  renderHypoMetrics();
+  ST.hypoQ.topN = Math.max(1, Math.min(50, Math.floor(+e.target.value || 8)));
+  e.target.value = ST.hypoQ.topN; renderHypoData();
 });
 document.getElementById('hypod-topn').addEventListener('change', e => {
-  ST.hypoD.topN = Math.max(1, Math.min(50, +e.target.value || 8));
-  renderHypoMetrics();
+  ST.hypoD.topN = Math.max(1, Math.min(50, Math.floor(+e.target.value || 8)));
+  e.target.value = ST.hypoD.topN; renderHypoData();
 });
 
 async function renderPlotForDownload(plotId) {
@@ -1716,16 +1938,43 @@ async function renderPlotForDownload(plotId) {
   await PLOT_RENDER_PROMISES.get(plotId);
 }
 
+function plotContext(plotId) {
+  const fields = {'plot-tr':'true', 'plot-rc':'ray_count', 'plot-wt':'weights', 'plot-G':'G',
+    'plot-timing':'timing', 'plot-quality':'quality', 'plot-hypoq-trend':'residual_trend',
+    'plot-hypoq-hist':'residual_by_event', 'plot-hypod-trend':'distance_trend', 'plot-hypod-hist':'distance_by_event'};
+  const field = fields[plotId] || (ST.vel.type === 'iter' && !publishedIterations().length ? 'initial' : ST.vel.type);
+  const state = plotId === 'plot-wt' ? ST.wt : plotId === 'plot-G' ? ST.G : plotId === 'plot-rc' ? ST.rc : ST.vel;
+  const label = `${ST.run} · iter ${ST.iter} · ${field} · Y ${state.y} km`
+    + (state.event !== undefined ? ` · Ev ${eventLabel(state.event)}` : '')
+    + (field === 'delta_s' ? ` · update ${ST.iter} → ${ST.iter + 1}` : '');
+  return {field, y: state.y, label};
+}
+
 async function downloadPlot(plotId, filename) {
+  const runToken = LOAD_RUN_TOKEN, selection = SELECTION_TOKEN;
   await renderPlotForDownload(plotId);
   const el = document.getElementById(plotId);
-  if (!el?._fullLayout) return;
+  if (!el?._fullLayout || el.style.display === 'none' || runToken !== LOAD_RUN_TOKEN || selection !== SELECTION_TOKEN) return;
   const run = el.dataset.renderRun || ST.run || 'plot';
   const iter = el.dataset.renderIter ?? ST.iter;
-  await Plotly.downloadImage(el, {
-    format: 'png', width: 1200, height: 700,
-    filename: `${run}_iter_${iter}_${filename}`,
-  });
+  const title = el.layout.title || {};
+  const margin = {...el.layout.margin};
+  const renderToken = PLOT_RENDER_TOKENS.get(plotId);
+  const field = el.dataset.renderField, y = el.dataset.renderY;
+  const context = el.dataset.renderContext;
+  try {
+    // Title/margin only: never alter axes or uirevision for export.
+    await Plotly.relayout(el, {title: {text: escapeText(context), font: {size: 12}}, 'margin.t': 55});
+    if (runToken !== LOAD_RUN_TOKEN || PLOT_RENDER_TOKENS.get(plotId) !== renderToken) return;
+    await Plotly.downloadImage(el, {
+      format: 'png', width: 1200, height: 700,
+      filename: `${run}_iter_${iter}_${field}_y_${y}_${filename}`.replace(/[^\w.\-]/g, '_'),
+    });
+  } finally {
+    if (runToken === LOAD_RUN_TOKEN && PLOT_RENDER_TOKENS.get(plotId) === renderToken) {
+      await Plotly.relayout(el, {title, margin});
+    }
+  }
 }
 
 document.querySelectorAll('.btn-collapse').forEach(btn => {
@@ -1755,25 +2004,83 @@ document.querySelectorAll('.btn-dl').forEach(btn => {
 });
 
 /* ── Fullscreen ── */
-document.querySelectorAll('.btn-full').forEach(btn => {
-  btn.addEventListener('click', e => {
-    const panel = e.target.closest('.panel');
-    const isFs  = panel.classList.toggle('fullscreen');
-    document.body.classList.toggle('has-fullscreen', isFs);
-    btn.textContent = isFs ? '✕' : '⤢';
-    setTimeout(relayoutAll, 120);
+function closeFullscreen() {
+  document.querySelectorAll('.panel.fullscreen').forEach(panel => {
+    panel.classList.remove('fullscreen');
+    const button = panel.querySelector('.btn-full'); if (button) button.textContent = '⤢';
   });
+  document.body.classList.remove('has-fullscreen');
+}
+function toggleFullscreen(panel, button) {
+  const wasFullscreen = panel.classList.contains('fullscreen');
+  closeFullscreen();
+  if (!wasFullscreen) {
+    panel.classList.add('fullscreen'); document.body.classList.add('has-fullscreen'); button.textContent = '✕';
+  }
+  setTimeout(relayoutAll, 120);
+}
+document.querySelectorAll('.btn-full').forEach(btn => {
+  btn.addEventListener('click', e => toggleFullscreen(e.target.closest('.panel'), btn));
 });
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeFullscreen(); relayoutAll(); }
+});
+
+function observeModelHeaders() {
+  if (typeof CSS === 'undefined' || typeof CSS.supports !== 'function'
+      || CSS.supports('grid-template-rows', 'subgrid') || typeof ResizeObserver === 'undefined') return;
+  const headers = ['vel-header', 'tr-header'].map(id => document.getElementById(id));
+  if (headers.some(header => typeof header?.getBoundingClientRect !== 'function')) return;
+  const measure = () => {
+    // Remove our previous minimum before reading natural wrapped heights, so
+    // both headers can shrink again when the viewport widens.
+    headers.forEach(header => { header.style.minHeight = ''; });
+    if (headers.some(header => header.closest('.panel')?.classList.contains('fullscreen'))) return;
+    const height = Math.max(...headers.map(header => header.getBoundingClientRect().height));
+    if (height > 0) headers.forEach(header => { header.style.minHeight = `${height}px`; });
+  };
+  let scheduled = false;
+  const observer = new ResizeObserver(() => {
+    if (scheduled) return;
+    scheduled = true;
+    const apply = () => { scheduled = false; measure(); };
+    // Defer writes out of the observer delivery cycle and coalesce notifications.
+    if (typeof window.requestAnimationFrame === 'function') window.requestAnimationFrame(apply);
+    else setTimeout(apply, 0);
+  });
+  headers.forEach(header => observer.observe(header));
+  measure();
+}
+
+function observePlotSizes() {
+  observeModelHeaders();
+  if (typeof ResizeObserver === 'undefined') return;
+  const observer = new ResizeObserver(entries => {
+    for (const entry of entries) {
+      const plot = entry.target.querySelector('[id^="plot-"]');
+      if (plot?._fullLayout && plot.style.display !== 'none' && entry.contentRect.width > 0 && entry.contentRect.height > 0) {
+        Plotly.Plots.resize(plot);
+      }
+    }
+  });
+  document.querySelectorAll('.panel-body, .hypoq-cell').forEach(body => observer.observe(body));
+}
 
 /* ── Init ── */
 async function init() {
-  const runs = await apiFetch('/api/runs');
-  if (!runs?.length) {
-    document.getElementById('run-select').innerHTML = '<option value="">No runs found</option>';
+  observePlotSizes();
+  const runs = await apiFetch('/api/runs/summary');
+  if (!Array.isArray(runs)) {
+    document.getElementById('run-select').innerHTML = '';
+    const option = document.createElement('option'); option.value = '';
+    option.textContent = dataMessage(runs, 'Run summary API unavailable');
+    document.getElementById('run-select').appendChild(option);
+    document.getElementById('refresh-status').textContent = option.textContent;
     return;
   }
-  populateRunSelect(runs, runs[0]);
-  loadRun(runs[0]);
+  ST.summaries = runs;
+  populateRunSelect(runs, runs[0]?.id);
+  if (runs.length) await loadRun(runs[0].id);
 }
 
 init();

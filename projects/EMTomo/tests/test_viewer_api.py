@@ -16,6 +16,31 @@ from tomography.tomography_em import run_em
 from velocity_model import VelocityModel
 
 
+def _save_viewer_cycle(rd, iteration, *, complete=True):
+    """Standalone fixtures include the outputs needed to infer old-format completion."""
+    meta = json.loads((rd / "meta.json").read_text())
+    shape = tuple(meta["grid_info"]["coarse_shape"])
+    directory = rd / f"iter_{iteration}"
+    directory.mkdir(exist_ok=True)
+    for name, value in (("model", 5200.), ("delta_s", 1.), ("ray_count", 1.),
+                        ("sensitivity_diagonal", 2.), ("coverage_confidence", 0.5)):
+        np.save(directory / f"{name}.npy", np.full(shape, value))
+    for event in range(meta["run_params"]["n_events"]):
+        event_dir = directory / f"event_{event}"
+        event_dir.mkdir(exist_ok=True)
+        np.savez(event_dir / "weights.npz", weight_shape=shape,
+                 weight_indices=np.empty((0, 3), dtype=int), weight_values=[])
+        np.save(event_dir / "residuals.npy", np.empty((0, 0)))
+    with (rd / "timing.jsonl").open("a") as stream:
+        stream.write(json.dumps({"iter": iteration, "elapsed_s": 1.}) + "\n")
+    with (rd / "quality.jsonl").open("a") as stream:
+        stream.write(json.dumps({"iter": iteration, "avg_abs_pct_dev": 1., "rms_m_s": 2.}) + "\n")
+    if complete and meta.get("viewer_completion_protocol") == 1:
+        (directory / "complete.json").write_text(json.dumps(
+            {"iter": iteration, "viewer_completion_protocol": 1}))
+    return directory
+
+
 @pytest.fixture
 def viewer(tmp_path, monkeypatch):
     runs = tmp_path / "runs"
@@ -44,20 +69,18 @@ def viewer(tmp_path, monkeypatch):
     grid = {"coarse_shape": [24, 12, 12], "coarse_cell_size": 10000.,
             "coarse_side_m": [240000., 120000., 120000.], "fine_cell_size": 10000.}
 
-    def add_run(name, *, source=True, hash_value=digest, iteration=True):
+    def add_run(name, *, source=True, hash_value=digest, iteration=True, protocol=1):
         rd = runs / name
         rd.mkdir()
         meta = {"run_params": {"subdivision": 1, "n_events": 3}, "grid_info": grid,
                 "station_locs": [[0, 0, 0], [10000, 0, 0]], "event_locs": [],
                 "source_experiment": {"id": "sample", "model_sha256": hash_value} if source else None}
+        if protocol is not None:
+            meta["viewer_completion_protocol"] = protocol
         (rd / "meta.json").write_text(json.dumps(meta))
         np.save(rd / "initial_model.npy", np.full((24, 12, 12), 5100.))
         if iteration:
-            it = rd / "iter_0"
-            it.mkdir()
-            np.save(it / "model.npy", np.full((24, 12, 12), 5200.))
-            np.save(it / "delta_s.npy", np.ones((24, 12, 12)))
-            np.save(it / "ray_count.npy", np.ones((24, 12, 12)))
+            _save_viewer_cycle(rd, 0)
         return rd
 
     monkeypatch.setattr(server, "RUNS_DIR", runs)
@@ -206,17 +229,18 @@ def test_optional_generation_hash_is_validated_and_cache_invalidated(viewer):
 def test_hypo_distances_all_iterations_and_cache_updates(viewer):
     client, add, _, model, _, _ = viewer
     rd = add("current")
+    _save_viewer_cycle(rd, 1)
     for iteration in (0, 1):
         for event in (0, 1):
             directory = rd / f"iter_{iteration}" / f"event_{event}"
-            directory.mkdir(parents=True)
+            directory.mkdir(parents=True, exist_ok=True)
             np.savez(directory / "weights.npz",
                      positions=[[20, 0, 0], [event + iteration + 0.25, 0, 0]],
                      weight_values=[0.1, 0.9])
             np.save(directory / "residuals.npy", [[0., 2.], [-2., 0.]])
     # Compact logs without refined positions use fine-grid cell centres.
     directory = rd / "iter_0" / "event_2"
-    directory.mkdir()
+    directory.mkdir(exist_ok=True)
     np.savez(directory / "weights.npz", weight_shape=[3, 1, 1],
              weight_indices=[[2, 0, 0]], weight_values=[1.])
     url = "/api/runs/current/hypo_metrics?iter=0"
@@ -248,7 +272,8 @@ def test_missing_or_invalid_hypotheses_do_not_fabricate_distances(viewer, payloa
     client, add, _, _, _, _ = viewer
     rd = add("current")
     event = rd / "iter_0" / "event_0"
-    event.mkdir()
+    event.mkdir(exist_ok=True)
+    (event / "weights.npz").unlink()
     if payload is not None:
         np.savez(event / "weights.npz", **payload)
     data = client.get("/api/runs/current/hypo_metrics?iter=0").json
@@ -334,7 +359,7 @@ def test_inversion_resampling_and_diagnostics_have_physical_axes(viewer):
     assert sampled["shape"] == [256, 192]
     assert sampled["x_edges_km"][-1] == 240
     assert sampled["z_edges_km"][-1] == 120
-    for dtype in ("delta_s", "ray_count"):
+    for dtype in ("delta_s", "ray_count", "sensitivity_diagonal", "coverage_confidence"):
         data = client.get(base + "&type=" + dtype).json
         assert data["y_km"] == 60
         assert data["x_km"][0] == 5
@@ -361,7 +386,7 @@ def test_run_provenance_latest_and_security(viewer, tmp_path):
     add("good")
     add("incomplete", iteration=False)
     assert set(client.get("/api/runs").json) == {"good", "incomplete"}
-    assert client.get("/api/runs/latest").json == {"run_id": "good", "max_iter": 0}
+    assert client.get("/api/runs/latest").json == {"run_id": "incomplete", "max_iter": None}
     for name in ("old", "bad"):
         for suffix in ("meta", "info", "slice?type=model&model_type=true"):
             assert client.get(f"/api/runs/{name}/{suffix}").status_code == 404
@@ -374,7 +399,7 @@ def test_run_provenance_latest_and_security(viewer, tmp_path):
     model.write_bytes(model.read_bytes() + b"changed")
     assert "good" not in client.get("/api/runs").json
     assert client.get("/api/runs/good/slice?type=model&model_type=true").status_code == 404
-    assert client.get("/api/runs/latest").json == {"run_id": None, "max_iter": 0}
+    assert client.get("/api/runs/latest").json == {"run_id": None, "max_iter": None}
 
 
 def test_saved_em_metadata_records_provenance_without_resampled_truth(tmp_path):
@@ -403,3 +428,376 @@ def test_experiment_symlink_and_id_escape(viewer, tmp_path):
     model.unlink()
     model.symlink_to(copy)
     assert client.get("/api/runs/good/meta").status_code == 404
+
+
+def test_only_marked_cycles_are_published_by_every_endpoint(viewer):
+    client, add, _, _, _, _ = viewer
+    rd = add("current")
+    _save_viewer_cycle(rd, 3)
+    partial = _save_viewer_cycle(rd, 1, complete=False)
+    for iteration in (0, 1, 3):
+        event = rd / f"iter_{iteration}" / "event_0"
+        np.savez(event / "weights.npz", weight_shape=[24, 12, 12],
+                 weight_indices=[[0, 0, 0]], positions=[[0, 0, 0]], weight_values=[1.])
+        np.save(event / "residuals.npy", [[0., 2.], [-2., 0.]])
+        (event / "weight_0").mkdir()
+    (rd / "quality.jsonl").write_text("".join(json.dumps(
+        {"iter": i, "avg_abs_pct_dev": 1., "rms_m_s": 2.}) + "\n" for i in (0, 1, 3)))
+    meta = json.loads((rd / "meta.json").read_text())
+    meta["run_params"]["n_cycles"] = 8
+    (rd / "meta.json").write_text(json.dumps(meta))
+    base = "/api/runs/current/"
+    info = client.get(base + "info").json
+    assert info["iterations"] == [0, 3]
+    assert info["completed_iterations"] == 2  # not max + 1
+    assert info["planned_iterations"] == 8
+    assert client.get("/api/runs/summary").json == [
+        {"id": "current", "run_name": "current", "iterations": [0, 3], "completed_iterations": 2, "planned_iterations": 8}]
+    assert client.get("/api/runs").json == ["current"]
+    assert client.get("/api/runs/latest").json == {"run_id": "current", "max_iter": 3}
+    assert client.get(base + "iters_list").json == ["iter_0", "iter_3"]
+    for endpoint in ("timing", "quality"):
+        assert [row["iter"] for row in client.get(base + endpoint).json] == [0, 3]
+    for endpoint in ("events_list", "weights_list"):
+        assert client.get(base + endpoint + "?iter=1").json == []
+        assert client.get(base + endpoint + "?iter=0").json
+    for dtype in ("model", "weights", "G", "ray_count", "delta_s", "sensitivity_diagonal", "coverage_confidence"):
+        assert client.get(base + f"slice?type={dtype}&iter=1").status_code == 404
+    metrics = client.get(base + "hypo_metrics?iter=1").json
+    assert metrics["distance_iter"] == metrics["residual_iter"] == []
+    assert [row["iter"] for row in metrics["residual_summary"]] == [0, 3]
+    # Publication alone must invalidate the metrics cache, without changing event files.
+    (partial / "complete.json").write_text(json.dumps({"iter": 1, "viewer_completion_protocol": 1}))
+    metrics = client.get(base + "hypo_metrics?iter=1").json
+    assert metrics["residual_iter"]
+    assert [row["iter"] for row in metrics["distance_summary"]] == [0, 1, 3]
+
+
+def test_no_complete_cycles_defaults_to_initial_and_latest_null(viewer):
+    client, add, _, _, _, _ = viewer
+    rd = add("current", iteration=False)
+    _save_viewer_cycle(rd, 0, complete=False)
+    assert client.get("/api/runs/current/info").json["iterations"] == []
+    assert client.get("/api/runs/summary").json == [
+        {"id": "current", "run_name": "current", "iterations": [], "completed_iterations": 0, "planned_iterations": None}]
+    assert client.get("/api/runs/latest").json == {"run_id": "current", "max_iter": None}
+    base = "/api/runs/current/slice?type=model"
+    assert client.get(base).json["slice"][0][0] == 5100.
+    for model_type in ("initial", "true"):
+        assert client.get(base + "&model_type=" + model_type).status_code == 200
+    assert client.get(base + "&model_type=iter").status_code == 404
+    assert client.get("/api/runs/current/timing").json == []
+
+
+@pytest.mark.parametrize("marker", ["{", "[]", '{"iter": 9, "viewer_completion_protocol": 1}',
+                                    '{"iter": 0, "viewer_completion_protocol": 2}'])
+def test_invalid_completion_marker_never_falls_back_to_timing(viewer, marker):
+    client, add, _, _, _, _ = viewer
+    rd = add("current")
+    (rd / "iter_0" / "complete.json").write_text(marker)
+    assert client.get("/api/runs/current/info").json["iterations"] == []
+
+
+def test_legacy_completion_requires_unique_valid_timing_not_model_directories(viewer):
+    client, add, _, _, _, _ = viewer
+    rd = add("legacy", protocol=None)
+    _save_viewer_cycle(rd, 4)
+    model_only = rd / "iter_7"
+    model_only.mkdir()
+    np.save(model_only / "model.npy", np.ones((2, 2, 2)))
+    assert client.get("/api/runs/legacy/info").json["iterations"] == [0, 4]
+    with (rd / "timing.jsonl").open("a") as stream:
+        stream.write('{"iter": 4, "elapsed_s": 2}\n')
+        stream.write('null\n{"iter": 7, "elapsed_s": NaN}\n{"iter": true, "elapsed_s": 1}\n{')
+    assert client.get("/api/runs/legacy/info").json["iterations"] == [0]
+    assert [row["iter"] for row in client.get("/api/runs/legacy/timing").json] == [0]
+    assert client.get("/api/runs/legacy/slice?iter=4&model_type=iter").status_code == 404
+    (rd / "timing.jsonl").unlink()
+    assert client.get("/api/runs/legacy/info").json["iterations"] == []
+
+
+@pytest.mark.parametrize("missing", ["model.npy", "delta_s.npy", "sensitivity_diagonal.npy",
+                                      "coverage_confidence.npy", "event_0/weights.npz",
+                                      "event_2/residuals.npy", "station_fields.npy", "event_0/misfit.npy",
+                                      "event_0/weight_0/G_stations_sparse.npz", "event_0/weight_0/ray_count.npy",
+                                      "quality.jsonl"])
+def test_legacy_requires_configured_artifacts(viewer, missing):
+    client, add, _, _, _, _ = viewer
+    rd = add("legacy", protocol=None)
+    meta = json.loads((rd / "meta.json").read_text())
+    # An underspecified older layout retains detailed cold-read compatibility checks.
+    meta["run_params"].update(log_g_per_weight=True, save_timefields=True,
+                              save_misfit=True, viewer_quality_expected=True)
+    (rd / "meta.json").write_text(json.dumps(meta))
+    directory = rd / "iter_0"
+    np.save(directory / "station_fields.npy", np.ones((2, 2, 2, 2)))
+    for event in directory.glob("event_*"):
+        np.savez(event / "weights.npz", weight_shape=[2, 2, 2],
+                 weight_indices=[[0, 0, 0]], weight_values=[1.])
+        np.save(event / "misfit.npy", np.ones((2, 2, 2)))
+        weight = event / "weight_0"
+        weight.mkdir()
+        np.save(weight / "ray_count.npy", np.ones((2, 2, 2)))
+        np.savez(weight / "G_stations_sparse.npz", shape=[2, 2, 2], offsets=[0, 0],
+                 coords=np.empty((0, 3), dtype=int), values=[])
+    (rd / "quality.jsonl").write_text('{"iter": 0, "avg_abs_pct_dev": 1}\n')
+    # Construct a damaged old snapshot before its first read. Published event
+    # outputs are immutable; warm invalidation watches end saves, not event history.
+    (rd / missing if missing == "quality.jsonl" else directory / missing).unlink()
+    assert client.get("/api/runs/legacy/info").json["iterations"] == []
+
+
+def test_legacy_pre_diagnostics_format_and_truncated_array(viewer):
+    client, add, _, _, _, _ = viewer
+    rd = add("legacy", protocol=None)
+    for name in ("sensitivity_diagonal", "coverage_confidence"):
+        (rd / "iter_0" / f"{name}.npy").unlink()
+    assert client.get("/api/runs/legacy/info").json["iterations"] == [0]
+    (rd / "iter_0" / "delta_s.npy").write_bytes(b"partial array")
+    assert client.get("/api/runs/legacy/info").json["iterations"] == []
+
+
+def test_sparse_slices_allocate_only_plane_and_keep_refined_hypocenters(viewer, monkeypatch):
+    client, add, _, _, _, _ = viewer
+    rd = add("current")
+    event = rd / "iter_0" / "event_0"
+    shape = [8, 10000000, 6]
+    indices = np.array([[2, 5000000, 3], [1, 4999999, 4], [7, 9999999, 5]])
+    positions = [[2.25, 5000000.1, 3.4], [1.1, 4999999.2, 4.3], [7., 9999999., 5.]]
+    np.savez(event / "weights.npz", weight_shape=shape, weight_indices=indices,
+             weight_values=[0.75, 0.2, 0.05], positions=positions)
+    weight = event / "weight_0"
+    weight.mkdir()
+    np.savez(weight / "G_stations_sparse.npz", shape=shape, offsets=[0, 2, 3],
+             coords=indices, values=[1.25, 2., 3.])
+    zeros = np.zeros
+    allocations = []
+
+    def plane_only(size, *args, **kwargs):
+        if isinstance(size, (tuple, list)):
+            assert len(size) <= 2, "Sparse slice allocated a full volume"
+            allocations.append(tuple(size))
+        return zeros(size, *args, **kwargs)
+
+    monkeypatch.setattr(server.np, "zeros", plane_only)
+    base = "/api/runs/current/slice?iter=0&event=0&y_km=60&type="
+    for dtype, value in (("weights", 0.75), ("G", 1.25)):
+        data = client.get(base + dtype).json
+        assert data["shape"] == [8, 6]
+        assert data["full_shape"] == shape
+        assert data["slice"][2][3] == value
+        assert np.count_nonzero(data["slice"]) == 1
+        assert data["hypocenters"][0] == {"coord": positions[0], "weight": 0.75}
+        assert len(data["hypocenters"]) == (3 if dtype == "weights" else 1)
+        assert data["x_edges_km"][-1] == 240
+        assert data["z_edges_km"][-1] == 120
+        assert data["y_km"] == 60
+    assert allocations == [(8, 6), (8, 6)]
+    assert np.count_nonzero(client.get(base + "G&station=1").json["slice"]) == 0
+    assert client.get(base + "G&station=2").json["slice"] is None
+    boundary = client.get(base.replace("y_km=60", "y_km=120") + "weights").json
+    assert boundary["slice"][7][5] == 0.05
+
+
+def test_unavailable_truth_has_false_flag_and_no_none_load(viewer, monkeypatch):
+    client, add, _, _, _, _ = viewer
+    add("current", source=False)
+    # Isolate truth availability from the existing provenance-based run eligibility rule.
+    monkeypatch.setattr(server, "_eligible", lambda rd: rd.is_dir())
+    assert client.get("/api/runs/current/info").json["has_true_model"] is False
+    assert client.get("/api/runs/current/slice?model_type=true").status_code == 404
+
+
+@pytest.mark.parametrize("protocol", [2, 0, True, "1"])
+def test_unknown_completion_protocol_is_not_inferred_as_legacy(viewer, protocol):
+    client, add, _, _, _, _ = viewer
+    add("current", protocol=protocol)
+    assert client.get("/api/runs/current/info").json["iterations"] == []
+
+
+def test_legacy_source_requires_quality_unless_explicitly_disabled(viewer):
+    client, add, _, _, _, _ = viewer
+    rd = add("legacy", protocol=None)
+    (rd / "quality.jsonl").unlink()
+    assert client.get("/api/runs/legacy/info").json["iterations"] == []
+    meta = json.loads((rd / "meta.json").read_text())
+    meta["run_params"]["viewer_quality_expected"] = False
+    (rd / "meta.json").write_text(json.dumps(meta))
+    assert client.get("/api/runs/legacy/info").json["iterations"] == [0]
+
+
+def test_noncanonical_marker_directory_does_not_inflate_completion_count(viewer):
+    client, add, _, _, _, _ = viewer
+    rd = add("current")
+    alias = rd / "iter_00"
+    alias.mkdir()
+    (alias / "complete.json").write_bytes((rd / "iter_0/complete.json").read_bytes())
+    assert client.get("/api/runs/current/info").json["completed_iterations"] == 1
+
+
+def test_legacy_requires_weight_outputs_even_if_directory_was_never_written(viewer):
+    client, add, _, _, _, _ = viewer
+    rd = add("legacy", protocol=None)
+    event = rd / "iter_0/event_0"
+    np.savez(event / "weights.npz", weight_shape=[24, 12, 12],
+             weight_indices=[[0, 0, 0]], weight_values=[1.])
+    assert client.get("/api/runs/legacy/info").json["iterations"] == []
+    weight = event / "weight_0"
+    weight.mkdir()
+    np.save(weight / "ray_count.npy", np.ones((24, 12, 12)))
+    assert client.get("/api/runs/legacy/info").json["iterations"] == [0]
+
+
+def test_current_legacy_summary_is_bounded_and_caches_layout_and_readability(viewer, monkeypatch):
+    client, add, _, _, _, _ = viewer
+    rd = add("legacy", protocol=None)
+    _save_viewer_cycle(rd, 4)
+    meta = json.loads((rd / "meta.json").read_text())
+    # Declaring many events must not make summary work proportional to event count.
+    meta["run_params"].update(coverage_damping_power=1, n_events=100000, n_cycles=7,
+                              run_name="Immediate dropdown name")
+    (rd / "meta.json").write_text(json.dumps(meta))
+    loads, layouts = [], []
+    original_load, original_layout, original_glob = np.load, server._legacy_features, Path.glob
+
+    def load(path, *args, **kwargs):
+        assert Path(path).suffix == ".npy", "Summary reopened an event NPZ"
+        loads.append(Path(path).name)
+        return original_load(path, *args, **kwargs)
+
+    def layout(*args):
+        layouts.append(args[0])
+        return original_layout(*args)
+
+    def no_history_glob(path, pattern):
+        assert not pattern.startswith("iter_*/"), "Summary traversed event history"
+        return original_glob(path, pattern)
+
+    monkeypatch.setattr(server.np, "load", load)
+    monkeypatch.setattr(server, "_legacy_features", layout)
+    monkeypatch.setattr(Path, "glob", no_history_glob)
+    cold = client.get("/api/runs/summary").json
+    assert cold == [{"id": "legacy", "run_name": "Immediate dropdown name", "iterations": [0, 4],
+                     "completed_iterations": 2, "planned_iterations": 7}]
+    assert len(loads) == 8  # model, delta, and two diagnostics, for each timed cycle
+    assert client.get("/api/runs/summary").json == cold
+    assert len(loads) == 8 and len(layouts) == 1
+    np.save(rd / "iter_4/delta_s.npy", np.full((24, 12, 12), 2.))
+    assert client.get("/api/runs/summary").json == cold
+    assert len(loads) == 9 and len(layouts) == 1
+    (rd / "quality.jsonl").write_text('{"iter": 0, "avg_abs_pct_dev": 1}\n')
+    assert client.get("/api/runs/summary").json[0]["iterations"] == [0]
+    assert len(loads) == 9 and len(layouts) == 1
+
+
+@pytest.mark.parametrize("artifact", ["model.npy", "delta_s.npy", "sensitivity_diagonal.npy",
+                                       "coverage_confidence.npy", "station_fields.npy", "quality.jsonl"])
+def test_cached_current_legacy_completion_tracks_late_and_rewritten_end_saves(viewer, artifact):
+    client, add, _, _, _, _ = viewer
+    rd = add("legacy", protocol=None)
+    meta = json.loads((rd / "meta.json").read_text())
+    meta["run_params"].update(coverage_damping_power=1, save_timefields=True, viewer_quality_expected=True)
+    (rd / "meta.json").write_text(json.dumps(meta))
+    np.save(rd / "iter_0/station_fields.npy", np.ones((2, 2, 2, 2)))
+    path = rd / artifact if artifact == "quality.jsonl" else rd / "iter_0" / artifact
+    saved = path.read_bytes()
+    path.unlink()
+    url = "/api/runs/summary"
+    assert client.get(url).json[0]["iterations"] == []
+    assert client.get(url).json[0]["iterations"] == []
+    path.write_bytes(saved)
+    assert client.get(url).json[0]["iterations"] == [0]
+    path.write_bytes(b"partial rewrite")
+    assert client.get(url).json[0]["iterations"] == []
+    path.write_bytes(saved)
+    assert client.get(url).json[0]["iterations"] == [0]
+
+
+def test_cached_current_legacy_completion_detects_new_cycles_and_meta_changes(viewer):
+    client, add, _, _, _, _ = viewer
+    rd = add("legacy", protocol=None)
+    meta = json.loads((rd / "meta.json").read_text())
+    meta["run_params"]["coverage_damping_power"] = 1
+    (rd / "meta.json").write_text(json.dumps(meta))
+    url = "/api/runs/summary"
+    assert client.get(url).json[0]["iterations"] == [0]
+    _save_viewer_cycle(rd, 3)
+    assert client.get(url).json[0]["iterations"] == [0, 3]
+    meta.update(run_name="Renamed run")
+    meta["run_params"]["n_cycles"] = 9
+    (rd / "meta.json").write_text(json.dumps(meta))
+    assert client.get(url).json[0]["run_name"] == "Renamed run"
+    assert client.get(url).json[0]["planned_iterations"] == 9
+    (rd / "iter_3/coverage_confidence.npy").unlink()
+    assert client.get(url).json[0]["iterations"] == [0]
+    assert client.get("/api/runs/legacy/slice?type=delta_s&iter=3").status_code == 404
+    np.save(rd / "iter_3/coverage_confidence.npy", np.ones((24, 12, 12)))
+    assert client.get(url).json[0]["iterations"] == [0, 3]
+
+
+@pytest.mark.parametrize("layout", ["npy", "npz_c", "npz_fortran", "sparse_npz"])
+def test_legacy_standalone_G_slices_read_only_plane(viewer, monkeypatch, layout):
+    client, add, _, _, _, _ = viewer
+    rd = add("current")
+    event = rd / "iter_0/event_0"
+    weight = event / "weight_0"
+    weight.mkdir()
+    dense = np.arange(8 * 3 * 6, dtype=np.float32).reshape(8, 3, 6)
+    stem = weight / "G_station_0"
+    if layout == "npy":
+        np.save(stem.with_suffix(".npy"), dense)
+    elif layout == "sparse_npz":
+        coords = np.column_stack(np.nonzero(dense))
+        np.savez_compressed(stem.with_suffix(".npz"), shape=dense.shape, coords=coords,
+                            values=dense[tuple(coords.T)])
+    else:
+        values = np.asfortranarray(dense) if layout == "npz_fortran" else dense
+        np.savez_compressed(stem.with_suffix(".npz"), G=values)
+    np.savez(event / "weights.npz", weight_shape=dense.shape, weight_indices=[[2, 1, 3]],
+             positions=[[2.25, 1.1, 3.4]], weight_values=[1.])
+    empty, zeros, load = np.empty, np.zeros, np.load
+
+    def plane_allocation(allocator):
+        def allocate(shape, *args, **kwargs):
+            if isinstance(shape, (list, tuple)):
+                assert len(shape) <= 2, "Standalone G slice allocated a dense volume"
+            return allocator(shape, *args, **kwargs)
+        return allocate
+
+    def no_dense_npz(path, *args, **kwargs):
+        if layout in ("npz_c", "npz_fortran"):
+            assert Path(path).name != "G_station_0.npz", "Dense NPZ must be streamed, not expanded"
+        return load(path, *args, **kwargs)
+
+    monkeypatch.setattr(server.np, "empty", plane_allocation(empty))
+    monkeypatch.setattr(server.np, "zeros", plane_allocation(zeros))
+    monkeypatch.setattr(server.np, "load", no_dense_npz)
+    for y_km, y in ((0, 0), (60, 1), (120, 2)):
+        data = client.get(f"/api/runs/current/slice?type=G&event=0&weight=0&station=0&y_km={y_km}").json
+        np.testing.assert_array_equal(data["slice"], dense[:, y, :])
+        assert data["full_shape"] == [8, 3, 6]
+        assert data["shape"] == [8, 6]
+        assert data["x_edges_km"][-1] == 240 and data["z_edges_km"][-1] == 120
+        assert data["hypocenters"] == [{"coord": [2.25, 1.1, 3.4], "weight": 1.}]
+    assert client.get("/api/runs/current/slice?type=G&station=1").json["slice"] is None
+    np.testing.assert_array_equal(server._load_G_station(stem, 1), dense[:, 1, :])
+
+
+def test_old_legacy_completion_accepts_standalone_G_and_late_alternate_extension(viewer):
+    client, add, _, _, _, _ = viewer
+    rd = add("legacy", protocol=None)
+    meta = json.loads((rd / "meta.json").read_text())
+    meta["run_params"]["log_G_per_weight"] = True
+    (rd / "meta.json").write_text(json.dumps(meta))
+    event = rd / "iter_0/event_0"
+    np.savez(event / "weights.npz", weight_shape=[2, 2, 2], weight_indices=[[0, 0, 0]], weight_values=[1.])
+    weight = event / "weight_0"
+    weight.mkdir()
+    np.save(weight / "ray_count.npy", np.ones((2, 2, 2)))
+    np.save(weight / "G_station_0.npy", np.ones((2, 2, 2)))
+    url = "/api/runs/summary"
+    assert client.get(url).json[0]["iterations"] == []  # station 1 is still missing
+    np.savez_compressed(weight / "G_station_1.npz", G=np.ones((2, 2, 2)))
+    assert client.get(url).json[0]["iterations"] == [0]
+    assert not (weight / "G_stations_sparse.npz").exists()
+    assert client.get("/api/runs/legacy/slice?type=G&station=1").json["slice"] == [[1., 1.], [1., 1.]]

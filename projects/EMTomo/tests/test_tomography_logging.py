@@ -95,8 +95,9 @@ def test_sparse_g_log_round_trip(tmp_path):
     weight_dir = logger.run_dir / "iter_0" / "event_0" / "weight_0"
     assert (weight_dir / "G_stations_sparse.npz").exists()
     for station in range(dense.shape[0]):
-        restored = _load_G_station(weight_dir / f"G_station_{station}")
-        np.testing.assert_array_equal(restored, dense[station].astype(np.float32))
+        for y in range(dense.shape[2]):
+            restored = _load_G_station(weight_dir / f"G_station_{station}", y)
+            np.testing.assert_array_equal(restored, dense[station, :, y, :].astype(np.float32))
 
 
 def _mock_em_cycle(monkeypatch):

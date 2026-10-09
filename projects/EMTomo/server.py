@@ -13,8 +13,10 @@ import hashlib
 import json
 import math
 import re
+from collections import OrderedDict
 from functools import lru_cache
 from pathlib import Path
+from zipfile import BadZipFile, ZipFile
 
 import numpy as np
 from flask import Flask, abort, jsonify, request, send_from_directory
@@ -254,8 +256,19 @@ def _npy(path: Path):
 
 
 
-def _load_weights(path: Path) -> np.ndarray | None:
-    """Load compact sparse event weights."""
+def _sparse_plane(shape, indices, values, y: int, dtype=np.float64) -> np.ndarray:
+    """Scatter only the requested X-Z plane, never a dense 3-D ray/weight grid."""
+    result = np.zeros((int(shape[0]), int(shape[2])), dtype=dtype)
+    indices = np.asarray(indices, dtype=np.intp)
+    if len(indices):
+        selected = indices[:, 1] == y
+        coords = indices[selected]
+        result[coords[:, 0], coords[:, 2]] = np.asarray(values)[selected]
+    return result
+
+
+def _load_weights(path: Path, y: int | None = None) -> np.ndarray | None:
+    """Load compact weights; the optional plane keeps the utility API compatible."""
     if not path.exists():
         return None
     with np.load(path, allow_pickle=False) as data:
@@ -268,14 +281,16 @@ def _load_weights(path: Path) -> np.ndarray | None:
             if "weight_values" in data
             else np.ones(len(indices), dtype=np.float64)
         )
+        if y is not None:
+            return _sparse_plane(shape, indices, values, y)
         result = np.zeros(shape, dtype=np.float64)
         if len(indices):
             result[tuple(indices.T)] = values
         return result
 
 
-def _load_G_station(path_stem: Path) -> np.ndarray | None:
-    """Load one station G from the compact sparse event log."""
+def _load_G_station(path_stem: Path, y: int) -> np.ndarray | None:
+    """Load one station's requested plane from the compact sparse event log."""
     sparse_path = path_stem.parent / "G_stations_sparse.npz"
     if sparse_path.exists():
         station = int(path_stem.name.rsplit("_", 1)[1])
@@ -284,11 +299,58 @@ def _load_G_station(path_stem: Path) -> np.ndarray | None:
             if station < 0 or station + 1 >= len(offsets):
                 return None
             start, stop = int(offsets[station]), int(offsets[station + 1])
-            result = np.zeros(tuple(data["shape"]), dtype=np.float32)
-            coords = data["coords"][start:stop]
-            result[tuple(coords.T)] = data["values"][start:stop]
-            return result
+            return _sparse_plane(data["shape"], data["coords"][start:stop],
+                                 data["values"][start:stop], y, np.float32)
 
+    loaded = _legacy_G_plane(path_stem, lambda shape: int(np.clip(y, 0, shape[1] - 1)))
+    return loaded[0] if loaded is not None else None
+
+
+def _legacy_G_plane(path_stem: Path, select_y) -> tuple[np.ndarray, tuple] | None:
+    """Read dense standalone G via mmap or streamed NPZ rows, without a volume."""
+    for suffix in (".npy", ".npz"):
+        path = path_stem.with_suffix(suffix)
+        if not path.is_file() or not _contained(path, path_stem.parent):
+            continue
+        if suffix == ".npy":
+            array = np.load(path, mmap_mode="r", allow_pickle=False)
+            if array.ndim != 3:
+                return None
+            return array[:, select_y(array.shape), :], array.shape
+        with ZipFile(path) as archive:
+            names = archive.namelist()
+            if {"shape.npy", "coords.npy", "values.npy"}.issubset(names):
+                with np.load(path, allow_pickle=False) as data:
+                    shape = tuple(int(n) for n in data["shape"])
+                    return _sparse_plane(shape, data["coords"], data["values"], select_y(shape), np.float32), shape
+            member = next((name for name in ("G.npy", "arr_0.npy") if name in names), None)
+            if member is None:
+                return None
+            with archive.open(member) as stream:
+                version = np.lib.format.read_magic(stream)
+                header_reader = {(1, 0): np.lib.format.read_array_header_1_0,
+                                 (2, 0): np.lib.format.read_array_header_2_0}.get(version)
+                if header_reader is None:
+                    return None
+                shape, fortran, dtype = header_reader(stream)
+                if len(shape) != 3 or dtype.hasobject:
+                    return None
+                y = select_y(shape)
+                start = stream.tell()
+                nx, ny, nz = shape
+                plane = np.empty((nx, nz), dtype=dtype)
+                # ZipExtFile.seek skips/decompresses forward in bounded chunks;
+                # only one contiguous row and the requested plane are retained.
+                for index in range(nz if fortran else nx):
+                    count = nx if fortran else nz
+                    offset = (index * ny + y) * count * dtype.itemsize
+                    stream.seek(start + offset)
+                    row = np.frombuffer(stream.read(count * dtype.itemsize), dtype=dtype, count=count)
+                    if fortran:
+                        plane[:, index] = row
+                    else:
+                        plane[index, :] = row
+                return plane, shape
     return None
 
 
@@ -476,6 +538,243 @@ def api_runs():
     return jsonify([d.name for d in run_dirs])
 
 
+def _jsonl_rows(path: Path, metric: str) -> dict[int, dict]:
+    """Ignore malformed records and ambiguous (duplicate) iteration indices."""
+    if not path.is_file():
+        return {}
+    rows, seen = {}, set()
+    for line in path.read_text().splitlines():
+        try:
+            row = json.loads(line)
+            iteration = row["iter"]
+            value = row[metric]
+            if (type(iteration) is not int or iteration < 0
+                    or isinstance(value, bool) or not isinstance(value, (int, float))
+                    or not math.isfinite(value) or value < 0):
+                continue
+        except (ValueError, TypeError, KeyError):
+            continue
+        if iteration in seen:
+            rows.pop(iteration, None)
+        else:
+            rows[iteration] = row
+        seen.add(iteration)
+    return rows
+
+
+def _publication_stat(path: Path) -> tuple | None:
+    """Cheap identity/change token; no recursive walk or content hashing."""
+    try:
+        stat = path.stat()
+        return (stat.st_dev, stat.st_ino, stat.st_mode, stat.st_size,
+                stat.st_mtime_ns, stat.st_ctime_ns)
+    except OSError:
+        return None
+
+
+@lru_cache(maxsize=8192)
+def _readable_saved_file(filename: str, signature: tuple) -> bool:
+    try:
+        data = np.load(filename, mmap_mode="r", allow_pickle=False)
+        if isinstance(data, np.lib.npyio.NpzFile):
+            data.close()
+        return True
+    except (OSError, ValueError, EOFError, BadZipFile):
+        return False
+
+
+def _saved_file(path: Path, rd: Path) -> bool:
+    if not _contained(path, rd) or not path.is_file():
+        return False
+    signature = _publication_stat(path)
+    return signature is not None and _readable_saved_file(str(path), signature)
+
+
+def _legacy_features(rd: Path, meta: dict, directories: list[Path]) -> dict:
+    """Infer the writer layout once per run/publication change, not per cycle."""
+    params = meta.get("run_params") or {}
+    saved = meta.get("viewer_saved_artifacts") or {}
+    terminal_proof = "coverage_damping_power" in params
+    diagnostics = terminal_proof or any(
+        (directory / name).exists() for directory in directories
+        for name in ("sensitivity_diagonal.npy", "coverage_confidence.npy"))
+    timefields = saved.get("save_timefields", params.get("save_timefields", False))
+    misfit = saved.get("save_misfit", params.get("save_misfit", False))
+    if not terminal_proof:
+        timefields = timefields or any((d / "station_fields.npy").exists() for d in directories)
+        misfit = misfit or any(rd.glob("iter_*/event_*/misfit.npy"))
+    return {
+        "terminal_proof": terminal_proof, "diagnostics": diagnostics,
+        "timefields": bool(timefields), "misfit": bool(misfit),
+        "quality": params.get("viewer_quality_expected", bool(meta.get("source_experiment"))
+                              or (rd / "true_model.npy").exists() or (rd / "quality.jsonl").exists()),
+        "g": params.get("log_g_per_weight", params.get("log_G_per_weight", False)),
+    }
+
+
+def _legacy_g_files(weight: Path, n_stations: int) -> list[Path]:
+    """Compact multi-station logs and the older standalone station layouts."""
+    compact = weight / "G_stations_sparse.npz"
+    if compact.exists():
+        return [compact]
+    if n_stations:
+        return [next((p for p in (weight / f"G_station_{station}.npy",
+                                  weight / f"G_station_{station}.npz") if p.exists()),
+                     weight / f"G_station_{station}.npy") for station in range(n_stations)]
+    return list(weight.glob("G_station_*.np[yz]")) or [compact]
+
+
+def _legacy_iteration_ready(rd: Path, iteration: int, meta: dict, quality: dict,
+                            features: dict, pending: set[Path]) -> bool:
+    """End saves prove the event phase finished for the known diagnostics writer."""
+    directory = rd / f"iter_{iteration}"
+    params = meta.get("run_params") or {}
+    required = [directory / "model.npy", directory / "delta_s.npy"]
+    if features["diagnostics"]:
+        required.extend(directory / name for name in ("sensitivity_diagonal.npy", "coverage_confidence.npy"))
+    if features["timefields"]:
+        required.append(directory / "station_fields.npy")
+    if features["quality"] and iteration not in quality:
+        return False
+    failed = [path for path in required if not _saved_file(path, rd)]
+    if failed:
+        pending.update(failed)
+        return False
+    if features["terminal_proof"]:
+        # This writer appends timing only after all events and the velocity update,
+        # then saves delta, both diagnostics, and conditional quality. Reopening
+        # every preceding event archive adds no publication evidence.
+        return True
+    n_events = params.get("n_events")
+    events = ([directory / f"event_{event}" for event in range(n_events)]
+              if type(n_events) is int and n_events >= 0
+              else list(directory.glob("event_*")))
+    for event in events:
+        weights_path = event / "weights.npz"
+        required.extend((weights_path, event / "residuals.npy"))
+        if features["misfit"]:
+            required.append(event / "misfit.npy")
+        if not _saved_file(weights_path, rd):
+            pending.add(weights_path)
+            return False
+        try:
+            with np.load(weights_path, allow_pickle=False) as data:
+                indices = data["positions"] if "positions" in data else data["weight_indices"]
+                values = data["weight_values"] if "weight_values" in data else np.ones(len(indices))
+                if values.shape != (len(indices),) or not np.all(np.isfinite(values)) or np.any(values < 0):
+                    pending.add(weights_path)
+                    return False
+                weight_indices = set(np.flatnonzero(values > 0).tolist())
+        except (OSError, ValueError, KeyError, EOFError, BadZipFile):
+            pending.add(weights_path)
+            return False
+        weight_indices.update(int(w.name[7:]) for w in event.glob("weight_*")
+                              if w.is_dir() and re.fullmatch(r"weight_\d+", w.name))
+        for index in weight_indices:
+            weight = event / f"weight_{index}"
+            required.append(weight / "ray_count.npy")
+            if features["g"]:
+                g_files = _legacy_g_files(weight, len(meta.get("station_locs", [])))
+                required.extend(g_files)
+                if not all(_saved_file(path, rd) for path in g_files):
+                    pending.add(weight)  # Notice .npz/compact publication after a missing .npy.
+    failed = [path for path in required if not _saved_file(path, rd)]
+    pending.update(failed)
+    return not failed
+
+
+_completion_cache: OrderedDict[str, dict] = OrderedDict()
+
+
+def _completed_iterations(rd: Path, meta: dict | None = None) -> list[int]:
+    meta = _read_meta(rd) if meta is None else meta
+    directories = sorted([d for d in rd.iterdir() if d.is_dir()
+                          and re.fullmatch(r"iter_\d+", d.name)
+                          and d.name == f"iter_{int(d.name[5:])}" and _contained(d, rd)],
+                         key=lambda d: int(d.name[5:]))
+    cache_id = str(rd.resolve())
+    previous = _completion_cache.get(cache_id)
+    roots = ("meta.json", "timing.jsonl", "quality.jsonl", "true_model.npy")
+    terminal = ("complete.json",) if "viewer_completion_protocol" in meta else (
+        "model.npy", "delta_s.npy", "sensitivity_diagonal.npy", "coverage_confidence.npy", "station_fields.npy")
+    signature = (
+        tuple(_publication_stat(rd / name) for name in roots),
+        tuple((d.name, _publication_stat(d), tuple(_publication_stat(d / name) for name in terminal))
+              for d in directories),
+        tuple((path, _publication_stat(path)) for path in previous["pending"]) if previous else (),
+    )
+    if previous and signature == previous["signature"]:
+        _completion_cache.move_to_end(cache_id)
+        return list(previous["iterations"])
+    pending: set[Path] = set()
+    features = None
+    feature_key = None
+    if "viewer_completion_protocol" in meta:
+        if type(meta["viewer_completion_protocol"]) is not int or meta["viewer_completion_protocol"] != 1:
+            return []
+        completed = set()
+        for directory in directories:
+            iteration = int(directory.name[5:])
+            marker = directory / "complete.json"
+            if not _contained(marker, rd):
+                continue
+            try:
+                row = json.loads(marker.read_text())
+                if (isinstance(row, dict) and type(row.get("iter")) is int
+                        and row["iter"] == iteration and type(row.get("viewer_completion_protocol")) is int
+                        and row["viewer_completion_protocol"] == 1):
+                    completed.add(iteration)
+            except (OSError, ValueError):
+                continue
+        iterations = sorted(completed)
+    elif not all(_contained(rd / name, rd) for name in ("timing.jsonl", "quality.jsonl")):
+        iterations = []
+    else:
+        # Known writer features do not depend on event history or timing appends.
+        # Older, underspecified layouts may discover new optional files while pending.
+        feature_key = (signature[0][0], signature[0][2] is not None, signature[0][3] is not None,
+                       None if "coverage_damping_power" in (meta.get("run_params") or {}) else signature[1])
+        if previous and previous.get("feature_key") == feature_key:
+            features = previous["features"]
+        else:
+            features = _legacy_features(rd, meta, directories)
+        timing = _jsonl_rows(rd / "timing.jsonl", "elapsed_s")
+        quality = _jsonl_rows(rd / "quality.jsonl", "avg_abs_pct_dev")
+        iterations = sorted(i for i in timing if _legacy_iteration_ready(rd, i, meta, quality, features, pending))
+    # Only unresolved old-layout paths are watched below the iteration root.
+    # Successfully published event outputs are immutable; end saves remain watched.
+    pending = tuple(sorted(pending))
+    signature = (*signature[:2], tuple((path, _publication_stat(path)) for path in pending))
+    entry = {"signature": signature, "iterations": tuple(iterations), "pending": pending}
+    if features is not None:
+        entry.update(features=features, feature_key=feature_key)
+    _completion_cache[cache_id] = entry
+    _completion_cache.move_to_end(cache_id)
+    if len(_completion_cache) > 256:
+        _completion_cache.popitem(last=False)
+    return iterations
+
+
+def _run_summary(rd: Path, meta: dict | None = None) -> dict:
+    meta = _read_meta(rd) if meta is None else meta
+    iterations = _completed_iterations(rd, meta)
+    planned = (meta.get("run_params") or {}).get("n_cycles")
+    run_name = meta.get("run_name") or (meta.get("run_params") or {}).get("run_name")
+    return {"id": rd.name, "run_name": run_name if isinstance(run_name, str) and run_name else rd.name,
+            "completed_iterations": len(iterations),
+            "planned_iterations": planned if type(planned) is int and planned >= 0 else None,
+            "iterations": iterations}
+
+
+@app.route("/api/runs/summary")
+def api_runs_summary():
+    if not RUNS_DIR.exists():
+        return jsonify([])
+    runs = sorted((d for d in RUNS_DIR.iterdir() if _ID.fullmatch(d.name) and _eligible(d)),
+                  key=_run_sort_key, reverse=True)
+    return jsonify([_run_summary(rd) for rd in runs])
+
+
 # ─── meta + info ──────────────────────────────────────────────────────────────
 
 @app.route("/api/runs/<rid>/meta")
@@ -504,11 +803,9 @@ def api_meta(rid):
 def api_info(rid):
     rd = _rd(rid)
 
-    iters = sorted(
-        int(d.name[5:]) for d in rd.iterdir()
-        if d.is_dir() and re.fullmatch(r"iter_\d+", d.name) and _contained(d, rd)
-        and _contained(d / "model.npy", rd) and (d / "model.npy").is_file()
-    )
+    meta = _read_meta(rd)
+    summary = _run_summary(rd, meta)
+    iters = summary["iterations"]
 
     n_stations = 0
     # Try to infer station count from G files or weights
@@ -546,10 +843,10 @@ def api_info(rid):
         n_events = m.get("run_params", {}).get("n_events", len(m.get("event_locs", [])))
 
     return jsonify({
-        "iterations":     iters,
+        **summary,
         "n_stations":     n_stations,
         "n_events":       n_events,
-        "has_true_model":      True,
+        "has_true_model": _source_model(rd, meta) is not None,
     })
 
 
@@ -557,34 +854,18 @@ def api_info(rid):
 
 @app.route("/api/runs/<rid>/timing")
 def api_timing(rid):
-    p = _rd(rid) / "timing.jsonl"
-    if not p.exists():
-        return jsonify([])
-    rows = []
-    for line in p.read_text().splitlines():
-        line = line.strip()
-        if line:
-            try:
-                rows.append(json.loads(line))
-            except json.JSONDecodeError:
-                pass
-    return jsonify(rows)
+    rd = _rd(rid)
+    completed = _completed_iterations(rd)
+    rows = _jsonl_rows(_child(rd, "timing.jsonl"), "elapsed_s")
+    return jsonify([rows[i] for i in completed if i in rows])
 
 
 @app.route("/api/runs/<rid>/quality")
 def api_quality(rid):
-    p = _rd(rid) / "quality.jsonl"
-    if not p.exists():
-        return jsonify([])
-    rows = []
-    for line in p.read_text().splitlines():
-        line = line.strip()
-        if line:
-            try:
-                rows.append(json.loads(line))
-            except json.JSONDecodeError:
-                pass
-    return jsonify(rows)
+    rd = _rd(rid)
+    completed = _completed_iterations(rd)
+    rows = _jsonl_rows(_child(rd, "quality.jsonl"), "avg_abs_pct_dev")
+    return jsonify([rows[i] for i in completed if i in rows])
 
 
 # ─── hypocenter quality ───────────────────────────────────────────────────────
@@ -640,13 +921,16 @@ def _dist_to_true_hypo(ev_dir: Path, true_loc, cell_size: float) -> float | None
                     data["positions"][int(np.argmax(values))], dtype=np.float64
                 )
             else:
-                weights = _load_weights(wp)
-                if weights is None or not np.all(np.isfinite(weights)) or np.any(weights < 0) or not np.any(weights > 0):
+                if "weight_indices" not in data or not len(data["weight_indices"]):
                     return None
-                coord = np.asarray(
-                    np.unravel_index(int(np.argmax(weights)), weights.shape),
-                    dtype=np.float64,
-                )
+                indices = data["weight_indices"]
+                values = data["weight_values"] if "weight_values" in data else np.ones(len(indices))
+                if values.shape != (len(indices),) or not np.all(np.isfinite(values)) or np.any(values < 0) or not np.any(values > 0):
+                    return None
+                # The former dense argmax chose the first cell in C-order on ties.
+                best = np.flatnonzero(values == values.max())
+                order = np.lexsort(indices[best].T[::-1])
+                coord = np.asarray(indices[best[order[0]]], dtype=np.float64)
         est = (coord + 0.5) * cell_size
         true = np.asarray(true_loc, dtype=np.float64)
         if est.shape != (3,) or true.shape != (3,) or not np.all(np.isfinite(est)) or not np.all(np.isfinite(true)):
@@ -669,11 +953,12 @@ def _aggregate(vals: list[float]) -> dict | None:
     }
 
 
-def _hypo_signature(rd: Path) -> tuple:
+def _hypo_signature(rd: Path, iterations: tuple[int, ...]) -> tuple:
     signature = []
     paths = [rd / "meta.json"]
-    for pattern in ("iter_*/event_*/weights.npz", "iter_*/event_*/residuals.npy"):
-        paths.extend(sorted(rd.glob(pattern)))
+    for iteration in iterations:
+        for pattern in ("event_*/weights.npz", "event_*/residuals.npy"):
+            paths.extend(sorted((rd / f"iter_{iteration}").glob(pattern)))
     for path in paths:
         if _contained(path, rd) and path.is_file():
             stat = path.stat()
@@ -682,7 +967,7 @@ def _hypo_signature(rd: Path) -> tuple:
 
 
 @lru_cache(maxsize=16)
-def _collect_hypo_dataset(rd_name: str, _signature: tuple, event_locs: tuple) -> dict:
+def _collect_hypo_dataset(rd_name: str, _signature: tuple, event_locs: tuple, iterations: tuple[int, ...]) -> dict:
     """Read all expensive per-event metrics once for an unchanged run."""
     rd = Path(rd_name)
     meta = _read_meta(rd)
@@ -691,11 +976,7 @@ def _collect_hypo_dataset(rd_name: str, _signature: tuple, event_locs: tuple) ->
     residual_by_iter: dict[int, list[dict]] = {}
     distance_by_iter: dict[int, list[dict]] = {}
 
-    iter_dirs = sorted(
-        [d for d in rd.iterdir() if d.is_dir() and re.fullmatch(r"iter_\d+", d.name)
-         and _contained(d, rd)],
-        key=lambda d: int(d.name.split("_")[1]),
-    )
+    iter_dirs = [rd / f"iter_{iteration}" for iteration in iterations]
     for iter_dir in iter_dirs:
         iteration = int(iter_dir.name.split("_")[1])
         for event_dir in _sorted_event_dirs(iter_dir):
@@ -738,7 +1019,8 @@ def _collect_hypo_dataset(rd_name: str, _signature: tuple, event_locs: tuple) ->
 
 def _collect_all_hypo_metrics(rd: Path, meta: dict, current_iter: int) -> dict:
     _, event_locs = _reference_events(rd, meta)
-    dataset = _collect_hypo_dataset(str(rd.resolve()), _hypo_signature(rd), event_locs)
+    iterations = tuple(_completed_iterations(rd, meta))
+    dataset = _collect_hypo_dataset(str(rd.resolve()), _hypo_signature(rd, iterations), event_locs, iterations)
     return {
         "residual_summary": dataset["residual_summary"],
         "distance_summary": dataset["distance_summary"],
@@ -749,32 +1031,26 @@ def _collect_all_hypo_metrics(rd: Path, meta: dict, current_iter: int) -> dict:
 
 @app.route("/api/runs/latest")
 def api_runs_latest():
-    """Most recent run id and its max iteration."""
+    """Newest eligible run, including one which has not completed its first cycle."""
     if not RUNS_DIR.exists():
-        return jsonify({"run_id": None, "max_iter": 0})
+        return jsonify({"run_id": None, "max_iter": None})
     runs = sorted(
         (d for d in RUNS_DIR.iterdir() if _ID.fullmatch(d.name) and _eligible(d)),
         key=_run_sort_key,
         reverse=True,
     )
     if not runs:
-        return jsonify({"run_id": None, "max_iter": 0})
-    for rd in runs:
-        iters = [
-            int(d.name[5:]) for d in rd.iterdir()
-            if d.is_dir() and re.fullmatch(r"iter_\d+", d.name)
-            and _contained(d / "model.npy", rd) and (d / "model.npy").is_file()
-        ]
-        if iters:
-            return jsonify({"run_id": rd.name, "max_iter": max(iters)})
-    return jsonify({"run_id": None, "max_iter": 0})
+        return jsonify({"run_id": None, "max_iter": None})
+    rd = runs[0]
+    iterations = _completed_iterations(rd)
+    return jsonify({"run_id": rd.name, "max_iter": max(iterations) if iterations else None})
 
 
 @app.route("/api/runs/<rid>/hypo_metrics")
 def api_hypo_metrics(rid):
     """Combined hypo residual + distance metrics for one iteration and all iters."""
     rd = _rd(rid)
-    it = request.args.get("iter", 0, type=int)
+    it = _index("iter")
     meta = _read_meta(rd)
     return jsonify(_collect_all_hypo_metrics(rd, meta, it))
 
@@ -784,10 +1060,7 @@ def api_hypo_metrics(rid):
 @app.route("/api/runs/<rid>/iters_list")
 def api_iters_list(rid):
     rd = _rd(rid)
-    iters = sorted(
-        [d.name for d in rd.iterdir() if d.is_dir() and re.fullmatch(r"iter_\d+", d.name) and _contained(d, rd) and (d / "model.npy").is_file()],
-        key=lambda x: int(x.split("_")[1]),
-    )
+    iters = [f"iter_{i}" for i in _completed_iterations(rd)]
     return jsonify(iters)
 
 
@@ -795,11 +1068,13 @@ def api_iters_list(rid):
 def api_events_list(rid):
     rd  = _rd(rid)
     itr = _index("iter")
+    if itr not in _completed_iterations(rd):
+        return jsonify([])
     d   = _child(rd, f"iter_{itr}")
     if not d.exists():
         return jsonify([])
     evs = sorted(
-        [x.name for x in d.iterdir() if x.is_dir() and x.name.startswith("event_")],
+        [x.name for x in d.iterdir() if x.is_dir() and re.fullmatch(r"event_\d+", x.name) and _contained(x, rd)],
         key=lambda x: int(x.split("_")[1]),
     )
     return jsonify(evs)
@@ -810,14 +1085,60 @@ def api_weights_list(rid):
     rd  = _rd(rid)
     itr = _index("iter")
     ev  = _index("event")
+    if itr not in _completed_iterations(rd):
+        return jsonify([])
     d   = _child(rd, f"iter_{itr}", f"event_{ev}")
     if not d.exists():
         return jsonify([])
     ws = sorted(
-        [x.name for x in d.iterdir() if x.is_dir() and x.name.startswith("weight_")],
+        [x.name for x in d.iterdir() if x.is_dir() and re.fullmatch(r"weight_\d+", x.name) and _contained(x, rd)],
         key=lambda x: int(x.split("_")[1]),
     )
     return jsonify(ws)
+
+
+def _sparse_slice_response(data, meta: dict, station: int | None = None) -> dict:
+    is_weights = station is None
+    shape_key = "weight_shape" if is_weights else "shape"
+    if shape_key not in data:
+        return _arr_resp(None, 0)
+    shape = tuple(int(v) for v in data[shape_key])
+    grid = meta.get("grid_info") or {}
+    extents = grid.get("coarse_side_m") or [n * float(grid.get("coarse_cell_size", 1)) for n in shape]
+    cell_size = float(extents[0]) / shape[0]
+    y_km, y = _requested_y(shape, float(extents[1]) / shape[1])
+    if is_weights:
+        if "weight_indices" not in data:
+            return _arr_resp(None, 0)
+        indices = data["weight_indices"]
+        values = data["weight_values"] if "weight_values" in data else np.ones(len(indices))
+        plane = _sparse_plane(shape, indices, values, y)
+    else:
+        offsets = data["offsets"]
+        if station + 1 >= len(offsets):
+            return _arr_resp(None, 0)
+        start, stop = int(offsets[station]), int(offsets[station + 1])
+        plane = _sparse_plane(shape, data["coords"][start:stop], data["values"][start:stop], y, np.float32)
+    return _axes(_slice_resp(plane, list(shape), cell_size), cell_size, y_km, extents)
+
+
+def _legacy_G_slice_response(path_stem: Path, meta: dict) -> dict:
+    geometry = {}
+
+    def select_y(shape):
+        grid = meta.get("grid_info") or {}
+        extents = grid.get("coarse_side_m") or [n * float(grid.get("coarse_cell_size", 1)) for n in shape]
+        cell_size = float(extents[0]) / shape[0]
+        y_km, y = _requested_y(shape, float(extents[1]) / shape[1])
+        geometry.update(cell_size=cell_size, y_km=y_km, extents=extents)
+        return y
+
+    loaded = _legacy_G_plane(path_stem, select_y)
+    if loaded is None:
+        return _arr_resp(None, 0)
+    plane, shape = loaded
+    return _axes(_slice_resp(plane, list(shape), geometry["cell_size"]),
+                 geometry["cell_size"], geometry["y_km"], geometry["extents"])
 
 
 # ─── main slice endpoint ───────────────────────────────────────────────────────
@@ -829,7 +1150,7 @@ def api_slice(rid):
 
     Query params
     ────────────
-    type        model | weights | G | delta_s | ray_count
+    type        model | weights | G | delta_s | ray_count | sensitivity_diagonal | coverage_confidence
     y_km        float physical y coordinate in kilometres
     iter        int   iteration number
 
@@ -844,19 +1165,32 @@ def api_slice(rid):
     it    = _index("iter")
     meta = _read_meta(rd)
     grid = meta.get("grid_info") or {}
+    if dtype not in ("model", "weights", "G", "delta_s", "ray_count", "sensitivity_diagonal", "coverage_confidence"):
+        abort(400, description="Invalid slice type")
+    completed = _completed_iterations(rd, meta)
+    mt = request.args.get("model_type", "iter" if completed else "initial")
+    if dtype == "model" and mt not in ("initial", "true", "iter"):
+        abort(400, description="Invalid model_type")
+    if (dtype != "model" or mt == "iter") and it not in completed:
+        abort(404, description=f"Iteration {it} is not complete")
 
     arr = None
     response_extra = {}
 
     if dtype == "model":
-        mt = request.args.get("model_type", "iter")
         if mt == "true":
             if any(name in request.args for name in ("nx", "ny", "nz")):
                 abort(400, description="Truth is only available on its native grid")
-            with np.load(_source_model(rd, meta), allow_pickle=False) as data:
-                arr = data["velocity"]
-                cell_size = float(data["cell_size_m"])
-                origin = data["origin_m"]
+            source_path = _source_model(rd, meta)
+            if source_path is None:
+                abort(404, description="Reference model unavailable")
+            try:
+                with np.load(source_path, allow_pickle=False) as data:
+                    arr = data["velocity"]
+                    cell_size = float(data["cell_size_m"])
+                    origin = data["origin_m"]
+            except (OSError, ValueError, KeyError, EOFError, BadZipFile):
+                abort(404, description="Reference model unavailable")
             if arr.ndim != 3 or not np.array_equal(origin, [0, 0, 0]) or not math.isfinite(cell_size) or cell_size <= 0:
                 abort(404)
             y_km, y = _requested_y(arr.shape, cell_size)
@@ -879,15 +1213,16 @@ def api_slice(rid):
             grid_step = _model_grid_step(meta, arr.shape, full_shape)
             return jsonify(_axes(_slice_resp(s2d, full_shape, cell_size, grid_step), cell_size, y_km, extents))
 
-    elif dtype == "delta_s":
-        arr = _npy(_child(rd, f"iter_{it}", "delta_s.npy"))
+    elif dtype in ("delta_s", "sensitivity_diagonal", "coverage_confidence"):
+        arr = _npy(_child(rd, f"iter_{it}", f"{dtype}.npy"))
 
     elif dtype == "weights":
         ev = _index("event")
         path = _child(rd, f"iter_{it}", f"event_{ev}", "weights.npz")
-        arr = _load_weights(path)
+        response = _arr_resp(None, 0)
         if path.exists():
-            with np.load(path) as data:
+            with np.load(path, allow_pickle=False) as data:
+                response = _sparse_slice_response(data, meta)
                 if "positions" in data:
                     values = (
                         data["weight_values"]
@@ -898,13 +1233,21 @@ def api_slice(rid):
                         {"coord": position.tolist(), "weight": float(value)}
                         for position, value in zip(data["positions"], values)
                     ]
+        response.update(response_extra)
+        return jsonify(response)
 
     elif dtype == "G":
         ev = _index("event")
         wt = _index("weight")
         sta = _index("station")
-        stem = _child(rd, f"iter_{it}", f"event_{ev}", f"weight_{wt}", f"G_station_{sta}")
-        arr = _load_G_station(stem)
+        path = _child(rd, f"iter_{it}", f"event_{ev}", f"weight_{wt}", "G_stations_sparse.npz")
+        response = _arr_resp(None, 0)
+        if path.exists():
+            with np.load(path, allow_pickle=False) as data:
+                response = _sparse_slice_response(data, meta, sta)
+        else:
+            stem = _child(rd, f"iter_{it}", f"event_{ev}", f"weight_{wt}", f"G_station_{sta}")
+            response = _legacy_G_slice_response(stem, meta)
         weights_path = _child(rd, f"iter_{it}", f"event_{ev}", "weights.npz")
         if weights_path.exists():
             with np.load(weights_path) as data:
@@ -913,6 +1256,8 @@ def api_slice(rid):
                         "coord": data["positions"][wt].tolist(),
                         "weight": float(data["weight_values"][wt]) if "weight_values" in data else 1.0,
                     }]
+        response.update(response_extra)
+        return jsonify(response)
 
     elif dtype == "ray_count":
         arr = _cached_ray_count(_child(rd, f"iter_{it}"))
