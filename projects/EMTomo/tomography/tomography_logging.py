@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-import io
 import json
-import pstats
 import re
 import time
 from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 import numpy as np
 
@@ -18,10 +16,10 @@ class TomographyLogger:
     Directory layout:
         runs/run_<method>_v<version>_<tags>_<timestamp>/
           meta.json
-          initial_model.npy / true_model.npy / true_model_fine.npy
-          timing.jsonl / timing_summary.json
-          profile.txt / profile_top30.json
+          initial_model.npy / final_model.npy
+          timing.jsonl / timing_summary.json / quality.jsonl
           iter_<i>/
+            complete.json            ← published only after all cycle artifacts
             model.npy / delta_s.npy
             sensitivity_diagonal.npy / coverage_confidence.npy
             event_<j>/
@@ -74,8 +72,27 @@ class TomographyLogger:
             np.save(stream, values)
         temporary.replace(path)
 
+    @staticmethod
+    def _save_npz(path: Path, **values) -> None:
+        temporary = path.with_suffix(path.suffix + ".tmp")
+        with temporary.open("wb") as stream:
+            np.savez_compressed(stream, **values)
+        temporary.replace(path)
+
+    @staticmethod
+    def _save_json(path: Path, values) -> None:
+        temporary = path.with_suffix(path.suffix + ".tmp")
+        with temporary.open("w") as stream:
+            json.dump(values, stream, indent=2)
+        temporary.replace(path)
+
     def save_meta(self, run_params, station_locs, event_locs, grid_info=None, source_experiment=None):
         meta = {
+            "viewer_completion_protocol": 1,
+            "viewer_saved_artifacts": {
+                "save_misfit": self.save_misfit,
+                "save_timefields": self.save_timefields,
+            },
             "run_id": self.run_id,
             "started_at": self.started_at.isoformat(),
             "run_name": self.run_name,
@@ -87,29 +104,25 @@ class TomographyLogger:
             "grid_info": grid_info or {},
             "source_experiment": source_experiment,
         }
-        path = self.run_dir / "meta.json"
-        temporary = path.with_suffix(".json.tmp")
-        with temporary.open("w") as stream:
-            json.dump(meta, stream, indent=2)
-        temporary.replace(path)
+        self._save_json(self.run_dir / "meta.json", meta)
 
-    def save_initial_model(self, model):
-        self._save_npy(self.run_dir / "initial_model.npy", model.grid.vp)
+    def save_initial_model(self, velocity: np.ndarray):
+        self._save_npy(self.run_dir / "initial_model.npy", np.asarray(velocity))
 
-    def save_true_model(self, model, filename: str = "true_model.npy"):
-        if model is not None:
-            self._save_npy(self.run_dir / filename, model.grid.vp)
+    def save_final_model(self, velocity: np.ndarray):
+        """Model after the last update; iter_<i>/model.npy holds models before each update."""
+        self._save_npy(self.run_dir / "final_model.npy", np.asarray(velocity))
 
     def iter_dir(self, iteration: int) -> Path:
         d = self.run_dir / f"iter_{iteration}"
         d.mkdir(exist_ok=True)
         return d
 
-    def save_iteration_model(self, iteration: int, model):
-        self._save_npy(self.iter_dir(iteration) / "model.npy", model.grid.vp)
+    def save_iteration_model(self, iteration: int, velocity: np.ndarray):
+        self._save_npy(self.iter_dir(iteration) / "model.npy", np.asarray(velocity))
 
     def save_delta_s(self, iteration: int, delta_s: np.ndarray):
-        np.save(self.iter_dir(iteration) / "delta_s.npy", delta_s)
+        self._save_npy(self.iter_dir(iteration) / "delta_s.npy", delta_s)
 
     def save_inversion_diagnostics(
         self,
@@ -118,59 +131,41 @@ class TomographyLogger:
         coverage_confidence: np.ndarray,
     ) -> None:
         directory = self.iter_dir(iteration)
-        np.save(directory / "sensitivity_diagonal.npy", sensitivity_diagonal)
-        np.save(directory / "coverage_confidence.npy", coverage_confidence)
+        self._save_npy(directory / "sensitivity_diagonal.npy", sensitivity_diagonal)
+        self._save_npy(directory / "coverage_confidence.npy", coverage_confidence)
 
     def save_station_fields(self, iteration: int, station_fields: np.ndarray):
         if not self.save_timefields:
             return
-        np.save(self.iter_dir(iteration) / "station_fields.npy", np.asarray(station_fields))
+        self._save_npy(self.iter_dir(iteration) / "station_fields.npy", np.asarray(station_fields))
 
     def save_ray_count(self, iteration: int, ray_count: np.ndarray):
-        np.save(self.iter_dir(iteration) / "ray_count.npy", np.asarray(ray_count))
+        self._save_npy(self.iter_dir(iteration) / "ray_count.npy", np.asarray(ray_count))
 
-    def save_event_data(
-        self,
-        iteration: int,
-        event_idx: int,
-        weights: Mapping[str, np.ndarray],
-        positions: Optional[np.ndarray] = None,
-        weight_values: Optional[np.ndarray] = None,
-        misfit: Optional[np.ndarray] = None,
-        residuals: Optional[np.ndarray] = None,
-        G_per_weight: Optional[Dict[int, Dict[str, np.ndarray]]] = None,
-        ray_count_per_weight: Optional[Dict[int, np.ndarray]] = None,
-    ):
+    def save_event_data(self, iteration: int, event_idx: int, log):
+        """Store one event's hypotheses (a ``tomography_events.EventLog``)."""
         event_dir = self.iter_dir(iteration) / f"event_{event_idx}"
         event_dir.mkdir(exist_ok=True)
+        self._save_npz(
+            event_dir / "weights.npz",
+            weight_shape=np.asarray(log.misfit_shape, dtype=np.int32),
+            weight_indices=np.asarray(log.candidate_cells, dtype=np.int32),
+            positions=np.asarray(log.positions, dtype=np.float64),
+            weight_values=np.asarray(log.weights, dtype=np.float64),
+        )
+        if log.misfit is not None and self.save_misfit:
+            self._save_npy(event_dir / "misfit.npy", log.misfit)
+        self._save_npy(event_dir / "residuals.npy", log.residuals)
 
-        payload = {
-            "weight_shape": np.asarray(weights["shape"], dtype=np.int32),
-            "weight_indices": np.asarray(weights["indices"], dtype=np.int32),
-        }
-        if positions is not None:
-            payload["positions"] = np.asarray(positions, dtype=np.float64)
-        if weight_values is not None:
-            payload["weight_values"] = np.asarray(weight_values, dtype=np.float64)
-        np.savez_compressed(event_dir / "weights.npz", **payload)
-
-        if misfit is not None and self.save_misfit:
-            np.save(event_dir / "misfit.npy", misfit)
-        if residuals is not None:
-            np.save(event_dir / "residuals.npy", residuals)
-
-        if ray_count_per_weight is not None:
-            for w_idx, ray_count in ray_count_per_weight.items():
-                w_dir = event_dir / f"weight_{w_idx}"
-                w_dir.mkdir(exist_ok=True)
-                np.save(w_dir / "ray_count.npy", ray_count)
-
+        for w_idx, ray_count in log.ray_count_per_weight.items():
+            w_dir = event_dir / f"weight_{w_idx}"
+            w_dir.mkdir(exist_ok=True)
+            self._save_npy(w_dir / "ray_count.npy", ray_count)
         # Fine-grid G is optional because it is substantially larger than coverage.
-        if G_per_weight is not None:
-            for w_idx, sparse_g in G_per_weight.items():
-                w_dir = event_dir / f"weight_{w_idx}"
-                w_dir.mkdir(exist_ok=True)
-                np.savez_compressed(w_dir / "G_stations_sparse.npz", **sparse_g)
+        for w_idx, sparse_g in (log.G_per_weight or {}).items():
+            w_dir = event_dir / f"weight_{w_idx}"
+            w_dir.mkdir(exist_ok=True)
+            self._save_npz(w_dir / "G_stations_sparse.npz", **sparse_g)
 
     def start_iteration(self, iteration: int):
         self._iter_start = time.perf_counter()
@@ -182,23 +177,12 @@ class TomographyLogger:
             json.dump({"iter": iteration, "elapsed_s": elapsed}, f)
             f.write("\n")
 
-    def save_profiling(self, profiler):
-        buf = io.StringIO()
-        stats = pstats.Stats(profiler, stream=buf).strip_dirs().sort_stats("cumulative")
-        stats.print_stats(50)
-        (self.run_dir / "profile.txt").write_text(buf.getvalue())
-        rows = []
-        for func, (cc, nc, tt, ct, _) in list(stats.stats.items())[:30]:
-            rows.append(
-                {
-                    "func": f"{func[0]}:{func[1]}:{func[2]}",
-                    "n_calls": nc,
-                    "tottime_s": round(tt, 6),
-                    "cumtime_s": round(ct, 6),
-                }
-            )
-        with open(self.run_dir / "profile_top30.json", "w") as f:
-            json.dump(rows, f, indent=2)
+    def complete_iteration(self, iteration: int) -> None:
+        """Publish only after the update and every configured save have succeeded."""
+        self._save_json(
+            self.iter_dir(iteration) / "complete.json",
+            {"iter": int(iteration), "viewer_completion_protocol": 1},
+        )
 
     def save_timing_summary(self):
         total = time.perf_counter() - self._run_start
@@ -209,11 +193,12 @@ class TomographyLogger:
             if self.timing
             else None,
         }
-        with open(self.run_dir / "timing_summary.json", "w") as f:
-            json.dump(summary, f, indent=2)
+        self._save_json(self.run_dir / "timing_summary.json", summary)
         return summary
 
-    def save_quality(self, iteration: int, avg_abs_pct_dev: float):
+    def save_quality(self, iteration: int, avg_abs_pct_dev: float, rms_m_s: float):
+        """Errors of the model after the update of ``iteration`` against the reference."""
+        row = {"iter": int(iteration), "avg_abs_pct_dev": float(avg_abs_pct_dev), "rms_m_s": float(rms_m_s)}
         with open(self.run_dir / "quality.jsonl", "a") as f:
-            json.dump({"iter": int(iteration), "avg_abs_pct_dev": float(avg_abs_pct_dev)}, f)
+            json.dump(row, f)
             f.write("\n")

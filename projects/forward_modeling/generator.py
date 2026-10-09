@@ -63,6 +63,51 @@ class CheckerboardConfig:
             raise ValueError("seed must be a nonnegative integer")
 
 
+def surface_station_grid(lengths_km, counts) -> PointSet:
+    """Stations at the centres of a regular ``counts[0] x counts[1]`` tiling of the surface."""
+    count_x, count_y = counts
+    station_x = (np.arange(count_x) + 0.5) * lengths_km[0] * 1000 / count_x
+    station_y = (np.arange(count_y) + 0.5) * lengths_km[1] * 1000 / count_y
+    x, y = np.meshgrid(station_x, station_y, indexing="ij")
+    station_xyz = np.column_stack((x.ravel(), y.ravel(), np.zeros(count_x * count_y)))
+    return PointSet(
+        tuple(f"STA_{i:0{len(str(count_x * count_y))}d}" for i in range(1, count_x * count_y + 1)),
+        station_xyz,
+    )
+
+
+def sobol_unit_points(n: int, seed: int) -> np.ndarray:
+    """``n`` scrambled Sobol points in the unit cube.
+
+    A power-of-two draw retains balanced coverage; truncation only removes the
+    final low-discrepancy samples.
+    """
+    sampler = qmc.Sobol(d=3, scramble=True, seed=seed)
+    return sampler.random_base2(m=(n - 1).bit_length())[:n]
+
+
+def events_from_unit_points(unit, lengths_km, depth_range_km, bottom_bias: float = 0.0) -> PointSet:
+    """Map unit-cube points to hypocentres spanning x, y and ``depth_range_km``.
+
+    ``bottom_bias`` warps depth toward the bottom with density ``1 - b + 2bt``.
+    """
+    bias = bottom_bias
+    # Invert F(t) = (1-b)t + b*t²; the rationalized form avoids cancellation as b -> 0.
+    depth_fraction = 2 * unit[:, 2] / (
+        1 - bias + np.sqrt((1 - bias) ** 2 + 4 * bias * unit[:, 2])
+    )
+    top, bottom = depth_range_km
+    event_xyz = np.column_stack((
+        unit[:, 0] * lengths_km[0] * 1000,
+        unit[:, 1] * lengths_km[1] * 1000,
+        (top + depth_fraction * (bottom - top)) * 1000,
+    ))
+    return PointSet(
+        tuple(f"EVT_{i:0{len(str(len(unit)))}d}" for i in range(1, len(unit) + 1)),
+        event_xyz,
+    )
+
+
 def generate_checkerboard(config: CheckerboardConfig = CheckerboardConfig()) -> tuple[VelocityGrid, PointSet, PointSet]:
     """Return a single-wave checkerboard, surface stations and interior events.
 
@@ -77,39 +122,16 @@ def generate_checkerboard(config: CheckerboardConfig = CheckerboardConfig()) -> 
     cell_size_m = config.lengths_km[0] * 1000.0 / config.blocks[0]
     model = VelocityGrid(speed, cell_size_m)
 
-    count_x, count_y = config.surface_stations
-    station_x = (np.arange(count_x) + 0.5) * config.lengths_km[0] * 1000 / count_x
-    station_y = (np.arange(count_y) + 0.5) * config.lengths_km[1] * 1000 / count_y
-    x, y = np.meshgrid(station_x, station_y, indexing="ij")
-    station_xyz = np.column_stack((x.ravel(), y.ravel(), np.zeros(count_x * count_y)))
-    stations = PointSet(
-        tuple(f"STA_{i:0{len(str(count_x * count_y))}d}" for i in range(1, count_x * count_y + 1)),
-        station_xyz,
-    )
+    stations = surface_station_grid(config.lengths_km, config.surface_stations)
 
     if config.event_grid_shape is None:
-        # Power-of-two Sobol draw retains balanced coverage; truncation only
-        # removes the final low-discrepancy samples.
-        sampler = qmc.Sobol(d=3, scramble=True, seed=config.seed)
-        unit = sampler.random_base2(m=(config.n_events - 1).bit_length())[:config.n_events]
+        unit = sobol_unit_points(config.n_events, config.seed)
     else:
         levels = [(np.arange(count) + 0.5) / count for count in config.event_grid_shape]
         x_unit, y_unit, z_unit = np.meshgrid(*levels, indexing="ij")
         unit = np.column_stack((x_unit.ravel(), y_unit.ravel(), z_unit.ravel()))
-    bias = config.bottom_bias
-    # Invert F(t) = (1-b)t + b*t², density p(t) = 1-b+2bt.
-    # Rationalized form avoids cancellation as b approaches zero.
-    depth_fraction = 2 * unit[:, 2] / (
-        1 - bias + np.sqrt((1 - bias) ** 2 + 4 * bias * unit[:, 2])
-    )
-    event_xyz = np.column_stack((
-        unit[:, 0] * config.lengths_km[0] * 1000,
-        unit[:, 1] * config.lengths_km[1] * 1000,
-        (config.min_depth_km + depth_fraction * (config.lengths_km[2] - config.min_depth_km)) * 1000,
-    ))
-    events = PointSet(
-        tuple(f"EVT_{i:0{len(str(config.n_events))}d}" for i in range(1, config.n_events + 1)),
-        event_xyz,
+    events = events_from_unit_points(
+        unit, config.lengths_km, (config.min_depth_km, config.lengths_km[2]), config.bottom_bias,
     )
     return model, stations, events
 

@@ -153,7 +153,7 @@ def test_run_roundtrip_metadata(tmp_path, inputs, solver_mock, check_accuracy):
     assert "coordinates_m" not in json.dumps(metadata)
     compute, convergence = solver_mock
     compute.assert_called_once()
-    assert set(compute.call_args.kwargs) == {"model", "stations", "events", "config"}
+    assert set(compute.call_args.kwargs) == {"model", "stations", "events", "config", "workers"}
     assert compute.call_args.kwargs["config"] is config
     np.testing.assert_array_equal(compute.call_args.kwargs["model"].origin_m, inputs[0].origin_m)
     if check_accuracy:

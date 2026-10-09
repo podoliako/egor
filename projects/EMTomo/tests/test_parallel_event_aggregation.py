@@ -1,144 +1,65 @@
-"""Regression tests for worker-side normal-equation aggregation."""
+"""Event partitioning and serial/parallel equivalence of the summed normal equations."""
 
 import numpy as np
+import pytest
 
-import tomography.tomography_events as event_module
+from eikonal import station_travel_time_fields
+from instruments.instruments_coords import metric_to_cell_coord, sample_cell_centered_trilinear_batch
+from instruments.likelihood import PickNoise
+from tomography.tomography_em import warm_up_jit
 from tomography.tomography_events import (
-    _aggregate_event_results,
-    _mp_event_chunk_task,
-    _partition_event_tasks,
+    EventSettings,
+    IterationFields,
+    partition_events,
+    run_events,
 )
-from tomography.tomography_math import _normal_equation_contribution
+from velocity_model import VelocityModel
 
 
-def test_event_tasks_are_partitioned_once_into_balanced_ordered_chunks():
-    arrivals = [[float(i)] for i in range(11)]
-    chunks = _partition_event_tasks(arrivals, n_chunks=4)
-
-    assert [chunk_idx for chunk_idx, _tasks in chunks] == [0, 1, 2, 3]
-    assert [len(tasks) for _chunk_idx, tasks in chunks] == [3, 3, 3, 2]
-    assert [
-        event_idx
-        for _chunk_idx, tasks in chunks
-        for event_idx, _observed in tasks
-    ] == list(range(11))
+def test_events_are_partitioned_into_balanced_ordered_chunks():
+    chunks = partition_events(11, n_chunks=4)
+    assert [len(chunk) for chunk in chunks] == [3, 3, 3, 2]
+    assert [event for chunk in chunks for event in chunk] == list(range(11))
+    assert len(partition_events(2, n_chunks=8)) == 2
+    chunks = partition_events(512, n_chunks=24)
+    assert {len(chunk) for chunk in chunks} == {21, 22}
+    with pytest.raises(ValueError, match="At least one event"):
+        partition_events(0, n_chunks=2)
 
 
-def test_more_workers_than_events_does_not_create_empty_chunks():
-    chunks = _partition_event_tasks([[1.0], [2.0]], n_chunks=8)
-
-    assert len(chunks) == 2
-    assert all(len(tasks) == 1 for _chunk_idx, tasks in chunks)
-
-
-def test_empty_arrival_table_is_rejected():
-    try:
-        _partition_event_tasks([], n_chunks=2)
-    except ValueError as error:
-        assert "at least one event" in str(error)
-    else:
-        raise AssertionError("An empty arrival table must be rejected")
-
-
-def test_event_result_aggregation_preserves_logs_and_sums_equations():
-    results = [
-        (
-            event_idx,
-            np.full((2, 2), event_idx + 1.0),
-            np.full(2, 10.0 + event_idx),
-            {"marker": event_idx},
-        )
-        for event_idx in range(3)
-    ]
-
-    hessian, rhs, logs = _aggregate_event_results(iter(results))
-
-    np.testing.assert_allclose(hessian, np.full((2, 2), 6.0))
-    np.testing.assert_allclose(rhs, np.full(2, 33.0))
-    assert logs == [
-        (0, {"marker": 0}),
-        (1, {"marker": 1}),
-        (2, {"marker": 2}),
-    ]
-
-
-def test_chunk_worker_returns_one_normal_system_with_explicit_event_indices():
-    original = event_module._mp_event_task
-
-    def fake_event_task(task):
-        event_idx, _observed = task
-        return (
-            np.full((2, 2), event_idx + 1.0),
-            np.full(2, event_idx + 0.5),
-            ("event", event_idx),
-        )
-
-    event_module._mp_event_task = fake_event_task
-    try:
-        chunk_idx, hessian, rhs, logs = _mp_event_chunk_task(
-            (3, [(4, [1.0]), (5, [2.0])])
-        )
-    finally:
-        event_module._mp_event_task = original
-
-    assert chunk_idx == 3
-    np.testing.assert_allclose(hessian, np.full((2, 2), 11.0))
-    np.testing.assert_allclose(rhs, np.full(2, 10.0))
-    assert logs == [(4, ("event", 4)), (5, ("event", 5))]
-
-
-def test_sparse_normal_equations_match_explicit_dense_centering():
-    rng = np.random.default_rng(17)
-    sensitivities = np.zeros((7, 3, 2, 2), dtype=np.float64)
-    flat = sensitivities.reshape(7, -1)
-    flat[:, [1, 4, 9]] = rng.normal(size=(7, 3))
-    residuals = rng.normal(size=7)
-    valid = np.asarray([True, True, False, True, True, False, True])
-    weight = 0.37
-
-    hessian, rhs = _normal_equation_contribution(
-        sensitivities, residuals, sensitivities.shape[1:], weight, valid
+def _small_problem(subdivision=2):
+    rng = np.random.default_rng(4)
+    coarse = VelocityModel(rng.uniform(4500., 5500., size=(4, 3, 3)), 1000.)
+    fine = coarse.refined(subdivision)
+    stations = np.array([[200., 300., 0.], [3700., 400., 0.], [1900., 2800., 0.],
+                         [600., 2500., 0.], [3300., 2600., 0.]])
+    times = station_travel_time_fields(fine, stations)
+    events = rng.uniform([300., 300., 800.], [3700., 2700., 2700.], size=(7, 3))
+    arrivals = np.stack([
+        sample_cell_centered_trilinear_batch(times, metric_to_cell_coord(event, fine.cell_size))
+        for event in events
+    ])
+    arrivals -= arrivals.min(axis=1, keepdims=True)
+    noise = PickNoise(0.01, 0.05, 0.1)
+    fields = IterationFields.from_times(
+        times, metric_to_cell_coord(stations, fine.cell_size), fine.cell_size, subdivision, noise,
     )
-    rows = flat[valid]
-    centered_rows = rows - rows.mean(axis=0, keepdims=True)
-    centered_residuals = residuals[valid] - residuals[valid].mean()
-    scale = weight
-
-    np.testing.assert_allclose(hessian, scale * centered_rows.T @ centered_rows)
-    np.testing.assert_allclose(rhs, scale * centered_rows.T @ centered_residuals)
-    assert not np.any(hessian[0])
-    assert not np.any(hessian[:, 0])
-
-
-def test_sparse_normal_equations_with_unequal_sigmas_and_failed_ray():
-    sensitivities = np.zeros((4, 2, 2, 1))
-    flat = sensitivities.reshape(4, -1)
-    flat[:, 1] = [1., 2., 100., 3.]
-    flat[:, 3] = [0., 4., 100., 2.]
-    residuals = np.array([1., -2., 100., 3.])
-    valid = np.array([True, True, False, True])
-    sigmas = np.array([1., 2., np.nan, 4.])
-    weight = 0.4
-
-    hessian, rhs = _normal_equation_contribution(
-        sensitivities, residuals, (2, 2, 1), weight, valid,
-        station_sigmas=sigmas,
+    settings = EventSettings(
+        subdivision=subdivision, slowness_interpolation="nearest", n_candidates=5, weights_top_n=3,
+        weights_min_distance=2, candidate_mode="soft", temperature=1., noise=noise,
     )
-    rows = flat[valid]
-    precision = 1 / sigmas[valid] ** 2
-    centered_rows = rows - np.average(rows, axis=0, weights=precision)
-    centered_residuals = residuals[valid] - np.average(residuals[valid], weights=precision)
-    np.testing.assert_allclose(
-        hessian, weight * centered_rows.T @ (precision[:, None] * centered_rows)
-    )
-    np.testing.assert_allclose(rhs, weight * centered_rows.T @ (precision * centered_residuals))
-    assert not np.any(hessian[0])
-    assert not np.any(hessian[:, 2])
+    return arrivals, fields, settings
 
 
-def test_512_events_produce_at_most_one_dense_result_per_worker():
-    chunks = _partition_event_tasks([[0.0]] * 512, n_chunks=24)
-
-    assert len(chunks) == 24
-    assert max(len(tasks) for _chunk_idx, tasks in chunks) == 22
-    assert min(len(tasks) for _chunk_idx, tasks in chunks) == 21
+def test_parallel_events_match_serial_sum_and_logs():
+    warm_up_jit()
+    arrivals, fields, settings = _small_problem()
+    serial = run_events(arrivals, fields, settings, n_workers=1)
+    parallel = run_events(arrivals, fields, settings, n_workers=3)
+    np.testing.assert_allclose(parallel[0], serial[0], rtol=1e-10, atol=1e-12)
+    np.testing.assert_allclose(parallel[1], serial[1], rtol=1e-10, atol=1e-12)
+    assert [event for event, _ in parallel[2]] == list(range(len(arrivals)))
+    for (_, a), (_, b) in zip(serial[2], parallel[2]):
+        np.testing.assert_allclose(a.weights, b.weights)
+        np.testing.assert_allclose(a.positions, b.positions)
+    assert np.any(serial[0]) and np.allclose(serial[0], serial[0].T)

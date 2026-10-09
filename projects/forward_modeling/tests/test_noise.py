@@ -175,7 +175,7 @@ def test_compute_arrivals_adds_noise_to_absolute_times_before_normalizing(monkey
     np.testing.assert_allclose(actual, expected, rtol=0, atol=1e-12)
     np.testing.assert_array_equal(actual.min(axis=1), 0.)
     assert np.all(actual >= 0)
-    travel.assert_called_once_with(model, stations, events, forward)
+    travel.assert_called_once_with(model, stations, events, forward, workers=1)
 
 
 @pytest.mark.parametrize("kwargs", [{}, {"noise": None}, {"noise": NoiseConfig(0, 0)}])
@@ -202,8 +202,8 @@ def test_check_convergence_uses_clean_absolute_times(monkeypatch, geometry):
     assert travel.call_count == 2
     assert travel.call_args_list[0].args == (model, stations, events, ForwardConfig(refinement=2))
     assert travel.call_args_list[1].args == (model, stations, events, ForwardConfig(refinement=4))
-    assert not travel.call_args_list[0].kwargs
-    assert not travel.call_args_list[1].kwargs
+    assert travel.call_args_list[0].kwargs == {"workers": 1}
+    assert travel.call_args_list[1].kwargs == {"workers": 1}
     assert stats["max_absolute_time_difference_s"] == pytest.approx(4.)
     assert stats["rms_absolute_time_difference_s"] == pytest.approx(np.sqrt(7.))
     assert stats["max_abs_difference_s"] == pytest.approx(3.)

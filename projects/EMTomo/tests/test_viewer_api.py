@@ -4,14 +4,16 @@ import json
 from pathlib import Path
 import subprocess
 import sys
-from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import server
+from config import InversionConfig
+from instruments.likelihood import PickNoise
 from tomography.tomography_em import run_em
+from velocity_model import VelocityModel
 
 
 @pytest.fixture
@@ -376,16 +378,15 @@ def test_run_provenance_latest_and_security(viewer, tmp_path):
 
 
 def test_saved_em_metadata_records_provenance_without_resampled_truth(tmp_path):
-    grid = SimpleNamespace(vp=np.ones((2, 2, 2)), shape=(2, 2, 2), cell_size=1000.)
-    model = SimpleNamespace(grid=grid, get_geo_grid=lambda subdivision=1: grid)
+    model = VelocityModel(np.ones((2, 2, 2)), 1000.)
     source = {"id": "sample", "model_sha256": "a" * 64}
-    logger = run_em(0, model, np.zeros((3, 2)), [(0, 0, 0)], true_model=model,
-                    source_experiment=source, runs_dir=str(tmp_path))
+    config = InversionConfig(n_cycles=1, subdivision=1, n_workers=1, runs_dir=str(tmp_path))
+    logger = run_em(config, model, np.zeros((3, 2)), [(0, 0, 0), (1000, 0, 0)],
+                    PickNoise(), reference_model=model, source_experiment=source)
     meta = json.loads((logger.run_dir / "meta.json").read_text())
     assert meta["source_experiment"] == source
     assert meta["run_params"]["n_events"] == 3
     assert not (logger.run_dir / "true_model.npy").exists()
-    assert not (logger.run_dir / "true_model_fine.npy").exists()
 
 
 def test_experiment_symlink_and_id_escape(viewer, tmp_path):

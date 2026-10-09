@@ -1347,11 +1347,11 @@ async function renderVelPair() {
     trackPlotRender('plot-vel',
       buildTraces(heatTrace(dV.slice, isDelta ? CS_DIVERG : 'Viridis', dV, zrange),
         dV.shape[0], dV.shape[1], -1, -1, dV.cell_size, yKm, false, [], dV.grid_step),
-      mkLayout(dV.shape[0], dV.shape[1], isDelta ? 'Δs' : 'Vp', zrange), PLY_CFG),
+      mkLayout(dV.shape[0], dV.shape[1], isDelta ? 'Δs' : 'V', zrange), PLY_CFG),
     trackPlotRender('plot-tr',
       buildTraces(heatTrace(dTr.slice, 'Viridis', dTr, isDelta ? sliceRange(dTr) : zrange),
         dTr.shape[0], dTr.shape[1], -1, -1, dTr.cell_size, yKm, false, [], dTr.grid_step),
-      mkLayout(dTr.shape[0], dTr.shape[1], 'Vp true', isDelta ? sliceRange(dTr) : zrange), PLY_CFG),
+      mkLayout(dTr.shape[0], dTr.shape[1], 'V true', isDelta ? sliceRange(dTr) : zrange), PLY_CFG),
   ]);
 }
 

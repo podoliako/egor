@@ -9,7 +9,9 @@ this avoids interpolating the point-source cusp directly.
 from __future__ import annotations
 
 from dataclasses import replace
+import importlib.util
 from itertools import product
+import multiprocessing as mp
 
 import numpy as np
 
@@ -78,57 +80,93 @@ def _sample_factored(field, source, receivers, h, source_slowness):
     return result * np.linalg.norm(receivers - source, axis=1)
 
 
+def _event_times(model: VelocityGrid, velocity: np.ndarray, h: float, receivers: np.ndarray,
+                 source: np.ndarray, config: ForwardConfig) -> np.ndarray:
+    """Absolute times from one off-grid source to all receivers (local coordinates)."""
+    from pykonal import EikonalSolver
+
+    shape = np.array(velocity.shape)
+    solver = EikonalSolver(coord_sys="cartesian")
+    solver.velocity.min_coords = (0.0, 0.0, 0.0)
+    solver.velocity.node_intervals = (h, h, h)
+    solver.velocity.npts = tuple(shape)
+    solver.velocity.values = velocity
+    base = np.floor(source / h).astype(np.intp)
+    radius = config.source_radius_cells
+    ranges = [range(max(0, int(i) - radius + 1), min(int(n), int(i) + radius + 1))
+              for i, n in zip(base, shape)]
+    # Initial source-box values are local straight-ray upper bounds. The
+    # approximation is tested by refining both the box and the global grid.
+    for index in product(*ranges):
+        solver.traveltime.values[index] = _segment_time(model, source, np.array(index) * h)
+        solver.unknown[index] = False
+        solver.trial.push(*index)
+    if not solver.solve():
+        return None
+    cell = np.clip(np.floor(source / model.cell_size_m).astype(np.intp),
+                   0, np.array(model.velocity.shape) - 1)
+    return _sample_factored(
+        solver.traveltime.values, source, receivers, h, 1.0 / model.velocity[tuple(cell)],
+    )
+
+
+_WORKER: dict = {}
+
+
+def _init_worker(*state) -> None:
+    _WORKER["state"] = state
+
+
+def _event_times_in_worker(source):
+    return _event_times(*_WORKER["state"][:4], source, _WORKER["state"][4])
+
+
 def compute_travel_times(
     model: VelocityGrid,
     stations: PointSet,
     events: PointSet,
     config: ForwardConfig = ForwardConfig(),
+    workers: int = 1,
 ) -> np.ndarray:
     """Return absolute propagation seconds shaped (events, stations).
 
     Sources are the events; stations are receivers. No swapping by reciprocity
-    is performed, so numerical results do not change with catalogue size/order.
-    One field is held at a time. Boundaries are included, never clipped or padded.
+    is performed, so numerical results do not change with catalogue size/order;
+    events are independent, so ``workers`` processes give identical results.
+    Boundaries are included, never clipped or padded.
     """
     model.validate_points(stations, "stations")
     model.validate_points(events, "events")
-    try:
-        from pykonal import EikonalSolver
-    except ImportError as exc:
-        raise ImportError("Install pykonal==0.4.1 to calculate forward arrivals") from exc
+    if importlib.util.find_spec("pykonal") is None:
+        raise ImportError("Install pykonal==0.4.1 to calculate forward arrivals")
+    if isinstance(workers, bool) or not isinstance(workers, int) or workers < 1:
+        raise ValueError("workers must be a positive integer")
 
     h = model.cell_size_m / config.refinement
     velocity = _nodal_velocity(model, config.refinement)
-    shape = np.array(velocity.shape)
     origin = np.array(model.origin_m)
     receivers = stations.coordinates_m - origin
-    times = np.empty((len(events.ids), len(stations.ids)), dtype=np.float64)
-    for row, source in enumerate(events.coordinates_m - origin):
-        solver = EikonalSolver(coord_sys="cartesian")
-        solver.velocity.min_coords = (0.0, 0.0, 0.0)
-        solver.velocity.node_intervals = (h, h, h)
-        solver.velocity.npts = tuple(shape)
-        solver.velocity.values = velocity
-        base = np.floor(source / h).astype(np.intp)
-        radius = config.source_radius_cells
-        ranges = [range(max(0, int(i) - radius + 1), min(int(n), int(i) + radius + 1))
-                  for i, n in zip(base, shape)]
-        # Initial source-box values are local straight-ray upper bounds. The
-        # approximation is tested by refining both the box and the global grid.
-        for index in product(*ranges):
-            solver.traveltime.values[index] = _segment_time(model, source, np.array(index) * h)
-            solver.unknown[index] = False
-            solver.trial.push(*index)
-        if not solver.solve():
-            raise RuntimeError(f"Forward FMM failed for event {events.ids[row]}")
-        cell = np.clip(np.floor(source / model.cell_size_m).astype(np.intp),
-                       0, np.array(model.velocity.shape) - 1)
-        times[row] = _sample_factored(
-            solver.traveltime.values, source, receivers, h,
-            1.0 / model.velocity[tuple(cell)],
+    sources = list(events.coordinates_m - origin)
+    if workers == 1:
+        rows = (_event_times(model, velocity, h, receivers, source, config) for source in sources)
+        pool = None
+    else:
+        pool = mp.get_context("fork").Pool(
+            min(workers, len(sources)), initializer=_init_worker,
+            initargs=(model, velocity, h, receivers, config),
         )
-        if not np.all(np.isfinite(times[row])) or np.any(times[row] < 0):
-            raise RuntimeError(f"Invalid travel times for event {events.ids[row]}")
+        rows = pool.imap(_event_times_in_worker, sources, chunksize=1)
+    times = np.empty((len(events.ids), len(stations.ids)), dtype=np.float64)
+    try:
+        for row, values in enumerate(rows):
+            if values is None:
+                raise RuntimeError(f"Forward FMM failed for event {events.ids[row]}")
+            if not np.all(np.isfinite(values)) or np.any(values < 0):
+                raise RuntimeError(f"Invalid travel times for event {events.ids[row]}")
+            times[row] = values
+    finally:
+        if pool is not None:
+            pool.terminate()
     return times
 
 
@@ -139,9 +177,10 @@ def compute_arrivals(
     config: ForwardConfig = ForwardConfig(),
     *,
     noise: NoiseConfig | None = None,
+    workers: int = 1,
 ) -> list[Arrival]:
     """All pairs, optionally noisy; each event's earliest observed pick is zero."""
-    times = compute_travel_times(model, stations, events, config)
+    times = compute_travel_times(model, stations, events, config, workers=workers)
     if noise is not None:
         times = add_arrival_noise(times, events.ids, stations.ids, noise)
     times -= times.min(axis=1, keepdims=True)
@@ -155,14 +194,17 @@ def check_convergence(
     stations: PointSet,
     events: PointSet,
     config: ForwardConfig = ForwardConfig(),
+    *,
+    workers: int = 1,
 ) -> dict:
     """Compare absolute and relative times at r and 2r, not an error bound.
 
     Absolute differences also matter: subtracting the first arrival can hide a
     common source error. For reference datasets, check more than two resolutions.
     """
-    coarse = compute_travel_times(model, stations, events, config)
-    fine = compute_travel_times(model, stations, events, replace(config, refinement=2 * config.refinement))
+    coarse = compute_travel_times(model, stations, events, config, workers=workers)
+    fine = compute_travel_times(model, stations, events,
+                                replace(config, refinement=2 * config.refinement), workers=workers)
     absolute_delta = fine - coarse
     coarse -= coarse.min(axis=1, keepdims=True)
     fine -= fine.min(axis=1, keepdims=True)

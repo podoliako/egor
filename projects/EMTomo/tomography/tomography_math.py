@@ -3,48 +3,62 @@ from __future__ import annotations
 import numpy as np
 from scipy.optimize import minimize
 
-from instruments.instruments_coords import (
-    cell_coord_bounds,
-    sample_cell_centered_trilinear_batch,
-)
-from raytracing import rasterize_path_lengths, trace_ray_from_timefield
+from instruments.instruments_coords import cell_coord_bounds, sample_cell_centered_trilinear_batch
+from instruments.likelihood import PickNoise, negative_log_likelihood
 
 
-def _station_residuals_at_coord(
+def select_candidate_cells(cost: np.ndarray, n: int, min_distance: int = 1) -> np.ndarray:
+    """Lowest-cost cells, pairwise separated by at least ``min_distance`` (Chebyshev, in cells)."""
+    values = np.asarray(cost, dtype=np.float64)
+    if values.ndim != 3:
+        raise ValueError("cost must be a 3-D array")
+    if not isinstance(n, (int, np.integer)) or n < 1:
+        raise ValueError("n must be an integer >= 1")
+    if not isinstance(min_distance, (int, np.integer)) or min_distance < 1:
+        raise ValueError("min_distance must be an integer >= 1")
+
+    flat = values.ravel()
+    # Each selected cell can exclude at most (2d - 1)^3 better-ranked cells.
+    n_considered = min(flat.size, n * (2 * min_distance - 1) ** 3 + n)
+    while True:
+        if n_considered < flat.size:
+            order = np.argpartition(flat, n_considered - 1)[:n_considered]
+            order = order[np.argsort(flat[order], kind="stable")]
+        else:
+            order = np.argsort(flat, kind="stable")
+        selected = []
+        for flat_index in order:
+            if not np.isfinite(flat[flat_index]):
+                continue
+            index = np.asarray(np.unravel_index(int(flat_index), values.shape), dtype=np.int64)
+            if any(np.max(np.abs(index - previous)) < min_distance for previous in selected):
+                continue
+            selected.append(index)
+            if len(selected) == n:
+                return np.asarray(selected, dtype=np.int64)
+        if n_considered >= flat.size:
+            break
+        n_considered = flat.size
+    if not selected:
+        raise ValueError("No finite hypocentre candidates available")
+    return np.asarray(selected, dtype=np.int64)
+
+
+def refine_hypocentre_in_cell(
     station_fields: np.ndarray,
-    arrivals: np.ndarray,
-    cell_coord,
-) -> np.ndarray:
-    predicted = sample_cell_centered_trilinear_batch(station_fields, cell_coord)
-    return np.asarray(arrivals, dtype=np.float64) - predicted
-
-
-def _pairwise_misfit_from_station_residuals(residuals: np.ndarray) -> float:
-    residuals = np.asarray(residuals, dtype=np.float64)
-    n_stations = residuals.size
-    value = n_stations * np.dot(residuals, residuals) - np.sum(residuals) ** 2
-    return max(float(value), 0.0)
-
-
-def _calculate_residuals(station_fields: np.ndarray, arrivals: np.ndarray, cell_coord):
-    residual_vector = _station_residuals_at_coord(station_fields, arrivals, cell_coord)
-    return residual_vector[:, np.newaxis] - residual_vector[np.newaxis, :]
-
-
-def _refine_epicenter_in_cell(
-    station_fields: np.ndarray,
-    arrivals: np.ndarray,
+    observed: np.ndarray,
     cell_index,
-):
-    """Refine one event hypothesis continuously, constrained to its cell."""
+    noise: PickNoise,
+) -> tuple[np.ndarray, float]:
+    """Continuous maximum-likelihood position of one hypothesis within its cell."""
     start = np.asarray(cell_index, dtype=np.float64)
     bounds = cell_coord_bounds(tuple(int(v) for v in cell_index), station_fields.shape[1:])
 
     def objective(coord):
-        residuals = _station_residuals_at_coord(station_fields, arrivals, coord)
-        return _pairwise_misfit_from_station_residuals(residuals)
+        predicted = sample_cell_centered_trilinear_batch(station_fields, coord)
+        return float(negative_log_likelihood(predicted, observed, noise))
 
-    start_misfit = objective(start)
+    start_value = objective(start)
     result = minimize(
         objective,
         start,
@@ -53,96 +67,75 @@ def _refine_epicenter_in_cell(
         options={"xtol": 1e-3, "ftol": 1e-8, "maxiter": 50},
     )
     refined = np.asarray(result.x, dtype=np.float64)
-    refined_misfit = objective(refined)
-    if not np.all(np.isfinite(refined)) or not np.isfinite(refined_misfit):
-        return start, start_misfit
-    if refined_misfit > start_misfit:
-        return start, start_misfit
-    return refined, refined_misfit
+    if not np.all(np.isfinite(refined)):
+        return start, start_value
+    refined_value = objective(refined)
+    if not np.isfinite(refined_value) or refined_value > start_value:
+        return start, start_value
+    return refined, refined_value
 
 
-def _normal_equation_contribution(
+def accumulate_normal_equations(
+    hessian: np.ndarray,
+    rhs: np.ndarray,
     station_sensitivities: np.ndarray,
     station_residuals: np.ndarray,
-    model_shape,
-    weight: float,
     valid_stations: np.ndarray,
-    *,
-    station_sigmas: np.ndarray | None = None,
-):
-    """Return weighted normal equations after profiling out event origin time.
+    station_sigmas: np.ndarray,
+    weight: float,
+) -> None:
+    """Add one weighted hypothesis to the normal equations in place.
 
-    Valid station rows and residuals are centered by station precision
-    ``1 / sigma_i²``; omitted sigmas default to one second. This is
-    equivalent to pair differences weighted by ``p_i * p_j / sum(p)``.
+    The unknown origin time is profiled out by centring station rows and
+    residuals with precision weights ``1 / sigma_i²``; this equals station-pair
+    differences weighted by ``p_i * p_j / sum(p)``.
     """
-    n_vox = int(np.prod(model_shape))
     valid = np.asarray(valid_stations, dtype=bool)
     if np.count_nonzero(valid) < 2 or weight <= 0.0:
-        return (
-            np.zeros((n_vox, n_vox), dtype=np.float64),
-            np.zeros(n_vox, dtype=np.float64),
-        )
-
-    rows = station_sensitivities[valid].reshape(-1, n_vox)
+        return
+    n_vox = rhs.size
+    rows = np.asarray(station_sensitivities)[valid].reshape(-1, n_vox)
     residual = np.asarray(station_residuals, dtype=np.float64)[valid]
-    if station_sigmas is None:
-        precision = np.ones(rows.shape[0], dtype=np.float64)
-    else:
-        sigmas = np.asarray(station_sigmas, dtype=np.float64)
-        if sigmas.shape != valid.shape:
-            raise ValueError("station_sigmas must match valid_stations shape")
-        sigmas = sigmas[valid]
-        if not np.all(np.isfinite(sigmas)) or np.any(sigmas <= 0):
-            raise ValueError("Valid station sigmas must be finite and positive")
-        precision = 1.0 / np.square(sigmas)
+    sigmas = np.asarray(station_sigmas, dtype=np.float64)
+    if sigmas.shape != valid.shape:
+        raise ValueError("station_sigmas must match valid_stations shape")
+    sigmas = sigmas[valid]
+    if not np.all(np.isfinite(sigmas)) or np.any(sigmas <= 0):
+        raise ValueError("Valid station sigmas must be finite and positive")
+    precision = 1.0 / np.square(sigmas)
+
+    # Rays touch only a few cells and centring cannot fill an all-zero column,
+    # so the Gram matrix is formed on the active columns only.
     active = np.flatnonzero(np.any(rows != 0.0, axis=0))
     if active.size == 0:
-        return (
-            np.zeros((n_vox, n_vox), dtype=np.float64),
-            np.zeros(n_vox, dtype=np.float64),
-        )
-
-    # Ray sensitivities occupy only a small subset of model cells. Centering
-    # cannot make an all-zero column nonzero, so evaluate the dense Gram matrix
-    # only on active columns and scatter it into the full normal system.
-    rows_active = rows[:, active]
-    rows_centered = rows_active - np.average(rows_active, axis=0, weights=precision)
+        return
+    rows_centered = rows[:, active] - np.average(rows[:, active], axis=0, weights=precision)
     residual_centered = residual - np.average(residual, weights=precision)
-    hessian = np.zeros((n_vox, n_vox), dtype=np.float64)
-    rhs = np.zeros(n_vox, dtype=np.float64)
-    hessian[np.ix_(active, active)] = weight * (rows_centered.T @ (precision[:, None] * rows_centered))
-    rhs[active] = weight * (rows_centered.T @ (precision * residual_centered))
-    return hessian, rhs
+    hessian[np.ix_(active, active)] += weight * (rows_centered.T @ (precision[:, None] * rows_centered))
+    rhs[active] += weight * (rows_centered.T @ (precision * residual_centered))
 
 
-def _solve_delta_s(
+def solve_slowness_update(
     hessian,
     rhs,
     model_shape,
-    lambda_reg,
+    lambda_reg: float,
     coverage_damping_power: float = 0.0,
     coverage_floor: float = 0.05,
     coverage_reference_percentile: float = 75.0,
-    return_diagnostics: bool = False,
-    smoothness_reg: float = 0.0,
 ):
-    """Solve the normal system with optional coverage damping and smoothing.
+    """Solve the damped normal system for the slowness increment.
 
-    ``diag(G.T @ W @ G)`` measures differential sensitivity, which is more
-    informative than raw ray counts. When ``coverage_damping_power`` is
-    positive, poorly constrained cells receive a stronger zero-update prior.
-    ``smoothness_reg`` adds a graph Laplacian to the normal matrix with
-    weight ``smoothness_reg * max(mean(diag(H)), 0) / 6`` per face-adjacent
-    pair. This penalizes differences in the update, not its absolute value;
-    a constant update has zero smoothing cost.
+    Damping acts on the increment, not on the total model. ``lambda_reg`` is
+    relative to the mean of ``diag(H)``; with ``coverage_damping_power > 0``
+    cells with low ``diag(H)`` (relative to its ``coverage_reference_percentile``)
+    are damped more strongly.
+
+    Returns ``(delta_s, sensitivity_diagonal, coverage_confidence)``.
     """
     n_vox = int(np.prod(model_shape))
     hessian = np.asarray(hessian, dtype=np.float64).reshape(n_vox, n_vox)
     rhs = np.asarray(rhs, dtype=np.float64).reshape(n_vox)
-    smoothness_reg = float(smoothness_reg)
-    if not np.isfinite(smoothness_reg) or smoothness_reg < 0.0:
-        raise ValueError("smoothness_reg must be finite and >= 0")
     if coverage_damping_power < 0.0:
         raise ValueError("coverage_damping_power must be >= 0")
     if not 0.0 < coverage_floor <= 1.0:
@@ -152,116 +145,18 @@ def _solve_delta_s(
 
     sensitivity = np.maximum(np.diag(hessian), 0.0)
     positive = sensitivity[sensitivity > 0.0]
-    reference = (
-        float(np.percentile(positive, coverage_reference_percentile))
-        if positive.size
-        else 1.0
-    )
+    reference = float(np.percentile(positive, coverage_reference_percentile)) if positive.size else 1.0
     confidence = np.clip(sensitivity / max(reference, np.finfo(float).tiny), 0.0, 1.0)
 
-    # lambda_reg is relative to the mean diagonal data sensitivity. With
-    # power=0 this is exactly the previous uniform ridge regularization.
-    scale = np.trace(hessian) / n_vox
-    safe_confidence = np.maximum(confidence, coverage_floor)
-    regularization_diagonal = (
-        float(lambda_reg)
-        * scale
-        / np.power(safe_confidence, float(coverage_damping_power))
-    )
-    hessian_reg = hessian + np.diag(regularization_diagonal)
-    smoothness_scale = smoothness_reg * max(float(scale), 0.0) / 6.0
-    if smoothness_scale > 0.0:
-        indices = np.arange(n_vox).reshape(model_shape)
-        for axis in range(3):
-            first = [slice(None)] * 3
-            second = [slice(None)] * 3
-            first[axis] = slice(None, -1)
-            second[axis] = slice(1, None)
-            i = indices[tuple(first)].ravel()
-            j = indices[tuple(second)].ravel()
-            hessian_reg[i, i] += smoothness_scale
-            hessian_reg[j, j] += smoothness_scale
-            hessian_reg[i, j] -= smoothness_scale
-            hessian_reg[j, i] -= smoothness_scale
-
+    scale = max(float(np.trace(hessian)) / n_vox, 0.0)
+    damping = lambda_reg * scale / np.power(np.maximum(confidence, coverage_floor), coverage_damping_power)
+    system = hessian + np.diag(damping)
     try:
-        delta_s = np.linalg.solve(hessian_reg, rhs)
+        delta_s = np.linalg.solve(system, rhs)
     except np.linalg.LinAlgError:
-        delta_s = np.linalg.lstsq(hessian_reg, rhs, rcond=None)[0]
-
-    delta_s = delta_s.reshape(model_shape)
-    if not return_diagnostics:
-        return delta_s
-    return delta_s, sensitivity.reshape(model_shape), confidence.reshape(model_shape)
-
-
-def _select_top_n_cells_by_misfit(
-    misfit: np.ndarray,
-    n: int,
-    min_distance: int = 2,
-) -> np.ndarray:
-    """Select separated low-misfit cells using Chebyshev index distance."""
-    values = np.asarray(misfit, dtype=np.float64)
-    if values.ndim != 3:
-        raise ValueError("misfit must be a 3-D array")
-    if not isinstance(n, (int, np.integer)) or n < 1:
-        raise ValueError("n must be an integer >= 1")
-    if not isinstance(min_distance, (int, np.integer)) or min_distance < 1:
-        raise ValueError("min_distance must be an integer >= 1")
-
-    selected = []
-    for flat_index in np.argsort(values, axis=None, kind="stable"):
-        index = np.asarray(np.unravel_index(int(flat_index), values.shape), dtype=np.int64)
-        if not np.isfinite(values[tuple(index)]):
-            continue
-        if any(np.max(np.abs(index - previous)) < min_distance for previous in selected):
-            continue
-        selected.append(index)
-        if len(selected) == n:
-            break
-
-    if not selected:
-        raise ValueError("No finite epicenter candidates available")
-    return np.asarray(selected, dtype=np.int64)
-
-
-def _select_top_n_weights(weights_matrix, n: int, normalize: bool = False):
-    w = np.asarray(weights_matrix, dtype=np.float64)
-    if w.ndim != 3:
-        raise ValueError("weights_matrix must be a 3-D array")
-    if not isinstance(n, (int, np.integer)):
-        raise TypeError("n must be an integer")
-    if n < 0:
-        raise ValueError("n must be >= 0")
-
-    out = np.zeros_like(w)
-    if n == 0:
-        return out
-    if n >= w.size:
-        out = w.copy()
-    else:
-        flat = w.ravel()
-        top_idx = np.argpartition(flat, -n)[-n:]
-        out.ravel()[top_idx] = flat[top_idx]
-
-    if normalize:
-        s = out.sum()
-        if s > 0:
-            out /= s
-    return out
-
-
-def _calculate_G(station_field, origin_loc, station_loc, geo_shape, voxel_size, gradT=None):
-    path, reached = trace_ray_from_timefield(
-        T=station_field,
-        station_xyz=station_loc,
-        epic_xyz=origin_loc,
-        spacing_xyz=(1.0, 1.0, 1.0),
-        gradT=gradT,
-        return_status=True,
-    )
-    if not reached:
-        return np.zeros(geo_shape, dtype=np.float64)
-    return rasterize_path_lengths(
-        path_xyz=path, shape=geo_shape, voxel_size=voxel_size, dtype=np.float64
+        delta_s = np.linalg.lstsq(system, rhs, rcond=None)[0]
+    return (
+        delta_s.reshape(model_shape),
+        sensitivity.reshape(model_shape),
+        confidence.reshape(model_shape),
     )

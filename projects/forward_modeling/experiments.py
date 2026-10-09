@@ -167,7 +167,7 @@ def _sha256(path):
 
 
 def run_experiment(root, experiment_id, config=ForwardConfig(), check_accuracy=False,
-                   max_difference_s=None, *, noise=None) -> Path:
+                   max_difference_s=None, *, noise=None, workers=1) -> Path:
     """Compute existing inputs and atomically publish results exactly once.
 
     Times are relative to the earliest station arrival for each event, not
@@ -193,13 +193,13 @@ def run_experiment(root, experiment_id, config=ForwardConfig(), check_accuracy=F
             (arrival.station_id, arrival.event_id, arrival.arrival_time_s)
             for arrival in solver.compute_arrivals(
                 model=model, stations=stations, events=events, config=config,
-                **({"noise": noise} if noise is not None else {}),
+                workers=workers, **({"noise": noise} if noise is not None else {}),
             )
         )
         convergence = None
         if check_accuracy or max_difference_s is not None:
             convergence = solver.check_convergence(
-                model=model, stations=stations, events=events, config=config
+                model=model, stations=stations, events=events, config=config, workers=workers,
             )
         if max_difference_s is not None:
             differences = (convergence["max_abs_difference_s"],

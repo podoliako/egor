@@ -1,248 +1,51 @@
-"""
-Simple tests for velocity model.
-Run with: python -m pytest test_velocity_model.py
-or just: python test_velocity_model.py
-"""
+"""Cell-centred velocity model, refinement and reference averaging."""
+
 import numpy as np
-from velocity_model import VelocityModel, GridGeometry, VelocityGrid
+import pytest
+
+from interpolation import prolongate_cell_centered_trilinear
+from velocity_model import VelocityModel, block_average_slowness
 
 
-def test_grid_creation():
-    """Test basic grid creation."""
-    grid = VelocityGrid((10, 20, 30))
-    assert grid.shape == (10, 20, 30)
-    assert grid.vp.shape == (10, 20, 30)
-    assert grid.vs.shape == (10, 20, 30)
-    print("✓ Grid creation test passed")
+def test_model_is_validated_and_read_only():
+    model = VelocityModel(np.full((2, 3, 4), 5000.0), 100.0)
+    assert model.shape == (2, 3, 4)
+    assert model.velocity.dtype == np.float64
+    with pytest.raises(ValueError):
+        model.velocity[0, 0, 0] = 1.0
+    for velocity, cell_size in ((np.zeros((2, 2, 2)), 1.0), (np.ones((2, 2)), 1.0),
+                                (np.ones((2, 2, 2)), 0.0), (np.full((2, 2, 2), np.nan), 1.0)):
+        with pytest.raises(ValueError):
+            VelocityModel(velocity, cell_size)
 
 
-def test_set_get_values():
-    """Test setting and getting individual values."""
-    grid = VelocityGrid((5, 5, 5))
-    
-    grid.set_vp(2, 3, 4, 5000.0)
-    assert grid.get_vp(2, 3, 4) == 5000.0
-    
-    grid.set_vs(1, 2, 3, 3000.0)
-    assert grid.get_vs(1, 2, 3) == 3000.0
-    
-    print("✓ Set/get values test passed")
+def test_nearest_refinement_copies_parent_cells():
+    velocity = np.arange(1.0, 9.0).reshape(2, 2, 2) * 1000
+    fine = VelocityModel(velocity, 300.0).refined(3)
+    assert fine.shape == (6, 6, 6)
+    assert fine.cell_size == 100.0
+    np.testing.assert_array_equal(fine.velocity[::3, ::3, ::3], velocity)
+    np.testing.assert_array_equal(fine.velocity[2, 5, 4], velocity[0, 1, 1])
+    assert VelocityModel(velocity, 300.0).refined(1).shape == (2, 2, 2)
 
 
-def test_linear_gradient():
-    """Test linear gradient filling."""
-    grid = VelocityGrid((10, 10, 10))
-    grid.fill_linear_gradient('vp', 1000.0, 5000.0)
-    
-    # Check top and bottom
-    assert np.allclose(grid.vp[:, :, 0], 1000.0)
-    assert np.allclose(grid.vp[:, :, 9], 5000.0)
-    
-    # Check middle is approximately average
-    assert np.allclose(grid.vp[:, :, 5], 3000.0, atol=500)
-    
-    print("✓ Linear gradient test passed")
+def test_trilinear_refinement_interpolates_slowness():
+    velocity = np.array([100.0, 200.0, 400.0]).reshape(3, 1, 1)
+    fine = VelocityModel(velocity, 100.0).refined(2, "trilinear")
+    np.testing.assert_allclose(fine.velocity, 1.0 / prolongate_cell_centered_trilinear(1.0 / velocity, 2))
 
 
-def test_array_operations():
-    """Test bulk array operations."""
-    grid = VelocityGrid((3, 3, 3))
-    
-    vp_values = np.ones((3, 3, 3)) * 4000.0
-    grid.set_vp_array(vp_values)
-    
-    assert np.allclose(grid.vp, 4000.0)
-    print("✓ Array operations test passed")
-
-
-def test_geometry():
-    """Test geometry class."""
-    geom = GridGeometry(
-        lon=30.0, lat=60.0, height=100.0,
-        azimuth=90.0, side_size=50.0,
-        n_x=10, n_y=20, n_z=30
-    )
-    
-    config = geom.to_dict()
-    assert config['lon'] == 30.0
-    assert config['n_x'] == 10
-    
-    geom2 = GridGeometry.from_dict(config)
-    assert geom2.lon == 30.0
-    assert geom2.azimuth == 90.0
-    
-    print("✓ Geometry test passed")
-
-
-def test_grid_geometry_coordinate_convention():
-    """The geographic reference is the geometric centre of the top face."""
-    even = GridGeometry(
-        lon=30.0, lat=60.0, height=0.0, azimuth=0.0,
-        side_size=500.0, n_x=10, n_y=8, n_z=4,
-    )
-    assert even.shape == (10, 8, 4)
-    assert even.top_face_center_local == (2500.0, 2000.0, 0.0)
-    assert even.cell_center_local(0, 0, 0) == (250.0, 250.0, 250.0)
-    assert even.cell_center_local(9, 7, 3) == (4750.0, 3750.0, 1750.0)
-
-    odd = GridGeometry(
-        lon=30.0, lat=60.0, height=0.0, azimuth=0.0,
-        side_size=500.0, n_x=9, n_y=9, n_z=9,
-    )
-    assert odd.top_face_center_local == (2250.0, 2250.0, 0.0)
-    assert odd.cell_center_local(4, 4, 0) == (2250.0, 2250.0, 250.0)
-
-
-def test_full_model():
-    """Test complete model workflow."""
-    config = {
-        'lon': 0.0, 'lat': 0.0, 'height': 0.0,
-        'azimuth': 0.0, 'side_size': 100.0,
-        'n_x': 5, 'n_y': 5, 'n_z': 5
-    }
-    
-    model = VelocityModel.from_config(config)
-    model.fill_linear_gradient('vp', 2000.0, 6000.0)
-    
-    # Test convenience methods
-    model.set_vp(2, 2, 2, 5000.0)
-    assert model.get_vp(2, 2, 2) == 5000.0
-    
-    print("✓ Full model test passed")
-
-
-def test_save_load():
-    """Test JSON serialization."""
-    import os
-    
-    config = {
-        'lon': 10.0, 'lat': 20.0, 'height': 0.0,
-        'azimuth': 45.0, 'side_size': 100.0,
-        'n_x': 3, 'n_y': 3, 'n_z': 3
-    }
-    
-    model = VelocityModel.from_config(config)
-    model.fill_linear_gradient('vp', 1000.0, 3000.0)
-    model.set_vs(1, 1, 1, 1500.0)
-    
-    # Save and load
-    filepath = '/tmp/test_model.json'
-    model.to_json(filepath, include_data=True)
-    
-    loaded = VelocityModel.from_json(filepath)
-    
-    assert loaded.geometry.lon == 10.0
-    assert loaded.geometry.azimuth == 45.0
-    assert loaded.get_vs(1, 1, 1) == 1500.0
-    assert np.allclose(loaded.grid.vp[0, 0, 0], 1000.0)
-    
-    os.remove(filepath)
-    print("✓ Save/load test passed")
-
-
-def test_geo_grid_no_subdivision():
-    """Test geo grid with subdivision=1 (1:1 mapping)."""
-    config = {
-        'lon': 0.0, 'lat': 0.0, 'height': 0.0,
-        'azimuth': 0.0, 'side_size': 100.0,
-        'n_x': 5, 'n_y': 5, 'n_z': 5
-    }
-    
-    model = VelocityModel.from_config(config)
-    model.fill_linear_gradient('vp', 2000.0, 4000.0)
-    
-    geo = model.get_geo_grid(subdivision=1)
-    
-    assert geo.shape == (5, 5, 5)
-    assert geo.cell_size == 100.0
-    assert geo.subdivision == 1
-    assert np.allclose(geo.vp, model.grid.vp)
-    
-    print("✓ Geo grid no subdivision test passed")
-
-
-def test_geo_grid_subdivision():
-    """Test geo grid with subdivision."""
-    config = {
-        'lon': 0.0, 'lat': 0.0, 'height': 0.0,
-        'azimuth': 0.0, 'side_size': 100.0,
-        'n_x': 2, 'n_y': 2, 'n_z': 2
-    }
-    
-    model = VelocityModel.from_config(config)
-    model.fill_linear_gradient('vp', 1000.0, 3000.0)
-    
-    geo = model.get_geo_grid(subdivision=2)
-    
-    # Check dimensions
-    assert geo.shape == (4, 4, 4)
-    assert geo.cell_size == 50.0
-    assert geo.subdivision == 2
-    
-    # Check corners match original values
-    assert np.isclose(geo.vp[0, 0, 0], model.grid.vp[0, 0, 0])
-    
-    print("✓ Geo grid subdivision test passed")
-
-
-def test_geo_grid_interpolation():
-    """Test different interpolation methods."""
-    config = {
-        'lon': 0.0, 'lat': 0.0, 'height': 0.0,
-        'azimuth': 0.0, 'side_size': 100.0,
-        'n_x': 3, 'n_y': 3, 'n_z': 3
-    }
-    
-    model = VelocityModel.from_config(config)
-    model.grid.vp[:] = 1000.0
-    model.grid.vp[1, 1, 1] = 5000.0  # One high value
-    
-    # Trilinear should smooth
-    geo_tri = model.get_geo_grid(subdivision=2, interpolation='trilinear')
-    
-    # Nearest should be blocky
-    geo_near = model.get_geo_grid(subdivision=2, interpolation='nearest')
-    
-    # Values should differ
-    assert not np.allclose(geo_tri.vp, geo_near.vp)
-    
-    print("✓ Geo grid interpolation test passed")
-
-
-def test_custom_interpolation():
-    """Test custom interpolation function."""
-    config = {
-        'lon': 0.0, 'lat': 0.0, 'height': 0.0,
-        'azimuth': 0.0, 'side_size': 100.0,
-        'n_x': 2, 'n_y': 2, 'n_z': 2
-    }
-    
-    model = VelocityModel.from_config(config)
-    model.fill_linear_gradient('vp', 1000.0, 2000.0)
-    
-    def constant_interp(values, i, j, k, di, dj, dk):
-        """Always return 9999."""
-        return 9999.0
-    
-    geo = model.get_geo_grid(subdivision=2, interpolation=constant_interp)
-    
-    assert np.allclose(geo.vp, 9999.0)
-    
-    print("✓ Custom interpolation test passed")
-
-
-if __name__ == '__main__':
-    print("Running velocity model tests...\n")
-    test_grid_creation()
-    test_set_get_values()
-    test_linear_gradient()
-    test_array_operations()
-    test_geometry()
-    test_grid_geometry_coordinate_convention()
-    test_full_model()
-    test_save_load()
-    test_geo_grid_no_subdivision()
-    test_geo_grid_subdivision()
-    test_geo_grid_interpolation()
-    test_custom_interpolation()
-    print("\n✅ All tests passed!")
+def test_block_average_is_slowness_mean_over_overlaps():
+    source = np.array([1000.0, 2000.0, 4000.0, 4000.0]).reshape(4, 1, 1)
+    nested = block_average_slowness(np.broadcast_to(source, (4, 2, 2)), 1.0, (2, 1, 1), 2.0)
+    np.testing.assert_allclose(nested.ravel(), [1 / ((1 / 1000 + 1 / 2000) / 2), 4000.0])
+    # Target cells of 4/3 straddle source cells.
+    straddling = block_average_slowness(np.broadcast_to(source, (4, 4, 4)), 1.0, (3, 3, 3), 4 / 3)
+    expected_first = 1 / ((1 / 1000 + (1 / 3) / 2000) * 3 / 4)
+    assert straddling[0, 0, 0] == pytest.approx(expected_first)
+    rng = np.random.default_rng(0)
+    velocity = rng.uniform(4000, 6000, size=(6, 4, 3))
+    uniform = block_average_slowness(velocity, 2.0, (6, 4, 3), 2.0)
+    np.testing.assert_allclose(uniform, velocity)
+    with pytest.raises(ValueError, match="extent"):
+        block_average_slowness(velocity, 2.0, (5, 4, 3), 2.0)

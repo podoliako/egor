@@ -6,6 +6,7 @@ from tempfile import TemporaryDirectory
 import numpy as np
 
 from server import _load_weights
+from tomography.tomography_events import EventLog
 from tomography.tomography_logging import TomographyLogger
 
 
@@ -17,13 +18,16 @@ def test_compact_weights_round_trip_without_dense_storage():
             "indices": np.asarray([[1, 2, 3], [7, 5, 4]], dtype=np.int32),
         }
         values = np.asarray([0.25, 0.75], dtype=np.float64)
-        logger.save_event_data(
-            iteration=0,
-            event_idx=0,
-            weights=compact,
+        logger.save_event_data(0, 0, EventLog(
+            candidate_cells=compact["indices"],
+            misfit_shape=compact["shape"],
             positions=np.asarray([[1.1, 2.2, 3.3], [7.0, 5.0, 4.0]]),
-            weight_values=values,
-        )
+            weights=values,
+            misfit=None,
+            residuals=np.array([]),
+            G_per_weight=None,
+            ray_count_per_weight={},
+        ))
         path = Path(logger.run_dir) / "iter_0" / "event_0" / "weights.npz"
 
         with np.load(path) as saved:

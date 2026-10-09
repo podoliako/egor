@@ -16,6 +16,8 @@ def main(argv=None):
     parser.add_argument("--refinement", type=int, default=defaults.refinement)
     parser.add_argument("--source-radius-cells", type=int, default=defaults.source_radius_cells)
     parser.add_argument("--check-convergence", action="store_true")
+    parser.add_argument("--workers", type=int, default=1,
+                        help="Parallel event processes (results do not depend on it)")
     parser.add_argument("--noise", action="store_true", help="Add independent propagation and picking noise")
     parser.add_argument("--noise-relative-sigma", type=float, default=None,
                         help="Sigma / absolute travel time (default with --noise: 0.01)")
@@ -47,7 +49,7 @@ def main(argv=None):
             options["max_difference_s"] = args.max_difference_s
         destination = run_experiment(
             root=args.root, experiment_id=args.experiment_id, config=config,
-            check_accuracy=args.check_convergence, **options,
+            check_accuracy=args.check_convergence, workers=args.workers, **options,
         )
     except (OSError, ValueError, RuntimeError) as error:
         parser.exit(1, f"{parser.prog}: {error}\n")

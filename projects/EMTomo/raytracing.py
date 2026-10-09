@@ -1,15 +1,7 @@
-"""
-raytracing.py — Numba-accelerated ray tracing.
+"""Numba ray tracing down travel-time gradients and ray-length rasterization.
 
-Public API (trace_ray_from_timefield, rasterize_path_lengths) is unchanged.
-
-New exports
------------
-compute_G_all_stations        — Numba prange over stations; use with n_workers=1
-compute_G_all_stations_serial — single-threaded Numba; use inside fork workers
-
-JIT compilation is triggered on first call and cached to __pycache__ (~3–5 s
-warm-up once; subsequent runs load from cache in < 0.1 s).
+compute_G_all_stations        — prange over stations; use in a single process
+compute_G_all_stations_serial — single-threaded; use inside fork workers
 """
 from __future__ import annotations
 
@@ -56,10 +48,10 @@ def _trace_ray_nb(gx, gy, gz, station, epic, step, tol_sq, max_steps, x_lo, x_hi
 
     for _ in range(max_steps):
         dx = x0 - station[0];  dy = x1 - station[1];  dz = x2 - station[2]
-        # FMM is seeded at the station cell centre. In heterogeneous models the
-        # interpolated gradient can point out of the domain near a surface source,
-        # so clipping may stall before the much smaller numerical tolerance is met.
-        # Entering the source cell is sufficient; append its exact centre below.
+        # A surface station lies half a cell outside the cell-centre domain and
+        # the gradient there points out of it, so clipping can stall before the
+        # tolerance is met. Coming within half a cell is sufficient; the exact
+        # station position is appended below.
         in_source_cell = abs(dx) <= 0.5 and abs(dy) <= 0.5 and abs(dz) <= 0.5
         if dx * dx + dy * dy + dz * dz <= tol_sq or in_source_cell:
             if dx * dx + dy * dy + dz * dz > 1e-24:
@@ -98,11 +90,16 @@ def _trace_ray_nb(gx, gy, gz, station, epic, step, tol_sq, max_steps, x_lo, x_hi
 
 
 @njit(cache=True, fastmath=True)
-def _rasterize_nb(path, G, vsx, vsy, vsz, eps=1e-12):
-    """DDA ray-length accumulation into G in-place (index coordinates)."""
-    nx, ny, nz = G.shape
-    # Array samples and ray coordinates are cell-centred: integer i is the
-    # centre of cell i, whose physical index-space bounds are i ± 0.5.
+def _rasterize_nb(path, G, cell_len, ix, wx, iy, wy, iz, wz, eps=1e-12):
+    """DDA ray-length accumulation over the fine grid, deposited into ``G``.
+
+    The path is in fine cell-centred index coordinates. A length in fine cell
+    ``(i, j, k)`` is added to ``G[ix[a, i], iy[b, j], iz[c, k]]`` with weight
+    ``wx[a, i] * wy[b, j] * wz[c, k]`` (a, b, c in {0, 1}); identity tables give
+    the fine grid itself.
+    """
+    nx = ix.shape[1];  ny = iy.shape[1];  nz = iz.shape[1]
+    # Integer coordinate i is the centre of cell i, whose bounds are i ± 0.5.
     lx = ly = lz = -0.5
     hx = float(nx) - 0.5 - 1e-9
     hy = float(ny) - 0.5 - 1e-9
@@ -119,12 +116,11 @@ def _rasterize_nb(path, G, vsx, vsy, vsz, eps=1e-12):
             aa = a0 if ax == 0 else (a1 if ax == 1 else a2)
             da = d0 if ax == 0 else (d1 if ax == 1 else d2)
             hi = hx if ax == 0 else (hy if ax == 1 else hz)
+            lo = lx if ax == 0 else (ly if ax == 1 else lz)
             if abs(da) < eps:
-                lo = lx if ax == 0 else (ly if ax == 1 else lz)
                 if aa < lo or aa > hi:
                     skip = True;  break
             else:
-                lo = lx if ax == 0 else (ly if ax == 1 else lz)
                 tn = (lo - aa) / da;  tf = (hi - aa) / da
                 if tn > tf:  tn, tf = tf, tn
                 t0c = max(t0c, tn);  t1c = min(t1c, tf)
@@ -134,7 +130,7 @@ def _rasterize_nb(path, G, vsx, vsy, vsz, eps=1e-12):
 
         ca0 = a0 + t0c * d0;  ca1 = a1 + t0c * d1;  ca2 = a2 + t0c * d2
         cd0 = d0 * (t1c - t0c);  cd1 = d1 * (t1c - t0c);  cd2 = d2 * (t1c - t0c)
-        seg_len = ((cd0 * vsx) ** 2 + (cd1 * vsy) ** 2 + (cd2 * vsz) ** 2) ** 0.5
+        seg_len = (cd0 * cd0 + cd1 * cd1 + cd2 * cd2) ** 0.5 * cell_len
         if seg_len < eps:
             continue
 
@@ -169,7 +165,20 @@ def _rasterize_nb(path, G, vsx, vsy, vsz, eps=1e-12):
         while True:
             if not (0 <= i < nx and 0 <= j < ny and 0 <= k < nz):  break
             t_next = min(1.0, tm0, tm1, tm2);  dt = t_next - t
-            if dt > 0.0:  G[i, j, k] += dt * seg_len
+            if dt > 0.0:
+                length = dt * seg_len
+                for a in range(2):
+                    wa = wx[a, i]
+                    if wa == 0.0:
+                        continue
+                    for b in range(2):
+                        wab = wa * wy[b, j]
+                        if wab == 0.0:
+                            continue
+                        for c in range(2):
+                            w = wab * wz[c, k]
+                            if w != 0.0:
+                                G[ix[a, i], iy[b, j], iz[c, k]] += length * w
             if t_next >= 1.0 - 1e-15:  break
             if tm0 <= t_next + 1e-12:  i += si_;  tm0 += td0
             if tm1 <= t_next + 1e-12:  j += sj_;  tm1 += td1
@@ -177,101 +186,44 @@ def _rasterize_nb(path, G, vsx, vsy, vsz, eps=1e-12):
             t = t_next
 
 
-# ── High-level G-tensor builders ──────────────────────────────────────────────
+# ── Sensitivity builders ─────────────────────────────────────────────────────
+# Arguments: stacked travel-time gradients (n_st, nx, ny, nz) on the fine grid,
+# station positions (n_st, 3) and the hypocentre (3,) in fine continuous index
+# coordinates, fine cell size, ray step and tolerance (index units), step limit,
+# clipping bounds, restriction tables (see instruments_ops) and the output shape.
 
 @njit(parallel=True, cache=True, fastmath=True)
-def compute_G_all_stations(
-    gx, gy, gz,       # (n_st, nx, ny, nz) float64 — stacked gradient components
-    sl,               # (n_st, 3)           float64 — station positions (index coords)
-    epic,             # (3,)                float64 — epicenter (index coords)
-    vsx, vsy, vsz,    # physical voxel sizes (scalars)
-    step, tol,        # ray-trace step and tolerance (index units)
-    max_steps,
-    x_lo, x_hi,       # (3,) grid bounds (index coords)
-):
-    """
-    Traces rays from *epic* to every station in parallel via Numba prange.
-    Returns ``(G, reached)`` where ``reached`` marks successful station rays.
-
-    Use this when n_workers = 1 (single process; Numba uses all available cores).
-    With 40 stations on a 48-core machine this saturates ~40 cores.
-    """
+def compute_G_all_stations(gx, gy, gz, sl, epic, cell_len, step, tol, max_steps,
+                           x_lo, x_hi, ix, wx, iy, wy, iz, wz, out_shape):
+    """Ray lengths per output cell for every station, parallel over stations.
+    Returns ``(G, reached)``; unreached stations get all-zero rows."""
     n_st = gx.shape[0]
-    nx_ = gx.shape[1];  ny_ = gx.shape[2];  nz_ = gx.shape[3]
-    G_all = np.zeros((n_st, nx_, ny_, nz_), dtype=np.float64)
+    G_all = np.zeros((n_st, out_shape[0], out_shape[1], out_shape[2]), dtype=np.float64)
     reached = np.zeros(n_st, dtype=np.bool_)
     tol_sq = tol * tol
-
     for si in prange(n_st):
         path, ray_reached = _trace_ray_nb(
-            gx[si], gy[si], gz[si], sl[si], epic,
-            step, tol_sq, max_steps, x_lo, x_hi,
+            gx[si], gy[si], gz[si], sl[si], epic, step, tol_sq, max_steps, x_lo, x_hi,
         )
         reached[si] = ray_reached
         if ray_reached:
-            _rasterize_nb(path, G_all[si], vsx, vsy, vsz)
-
+            _rasterize_nb(path, G_all[si], cell_len, ix, wx, iy, wy, iz, wz)
     return G_all, reached
 
 
 @njit(cache=True, fastmath=True)
-def compute_G_all_stations_serial(
-    gx, gy, gz, sl, epic,
-    vsx, vsy, vsz, step, tol, max_steps, x_lo, x_hi,
-):
-    """
-    Same as compute_G_all_stations but without prange — for use inside
-    multiprocessing worker processes (one process per core, Numba single-threaded).
-    """
+def compute_G_all_stations_serial(gx, gy, gz, sl, epic, cell_len, step, tol, max_steps,
+                                  x_lo, x_hi, ix, wx, iy, wy, iz, wz, out_shape):
+    """Same as compute_G_all_stations without prange, for fork worker processes."""
     n_st = gx.shape[0]
-    nx_ = gx.shape[1];  ny_ = gx.shape[2];  nz_ = gx.shape[3]
-    G_all = np.zeros((n_st, nx_, ny_, nz_), dtype=np.float64)
+    G_all = np.zeros((n_st, out_shape[0], out_shape[1], out_shape[2]), dtype=np.float64)
     reached = np.zeros(n_st, dtype=np.bool_)
     tol_sq = tol * tol
-
     for si in range(n_st):
         path, ray_reached = _trace_ray_nb(
-            gx[si], gy[si], gz[si], sl[si], epic,
-            step, tol_sq, max_steps, x_lo, x_hi,
+            gx[si], gy[si], gz[si], sl[si], epic, step, tol_sq, max_steps, x_lo, x_hi,
         )
         reached[si] = ray_reached
         if ray_reached:
-            _rasterize_nb(path, G_all[si], vsx, vsy, vsz)
-
+            _rasterize_nb(path, G_all[si], cell_len, ix, wx, iy, wy, iz, wz)
     return G_all, reached
-
-
-# ── Public backward-compatible API ────────────────────────────────────────────
-
-def trace_ray_from_timefield(
-    T, station_xyz, epic_xyz, spacing_xyz,
-    step=None, tol=None, max_steps=50000, gradT=None, return_status=False,
-):
-    station = np.asarray(station_xyz, dtype=np.float64)
-    epic    = np.asarray(epic_xyz,    dtype=np.float64)
-    spacing = np.asarray(spacing_xyz, dtype=np.float64)
-
-    if step is None:  step = float(0.5 * spacing.min())
-    if tol  is None:  tol  = step
-
-    x_lo = np.zeros(3, dtype=np.float64)
-    x_hi = (np.asarray(T.shape, dtype=np.float64) - 1) * spacing
-
-    if gradT is None:
-        gradT = np.gradient(T, *spacing_xyz, edge_order=1)
-
-    gx = np.ascontiguousarray(gradT[0], dtype=np.float64)
-    gy = np.ascontiguousarray(gradT[1], dtype=np.float64)
-    gz = np.ascontiguousarray(gradT[2], dtype=np.float64)
-
-    path, reached = _trace_ray_nb(
-        gx, gy, gz, station, epic, step, tol * tol, max_steps, x_lo, x_hi
-    )
-    return (path, reached) if return_status else path
-
-
-def rasterize_path_lengths(path_xyz, shape, voxel_size=(1.0, 1.0, 1.0), dtype=np.float32):
-    path = np.ascontiguousarray(path_xyz, dtype=np.float64)
-    G    = np.zeros(shape, dtype=np.float64)
-    _rasterize_nb(path, G, float(voxel_size[0]), float(voxel_size[1]), float(voxel_size[2]))
-    return G.astype(dtype, copy=False)

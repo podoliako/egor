@@ -14,21 +14,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
 
 from main import CONFIG, main
 import experiment_runner
-from archive.legacy_synthetics import runner as legacy_runner
 from experiment_data import load_tomography_experiment
+from instruments.likelihood import PickNoise
 from projects.forward_modeling import (
     ForwardConfig, PointSet, VelocityGrid, load_arrivals, run_experiment, save_inputs,
 )
-
-
-def test_saved_entrypoint_does_not_import_archived_forward_solver():
-    result = subprocess.run(
-        [sys.executable, "-c",
-         "import sys; import main; import instruments.instruments; "
-         "assert 'archive.legacy_synthetics.instruments_synthetic' not in sys.modules"],
-        cwd=Path(__file__).resolve().parents[1], capture_output=True, text=True, timeout=30,
-    )
-    assert result.returncode == 0, result.stderr
 
 
 @pytest.fixture
@@ -47,11 +37,11 @@ def small_experiment(tmp_path):
 
 def test_prepared_inversion_uses_saved_observations_and_reference_only_for_metrics(small_experiment):
     root, truth, stations, events = small_experiment
-    config = replace(CONFIG, cell_size=500., grid_shape=(99, 99, 99), background_vp=5000.)
+    config = replace(CONFIG, cell_size=500., initial_velocity_m_s=5000.)
     prepared = experiment_runner.prepare_inversion("small", config, root)
-    assert prepared.initial_model.grid.vp.shape == (4, 4, 4)
-    np.testing.assert_array_equal(prepared.initial_model.grid.vp, 5000.)
-    np.testing.assert_array_equal(prepared.reference_model.grid.vp, truth.repeat(2, 0).repeat(2, 1).repeat(2, 2))
+    assert prepared.initial_model.velocity.shape == (4, 4, 4)
+    np.testing.assert_array_equal(prepared.initial_model.velocity, 5000.)
+    np.testing.assert_array_equal(prepared.reference_model.velocity, truth.repeat(2, 0).repeat(2, 1).repeat(2, 2))
     assert prepared.station_ids == stations.ids
     assert prepared.event_ids == events.ids
     np.testing.assert_array_equal(prepared.station_locs, stations.coordinates_m)
@@ -67,8 +57,8 @@ def test_approximate_initial_gradient_is_independent_of_true_velocity(small_expe
     config = replace(CONFIG, cell_size=500., initial_gradient_m_s=(4700., 5500.))
     prepared = experiment_runner.prepare_inversion("small", config, root)
     expected = 4700. + 800. * (np.arange(4) + 0.5) / 4
-    np.testing.assert_array_equal(prepared.initial_model.grid.vp, np.broadcast_to(expected, (4, 4, 4)))
-    assert not np.array_equal(prepared.initial_model.grid.vp, prepared.reference_model.grid.vp)
+    np.testing.assert_array_equal(prepared.initial_model.velocity, np.broadcast_to(expected, (4, 4, 4)))
+    assert not np.array_equal(prepared.initial_model.velocity, prepared.reference_model.velocity)
 
 
 def test_approximate_horizontal_layers_do_not_use_true_velocities(small_experiment):
@@ -76,11 +66,11 @@ def test_approximate_horizontal_layers_do_not_use_true_velocities(small_experime
     config = replace(CONFIG, cell_size=500., initial_layer_boundaries_km=(0.5, 1., 1.5),
                      initial_layer_velocities_m_s=(4700., 4900., 5100., 5300.))
     prepared = experiment_runner.prepare_inversion("small", config, root)
-    np.testing.assert_array_equal(prepared.initial_model.grid.vp[0, 0], [4700., 4900., 5100., 5300.])
-    np.testing.assert_array_equal(prepared.initial_model.grid.vp, np.broadcast_to(
+    np.testing.assert_array_equal(prepared.initial_model.velocity[0, 0], [4700., 4900., 5100., 5300.])
+    np.testing.assert_array_equal(prepared.initial_model.velocity, np.broadcast_to(
         [4700., 4900., 5100., 5300.], (4, 4, 4),
     ))
-    assert not np.array_equal(prepared.initial_model.grid.vp, prepared.reference_model.grid.vp)
+    assert not np.array_equal(prepared.initial_model.velocity, prepared.reference_model.velocity)
 
 
 @pytest.mark.parametrize("boundaries, velocities, gradient, message", [
@@ -114,29 +104,24 @@ def test_invalid_initial_gradient_rejected(small_experiment, endpoints):
 
 
 def test_saved_run_passes_exact_stations_and_no_event_truth(small_experiment, monkeypatch):
-    root, _, stations, events = small_experiment
+    root, truth, stations, events = small_experiment
     calls = []
     monkeypatch.setattr(experiment_runner, "warm_up_jit", lambda: calls.append("warmup"))
-    monkeypatch.setattr(experiment_runner, "run_em", lambda **kwargs: calls.append(kwargs) or None)
+    monkeypatch.setattr(experiment_runner, "run_em", lambda *args, **kwargs: calls.append((args, kwargs)))
     config = replace(CONFIG, cell_size=1000., n_cycles=1, n_workers=1,
-                     smoothness_reg=0.4, weights_top_n=2, weights_min_distance=3,
+                     weights_top_n=2, weights_min_distance=3,
                      candidate_mode="hard", temperature=0.5, save_runs=False)
     assert main(config, experiment_id="small", experiments_root=root) is None
     assert calls[0] == "warmup"
-    passed = calls[1]
-    assert passed["event_locs"] is None
-    assert passed["station_locs"] == [tuple(c) for c in stations.coordinates_m]
-    assert passed["arrivals_table"].shape == (len(events.ids), len(stations.ids))
-    assert passed["initial_model"].grid.vp.shape == (2, 2, 2)
-    assert np.all(passed["initial_model"].grid.vp == 5000.)
-    assert passed["run_name"].endswith("_small")
-    assert passed["smoothness_reg"] == 0.4
-    assert passed["weights_top_n"] == 2
-    assert passed["weights_min_distance"] == 3
-    assert passed["candidate_mode"] == "hard"
-    assert passed["temperature"] == 0.5
-    assert passed["true_model"] is not passed["initial_model"]
-    assert "true_model_fine" not in passed
+    (passed_config, initial, arrivals, station_locs, noise), kwargs = calls[1]
+    assert passed_config is config
+    np.testing.assert_array_equal(station_locs, stations.coordinates_m)
+    assert arrivals.shape == (len(events.ids), len(stations.ids))
+    assert initial.shape == (2, 2, 2) and np.all(initial.velocity == 5000.)
+    np.testing.assert_array_equal(kwargs["reference_model"].velocity, truth)
+    assert kwargs["run_name"].endswith("_small")
+    assert kwargs["source_experiment"]["id"] == "small"
+    assert set(kwargs) == {"reference_model", "source_experiment", "run_name"}
 
 
 @pytest.fixture
@@ -168,21 +153,17 @@ def test_saved_weight_sigmas_use_metadata_and_overrides(metadata_experiment, mon
     root, _ = metadata_experiment
     passed = []
     monkeypatch.setattr(experiment_runner, "warm_up_jit", lambda: None)
-    monkeypatch.setattr(experiment_runner, "run_em", lambda **kwargs: passed.append(kwargs))
+    monkeypatch.setattr(experiment_runner, "run_em", lambda *args, **kwargs: passed.append(args[4]))
     config = replace(CONFIG, cell_size=1000., save_runs=False)
     prepared = experiment_runner.prepare_inversion("metadata", config, root)
     assert prepared.noise_sigmas == (0.03, 0.07)
     experiment_runner.run_saved_experiment("metadata", config, root)
-    assert tuple(passed[-1][name] for name in (
-        "weight_noise_relative_sigma", "weight_noise_absolute_sigma_s", "weight_model_sigma_s",
-    )) == (0.03, 0.07, 0.2)
+    assert passed[-1] == PickNoise(0.03, 0.07, 0.2)
     experiment_runner.run_saved_experiment("metadata", replace(
         config, weight_noise_relative_sigma=0., weight_noise_absolute_sigma_s=0.4,
         weight_model_sigma_s=0.6,
     ), root)
-    assert tuple(passed[-1][name] for name in (
-        "weight_noise_relative_sigma", "weight_noise_absolute_sigma_s", "weight_model_sigma_s",
-    )) == (0., 0.4, 0.6)
+    assert passed[-1] == PickNoise(0., 0.4, 0.6)
 
 
 @pytest.mark.parametrize("noise", [None, {"enabled": False, "config": None}])
@@ -220,46 +201,14 @@ def test_invalid_metadata_noise_rejected(metadata_experiment, noise, message):
     ({"weight_noise_absolute_sigma_s": float("nan")}, "weight_noise_absolute_sigma_s"),
     ({"weight_model_sigma_s": float("inf")}, "weight_model_sigma_s"),
     ({"weight_noise_relative_sigma": 0., "weight_noise_absolute_sigma_s": 0.,
-      "weight_model_sigma_s": 0.}, "positive combined variance"),
+      "weight_model_sigma_s": 0.}, "must be positive"),
 ])
 def test_invalid_weight_config_rejected_before_em(metadata_experiment, monkeypatch, overrides, message):
     root, _ = metadata_experiment
     monkeypatch.setattr(experiment_runner, "warm_up_jit", lambda: pytest.fail("unexpected JIT"))
-    config = replace(CONFIG, cell_size=1000., **overrides)
     with pytest.raises(ValueError, match=message):
+        config = replace(CONFIG, cell_size=1000., **overrides)
         experiment_runner.run_saved_experiment("metadata", config, root, validate_only=True)
-
-
-def test_main_without_experiment_id_directs_to_archive():
-    with pytest.raises(ValueError, match=r"archive\.legacy_synthetics\.runner\.main"):
-        main(CONFIG)
-
-
-def test_legacy_generated_weight_sigmas_default_and_override(monkeypatch, tmp_path):
-    passed = []
-    monkeypatch.setattr(legacy_runner, "load_or_generate_synthetic_arrivals",
-                        lambda *args: np.array([[0., 0.1]]))
-    monkeypatch.setattr(legacy_runner, "warm_up_jit", lambda: None)
-
-    class Logger:
-        run_dir = tmp_path
-
-        def save_profiling(self, profiler):
-            pass
-
-    monkeypatch.setattr(legacy_runner, "run_em", lambda **kwargs: passed.append(kwargs) or Logger())
-    config = replace(CONFIG, grid_shape=(2, 2, 2), subdivision=1,
-                     station_grid_shape=(2, 1), event_grid_shape=(1, 1, 1),
-                     arrival_noise_std=0.04, save_runs=False, profiling_stats_limit=1)
-    legacy_runner.main(config)
-    assert tuple(passed[-1][name] for name in (
-        "weight_noise_relative_sigma", "weight_noise_absolute_sigma_s", "weight_model_sigma_s",
-    )) == (0., 0.04, 0.2)
-    legacy_runner.main(replace(config, weight_noise_relative_sigma=0.05,
-                 weight_noise_absolute_sigma_s=0., weight_model_sigma_s=0.3))
-    assert tuple(passed[-1][name] for name in (
-        "weight_noise_relative_sigma", "weight_noise_absolute_sigma_s", "weight_model_sigma_s",
-    )) == (0.05, 0., 0.3)
 
 
 def test_validate_only_skips_jit_and_inversion(small_experiment, monkeypatch):
@@ -365,14 +314,14 @@ def test_layered_run_records_initial_profile_and_completes(small_experiment, tmp
     assert (logger.run_dir / "iter_0" / "delta_s.npy").is_file()
 
 
-def test_smoothness_run_records_parameter_and_completes(small_experiment, tmp_path):
+def test_gradient_run_records_parameter_and_completes(small_experiment, tmp_path):
     root = small_experiment[0]
     config = replace(CONFIG, cell_size=1000., n_cycles=1, subdivision=1,
-                     n_workers=1, weights_top_n=1, smoothness_reg=1.0,
+                     n_workers=1, weights_top_n=1,
                      initial_gradient_m_s=(4700., 5500.), runs_dir=str(tmp_path / "runs"))
     logger = main(config, experiment_id="small", experiments_root=root)
     meta = json.loads((logger.run_dir / "meta.json").read_text())
-    assert meta["run_params"]["smoothness_reg"] == 1.0
+    assert "smoothness_reg" not in meta["run_params"]
     assert meta["run_params"]["initial_gradient_m_s"] == [4700., 5500.]
     np.testing.assert_array_equal(np.load(logger.run_dir / "initial_model.npy")[:, :, 0], 4900.)
     np.testing.assert_array_equal(np.load(logger.run_dir / "initial_model.npy")[:, :, 1], 5300.)
@@ -406,3 +355,21 @@ def test_saved_multicandidate_weights_use_likelihood_in_serial_and_parallel(smal
         assert not np.allclose(weights[0], weights[1])
         assert np.all(np.asarray(weights) > 0)
     np.testing.assert_allclose(np.sum(weights, axis=1), 1.)
+
+
+def test_fine_grid_ray_logging_for_viewer(small_experiment, tmp_path):
+    config = replace(CONFIG, cell_size=1000., n_cycles=1, subdivision=2, n_workers=1,
+                     weights_top_n=1, log_g_per_weight=True, runs_dir=str(tmp_path / "runs"))
+    logger = main(config, experiment_id="small", experiments_root=small_experiment[0])
+    with np.load(logger.run_dir / "iter_0" / "event_0" / "weight_0" / "G_stations_sparse.npz") as G:
+        np.testing.assert_array_equal(G["shape"], [4, 4, 4])
+        assert len(G["offsets"]) == 4 and G["values"].size > 0
+    assert (logger.run_dir / "final_model.npy").is_file()
+    quality = json.loads((logger.run_dir / "quality.jsonl").read_text().splitlines()[0])
+    assert set(quality) == {"iter", "avg_abs_pct_dev", "rms_m_s"}
+
+
+@pytest.mark.parametrize("top_n, n_candidates", [(6, 5), (3, 2)])
+def test_top_n_cannot_exceed_candidates(top_n, n_candidates):
+    with pytest.raises(ValueError, match="n_candidates"):
+        replace(CONFIG, weights_top_n=top_n, n_candidates=n_candidates)

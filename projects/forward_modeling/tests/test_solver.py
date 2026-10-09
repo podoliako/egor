@@ -172,3 +172,14 @@ def test_convergence_checks_absolute_times_even_for_single_station():
     assert stats["fine_refinement"] == 2
     assert stats["max_abs_difference_s"] == 0
     assert stats["max_absolute_time_difference_s"] > 0
+
+
+def test_parallel_events_give_identical_times():
+    pytest.importorskip("pykonal")
+    rng = np.random.default_rng(1)
+    model = VelocityGrid(rng.uniform(2000., 3000., size=(3, 2, 2)), 100.)
+    stations = PointSet(("a", "b", "c"), [[0., 0., 0.], [300., 200., 0.], [150., 50., 0.]])
+    events = PointSet(tuple(f"e{i}" for i in range(5)), rng.uniform([10, 10, 50], [290, 190, 190], (5, 3)))
+    serial = compute_travel_times(model, stations, events, ForwardConfig(refinement=2))
+    parallel = compute_travel_times(model, stations, events, ForwardConfig(refinement=2), workers=3)
+    np.testing.assert_array_equal(serial, parallel)

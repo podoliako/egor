@@ -14,7 +14,12 @@ import numpy as np
 
 from .experiments import load_inputs, save_inputs
 from .model import VelocityGrid
-from .spherical_generator import DEFAULT_ANOMALIES, SphereAnomaly
+from .spherical_generator import (
+    DEFAULT_ANOMALIES,
+    SphereAnomaly,
+    add_sphere_anomalies,
+    validate_anomalies_inside,
+)
 
 
 DEFAULT_BUBBLES = tuple(
@@ -50,14 +55,7 @@ class LayeredBubblesConfig:
             value <= 0 for value in self.layer_velocities_m_s
         ):
             raise ValueError("layer_velocities_m_s must contain four finite positive speeds")
-        if not self.anomalies or any(not isinstance(a, SphereAnomaly) for a in self.anomalies):
-            raise ValueError("anomalies must be a nonempty sequence of SphereAnomaly")
-        for anomaly in self.anomalies:
-            center = np.asarray(anomaly.center_km)
-            if np.any(center - anomaly.radius_km <= 0) or np.any(
-                center + anomaly.radius_km >= self.lengths_km
-            ):
-                raise ValueError("every bubble must lie strictly within the domain")
+        validate_anomalies_inside(self.anomalies, self.lengths_km)
         x, y = [(np.arange(int(round(n))) + 0.5) * self.cell_size_km for n in shape[:2]]
         b1, b2, b3 = layer_boundaries_km(x[:, None], y[None, :])
         if not np.all((0 < b1) & (b1 < b2) & (b2 < b3) & (b3 < self.lengths_km[2])):
@@ -83,15 +81,7 @@ def generate_layered_bubbles_model(config: LayeredBubblesConfig = LayeredBubbles
     velocity = np.full(shape, config.layer_velocities_m_s[0])
     for boundary, speed in zip(boundaries, config.layer_velocities_m_s[1:]):
         velocity = np.where(z[None, None, :] >= boundary[:, :, None], speed, velocity)
-    for anomaly in config.anomalies:
-        cx, cy, cz = anomaly.center_km
-        distance_sq = ((x[:, None, None] - cx) ** 2 +
-                       (y[None, :, None] - cy) ** 2 +
-                       (z[None, None, :] - cz) ** 2)
-        inside = distance_sq < anomaly.radius_km ** 2
-        velocity[inside] += anomaly.peak_delta_m_s * (
-            1 + np.cos(np.pi * np.sqrt(distance_sq[inside]) / anomaly.radius_km)
-        ) / 2
+    velocity = add_sphere_anomalies(velocity, x, y, z, config.anomalies)
     return VelocityGrid(velocity, config.cell_size_km * 1000.)
 
 

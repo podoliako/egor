@@ -18,9 +18,13 @@ from .model import VelocityGrid
 
 @dataclass(frozen=True)
 class SphereAnomaly:
+    """Compact anomaly: ``peak_delta_m_s`` within ``plateau_fraction * R`` of the
+    centre, then a C1 cosine taper to zero at ``R``."""
+
     center_km: tuple[float, float, float]
     radius_km: float
     peak_delta_m_s: float
+    plateau_fraction: float = 0.0
 
     def __post_init__(self):
         if len(self.center_km) != 3 or not np.all(np.isfinite(self.center_km)):
@@ -29,6 +33,36 @@ class SphereAnomaly:
             raise ValueError("radius_km must be finite and positive")
         if not np.isfinite(self.peak_delta_m_s) or self.peak_delta_m_s == 0:
             raise ValueError("peak_delta_m_s must be finite and nonzero")
+        if not np.isfinite(self.plateau_fraction) or not 0 <= self.plateau_fraction < 1:
+            raise ValueError("plateau_fraction must be in [0, 1)")
+
+    def profile(self, distance_km: np.ndarray) -> np.ndarray:
+        """Velocity perturbation in m/s at the given distances from the centre."""
+        plateau = self.plateau_fraction * self.radius_km
+        # Written so that plateau_fraction=0 reproduces earlier inputs bit for bit.
+        phase = np.clip(np.pi * (distance_km - plateau) / (self.radius_km - plateau), 0.0, np.pi)
+        return self.peak_delta_m_s * (1 + np.cos(phase)) / 2 * (distance_km < self.radius_km)
+
+
+def add_sphere_anomalies(velocity, x_km, y_km, z_km, anomalies) -> np.ndarray:
+    """Sum anomaly perturbations onto velocities sampled at voxel-centre axes ``x, y, z``."""
+    velocity = np.array(velocity, dtype=np.float64)
+    for anomaly in anomalies:
+        cx, cy, cz = anomaly.center_km
+        distance = np.sqrt((x_km[:, None, None] - cx) ** 2 +
+                           (y_km[None, :, None] - cy) ** 2 +
+                           (z_km[None, None, :] - cz) ** 2)
+        velocity += anomaly.profile(distance)
+    return velocity
+
+
+def validate_anomalies_inside(anomalies, lengths_km) -> None:
+    if not anomalies or any(not isinstance(a, SphereAnomaly) for a in anomalies):
+        raise ValueError("anomalies must be a nonempty sequence of SphereAnomaly")
+    for anomaly in anomalies:
+        center = np.asarray(anomaly.center_km)
+        if np.any(center - anomaly.radius_km <= 0) or np.any(center + anomaly.radius_km >= lengths_km):
+            raise ValueError("every anomaly must lie strictly within the domain")
 
 
 DEFAULT_ANOMALIES = (
@@ -63,14 +97,7 @@ class SphericalConfig:
             self.surface_velocity_m_s, self.bottom_velocity_m_s
         ) <= 0:
             raise ValueError("background velocities must be finite and positive")
-        if not self.anomalies or any(not isinstance(a, SphereAnomaly) for a in self.anomalies):
-            raise ValueError("anomalies must be a nonempty sequence of SphereAnomaly")
-        for anomaly in self.anomalies:
-            center = np.asarray(anomaly.center_km)
-            if np.any(center - anomaly.radius_km <= 0) or np.any(
-                center + anomaly.radius_km >= self.lengths_km
-            ):
-                raise ValueError("every sphere must lie strictly within the domain")
+        validate_anomalies_inside(self.anomalies, self.lengths_km)
 
 
 def generate_spherical_model(config: SphericalConfig = SphericalConfig()) -> VelocityGrid:
@@ -84,16 +111,7 @@ def generate_spherical_model(config: SphericalConfig = SphericalConfig()) -> Vel
     background = config.surface_velocity_m_s + (
         (config.bottom_velocity_m_s - config.surface_velocity_m_s) * z / config.lengths_km[2]
     )
-    velocity = np.broadcast_to(background, shape).copy()
-    for anomaly in config.anomalies:
-        cx, cy, cz = anomaly.center_km
-        distance_sq = ((x[:, None, None] - cx) ** 2 +
-                       (y[None, :, None] - cy) ** 2 +
-                       (z[None, None, :] - cz) ** 2)
-        inside = distance_sq < anomaly.radius_km ** 2
-        velocity[inside] += anomaly.peak_delta_m_s * (
-            1 + np.cos(np.pi * np.sqrt(distance_sq[inside]) / anomaly.radius_km)
-        ) / 2
+    velocity = add_sphere_anomalies(np.broadcast_to(background, shape), x, y, z, config.anomalies)
     return VelocityGrid(velocity, config.cell_size_km * 1000.)
 
 

@@ -168,7 +168,7 @@ def test_generated_inputs_and_run_metadata_include_provenance_hashes(tmp_path, m
         assert actual.ids == original.ids
         np.testing.assert_allclose(actual.coordinates_m, original.coordinates_m)
 
-    def compute_arrivals(*, model, stations, events, config):
+    def compute_arrivals(*, model, stations, events, config, workers):
         assert model.velocity.shape == (2, 1, 1)
         assert len(stations.ids) == len(events.ids) == 2
         assert config == ForwardConfig(refinement=1)
