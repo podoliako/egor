@@ -11,6 +11,66 @@ from typing import Optional
 import numpy as np
 
 
+def _ray_status_rows(log, n_stations=None):
+    """Extract available active masks; missing legacy masks remain unavailable."""
+    statuses = getattr(log, "ray_reached_per_weight", {})
+    indices, rows = [], []
+    for index in np.flatnonzero(np.asarray(log.weights) > 0):
+        if index not in statuses:
+            continue
+        reached = np.asarray(statuses[index], dtype=bool)
+        if n_stations is None and reached.ndim == 1:
+            n_stations = reached.size
+        if reached.shape != (n_stations,):
+            raise ValueError(
+                f"Ray reached mask for hypothesis {index} must have shape "
+                f"({n_stations},), got {reached.shape}"
+            )
+        indices.append(int(index))
+        rows.append(reached)
+    return np.asarray(indices, dtype=np.int64), np.asarray(rows, dtype=bool)
+
+
+def summarize_ray_status(event_logs, n_stations: int) -> Optional[dict]:
+    """Count primary traces only, requiring masks for every positive hypothesis."""
+    summary = {
+        "schema_version": 1,
+        "expected": 0,
+        "reached": 0,
+        "failed": 0,
+        "used": 0,
+        "n_events": 0,
+        "n_hypotheses": 0,
+        "events_with_failed_rays": 0,
+        "hypotheses_with_insufficient_stations": 0,
+        "failures": [],
+    }
+    for event, log in event_logs:
+        indices, rows = _ray_status_rows(log, n_stations)
+        if len(indices) != np.count_nonzero(np.asarray(log.weights) > 0):
+            return None
+        summary["n_events"] += 1
+        event_failed = False
+        for index, reached in zip(indices, rows):
+            count = int(np.count_nonzero(reached))
+            summary["n_hypotheses"] += 1
+            summary["expected"] += n_stations
+            summary["reached"] += count
+            if count >= 2:
+                summary["used"] += count
+            else:
+                summary["hypotheses_with_insufficient_stations"] += 1
+            failed = np.flatnonzero(~reached).tolist()
+            if failed:
+                event_failed = True
+                summary["failures"].append({
+                    "event": int(event), "hypothesis": int(index), "stations": failed,
+                })
+        summary["events_with_failed_rays"] += int(event_failed)
+    summary["failed"] = summary["expected"] - summary["reached"]
+    return summary
+
+
 class TomographyLogger:
     """
     Directory layout:
@@ -22,8 +82,10 @@ class TomographyLogger:
             complete.json            ← published only after all cycle artifacts
             model.npy / delta_s.npy
             sensitivity_diagonal.npy / coverage_confidence.npy
+            ray_status.json           ← aggregate primary-trace accounting
             event_<j>/
               weights.npz / residuals.npy
+              ray_status.npz          ← reached station masks per active hypothesis
               weight_<w>/
                 G_stations_sparse.npz  ← compact fine-grid ray paths
                 ray_count.npy          ← station ray count (coarse grid)
@@ -89,6 +151,7 @@ class TomographyLogger:
     def save_meta(self, run_params, station_locs, event_locs, grid_info=None, source_experiment=None):
         meta = {
             "viewer_completion_protocol": 1,
+            "viewer_ray_status_schema": 1,
             "viewer_saved_artifacts": {
                 "save_misfit": self.save_misfit,
                 "save_timefields": self.save_timefields,
@@ -142,6 +205,13 @@ class TomographyLogger:
     def save_ray_count(self, iteration: int, ray_count: np.ndarray):
         self._save_npy(self.iter_dir(iteration) / "ray_count.npy", np.asarray(ray_count))
 
+    def save_ray_status(self, iteration: int, event_logs, n_stations: int) -> Optional[dict]:
+        """Save trustworthy cycle totals, or skip legacy logs lacking active masks."""
+        summary = summarize_ray_status(event_logs, n_stations)
+        if summary is not None:
+            self._save_json(self.iter_dir(iteration) / "ray_status.json", summary)
+        return summary
+
     def save_event_data(self, iteration: int, event_idx: int, log):
         """Store one event's hypotheses (a ``tomography_events.EventLog``)."""
         event_dir = self.iter_dir(iteration) / f"event_{event_idx}"
@@ -156,6 +226,11 @@ class TomographyLogger:
         if log.misfit is not None and self.save_misfit:
             self._save_npy(event_dir / "misfit.npy", log.misfit)
         self._save_npy(event_dir / "residuals.npy", log.residuals)
+        indices, reached = _ray_status_rows(log)
+        if len(indices):
+            self._save_npz(
+                event_dir / "ray_status.npz", hypothesis_indices=indices, reached=reached,
+            )
 
         for w_idx, ray_count in log.ray_count_per_weight.items():
             w_dir = event_dir / f"weight_{w_idx}"

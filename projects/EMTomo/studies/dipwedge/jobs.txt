@@ -1,0 +1,41 @@
+hard-lam0.05-cov0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.05 --coverage-damping-power 0
+hard-lam0.05-cov0.5 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.05 --coverage-damping-power 0.5
+hard-lam0.05-cov1.0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.05 --coverage-damping-power 1.0
+hard-lam0.05-cov1.5 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.05 --coverage-damping-power 1.5
+hard-lam0.1-cov0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.1 --coverage-damping-power 0
+hard-lam0.1-cov0.5 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.1 --coverage-damping-power 0.5
+hard-lam0.1-cov1.0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.1 --coverage-damping-power 1.0
+hard-lam0.1-cov1.5 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.1 --coverage-damping-power 1.5
+hard-lam0.2-cov0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.2 --coverage-damping-power 0
+hard-lam0.2-cov0.5 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.2 --coverage-damping-power 0.5
+hard-lam0.2-cov1.0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.2 --coverage-damping-power 1.0
+hard-lam0.2-cov1.5 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.2 --coverage-damping-power 1.5
+hard-lam0.5-cov0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.5 --coverage-damping-power 0
+hard-lam0.5-cov0.5 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.5 --coverage-damping-power 0.5
+hard-lam0.5-cov1.0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.5 --coverage-damping-power 1.0
+hard-lam0.5-cov1.5 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.5 --coverage-damping-power 1.5
+hard-lam1.0-cov0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 1.0 --coverage-damping-power 0
+hard-lam1.0-cov0.5 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 1.0 --coverage-damping-power 0.5
+hard-lam1.0-cov1.0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 1.0 --coverage-damping-power 1.0
+hard-lam1.0-cov1.5 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 1.0 --coverage-damping-power 1.5
+soft3-lam0.2-cov0.5 main.py --candidate-mode soft --weights-top-n 3 --n-candidates 5 --weights-min-distance 2 --lambda-reg 0.2 --coverage-damping-power 0.5
+soft3-lam0.2-cov1.0 main.py --candidate-mode soft --weights-top-n 3 --n-candidates 5 --weights-min-distance 2 --lambda-reg 0.2 --coverage-damping-power 1.0
+soft3-lam0.5-cov0.5 main.py --candidate-mode soft --weights-top-n 3 --n-candidates 5 --weights-min-distance 2 --lambda-reg 0.5 --coverage-damping-power 0.5
+soft3-lam0.5-cov1.0 main.py --candidate-mode soft --weights-top-n 3 --n-candidates 5 --weights-min-distance 2 --lambda-reg 0.5 --coverage-damping-power 1.0
+fixedhypo-lam0.1-cov0 studies/fixed_hypocentres/run_fixed.py --lambda-reg 0.1 --coverage-damping-power 0
+fixedhypo-lam0.1-cov0.5 studies/fixed_hypocentres/run_fixed.py --lambda-reg 0.1 --coverage-damping-power 0.5
+fixedhypo-lam0.1-cov1.0 studies/fixed_hypocentres/run_fixed.py --lambda-reg 0.1 --coverage-damping-power 1.0
+fixedhypo-lam0.2-cov0 studies/fixed_hypocentres/run_fixed.py --lambda-reg 0.2 --coverage-damping-power 0
+fixedhypo-lam0.2-cov0.5 studies/fixed_hypocentres/run_fixed.py --lambda-reg 0.2 --coverage-damping-power 0.5
+fixedhypo-lam0.2-cov1.0 studies/fixed_hypocentres/run_fixed.py --lambda-reg 0.2 --coverage-damping-power 1.0
+fixedhypo-lam0.5-cov0 studies/fixed_hypocentres/run_fixed.py --lambda-reg 0.5 --coverage-damping-power 0
+fixedhypo-lam0.5-cov0.5 studies/fixed_hypocentres/run_fixed.py --lambda-reg 0.5 --coverage-damping-power 0.5
+fixedhypo-lam0.5-cov1.0 studies/fixed_hypocentres/run_fixed.py --lambda-reg 0.5 --coverage-damping-power 1.0
+soft5d3-lam0.5-cov1.0 main.py --candidate-mode soft --weights-top-n 5 --n-candidates 5 --weights-min-distance 3 --lambda-reg 0.5 --coverage-damping-power 1.0
+hard-sub6-lam0.5-cov1.0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.5 --coverage-damping-power 1.0 --subdivision 6
+hard-msig0.005-lam0.5-cov1.0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.5 --coverage-damping-power 1.0 --weight-model-sigma-s 0.005
+hard-msig0.05-lam0.5-cov1.0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.5 --coverage-damping-power 1.0 --weight-model-sigma-s 0.05
+hard-step0.04-lam0.5-cov1.0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.5 --coverage-damping-power 1.0 --max-velocity-step-fraction 0.04
+hard-trilinear-lam0.5-cov1.0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.5 --coverage-damping-power 1.0 --slowness-interpolation trilinear
+hard-gradstart-lam0.5-cov1.0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 5 --lambda-reg 0.5 --coverage-damping-power 1.0 --initial-gradient-m-s 4000 5500
+hard-ncand1-lam0.5-cov1.0 main.py --candidate-mode hard --weights-top-n 1 --n-candidates 1 --lambda-reg 0.5 --coverage-damping-power 1.0

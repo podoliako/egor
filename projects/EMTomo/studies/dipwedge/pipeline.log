@@ -1,0 +1,87 @@
+2026-10-10 18:05:22 forward start
+2026-10-10 19:03:07 forward exit 0
+2026-10-10 19:03:07 41 jobs queued
+2026-10-10 19:03:07 start hard-lam0.05-cov0
+2026-10-10 19:03:07 start hard-lam0.05-cov0.5
+2026-10-10 19:03:07 start hard-lam0.05-cov1.0
+2026-10-10 19:03:07 start hard-lam0.05-cov1.5
+2026-10-10 19:19:15 end hard-lam0.05-cov1.0 (exit 0)
+2026-10-10 19:19:15 start hard-lam0.1-cov0
+2026-10-10 19:19:28 end hard-lam0.05-cov0 (exit 0)
+2026-10-10 19:19:28 start hard-lam0.1-cov0.5
+2026-10-10 19:19:37 end hard-lam0.05-cov1.5 (exit 0)
+2026-10-10 19:19:37 start hard-lam0.1-cov1.0
+2026-10-10 19:19:51 end hard-lam0.05-cov0.5 (exit 0)
+2026-10-10 19:19:51 start hard-lam0.1-cov1.5
+2026-10-10 19:34:14 end hard-lam0.1-cov0 (exit 0)
+2026-10-10 19:34:14 start hard-lam0.2-cov0
+2026-10-10 19:34:25 end hard-lam0.1-cov0.5 (exit 0)
+2026-10-10 19:34:25 start hard-lam0.2-cov0.5
+2026-10-10 19:34:37 end hard-lam0.1-cov1.0 (exit 0)
+2026-10-10 19:34:37 start hard-lam0.2-cov1.0
+2026-10-10 19:34:48 end hard-lam0.1-cov1.5 (exit 0)
+2026-10-10 19:34:48 start hard-lam0.2-cov1.5
+2026-10-10 19:49:16 end hard-lam0.2-cov0 (exit 0)
+2026-10-10 19:49:16 start hard-lam0.5-cov0
+2026-10-10 19:49:22 end hard-lam0.2-cov0.5 (exit 0)
+2026-10-10 19:49:22 start hard-lam0.5-cov0.5
+2026-10-10 19:49:37 end hard-lam0.2-cov1.0 (exit 0)
+2026-10-10 19:49:37 start hard-lam0.5-cov1.0
+2026-10-10 19:49:44 end hard-lam0.2-cov1.5 (exit 0)
+2026-10-10 19:49:44 start hard-lam0.5-cov1.5
+2026-10-10 20:04:21 end hard-lam0.5-cov0.5 (exit 0)
+2026-10-10 20:04:21 start hard-lam1.0-cov0
+2026-10-10 20:04:28 end hard-lam0.5-cov0 (exit 0)
+2026-10-10 20:04:28 start hard-lam1.0-cov0.5
+2026-10-10 20:04:43 end hard-lam0.5-cov1.0 (exit 0)
+2026-10-10 20:04:43 start hard-lam1.0-cov1.0
+2026-10-10 20:04:47 end hard-lam0.5-cov1.5 (exit 0)
+2026-10-10 20:04:47 start hard-lam1.0-cov1.5
+2026-10-10 20:19:30 end hard-lam1.0-cov0.5 (exit 0)
+2026-10-10 20:19:31 start soft3-lam0.2-cov0.5
+2026-10-10 20:19:33 end hard-lam1.0-cov0 (exit 0)
+2026-10-10 20:19:33 start soft3-lam0.2-cov1.0
+2026-10-10 20:19:49 end hard-lam1.0-cov1.5 (exit 0)
+2026-10-10 20:19:49 start soft3-lam0.5-cov0.5
+2026-10-10 20:19:55 end hard-lam1.0-cov1.0 (exit 0)
+2026-10-10 20:19:55 start soft3-lam0.5-cov1.0
+2026-10-10 20:35:38 end soft3-lam0.2-cov0.5 (exit 0)
+2026-10-10 20:35:38 start fixedhypo-lam0.1-cov0
+2026-10-10 20:35:41 end soft3-lam0.2-cov1.0 (exit 0)
+2026-10-10 20:35:41 start fixedhypo-lam0.1-cov0.5
+2026-10-10 20:36:05 end soft3-lam0.5-cov1.0 (exit 0)
+2026-10-10 20:36:05 start fixedhypo-lam0.1-cov1.0
+2026-10-10 20:36:08 end soft3-lam0.5-cov0.5 (exit 0)
+2026-10-10 20:36:08 start fixedhypo-lam0.2-cov0
+2026-10-10 20:46:32 end fixedhypo-lam0.1-cov0 (exit 0)
+2026-10-10 20:46:32 start fixedhypo-lam0.2-cov0.5
+2026-10-10 20:46:35 end fixedhypo-lam0.1-cov0.5 (exit 0)
+2026-10-10 20:46:35 start fixedhypo-lam0.2-cov1.0
+2026-10-10 20:46:44 end fixedhypo-lam0.1-cov1.0 (exit 0)
+2026-10-10 20:46:44 start fixedhypo-lam0.5-cov0
+2026-10-10 20:46:57 end fixedhypo-lam0.2-cov0 (exit 0)
+2026-10-10 20:46:57 start fixedhypo-lam0.5-cov0.5
+2026-10-10 20:57:22 end fixedhypo-lam0.2-cov1.0 (exit 0)
+2026-10-10 20:57:22 start fixedhypo-lam0.5-cov1.0
+2026-10-10 20:57:42 end fixedhypo-lam0.5-cov0 (exit 0)
+2026-10-10 20:57:42 start soft5d3-lam0.5-cov1.0
+2026-10-10 20:57:47 end fixedhypo-lam0.5-cov0.5 (exit 0)
+2026-10-10 20:57:47 start hard-sub6-lam0.5-cov1.0
+2026-10-10 20:57:49 end fixedhypo-lam0.2-cov0.5 (exit 0)
+2026-10-10 20:57:49 start hard-msig0.005-lam0.5-cov1.0
+2026-10-10 21:09:04 end fixedhypo-lam0.5-cov1.0 (exit 0)
+2026-10-10 21:09:04 start hard-msig0.05-lam0.5-cov1.0
+2026-10-10 21:14:32 end hard-msig0.005-lam0.5-cov1.0 (exit 0)
+2026-10-10 21:14:32 start hard-step0.04-lam0.5-cov1.0
+2026-10-10 21:16:41 end soft5d3-lam0.5-cov1.0 (exit 0)
+2026-10-10 21:16:41 start hard-trilinear-lam0.5-cov1.0
+2026-10-10 21:21:51 end hard-sub6-lam0.5-cov1.0 (exit 0)
+2026-10-10 21:21:51 start hard-gradstart-lam0.5-cov1.0
+2026-10-10 21:25:39 end hard-msig0.05-lam0.5-cov1.0 (exit 0)
+2026-10-10 21:25:39 start hard-ncand1-lam0.5-cov1.0
+2026-10-10 21:30:55 end hard-step0.04-lam0.5-cov1.0 (exit 0)
+2026-10-10 21:33:55 end hard-trilinear-lam0.5-cov1.0 (exit 0)
+2026-10-10 21:37:10 end hard-gradstart-lam0.5-cov1.0 (exit 0)
+2026-10-10 21:39:11 end hard-ncand1-lam0.5-cov1.0 (exit 0)
+2026-10-10 21:39:11 writing report
+2026-10-10 21:39:35 done (report exit 0)

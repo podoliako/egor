@@ -7,7 +7,7 @@ computed by the separate solver. Coordinates are x/y/z in km, z positive down.
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 
 import numpy as np
@@ -40,6 +40,9 @@ class DippingLayersConfig:
     n_events: int = 1000
     event_depth_km: tuple[float, float] = (5., 115.)
     seed: int = 42
+    # Regular hypocentre lattice (cell-centre fractions of x, y and the depth
+    # range) instead of Sobol points; n_events must equal its size.
+    event_grid_shape: tuple[int, int, int] | None = None
 
     def __post_init__(self):
         lengths = np.asarray(self.lengths_km, dtype=float)
@@ -74,6 +77,61 @@ class DippingLayersConfig:
             raise ValueError("event_depth_km must satisfy 0 < top < bottom < depth")
         if type(self.seed) is not int or self.seed < 0:
             raise ValueError("seed must be a nonnegative integer")
+        if self.event_grid_shape is not None and (
+            len(self.event_grid_shape) != 3
+            or any(type(n) is not int or n < 1 for n in self.event_grid_shape)
+            or int(np.prod(self.event_grid_shape)) != self.n_events
+        ):
+            raise ValueError("event_grid_shape must hold three positive integers whose product is n_events")
+
+
+# Same structure at the scale of the Geysers BG network box (20 x 7 x 7 km, see
+# EMTomo/data/geysers_2011), so that real stations and events can later be used
+# with an identical model. The dipping interface lies within the well-sampled
+# 0-5 km depth range of the catalogue.
+GEYSERS_SCALE_ANOMALIES = (
+    SphereAnomaly((3.5, 2.5, 1.2), 0.9, +600., 0.5),
+    SphereAnomaly((8.0, 4.8, 2.0), 1.1, -650., 0.5),
+    SphereAnomaly((12.5, 2.4, 2.6), 1.2, +700., 0.5),
+    SphereAnomaly((16.5, 4.5, 1.6), 1.0, -600., 0.5),
+    SphereAnomaly((6.0, 2.2, 3.6), 1.1, +700., 0.5),
+    SphereAnomaly((11.0, 5.0, 4.0), 1.0, -650., 0.5),
+)
+
+# Four flat layers (3800/4600/5200/5700 m/s; interfaces 0.7, 1.9 and 3.4 km,
+# off the faces of 1, 0.5 and 1/3 km inversion cells), the same spheres, a
+# 13 x 4 station grid and a 24 x 8 x 10 hypocentre lattice whose coordinates
+# avoid those faces as well.
+GEYSERS_FLAT = DippingLayersConfig(
+    lengths_km=(20., 7., 7.),
+    cell_size_km=0.125,
+    horizontal_boundaries_km=(0.7, 1.9),
+    dipping_boundary_km=(3.4, 3.4),
+    layer_velocities_m_s=(3800., 4600., 5200., 5700.),
+    anomalies=GEYSERS_SCALE_ANOMALIES,
+    surface_stations=(13, 4),
+    n_events=1920,
+    event_depth_km=(0.5, 5.5),
+    seed=42,
+    event_grid_shape=(24, 8, 10),
+)
+
+PRESETS = {
+    "deep240": DippingLayersConfig(),
+    "geysers20": DippingLayersConfig(
+        lengths_km=(20., 7., 7.),
+        cell_size_km=0.125,
+        horizontal_boundaries_km=(0.6, 1.3),
+        dipping_boundary_km=(2.0, 3.5),
+        layer_velocities_m_s=(4000., 4500., 5000., 5500.),
+        anomalies=GEYSERS_SCALE_ANOMALIES,
+        surface_stations=(9, 3),
+        n_events=1000,
+        event_depth_km=(0.5, 5.5),
+        seed=42,
+    ),
+    "geysers20flat": GEYSERS_FLAT,
+}
 
 
 def dipping_boundary_depth_km(config: DippingLayersConfig, x_km):
@@ -98,42 +156,57 @@ def generate_dipping_layers(
     config: DippingLayersConfig = DippingLayersConfig(),
 ) -> tuple[VelocityGrid, PointSet, PointSet]:
     stations = surface_station_grid(config.lengths_km, config.surface_stations)
-    events = events_from_unit_points(
-        sobol_unit_points(config.n_events, config.seed), config.lengths_km, config.event_depth_km,
-    )
+    if config.event_grid_shape is None:
+        unit = sobol_unit_points(config.n_events, config.seed)
+    else:
+        levels = [(np.arange(n) + 0.5) / n for n in config.event_grid_shape]
+        unit = np.column_stack([axis.ravel() for axis in np.meshgrid(*levels, indexing="ij")])
+    events = events_from_unit_points(unit, config.lengths_km, config.event_depth_km)
     return generate_dipping_layers_model(config), stations, events
 
 
 def save_dipping_layers(root, experiment_id: str,
-                        config: DippingLayersConfig = DippingLayersConfig()) -> Path:
-    """Publish inputs and generator parameters; does not compute any arrivals."""
-    model, stations, events = generate_dipping_layers(config)
+                        config: DippingLayersConfig = DippingLayersConfig(),
+                        stations: PointSet | None = None, events: PointSet | None = None,
+                        geometry_source: dict | None = None) -> Path:
+    """Publish inputs and generator parameters; does not compute any arrivals.
+
+    ``stations``/``events`` replace the generated uniform geometry (for example a
+    real network); ``geometry_source`` is then recorded in generation.json.
+    """
+    model, uniform_stations, uniform_events = generate_dipping_layers(config)
     top, bottom = config.dipping_boundary_km
-    return save_inputs(root, experiment_id, model, stations, events, generation={
+    generation = {
         "generator": "dipping_layers",
         "parameters": asdict(config),
         "dipping_boundary_km": f"{top:g} + {bottom - top:g} * x / {config.lengths_km[0]:g}",
         "anomaly_profile": "A within plateau_fraction*R, (1+cos(pi*(r-pR)/(R-pR)))/2 taper to R",
-    })
+    }
+    if stations is not None or events is not None:
+        generation["geometry_source"] = geometry_source or "external"
+    return save_inputs(root, experiment_id, model,
+                       uniform_stations if stations is None else stations,
+                       uniform_events if events is None else events, generation=generation)
 
 
 def main(argv=None):
-    defaults = DippingLayersConfig()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("experiment_id", metavar="EXPERIMENT_ID")
     parser.add_argument("--root", type=Path, default=Path(__file__).parent / "experiments")
-    parser.add_argument("--surface-stations", type=int, nargs=2, default=defaults.surface_stations,
-                        metavar=("NX", "NY"))
-    parser.add_argument("--events", type=int, default=defaults.n_events)
-    parser.add_argument("--event-depth-km", type=float, nargs=2, default=defaults.event_depth_km,
-                        metavar=("TOP", "BOTTOM"))
-    parser.add_argument("--seed", type=int, default=defaults.seed)
+    parser.add_argument("--preset", choices=sorted(PRESETS), default="deep240")
+    parser.add_argument("--surface-stations", type=int, nargs=2, metavar=("NX", "NY"))
+    parser.add_argument("--events", type=int)
+    parser.add_argument("--event-depth-km", type=float, nargs=2, metavar=("TOP", "BOTTOM"))
+    parser.add_argument("--seed", type=int)
     args = parser.parse_args(argv)
     try:
-        config = DippingLayersConfig(
-            surface_stations=tuple(args.surface_stations), n_events=args.events,
-            event_depth_km=tuple(args.event_depth_km), seed=args.seed,
-        )
+        overrides = {name: value for name, value in (
+            ("surface_stations", args.surface_stations and tuple(args.surface_stations)),
+            ("n_events", args.events),
+            ("event_depth_km", args.event_depth_km and tuple(args.event_depth_km)),
+            ("seed", args.seed),
+        ) if value is not None}
+        config = replace(PRESETS[args.preset], **overrides)
         destination = save_dipping_layers(args.root, args.experiment_id, config)
     except (OSError, ValueError) as error:
         parser.exit(1, f"{parser.prog}: {error}\n")

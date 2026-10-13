@@ -2,3 +2,21 @@
 2026-10-09 16:35:19 forward output ready
 2026-10-09 16:35:20 start soft-top3
 2026-10-09 16:35:20 start hard-top1
+2026-10-09 17:08:32 end hard-top1 (exit 0)
+2026-10-09 17:09:37 end soft-top3 (exit 0)
+2026-10-09 17:09:37 start hard-ncand1
+2026-10-09 17:09:37 start soft-top5-d3
+2026-10-09 17:42:27 end hard-ncand1 (exit 0)
+2026-10-09 17:44:02 end soft-top5-d3 (exit 0)
+2026-10-09 17:44:02 start hard-top1-step01
+2026-10-09 17:44:02 start hard-top1-lam02
+2026-10-09 18:20:08 end hard-top1-lam02 (exit 0)
+2026-10-09 18:20:17 end hard-top1-step01 (exit 0)
+2026-10-09 18:20:17 start soft-top3-gradstart
+2026-10-09 18:20:17 start hard-top1-gradstart
+2026-10-09 18:53:16 end hard-top1-gradstart (exit 0)
+2026-10-09 18:54:35 end soft-top3-gradstart (exit 0)
+2026-10-09 18:54:35 start hard-top1-sub6
+2026-10-09 19:01:38 end hard-top1-sub6 (exit 0)
+2026-10-09 19:01:38 writing report
+2026-10-09 19:01:46 done (report exit 0)

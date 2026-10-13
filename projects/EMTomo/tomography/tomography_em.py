@@ -13,7 +13,7 @@ from instruments.likelihood import PickNoise, negative_log_likelihood
 from raytracing import compute_G_all_stations, compute_G_all_stations_serial
 from velocity_model import VelocityModel
 from .tomography_events import EventSettings, IterationFields, run_events
-from .tomography_logging import TomographyLogger
+from .tomography_logging import TomographyLogger, summarize_ray_status
 from .tomography_math import solve_slowness_update
 
 # Recorded in meta.json so that runs with different formulations are not compared.
@@ -182,6 +182,19 @@ def make_tomography_step(
             ray_counts.extend(log.ray_count_per_weight.values())
         if ray_counts:
             logger.save_ray_count(iteration, np.add.reduce(ray_counts))
+        ray_status = logger.save_ray_status(iteration, event_logs, len(fields.stations))
+    else:
+        ray_status = summarize_ray_status(event_logs, len(fields.stations))
+
+    if ray_status is None:
+        print("[Rays] unavailable: missing active-hypothesis masks", flush=True)
+    else:
+        warning = " — WARNING: failed rays" if ray_status["failed"] else ""
+        print(
+            f"[Rays] {ray_status['reached']}/{ray_status['expected']} reached, "
+            f"{ray_status['failed']} failed, {ray_status['used']} used{warning}",
+            flush=True,
+        )
 
     return solve_slowness_update(
         hessian,

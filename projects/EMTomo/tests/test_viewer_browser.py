@@ -12,7 +12,7 @@ import numpy as np
 import pytest
 
 playwright = pytest.importorskip("playwright.sync_api")
-from test_viewer_api import viewer, _save_viewer_cycle
+from test_viewer_api import viewer, _save_viewer_cycle, _ray_status_fixture
 
 ROOT = Path(__file__).resolve().parents[1]
 RUN = "run_browser_v1.4_20261009_120000"
@@ -66,6 +66,7 @@ def browser_viewer(viewer, request):
         page.route("**/*", route_request)
         page.goto("http://emtomo.test/")
         page.wait_for_function("document.getElementById('plot-vel').dataset.renderRun === ST.run")
+        page.wait_for_function("document.getElementById('plot-vel-top').dataset.renderRun === ST.run")
         page.wait_for_function("document.getElementById('plot-hypod-hist')._fullLayout !== undefined")
         yield page, rd, requests, add_run
         browser.close()
@@ -167,13 +168,15 @@ def test_zoom_survives_controls_publication_and_reset(browser_viewer):
     assert _ranges(page) == [[0, 240], [120, 0]]
 
 
-def _assert_alignment(page):
-    geometry = page.evaluate("""() => ['plot-vel','plot-tr'].map(id => {
+def _assert_alignment(page, top=False):
+    plots = ['plot-vel-top', 'plot-tr-top'] if top else ['plot-vel', 'plot-tr']
+    geometry = page.evaluate("""ids => ids.map(id => {
       const el = document.getElementById(id), rect = el.getBoundingClientRect(), size = el._fullLayout._size;
       return [rect.top + size.t, rect.top + size.t + size.h];
-    })""")
+    })""", plots)
     assert geometry[0] == pytest.approx(geometry[1], abs=1)
-    heights = page.evaluate("""() => ['vel-header','tr-header'].map(id => document.getElementById(id).getBoundingClientRect().height)""")
+    headers = ['vel-top-header', 'tr-top-header'] if top else ['vel-header', 'tr-header']
+    heights = page.evaluate("ids => ids.map(id => document.getElementById(id).getBoundingClientRect().height)", headers)
     assert heights[0] == pytest.approx(heights[1], abs=1)
 
 
@@ -183,6 +186,7 @@ def test_wrapped_model_headers_and_plot_areas_align(browser_viewer, width):
     page.set_viewport_size({"width": width, "height": 1000})
     page.wait_for_timeout(450)
     _assert_alignment(page)
+    _assert_alignment(page, top=True)
     page.locator("#panel-vel .btn-full").click()
     assert page.locator(".panel.fullscreen").count() == 1
     page.keyboard.press("Escape")
@@ -198,6 +202,7 @@ def test_header_alignment_fallback_grows_and_shrinks(browser_viewer):
         page.set_viewport_size({"width": width, "height": 1000})
         page.wait_for_timeout(500)
         _assert_alignment(page)
+        _assert_alignment(page, top=True)
 
 
 def test_png_download_has_context_and_preserves_zoom(browser_viewer, tmp_path):
@@ -214,3 +219,107 @@ def test_png_download_has_context_and_preserves_zoom(browser_viewer, tmp_path):
     assert target.read_bytes().startswith(b"\x89PNG\r\n\x1a\n")
     page.wait_for_function("document.querySelector('#panel-vel .btn-dl').disabled === false")
     assert _ranges(page) == zoom
+
+
+@pytest.mark.parametrize("failed", [False, True])
+def test_ray_accounting_badge_changes_with_selected_complete_cycle(browser_viewer, failed):
+    page, rd, *_ = browser_viewer
+    page.wait_for_function("document.getElementById('ray-status-badge').textContent === 'Лучи: нет данных'")
+    (rd / "iter_0/ray_status.json").write_text(json.dumps(_ray_status_fixture(failed)))
+    page.evaluate("() => renderRayStatus()")
+    badge = page.locator("#ray-status-badge")
+    assert badge.inner_text() == ("Лучи: 5 / 6 · потеряно 1 · использовано 4" if failed else "Лучи: 6 / 6")
+    assert badge.evaluate("el => el.classList.contains('ray-status-warning')") is failed
+    assert badge.evaluate("el => el.classList.contains('ray-status-ok')") is not failed
+    if failed:
+        assert "Ev eM, гипотеза 0: станции 1" in badge.get_attribute("title")
+    page.evaluate("setIter(1)")
+    page.wait_for_function("document.getElementById('ray-status-badge').textContent === 'Лучи: нет данных'")
+    assert page.evaluate("ST.rayStatus") is None
+    _wait_iteration(page, 1)
+
+
+def test_top_view_uses_native_horizontal_plane_and_independent_depth(browser_viewer):
+    page, _, requests, _ = browser_viewer
+    assert page.evaluate("document.getElementById('model-top-row').previousElementSibling.id") == 'model-row'
+    assert _ranges(page, 'plot-vel-top') == [[0, 240], [0, 120]]
+    assert page.evaluate("document.getElementById('plot-vel-top').layout.yaxis.title.text") == 'Y (km)'
+    page.locator('#vel-top-z-num').fill('60')
+    page.locator('#vel-top-z-num').press('Enter')
+    page.wait_for_function("document.getElementById('plot-tr-top').dataset.renderDepthZ === '60'")
+    assert page.evaluate('ST.vel.y') == 0
+    assert page.evaluate('ST.top.z') == 60
+    assert page.evaluate("document.getElementById('plot-tr-top').data[0].z") == [
+        [4001, 4005, 4009, 4013], [4003, 4007, 4011, 4015],
+    ]
+    assert page.evaluate("document.getElementById('plot-tr-top').data[0].y") == [30, 90]
+    assert any('model_type=true&plane=xy&z_km=60' in url for url in requests)
+    scales = page.evaluate("""() => ['plot-vel-top','plot-tr-top'].map(id => {
+      const c = document.getElementById(id).layout.coloraxis;
+      return [c.colorscale, c.cmin, c.cmax];
+    })""")
+    assert scales[0] == scales[1]
+    assert scales[0][0] == 'Cividis'
+    events = page.evaluate("document.getElementById('plot-vel-top').data.find(t => t.marker?.symbol === 'star')")
+    assert events['x'] == [5, 15, 25]
+    assert events['y'] == [5, 5, 5]
+    assert max(events['marker']['opacity']) < 0.1
+
+
+def test_top_zoom_is_independent_and_survives_depth_fields_iterations(browser_viewer):
+    page, *_ = browser_viewer
+    page.evaluate("() => Plotly.relayout('plot-vel-top', {'xaxis.range':[40,100], 'yaxis.range':[20,70]})")
+    top_zoom = _ranges(page, 'plot-vel-top')
+    vertical_ranges = _ranges(page)
+    page.evaluate('setModelZ(72)')
+    page.wait_for_function("document.getElementById('plot-vel-top').dataset.renderDepthZ === '72'")
+    assert _ranges(page, 'plot-vel-top') == top_zoom
+    assert _ranges(page) == vertical_ranges
+    page.evaluate('setIter(1)')
+    page.wait_for_function("document.getElementById('plot-vel-top').dataset.renderIter === '1' && document.getElementById('plot-vel-top').style.display !== 'none'")
+    assert _ranges(page, 'plot-vel-top') == top_zoom
+    page.evaluate('setModelY(60)')
+    page.wait_for_function("document.getElementById('plot-vel').dataset.renderY === '60'")
+    assert page.evaluate('ST.top.z') == 72
+    assert _ranges(page, 'plot-vel-top') == top_zoom
+    page.locator('#vel-top-type').select_option('coverage_confidence')
+    page.wait_for_function("document.getElementById('plot-vel-top').dataset.renderField === 'coverage_confidence'")
+    assert _ranges(page, 'plot-vel-top') == top_zoom
+    assert page.evaluate('ST.vel.type') == 'iter'
+    assert page.evaluate("document.getElementById('plot-vel-top').layout.coloraxis.cmin") == 0
+    assert page.evaluate("document.getElementById('plot-vel-top').layout.coloraxis.cmax") == 1
+    page.locator('#cb-events').uncheck()
+    page.evaluate('() => renderTopPair()')
+    assert page.evaluate("document.getElementById('plot-vel-top').data.some(t => t.marker?.symbol === 'star')") is False
+    assert _ranges(page, 'plot-vel-top') == top_zoom
+
+
+def test_top_initial_is_available_before_completed_cycles(browser_viewer):
+    page, _, requests, add_run = browser_viewer
+    add_run('pending', iteration=False)
+    start = len(requests)
+    page.evaluate("() => loadRun('pending')")
+    page.wait_for_function("document.getElementById('plot-vel-top').dataset.renderRun === 'pending'")
+    assert page.evaluate("document.getElementById('plot-vel-top').dataset.renderField") == 'initial'
+    assert page.evaluate('ST.top.z') == 0
+    assert _ranges(page, 'plot-vel-top') == [[0, 240], [0, 120]]
+    assert not any('model_type=iter' in url for url in requests[start:])
+    assert any('model_type=initial' in url and 'plane=xy' in url for url in requests[start:])
+
+
+def test_top_png_contains_xy_depth_and_preserves_zoom(browser_viewer, tmp_path):
+    page, *_ = browser_viewer
+    page.evaluate('setModelZ(60)')
+    page.wait_for_function("document.getElementById('plot-vel-top').dataset.renderDepthZ === '60'")
+    page.evaluate("() => Plotly.relayout('plot-vel-top', {'xaxis.range':[40,100], 'yaxis.range':[20,70]})")
+    zoom = _ranges(page, 'plot-vel-top')
+    with page.expect_download() as pending:
+        page.locator('#panel-vel-top .btn-dl').click()
+    download = pending.value
+    assert 'XY_depthZ_60' in download.suggested_filename
+    assert '_y_' not in download.suggested_filename
+    path = tmp_path / download.suggested_filename
+    download.save_as(path)
+    assert path.read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
+    page.wait_for_function("document.querySelector('#panel-vel-top .btn-dl').disabled === false")
+    assert _ranges(page, 'plot-vel-top') == zoom

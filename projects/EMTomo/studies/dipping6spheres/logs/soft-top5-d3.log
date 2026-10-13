@@ -1,0 +1,26 @@
+Experiment dipping6spheres_240x120x120_72st_1000ev_sobol_minz5_noise01_pick005_seed42: 1000 events, 72 stations, inversion grid (24, 12, 12), cell 10000 m
+1/12
+[Rays] 360000/360000 reached, 0 failed, 360000 used
+2/12
+[Rays] 360000/360000 reached, 0 failed, 360000 used
+3/12
+[Rays] 360000/360000 reached, 0 failed, 360000 used
+4/12
+[Rays] 360000/360000 reached, 0 failed, 360000 used
+5/12
+[Rays] 360000/360000 reached, 0 failed, 360000 used
+6/12
+[Rays] 360000/360000 reached, 0 failed, 360000 used
+7/12
+[Rays] 360000/360000 reached, 0 failed, 360000 used
+8/12
+[Rays] 360000/360000 reached, 0 failed, 360000 used
+9/12
+[Rays] 360000/360000 reached, 0 failed, 360000 used
+10/12
+[Rays] 360000/360000 reached, 0 failed, 360000 used
+11/12
+[Rays] 360000/360000 reached, 0 failed, 360000 used
+12/12
+[Rays] 360000/360000 reached, 0 failed, 360000 used
+[TomographyLogger] Run saved to: /mnt/disk01/egor/projects/EMTomo/runs/run_dip6-soft-top5-d3-dipping6spheres-240x120x120-72st-1000ev-sobol-minz5-noise01-pick005-seed42_v1.4_ncand-5_topn-5_mode-soft_dmin-3_lam-0.05_temp-1.0_sub-9_cov-1.5_20261009_170938

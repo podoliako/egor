@@ -82,3 +82,18 @@ def test_cli_saves_inputs_with_generation_record(tmp_path):
     assert generation["generator"] == "dipping_layers"
     assert generation["parameters"]["seed"] == 3
     assert len(generation["parameters"]["anomalies"]) == 6
+
+
+def test_event_lattice_avoids_inversion_cell_faces_and_layers_are_flat():
+    from projects.forward_modeling.dipping_layers_generator import PRESETS
+    config = PRESETS["geysers20flat"]
+    model, stations, events = generate_dipping_layers(config)
+    assert len(stations.ids) == 52 and len(events.ids) == 1920
+    coords_km = events.coordinates_m / 1000
+    for cell in (1.0, 0.5, 1 / 3):
+        ratio = coords_km / cell
+        assert np.all(np.abs(ratio - np.rint(ratio)) > 1e-6)
+    velocity = model.velocity
+    np.testing.assert_array_equal(velocity[0, 0], velocity[-1, 0])  # no dip at a sphere-free y
+    with pytest.raises(ValueError, match="event_grid_shape"):
+        replace(config, n_events=1000)

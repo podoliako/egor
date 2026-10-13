@@ -801,3 +801,299 @@ def test_old_legacy_completion_accepts_standalone_G_and_late_alternate_extension
     assert client.get(url).json[0]["iterations"] == [0]
     assert not (weight / "G_stations_sparse.npz").exists()
     assert client.get("/api/runs/legacy/slice?type=G&station=1").json["slice"] == [[1., 1.], [1., 1.]]
+
+
+@pytest.fixture
+def asymmetric_viewer(viewer):
+    client, add, _, model_path, _, _ = viewer
+    rd = add("xy")
+    coarse = (4000. + 1000. * np.arange(3)[:, None, None]
+              + 100. * np.arange(4)[None, :, None]
+              + 10. * np.arange(2)[None, None, :])
+    truth = (3000. + 1000. * np.arange(5)[:, None, None]
+             + 100. * np.arange(3)[None, :, None]
+             + 10. * np.arange(4)[None, None, :])
+    np.savez(model_path, velocity=truth, cell_size_m=np.array(2000.), origin_m=np.zeros(3))
+    meta = json.loads((rd / "meta.json").read_text())
+    meta["source_experiment"]["model_sha256"] = hashlib.sha256(model_path.read_bytes()).hexdigest()
+    meta["grid_info"] = {"coarse_shape": [3, 4, 2], "coarse_cell_size": 2000.,
+                         "coarse_side_m": [6000., 12000., 10000.], "fine_cell_size": 2000.}
+    (rd / "meta.json").write_text(json.dumps(meta))
+    np.save(rd / "initial_model.npy", coarse)
+    for name, values in (("model", coarse + 500), ("delta_s", coarse - 5000),
+                         ("sensitivity_diagonal", coarse * 2),
+                         ("coverage_confidence", coarse / 10000)):
+        np.save(rd / "iter_0" / f"{name}.npy", values)
+    return client, rd, coarse, truth
+
+
+@pytest.mark.parametrize("model_type", ["initial", "iter"])
+def test_xy_model_native_layers_axes_and_boundaries(asymmetric_viewer, model_type):
+    client, _, coarse, _ = asymmetric_viewer
+    values = coarse if model_type == "initial" else coarse + 500
+    base = f"/api/runs/xy/slice?type=model&model_type={model_type}&plane=xy"
+    assert client.get(base).json["z_km"] == 2.5
+    for depth, layer in ((0, 0), (4.999, 0), (5, 1), (10, 1)):
+        response = client.get(base + f"&z_km={depth}")
+        assert response.status_code == 200
+        data = response.json
+        np.testing.assert_array_equal(data["slice"], values[:, :, layer])
+        assert data["shape"] == [3, 4]
+        assert data["full_shape"] == [3, 4, 2]
+        assert data["slice_plane"] == "xy"
+        assert data["z_km"] == depth
+        assert data["x_km"] == [1, 3, 5]
+        assert data["y_km"] == [1.5, 4.5, 7.5, 10.5]
+        assert data["x_edges_km"] == [0, 2, 4, 6]
+        assert data["y_edges_km"] == [0, 3, 6, 9, 12]
+        assert "z_edges_km" not in data
+        assert data["origin_m"] == [0, 0, 0]
+        assert data["cell_size"] == 2000
+        assert data["grid_step"] == [1, 1]
+        assert data["vmin"] == values[:, :, layer].min()
+        assert data["vmax"] == values[:, :, layer].max()
+    # Explicit XZ remains identical to the legacy default, including its axes.
+    assert client.get(base.replace("&plane=xy", "") + "&y_km=6").json == client.get(
+        base.replace("plane=xy", "plane=xz") + "&y_km=6").json
+
+
+@pytest.mark.parametrize("dtype,scale,offset", [
+    ("delta_s", 1, -5000), ("sensitivity_diagonal", 2, 0), ("coverage_confidence", 0.0001, 0),
+])
+def test_xy_diagnostics_keep_native_values_and_geometry(asymmetric_viewer, dtype, scale, offset):
+    client, _, coarse, _ = asymmetric_viewer
+    base = f"/api/runs/xy/slice?type={dtype}&plane=xy"
+    for depth, layer in ((0, 0), (4.999, 0), (5, 1), (10, 1)):
+        response = client.get(base + f"&z_km={depth}")
+        assert response.status_code == 200
+        data = response.json
+        np.testing.assert_allclose(data["slice"], coarse[:, :, layer] * scale + offset)
+        assert data["shape"] == [3, 4]
+        assert data["full_shape"] == [3, 4, 2]
+        assert data["z_km"] == depth
+        assert data["slice_plane"] == "xy"
+        assert data["x_edges_km"] == [0, 2, 4, 6]
+        assert data["y_edges_km"] == [0, 3, 6, 9, 12]
+
+
+def test_xy_truth_stays_on_independent_native_grid(asymmetric_viewer):
+    client, _, _, truth = asymmetric_viewer
+    base = "/api/runs/xy/slice?type=model&model_type=true&plane=xy"
+    assert client.get(base).json["z_km"] == 1
+    for depth, layer in ((0, 0), (1.999, 0), (2, 1), (4, 2), (6, 3), (8, 3)):
+        response = client.get(base + f"&z_km={depth}")
+        assert response.status_code == 200
+        data = response.json
+        np.testing.assert_array_equal(data["slice"], truth[:, :, layer])
+        assert data["shape"] == [5, 3]
+        assert data["full_shape"] == [5, 3, 4]
+        assert data["z_km"] == depth
+        assert data["slice_plane"] == "xy"
+        assert data["x_km"] == [1, 3, 5, 7, 9]
+        assert data["y_km"] == [1, 3, 5]
+        assert data["x_edges_km"] == [0, 2, 4, 6, 8, 10]
+        assert data["y_edges_km"] == [0, 2, 4, 6]
+        assert data["cell_size"] == 2000
+        assert data["grid_step"] == [1, 1]
+    for query in ("nx=5", "nx=5&ny=3&nz=4"):
+        assert client.get(base + "&" + query).status_code == 400
+    assert client.get(base + "&z_km=8.001").status_code == 400
+
+
+@pytest.mark.parametrize("subdivision", [False, True])
+def test_xy_nearest_resampling_and_grid_steps(asymmetric_viewer, subdivision):
+    client, rd, coarse, _ = asymmetric_viewer
+    base = "/api/runs/xy/slice?type=model&model_type=initial&plane=xy"
+    if subdivision:
+        meta = json.loads((rd / "meta.json").read_text())
+        meta["run_params"]["subdivision"] = 2
+        (rd / "meta.json").write_text(json.dumps(meta))
+        target = (6, 8, 4)
+    else:
+        target = (6, 12, 8)
+        base += "&nx=6&ny=12&nz=8"
+    ix = ((np.arange(target[0]) + 0.5) * coarse.shape[0] / target[0]).astype(int)
+    iy = ((np.arange(target[1]) + 0.5) * coarse.shape[1] / target[1]).astype(int)
+    for depth in (0, 4.999, 5, 10):
+        response = client.get(base + f"&z_km={depth}")
+        assert response.status_code == 200
+        data = response.json
+        layer = min(int(depth / 10 * target[2]), target[2] - 1)
+        iz = int((layer + 0.5) * coarse.shape[2] / target[2])
+        np.testing.assert_array_equal(data["slice"], coarse[ix[:, None], iy[None, :], iz])
+        assert data["shape"] == list(target[:2])
+        assert data["full_shape"] == list(target)
+        assert data["grid_step"] == [2, 2 if subdivision else 3]
+        assert data["z_km"] == depth
+        assert data["x_edges_km"][-1] == 6
+        assert data["y_edges_km"][-1] == 12
+
+
+@pytest.mark.parametrize("positive", [False, True])
+def test_xy_trilinear_matches_cell_centred_slowness_formula(asymmetric_viewer, monkeypatch, positive):
+    client, rd, coarse, _ = asymmetric_viewer
+    values = coarse if positive else coarse - 5000
+    np.save(rd / "initial_model.npy", values)
+    meta = json.loads((rd / "meta.json").read_text())
+    meta["run_params"]["slowness_interpolation"] = "trilinear"
+    (rd / "meta.json").write_text(json.dumps(meta))
+    target = (7, 9, 5)
+    coords = [np.clip((np.arange(n) + 0.5) * size / n - 0.5, 0, size - 1)
+              for size, n in zip(values.shape, target)]
+    zeros = server.np.zeros
+
+    def plane_only(shape, *args, **kwargs):
+        assert not isinstance(shape, tuple) or len(shape) <= 2, "Resampling allocated a volume"
+        return zeros(shape, *args, **kwargs)
+
+    monkeypatch.setattr(server.np, "zeros", plane_only)
+    base = "/api/runs/xy/slice?type=model&model_type=initial&plane=xy&nx=7&ny=9&nz=5"
+    for depth in (0, 4.5, 10):
+        response = client.get(base + f"&z_km={depth}")
+        assert response.status_code == 200
+        data = response.json
+        layer = min(int(depth / 10 * target[2]), target[2] - 1)
+        expected = np.empty(target[:2])
+        for x in range(target[0]):
+            for y in range(target[1]):
+                position = (coords[0][x], coords[1][y], coords[2][layer])
+                lower = np.floor(position).astype(int)
+                fraction = np.asarray(position) - lower
+                result = 0.
+                for corner in np.ndindex(2, 2, 2):
+                    index = tuple(min(lower[a] + corner[a], values.shape[a] - 1) for a in range(3))
+                    weight = np.prod([fraction[a] if corner[a] else 1 - fraction[a] for a in range(3)])
+                    result += weight * (1 / values[index] if positive else values[index])
+                expected[x, y] = 1 / result if positive else result
+        np.testing.assert_allclose(data["slice"], expected.astype(np.float32), rtol=1e-7)
+        # The original XZ interpolation on a transpose view must be equivalent.
+        equivalent, _, _ = server._model_slice(values.transpose(0, 2, 1), layer, meta,
+                                               (target[0], target[2], target[1]))
+        np.testing.assert_array_equal(data["slice"], equivalent)
+        assert data["full_shape"] == list(target)
+        assert data["shape"] == [7, 9]
+        assert data["grid_step"] == [1, 1]
+        assert data["z_km"] == depth
+        np.testing.assert_allclose(data["x_km"], (np.arange(7) + 0.5) * 6 / 7)
+        np.testing.assert_allclose(data["y_km"], (np.arange(9) + 0.5) * 12 / 9)
+
+
+@pytest.mark.parametrize("query", [
+    "plane=yz", "plane=", "plane=XY", "plane=xy&y_km=0", "plane=xz&z_km=0", "z_km=0",
+    "plane=xy&z_km=-0.001", "plane=xy&z_km=10.001", "plane=xy&z_km=nan",
+    "plane=xy&z_km=inf", "plane=xy&z_km=-inf", "plane=xy&z_km=garbage", "plane=xy&z_km=",
+    "plane=xy&nx=0&ny=4&nz=2", "plane=xy&nx=3&ny=513&nz=2",
+    "plane=xy&nx=3&ny=4&nz=513", "plane=xy&nx=3", "plane=xy&nx=3&ny=nan&nz=2",
+])
+def test_xy_invalid_plane_coordinates_and_target_shapes(asymmetric_viewer, query):
+    client, _, _, _ = asymmetric_viewer
+    assert client.get("/api/runs/xy/slice?type=model&model_type=initial&" + query).status_code == 400
+    if not any(name + "=" in query for name in ("nx", "ny", "nz")):
+        for dtype in ("delta_s", "sensitivity_diagonal", "coverage_confidence"):
+            assert client.get(f"/api/runs/xy/slice?type={dtype}&" + query).status_code == 400
+        assert client.get("/api/runs/xy/slice?type=model&model_type=true&" + query).status_code == 400
+
+
+@pytest.mark.parametrize("dtype", ["weights", "G", "ray_count"])
+def test_xy_sparse_and_ray_types_remain_xz_only(asymmetric_viewer, dtype):
+    client, _, _, _ = asymmetric_viewer
+    assert client.get(f"/api/runs/xy/slice?type={dtype}&plane=xy&z_km=0").status_code == 400
+
+
+def test_xy_pixel_limit_uses_shown_axes_for_explicit_and_default_grids(asymmetric_viewer):
+    client, rd, _, _ = asymmetric_viewer
+    base = "/api/runs/xy/slice?type=model&model_type=initial"
+    for plane, shape, status in (("xy", (256, 2, 512), 200), ("xz", (256, 2, 512), 400),
+                                 ("xy", (256, 512, 2), 400), ("xz", (256, 512, 2), 200),
+                                 ("xy", (256, 256, 1), 200), ("xy", (256, 257, 1), 400)):
+        query = f"&plane={plane}&nx={shape[0]}&ny={shape[1]}&nz={shape[2]}"
+        assert client.get(base + query).status_code == status
+    meta = json.loads((rd / "meta.json").read_text())
+    meta["run_params"]["subdivision"] = 74
+    (rd / "meta.json").write_text(json.dumps(meta))
+    assert client.get(base + "&plane=xy").status_code == 400
+    assert client.get(base + "&plane=xz").status_code == 200
+    assert client.get(base + "&plane=xy&nx=3&ny=4&nz=2").status_code == 200
+
+
+def test_xy_publication_gating_and_initial_before_completion(asymmetric_viewer):
+    client, rd, _, _ = asymmetric_viewer
+    (rd / "iter_0/complete.json").unlink()
+    base = "/api/runs/xy/slice?plane=xy&z_km=0"
+    for model_type in ("initial", "true"):
+        assert client.get(base + f"&type=model&model_type={model_type}").status_code == 200
+    np.testing.assert_array_equal(client.get(base + "&type=model").json["slice"],
+                                  np.load(rd / "initial_model.npy")[:, :, 0])
+    for query in ("type=model&model_type=iter", "type=delta_s", "type=sensitivity_diagonal",
+                  "type=coverage_confidence"):
+        assert client.get(base + "&" + query).status_code == 404
+    (rd / "iter_0/complete.json").write_text(json.dumps({"iter": 0, "viewer_completion_protocol": 1}))
+    for query in ("type=model&model_type=iter", "type=delta_s", "type=sensitivity_diagonal",
+                  "type=coverage_confidence"):
+        assert client.get(base + "&" + query).status_code == 200
+        assert client.get(base + "&" + query + "&iter=1").status_code == 404
+
+
+def _ray_status_fixture(failed=False):
+    return {
+        "schema_version": 1, "expected": 6, "reached": 5 if failed else 6,
+        "failed": int(failed), "used": 4 if failed else 6,
+        "n_events": 3, "n_hypotheses": 3, "events_with_failed_rays": int(failed),
+        "hypotheses_with_insufficient_stations": int(failed),
+        "failures": [{"event": 2, "hypothesis": 0, "stations": [1]}] if failed else [],
+    }
+
+
+@pytest.mark.parametrize("failed", [False, True])
+def test_ray_status_returns_primary_trace_totals_only_after_publication(viewer, failed):
+    client, add, *_ = viewer
+    rd = add("current")
+    status = _ray_status_fixture(failed)
+    (rd / "iter_0/ray_status.json").write_text(json.dumps(status))
+    response = client.get("/api/runs/current/ray_status?iter=0")
+    assert response.status_code == 200
+    assert response.json == {**status, "available": True, "iter": 0}
+    (rd / "iter_0/complete.json").unlink()
+    assert client.get("/api/runs/current/ray_status?iter=0").json == {
+        "available": False, "reason": "not_completed", "iter": 0,
+    }
+
+
+def test_old_logs_do_not_invent_ray_success_from_coverage(viewer):
+    client, add, *_ = viewer
+    rd = add("old", protocol=None)
+    np.save(rd / "iter_0/ray_count.npy", np.full((24, 12, 12), 99))
+    assert client.get("/api/runs/old/ray_status?iter=0").json == {
+        "available": False, "reason": "not_recorded", "iter": 0,
+    }
+
+
+@pytest.mark.parametrize("changes", [
+    {"expected": 7}, {"reached": -1}, {"used": 7}, {"expected": True},
+    {"schema_version": 2}, {"failures": []},
+    {"failures": [{"event": 2, "hypothesis": 0, "stations": [1, 1]}]},
+    {"failures": [{"event": 2, "hypothesis": 0, "stations": [-1]}]},
+    {"events_with_failed_rays": 4}, {"hypotheses_with_insufficient_stations": 4},
+])
+def test_invalid_ray_accounting_is_explicitly_unavailable(viewer, changes):
+    client, add, *_ = viewer
+    rd = add("current")
+    status = {**_ray_status_fixture(True), **changes}
+    (rd / "iter_0/ray_status.json").write_text(json.dumps(status))
+    assert client.get("/api/runs/current/ray_status?iter=0").json == {
+        "available": False, "reason": "invalid_artifact", "iter": 0,
+    }
+
+
+def test_ray_status_rejects_partial_json_invalid_iteration_and_symlinks(viewer, tmp_path):
+    client, add, *_ = viewer
+    rd = add("current")
+    path = rd / "iter_0/ray_status.json"
+    path.write_text('{"expected":')
+    assert client.get("/api/runs/current/ray_status").json["reason"] == "invalid_artifact"
+    assert client.get("/api/runs/current/ray_status?iter=-1").status_code == 400
+    path.unlink()
+    target = tmp_path / "outside.json"
+    target.write_text(json.dumps(_ray_status_fixture()))
+    path.symlink_to(target)
+    assert client.get("/api/runs/current/ray_status").status_code == 404

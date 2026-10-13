@@ -1,0 +1,42 @@
+Experiment dipwedge_20x7x7km_27st_1000ev_sobol_z0.5-5.5_noise01_pick001_seed42: 1000 events, 27 stations, inversion grid (40, 14, 14), cell 500 m
+1/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+2/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+3/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+4/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+5/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+6/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+7/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+8/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+9/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+10/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+11/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+12/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+13/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+14/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+15/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+16/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+17/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+18/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+19/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+20/20
+[Rays] 81000/81000 reached, 0 failed, 81000 used
+[TomographyLogger] Run saved to: /mnt/disk01/egor/projects/EMTomo/runs/run_dw-soft3-lam0.2-cov0.5-dipwedge-20x7x7km-27st-1000ev-sobol-z0.5-5.5-noise01-pick001-seed42_v1.4_ncand-5_topn-3_mode-soft_dmin-2_lam-0.2_temp-1.0_sub-4_cov-0.5_20261010_201931

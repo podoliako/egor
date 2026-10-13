@@ -1,7 +1,7 @@
 """E-step per event (hypotheses and their weights) and its normal-equation contribution."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import multiprocessing as mp
 from typing import Callable, Optional
 
@@ -84,6 +84,7 @@ class EventLog:
     residuals: np.ndarray
     G_per_weight: Optional[dict]
     ray_count_per_weight: dict
+    ray_reached_per_weight: dict = field(default_factory=dict)
 
 
 def _sparsify_G_stations(G_fine: np.ndarray) -> dict[str, np.ndarray]:
@@ -139,12 +140,22 @@ def process_event(
     first_residuals = None
     G_per_weight = {} if settings.log_g_per_weight else None
     ray_count_per_weight = {}
+    ray_reached_per_weight = {}
+    n_stations = len(fields.stations)
     for index, (position, weight) in enumerate(zip(positions, weights)):
-        if weight <= 0.0:
+        if not weight > 0.0:
             continue
         trace = (fields.gx, fields.gy, fields.gz, fields.stations, position,
                  h, RAY_STEP_CELLS, RAY_STEP_CELLS, RAY_MAX_STEPS, x_lo, x_hi)
         G_stations, reached = compute_G(*trace, *fields.restriction, fields.coarse_shape)
+        reached = np.array(reached, dtype=bool, copy=True)
+        if reached.shape != (n_stations,):
+            raise ValueError(
+                f"Ray reached mask for hypothesis {index} must have shape "
+                f"({n_stations},), got {reached.shape}"
+            )
+        # Keep the normal-equation trace, not the optional fine-grid re-trace.
+        ray_reached_per_weight[index] = reached
         residuals = observed - predicted[index]
         accumulate_normal_equations(
             hessian, rhs, G_stations, residuals, reached,
@@ -172,6 +183,7 @@ def process_event(
         residuals=first_residuals if first_residuals is not None else np.array([]),
         G_per_weight=G_per_weight,
         ray_count_per_weight=ray_count_per_weight,
+        ray_reached_per_weight=ray_reached_per_weight,
     )
 
 

@@ -97,6 +97,8 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 .toggle-row { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .toggle-item { display: flex; align-items: center; gap: 4px; cursor: pointer; color: var(--text2); user-select: none; font-size: 11px; }
 .badge { font-family: var(--ff-mono); font-size: 10px; padding: 1px 5px; border-radius: 3px; background: var(--bg2); color: var(--text2); border: 1px solid var(--border); }
+.ray-status-ok { color: #176840; background: #ecf7f0; border-color: #9cc9ad; }
+.ray-status-warning { color: #942c23; background: #fff0ed; border-color: #dca299; }
 #warn-no-grid {
   display: none; color: var(--warn); font-size: 10px; white-space: nowrap;
   padding: 2px 7px; border: 1px solid currentColor; border-radius: 3px; background: #fdf5ec;
@@ -139,13 +141,16 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   height: var(--panel-h);
 }
 
-#model-row .y-group { flex-wrap: wrap; flex-shrink: 1; min-width: 0; max-width: 100%; }
+#model-row .y-group, #model-top-row .y-group { flex-wrap: wrap; flex-shrink: 1; min-width: 0; max-width: 100%; }
 
 /* Share the complete wrapped header track, not just its first line. */
 @supports (grid-template-rows: subgrid) {
   #model-row { height: var(--panel-h); grid-template-rows: auto minmax(0, 1fr); row-gap: 0; }
   #model-row > .panel { display: grid; grid-row: span 2; grid-template-rows: subgrid; height: auto; }
   #model-row > .panel.fullscreen { display: flex; height: calc(100vh - 44px); }
+  #model-top-row { height: var(--panel-h); grid-template-rows: auto minmax(0, 1fr); row-gap: 0; }
+  #model-top-row > .panel { display: grid; grid-row: span 2; grid-template-rows: subgrid; height: auto; }
+  #model-top-row > .panel.fullscreen { display: flex; height: calc(100vh - 44px); }
 }
 
 /* Timing / quality panel: shorter, full width */
@@ -288,6 +293,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
     <input type="number" id="iter-num"   min="0" max="0" value="0" style="width:48px">
     <span class="badge" id="iter-max-badge">/ 0</span>
   </div>
+  <span class="badge" id="ray-status-badge" role="status" aria-live="polite">Лучи: —</span>
   <div class="vsep"></div>
 
   <div class="toggle-row">
@@ -390,6 +396,57 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
     </div>
 
   </div><!-- /row 1 -->
+
+  <!-- Horizontal XY comparison; independent physical depth from the Y pair. -->
+  <div class="panel-row" id="model-top-row">
+    <div class="panel" id="panel-vel-top">
+      <div class="panel-hdr" id="vel-top-header">
+        <span class="panel-title">Velocity Model · XY top view</span>
+        <button class="btn-dl" data-plot="plot-vel-top" data-fname="velocity_XY" title="Download PNG">↓</button>
+        <button class="btn-full" title="Fullscreen">⤢</button>
+        <div class="ph-group"><select id="vel-top-type" aria-label="Top view field">
+          <option value="iter">Iter</option>
+          <option value="initial">Initial</option>
+          <option value="delta_s">ΔS (update i → i+1)</option>
+          <option value="sensitivity_diagonal">Sensitivity diagonal</option>
+          <option value="coverage_confidence">Coverage confidence</option>
+        </select></div>
+        <div class="ph-group"><span class="badge" id="vel-top-shape-badge">—</span></div>
+        <div class="ph-group"><select id="vel-top-scale" aria-label="Top view color scale">
+          <option value="auto">Auto scale</option><option value="fixed">Fixed per run / field</option>
+        </select></div>
+        <span class="badge" id="model-top-state-label"></span>
+        <div class="ph-group y-group">
+          Z depth (km)
+          <button class="y-btn" id="vel-top-z-dec">◀</button>
+          <input type="range" id="vel-top-z" min="0" max="0" value="0" step="1" style="width:100px" aria-label="Top view depth Z (km)">
+          <button class="y-btn" id="vel-top-z-inc">▶</button>
+          <input type="number" id="vel-top-z-num" min="0" max="0" value="0" class="y-num" aria-label="Top view depth Z (km)">
+          <span class="y-val" id="vel-top-z-v">0 km</span>
+          <label title="Step of the Z depth slider and arrows in kilometres">Step
+            <input type="number" id="vel-top-z-step" class="y-step" min="0.01" step="any" value="1"> km
+          </label>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="no-data-msg" id="vel-top-empty">Select a run</div>
+        <div id="plot-vel-top" style="width:100%;height:100%"></div>
+      </div>
+    </div>
+    <div class="panel" id="panel-tr-top">
+      <div class="panel-hdr" id="tr-top-header">
+        <span class="panel-title">True Model · XY top view</span>
+        <button class="btn-dl" data-plot="plot-tr-top" data-fname="true_model_XY" title="Download PNG">↓</button>
+        <button class="btn-full" title="Fullscreen">⤢</button>
+        <div class="ph-group"><span class="badge" id="tr-top-shape-badge">—</span></div>
+        <div class="ph-group"><span class="badge" id="tr-top-z-v">Z depth: 0 km</span></div>
+      </div>
+      <div class="panel-body">
+        <div class="no-data-msg" id="tr-top-empty">No true model saved</div>
+        <div id="plot-tr-top" style="width:100%;height:100%"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- Row 2: Ray Count + G Matrix -->
   <div class="panel-row">
@@ -593,11 +650,14 @@ const ST = {
   vel:    { type: 'iter', y: 0, yStep: 1, scale: 'auto' },
   tr:     { y: 0 },
   truthEdges: null,
+  top:    { type: 'iter', z: 0, zStep: 1, scale: 'auto' },
+  topTruthEdges: null,
   rc:     { event: 0, weight: 0, y: 0, dim: true },
   G:      { event: 0, station: 0, weight: 0, y: 0, dim: true },
   wt:     { event: 0, y: 0, dim: true },
   timing: { data: [], mode: 'per_iter' },
   quality:{ data: [] },
+  rayStatus: null,
   hypoQ:  { residualSummary: [], residualIter: [], topN: 8, hilightEv: -1 },
   hypoD:  { distanceSummary: [], distanceIter: [], topN: 8, hilightEv: -1 },
   autoRefresh: false,
@@ -614,7 +674,7 @@ const PLY_CFG = {
 };
 
 const ALL_PLOTS = [
-  'plot-vel','plot-tr','plot-rc','plot-wt','plot-G',
+  'plot-vel','plot-tr','plot-vel-top','plot-tr-top','plot-rc','plot-wt','plot-G',
   'plot-timing','plot-quality',
   'plot-hypoq-trend','plot-hypoq-hist',
   'plot-hypod-trend','plot-hypod-hist',
@@ -624,6 +684,7 @@ const PLOT_REQUEST_TOKENS = new Map();
 const PLOT_RENDER_TOKENS = new Map();
 const PLOT_RENDER_PROMISES = new Map();
 let LOAD_RUN_TOKEN = 0;
+let RAY_STATUS_TOKEN = 0;
 
 function beginPlotRequest(...plotIds) {
   const token = Symbol('plot-request');
@@ -661,7 +722,13 @@ function trackPlotRender(plotId, traces, layout, config) {
     el.dataset.renderRun = renderedRun || 'plot';
     el.dataset.renderIter = String(renderedIter);
         el.dataset.renderField = context.field;
-        el.dataset.renderY = String(context.y);
+        if (context.depthZ !== undefined) {
+          el.dataset.renderDepthZ = String(context.depthZ);
+          delete el.dataset.renderY;
+        } else {
+          el.dataset.renderY = String(context.y);
+          delete el.dataset.renderDepthZ;
+        }
         el.dataset.renderContext = context.label;
   });
   PLOT_RENDER_PROMISES.set(plotId, promise);
@@ -674,7 +741,7 @@ function modelExtentKm() {
   return Array.isArray(size) ? size.map(v => v / 1000) : [1, 1, 1];
 }
 
-function mkLayout(nx, nz, cbTitle, zrange) {
+function mkLayout(nx, nz, cbTitle, zrange, plane = 'xz') {
   const coloraxis = {
     colorbar: {
       thickness: 10, len: 0.85,
@@ -694,9 +761,9 @@ function mkLayout(nx, nz, cbTitle, zrange) {
       tickmode: 'auto', nticks: 6,
     },
     yaxis: {
-      title: { text: 'Z depth (km) ↓', font: { size: 9 }, standoff: 2 },
+      title: { text: plane === 'xy' ? 'Y (km)' : 'Z depth (km) ↓', font: { size: 9 }, standoff: 2 },
       showgrid: false, zeroline: false, layer: 'below traces',
-      range: [modelExtentKm()[2], 0], tickfont: { size: 8 },
+      range: plane === 'xy' ? [0, modelExtentKm()[1]] : [modelExtentKm()[2], 0], tickfont: { size: 8 },
       tickmode: 'auto', nticks: 6,
     },
     showlegend: false,
@@ -713,12 +780,14 @@ function sparseTruthEdges(edges) {
   return selected;
 }
 
-function gridTrace(nx, nz, gridStep = [1, 1], fineGrid = false) {
+function gridTrace(nx, nz, gridStep = [1, 1], fineGrid = false, plane = 'xz') {
   if (!ST.showGrid) return null;
-  const [width, , depth] = modelExtentKm();
+  const extent = modelExtentKm(), width = extent[0], depth = extent[plane === 'xy' ? 1 : 2];
+  const edges = plane === 'xy' ? ST.topTruthEdges : ST.truthEdges;
+  const secondEdges = plane === 'xy' ? edges?.y : edges?.z;
   // Truth blocks, not inversion-grid indices, define the comparison overlay.
-  const xs = (!fineGrid && ST.truthEdges?.x && sparseTruthEdges(ST.truthEdges.x)) || Array.from({length: nx + 1}, (_, i) => i * width / nx);
-  const zs = (!fineGrid && ST.truthEdges?.z && sparseTruthEdges(ST.truthEdges.z)) || Array.from({length: nz + 1}, (_, i) => i * depth / nz);
+  const xs = (!fineGrid && edges?.x && sparseTruthEdges(edges.x)) || Array.from({length: nx + 1}, (_, i) => i * width / nx);
+  const zs = (!fineGrid && secondEdges && sparseTruthEdges(secondEdges)) || Array.from({length: nz + 1}, (_, i) => i * depth / nz);
   const x = [], y = [];
   for (const edge of xs) { x.push(edge, edge, null); y.push(0, depth, null); }
   for (const edge of zs) { x.push(0, width, null); y.push(edge, edge, null); }
@@ -734,22 +803,23 @@ function csz(coarseOrCellSize) {
   return coarseOrCellSize ? gi.coarse_cell_size : (gi.fine_cell_size ?? gi.coarse_cell_size);
 }
 
-function sliceOpacity(yKm, panelY) {
+function sliceOpacity(yKm, panelY, axis = 1) {
   // Physical falloff: independent of the velocity/FMM mesh and slider step.
-  const scale = Math.max(modelExtentKm()[1] / 10, 1e-9);
+  const scale = Math.max(modelExtentKm()[axis] / 10, 1e-9);
   return 0.06 + 0.94 * Math.exp(-Math.abs(yKm - panelY) / scale);
 }
 
-function locationTrace(locs, kind, hilite, coarse, panelY, dim, visible) {
+function locationTrace(locs, kind, hilite, coarse, panelY, dim, visible, plane = 'xz') {
   if ((!visible && hilite < 0) || !locs?.length) return [];
   const station = kind === 'station';
   const points = locs.map((loc, index) => ({ loc, index }))
     .filter(point => visible || point.index === hilite);
-  const alpha = p => (!station || dim) ? sliceOpacity(p.loc[1] / 1000, panelY) : 1;
+  const sliceAxis = plane === 'xy' ? 2 : 1;
+  const alpha = p => (plane === 'xy' || !station || dim) ? sliceOpacity(p.loc[sliceAxis] / 1000, panelY, sliceAxis) : 1;
   return [{
     type: 'scatter', mode: 'markers+text', cliponaxis: false,
     x: points.map(p => p.loc[0] / 1000),
-    y: points.map(p => p.loc[2] / 1000),
+    y: points.map(p => p.loc[plane === 'xy' ? 1 : 2] / 1000),
     // Keep a thousand event labels from obscuring the model; IDs remain in hover.
     text: points.map(p => station || p.index === hilite ? (station ? `S${p.index}` : escapeText(eventLabel(p.index))) : ''),
     customdata: points.map(p => [station ? p.index : escapeText(eventLabel(p.index)), ...p.loc.map(v => v / 1000)]),
@@ -767,12 +837,12 @@ function locationTrace(locs, kind, hilite, coarse, panelY, dim, visible) {
   }];
 }
 
-function stationTraces(hilite, coarse, panelY, dim) {
-  return locationTrace(ST.meta?.station_locs, 'station', hilite, coarse, panelY, dim, ST.showStations);
+function stationTraces(hilite, coarse, panelY, dim, plane = 'xz') {
+  return locationTrace(ST.meta?.station_locs, 'station', hilite, coarse, panelY, dim, ST.showStations, plane);
 }
 
-function eventTraces(hilite, coarse, panelY, dim) {
-  return locationTrace(ST.meta?.event_locs, 'event', hilite, coarse, panelY, dim, ST.showEvents);
+function eventTraces(hilite, coarse, panelY, dim, plane = 'xz') {
+  return locationTrace(ST.meta?.event_locs, 'event', hilite, coarse, panelY, dim, ST.showEvents, plane);
 }
 
 function hypocenterTraces(hypocenters, panelY, dim) {
@@ -795,13 +865,13 @@ function hypocenterTraces(hypocenters, panelY, dim) {
   });
 }
 
-function buildTraces(ht, nx, nz, hilSta, hilEv, coarse, panelY, dim, hypocenters = [], gridStep = [1, 1], fineGrid = false) {
-  const g = gridTrace(nx, nz, gridStep, fineGrid);
+function buildTraces(ht, nx, nz, hilSta, hilEv, coarse, panelY, dim, hypocenters = [], gridStep = [1, 1], fineGrid = false, plane = 'xz') {
+  const g = gridTrace(nx, nz, gridStep, fineGrid, plane);
   return [
     ht,
     ...(g ? [g] : []),
-    ...stationTraces(hilSta, coarse, panelY, dim ?? false),
-    ...eventTraces(hilEv, coarse, panelY, dim ?? false),
+    ...stationTraces(hilSta, coarse, panelY, dim ?? false, plane),
+    ...eventTraces(hilEv, coarse, panelY, dim ?? false, plane),
     ...hypocenterTraces(hypocenters, panelY, dim ?? false),
   ];
 }
@@ -845,6 +915,9 @@ function syncIterationControls() {
   document.getElementById('model-state-label').textContent = ST.vel.type === 'delta_s'
     ? (hasPublishedIteration() ? `Update ${ST.iter} → ${ST.iter + 1}` : 'No completed update')
         : `Applied updates: ${selectedUpdateState()}`;
+  document.getElementById('model-top-state-label').textContent = ST.top.type === 'delta_s'
+    ? (hasPublishedIteration() ? `Update ${ST.iter} → ${ST.iter + 1}` : 'No completed update')
+    : `Applied updates: ${ST.top.type === 'initial' || !publishedIterations().length ? 0 : ST.iter}`;
 }
 
 function T(mat) {
@@ -855,13 +928,13 @@ function T(mat) {
 }
 
 
-function heatTrace(slice, colorscale, axes, zrange) {
+function heatTrace(slice, colorscale, axes, zrange, plane = 'xz') {
   const nx = slice.length, nz = slice[0]?.length || 0;
-  const [width, , depth] = modelExtentKm();
+  const extent = modelExtentKm(), width = extent[0], depth = extent[plane === 'xy' ? 1 : 2];
   const t = { type: 'heatmap', z: T(slice), colorscale, showscale: true, coloraxis: 'coloraxis',
     x: axes?.x_km || Array.from({length: nx}, (_, i) => (i + 0.5) * width / nx),
-    y: axes?.z_km || Array.from({length: nz}, (_, i) => (i + 0.5) * depth / nz),
-    hovertemplate: 'x=%{x:.2f} km  z=%{y:.2f} km  val=%{z:.4g}<extra></extra>' };
+    y: (plane === 'xy' ? axes?.y_km : axes?.z_km) || Array.from({length: nz}, (_, i) => (i + 0.5) * depth / nz),
+    hovertemplate: `x=%{x:.2f} km  ${plane === 'xy' ? 'y' : 'z'}=%{y:.2f} km  val=%{z:.4g}<extra></extra>` };
   t._zrange = zrange || null;
   return t;
 }
@@ -1406,7 +1479,7 @@ function _highlightHypoEvent(ev, which) {
       renderWt(); renderG(); renderRayCount();
     });
   }
-  renderVelPair(); renderHypoData();
+  renderVelPair(); renderTopPair(); renderHypoData();
 }
 
 
@@ -1418,7 +1491,7 @@ function trueModelUrl(yKm) {
 
 function inversionResolution() {
   const shape = ST.meta?.grid_info?.coarse_shape || [12, 12, 12];
-  // At most 57,600 pixels per slice. Upsample in x/z, never a 3-D volume.
+  // At most 57,600 pixels per slice. Upsample within the plane, never a 3-D volume.
   const n = shape.map(size => Math.min(240, Math.max(48, size * 8)));
   return `&nx=${n[0]}&ny=${n[1]}&nz=${n[2]}`;
 }
@@ -1427,37 +1500,45 @@ function sliceRange(data) {
   return [Math.min(data.vmin, data.vmax), Math.max(data.vmin, data.vmax)];
 }
 
-function fieldRange(field, range) {
-  if (ST.vel.scale !== 'fixed') return range;
+function fieldRange(field, range, scale = ST.vel.scale) {
+  if (scale !== 'fixed') return range;
   if (!ST.colorRanges.has(field)) ST.colorRanges.set(field, range);
   return ST.colorRanges.get(field);
 }
 
-async function renderVelPair() {
+async function renderModelPair(top = false) {
   if (!ST.run || !ST.meta) return;
-  const request = beginPlotRequest('plot-vel', 'plot-tr');
-  const run = ST.run, yKm = ST.vel.y;
-  const type = ST.vel.type;
+  const vel = top ? 'vel-top' : 'vel', tr = top ? 'tr-top' : 'tr';
+  const plotVel = `plot-${vel}`, plotTr = `plot-${tr}`;
+  const request = beginPlotRequest(plotVel, plotTr);
+  const state = top ? ST.top : ST.vel, plane = top ? 'xy' : 'xz';
+  const run = ST.run, position = top ? state.z : state.y;
+  const type = state.type;
   const model = type === 'iter' || type === 'initial';
   const effectiveType = type === 'iter' && !publishedIterations().length ? 'initial' : type;
+  const spatialQuery = top ? `plane=xy&z_km=${position}` : `y_km=${position}`;
   const velUrl = model
-    ? `/api/runs/${run}/slice?type=model&model_type=${effectiveType}&iter=${ST.iter}&y_km=${yKm}${inversionResolution()}`
-    : `/api/runs/${run}/slice?type=${type}&iter=${ST.iter}&y_km=${yKm}`;
+    ? `/api/runs/${run}/slice?type=model&model_type=${effectiveType}&iter=${ST.iter}&${spatialQuery}${inversionResolution()}`
+    : `/api/runs/${run}/slice?type=${type}&iter=${ST.iter}&${spatialQuery}`;
+  // Always retain the native truth mesh: no inversion resampling parameters.
+  const truthUrl = top ? `/api/runs/${run}/slice?type=model&model_type=true&${spatialQuery}` : trueModelUrl(position);
   const available = effectiveType === 'initial' || hasPublishedIteration();
-  emptyP('plot-vel', 'vel-empty', 'Loading model / field…');
-  emptyP('plot-tr', 'tr-empty', 'Loading true model…');
+  emptyP(plotVel, `${vel}-empty`, 'Loading model / field…');
+  emptyP(plotTr, `${tr}-empty`, 'Loading true model…');
   const [dV, dTr] = await Promise.all([
-    available ? apiFetch(velUrl) : Promise.resolve(null), apiFetch(trueModelUrl(yKm)),
+    available ? apiFetch(velUrl) : Promise.resolve(null), apiFetch(truthUrl),
   ]);
-  if (!isCurrentPlotRequest(request, 'plot-vel', 'plot-tr')) return;
-  ST.truthEdges = dTr?.slice ? {x: dTr.x_edges_km, z: dTr.z_edges_km} : null;
-  document.getElementById('tr-y-v').textContent = `Y: ${yKm.toFixed(2)} km`;
+  if (!isCurrentPlotRequest(request, plotVel, plotTr)) return;
+  if (top) ST.topTruthEdges = dTr?.slice ? {x: dTr.x_edges_km, y: dTr.y_edges_km} : null;
+  else ST.truthEdges = dTr?.slice ? {x: dTr.x_edges_km, z: dTr.z_edges_km} : null;
+  document.getElementById(top ? 'tr-top-z-v' : 'tr-y-v').textContent = `${top ? 'Z depth' : 'Y'}: ${position.toFixed(2)} km`;
   syncIterationControls();
   // Only physical velocities share a range; update/coverage fields have their own units.
   const velocities = [model ? dV : null, dTr].filter(d => d?.slice);
-  const velocityRange = velocities.length ? fieldRange('velocity', [
+  const rangeKey = top ? 'xy:' : '';
+  const velocityRange = velocities.length ? fieldRange(`${rangeKey}velocity`, [
     Math.min(...velocities.map(d => d.vmin)), Math.max(...velocities.map(d => d.vmax)),
-  ]) : null;
+  ], state.scale) : null;
   let range = velocityRange;
   if (!model && dV?.slice) {
     range = sliceRange(dV);
@@ -1465,33 +1546,36 @@ async function renderVelPair() {
       const bound = Math.max(1e-12, ...range.map(Math.abs)); range = [-bound, bound];
     }
     if (type === 'coverage_confidence') range = [0, 1];
-    range = fieldRange(type, range);
+    range = fieldRange(`${rangeKey}${type}`, range, state.scale);
   }
   const renders = [];
   if (dV?.slice) {
-    showP('plot-vel', 'vel-empty'); shapeBadge('vel-shape-badge', dV.full_shape);
+    showP(plotVel, `${vel}-empty`); shapeBadge(`${vel}-shape-badge`, dV.full_shape);
     const units = model ? 'V (m/s)' : type === 'delta_s' ? 'Δs (s/m)' : type === 'coverage_confidence' ? 'Confidence (0–1)' : 'diag(H) (m²/s²)';
     const colors = model ? CS_VELOCITY : type === 'delta_s' ? CS_DIVERG : CS_RAYS;
-    renders.push(trackPlotRender('plot-vel',
-      buildTraces(heatTrace(dV.slice, colors, dV, range), dV.shape[0], dV.shape[1], -1, ST.hypoQ.hilightEv,
-        dV.cell_size, yKm, false, [], dV.grid_step),
-      mkLayout(dV.shape[0], dV.shape[1], units, range), PLY_CFG));
+    renders.push(trackPlotRender(plotVel,
+      buildTraces(heatTrace(dV.slice, colors, dV, range, plane), dV.shape[0], dV.shape[1], -1, ST.hypoQ.hilightEv,
+        dV.cell_size, position, false, [], dV.grid_step, false, plane),
+      mkLayout(dV.shape[0], dV.shape[1], units, range, plane), PLY_CFG));
   } else {
-    shapeBadge('vel-shape-badge', null);
-    emptyP('plot-vel', 'vel-empty', dataMessage(dV, available ? 'No model / field artefact saved' : 'No completed iteration — choose Initial'));
+    shapeBadge(`${vel}-shape-badge`, null);
+    emptyP(plotVel, `${vel}-empty`, dataMessage(dV, available ? 'No model / field artefact saved' : 'No completed iteration — choose Initial'));
   }
   if (dTr?.slice) {
-    showP('plot-tr', 'tr-empty'); shapeBadge('tr-shape-badge', dTr.full_shape);
-    renders.push(trackPlotRender('plot-tr',
-      buildTraces(heatTrace(dTr.slice, CS_VELOCITY, dTr, velocityRange), dTr.shape[0], dTr.shape[1], -1, ST.hypoQ.hilightEv,
-        dTr.cell_size, yKm, false, [], dTr.grid_step),
-      mkLayout(dTr.shape[0], dTr.shape[1], 'V true (m/s)', velocityRange), PLY_CFG));
+    showP(plotTr, `${tr}-empty`); shapeBadge(`${tr}-shape-badge`, dTr.full_shape);
+    renders.push(trackPlotRender(plotTr,
+      buildTraces(heatTrace(dTr.slice, CS_VELOCITY, dTr, velocityRange, plane), dTr.shape[0], dTr.shape[1], -1, ST.hypoQ.hilightEv,
+        dTr.cell_size, position, false, [], dTr.grid_step, false, plane),
+      mkLayout(dTr.shape[0], dTr.shape[1], 'V true (m/s)', velocityRange, plane), PLY_CFG));
   } else {
-    shapeBadge('tr-shape-badge', null);
-    emptyP('plot-tr', 'tr-empty', dataMessage(dTr, 'No true model saved'));
+    shapeBadge(`${tr}-shape-badge`, null);
+    emptyP(plotTr, `${tr}-empty`, dataMessage(dTr, 'No true model saved'));
   }
   await Promise.all(renders);
 }
+
+function renderVelPair() { return renderModelPair(); }
+function renderTopPair() { return renderModelPair(true); }
 
 const renderVel = renderVelPair;
 
@@ -1574,12 +1658,73 @@ async function renderG(force = false) {
 
 function renderSpatialPlots() {
   renderVelPair();
+  renderTopPair();
   renderRayCount();
   renderWt();
   renderG();
 }
 
+function clearRayStatus(message) {
+  ++RAY_STATUS_TOKEN;
+  ST.rayStatus = null;
+  const badge = document.getElementById('ray-status-badge');
+  badge.textContent = message;
+  badge.title = '';
+  badge.classList.remove('ray-status-ok', 'ray-status-warning');
+}
+
+async function renderRayStatus() {
+  const request = ++RAY_STATUS_TOKEN;
+  const run = ST.run, iter = ST.iter;
+  const badge = document.getElementById('ray-status-badge');
+  badge.classList.remove('ray-status-ok', 'ray-status-warning');
+  ST.rayStatus = null;
+  if (!ST.meta || !hasPublishedIteration()) {
+    badge.textContent = 'Лучи: —';
+    badge.title = 'Нет завершённой итерации: промежуточные результаты не публикуются.';
+    return;
+  }
+  badge.textContent = 'Лучи: загрузка…';
+  badge.title = '';
+  const data = await apiFetch(`/api/runs/${run}/ray_status?iter=${iter}`);
+  if (request !== RAY_STATUS_TOKEN || ST.run !== run || ST.iter !== iter) return;
+  if (data?.apiError || data?.reason === 'invalid_artifact') {
+    badge.textContent = 'Лучи: ошибка';
+    badge.title = data?.apiError || 'Некорректный файл статистики лучей.';
+    badge.classList.add('ray-status-warning');
+    return;
+  }
+  if (!data?.available) {
+    badge.textContent = 'Лучи: нет данных';
+    badge.title = data?.reason === 'not_completed' ? 'Итерация ещё не опубликована.'
+      : 'Этот расчёт не сохранил флаги успеха трассировки. По длинам или числу проходов через клетки надёжно восстановить их нельзя.';
+    return;
+  }
+  ST.rayStatus = data;
+  badge.textContent = `Лучи: ${data.reached} / ${data.expected}`
+    + (data.failed ? ` · потеряно ${data.failed}` : '')
+    + (data.used !== data.reached ? ` · использовано ${data.used}` : '');
+  const fraction = data.expected ? `${(100 * data.reached / data.expected).toFixed(2)}%` : 'нет ожидаемых лучей';
+  const lines = [
+    `Цикл ${iter}: дошли до станции ${data.reached} из ${data.expected} (${fraction}).`,
+    `Ожидается по одному лучу на станцию для каждой гипотезы с положительным весом.`,
+    `Повторная трассировка для сохранения G не учитывается.`,
+    `В нормальных уравнениях использовано ${data.used} лучей: нужны минимум две достигнутые станции на гипотезу.`,
+  ];
+  if (data.failed) {
+    lines.push(`Событий с потерями: ${data.events_with_failed_rays}. Причина не классифицирована: возможны остановка на границе, нулевой градиент или лимит шагов.`);
+    for (const failure of (data.failures || []).slice(0, 5)) {
+      lines.push(`Ev ${eventLabel(failure.event)}, гипотеза ${failure.hypothesis}: станции ${failure.stations.join(', ')}.`);
+    }
+    if (data.failures.length > 5) lines.push('Полный список сохранён в iter_' + iter + '/ray_status.json.');
+  }
+  badge.title = lines.join('\n');
+  if (data.failed || data.hypotheses_with_insufficient_stations) badge.classList.add('ray-status-warning');
+  else if (data.expected) badge.classList.add('ray-status-ok');
+}
+
 function renderAll() {
+  renderRayStatus();
   renderSpatialPlots();
   renderTiming();
   renderQuality();
@@ -1615,6 +1760,35 @@ function setModelY(value) {
   ST.vel.y = snapYKm(parsed);
   configureModelY();
   renderVelPair();
+}
+
+function snapZKm(value) {
+  return Math.max(0, Math.min(modelExtentKm()[2],
+    Number((Math.round(value / ST.top.zStep) * ST.top.zStep).toFixed(8))));
+}
+
+function configureModelZ(resetStep = false) {
+  const depth = modelExtentKm()[2];
+  if (!Number.isFinite(depth) || depth <= 0) return;
+  if (resetStep) ST.top.zStep = depth / 10;
+  const slider = document.getElementById('vel-top-z');
+  const num = document.getElementById('vel-top-z-num');
+  const step = document.getElementById('vel-top-z-step');
+  slider.max = depth; slider.step = ST.top.zStep;
+  num.max = depth; num.step = 'any';
+  step.max = depth; step.value = Number(ST.top.zStep.toFixed(3));
+  ST.top.z = snapZKm(ST.top.z);
+  slider.value = num.value = ST.top.z;
+  document.getElementById('vel-top-z-v').textContent = `${ST.top.z.toFixed(2)} km`;
+  document.getElementById('tr-top-z-v').textContent = `Z depth: ${ST.top.z.toFixed(2)} km`;
+}
+
+function setModelZ(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return;
+  ST.top.z = snapZKm(parsed);
+  configureModelZ();
+  renderTopPair();
 }
 
 function setY(prefix, stateObj, value, renderFn) {
@@ -1727,7 +1901,8 @@ function updateParamsBar() {
 }
 
 const EMPTY_IDS = {
-  'plot-vel':'vel-empty', 'plot-tr':'tr-empty', 'plot-rc':'rc-empty', 'plot-wt':'wt-empty', 'plot-G':'g-empty',
+  'plot-vel':'vel-empty', 'plot-tr':'tr-empty', 'plot-vel-top':'vel-top-empty', 'plot-tr-top':'tr-top-empty',
+  'plot-rc':'rc-empty', 'plot-wt':'wt-empty', 'plot-G':'g-empty',
   'plot-timing':'timing-empty', 'plot-quality':'quality-empty',
   'plot-hypoq-trend':'hypoq-trend-empty', 'plot-hypoq-hist':'hypoq-hist-empty',
   'plot-hypod-trend':'hypod-trend-empty', 'plot-hypod-hist':'hypod-hist-empty',
@@ -1741,6 +1916,7 @@ async function loadRun(rid, targetIter = null) {
   const loadToken = ++LOAD_RUN_TOKEN;
   ++SELECTION_TOKEN; clearTimeout(ITER_RENDER_TIMER);
   ST.run = rid; ST.meta = ST.info = null;
+  clearRayStatus('Лучи: загрузка…');
   ST.timing.data = []; ST.quality.data = [];
   ST.hypoQ.residualSummary = ST.hypoQ.residualIter = [];
   ST.hypoD.distanceSummary = ST.hypoD.distanceIter = [];
@@ -1751,12 +1927,13 @@ async function loadRun(rid, targetIter = null) {
     PLOT_RENDER_TOKENS.delete(id); PLOT_RENDER_PROMISES.delete(id);
     Plotly.purge(el);
     delete el.dataset.renderRun; delete el.dataset.renderIter;
+    delete el.dataset.renderField; delete el.dataset.renderY; delete el.dataset.renderDepthZ; delete el.dataset.renderContext;
     emptyP(id, EMPTY_IDS[id], 'Loading run…');
   }
   document.getElementById('hypoq-worst-list').textContent = 'Loading…';
   document.getElementById('hypod-worst-list').textContent = 'Loading…';
   document.getElementById('params-bar').textContent = '';
-  for (const id of ['vel-shape-badge', 'tr-shape-badge', 'rc-shape-badge', 'wt-shape-badge', 'g-shape-badge']) shapeBadge(id, null);
+  for (const id of ['vel-shape-badge', 'tr-shape-badge', 'vel-top-shape-badge', 'tr-top-shape-badge', 'rc-shape-badge', 'wt-shape-badge', 'g-shape-badge']) shapeBadge(id, null);
   for (const key of ['wt', 'G', 'rc']) { ST[key].event = 0; ST[key].weightsLoading = false; ST[key].weightError = null; }
     ST.iter = 0; syncIterationControls(); syncSelections();
   ST.G.station = 0; ST.G.weight = ST.rc.weight = null;
@@ -1764,7 +1941,14 @@ async function loadRun(rid, targetIter = null) {
   ST.hypoQ.hilightEv = -1;
   ST.hypoD.hilightEv = -1;
   ['vel','tr','rc','wt','G'].forEach(k => { if (ST[k]) ST[k].y = 0; });
-  ST.truthEdges = null;
+  ST.truthEdges = ST.topTruthEdges = null;
+  ST.top.z = 0; ST.top.type = 'iter';
+  document.getElementById('vel-top-type').value = 'iter';
+  for (const id of ['vel-top-z', 'vel-top-z-num']) {
+    const el = document.getElementById(id); el.value = 0; el.max = 0;
+  }
+  document.getElementById('vel-top-z-v').textContent = '0 km';
+  document.getElementById('tr-top-z-v').textContent = 'Z depth: 0 km';
   ST.vel.type = 'iter';
   document.getElementById('vel-type').value = 'iter';
   ['vel-y','rc-y','wt-y','g-y'].forEach(id => {
@@ -1795,6 +1979,7 @@ async function loadRun(rid, targetIter = null) {
     ST.vel.type = 'initial'; document.getElementById('vel-type').value = 'initial';
   }
   configureModelY(true);
+  configureModelZ(true);
   syncWeightsY();
   document.getElementById('run-select').title = rid;
   ST.timing.data = Array.isArray(timing) ? timing : [];
@@ -1826,6 +2011,7 @@ function clampIteration(value) {
   return iterations.reduce((best, i) => Math.abs(i - requested) < Math.abs(best - requested) ? i : best, iterations[0]);
 }
 function setIter(v, debounce = false) {
+  clearRayStatus('Лучи: загрузка…');
   ST.iter = clampIteration(v);
   syncIterationControls(); syncSelections();
   beginPlotRequest(...ALL_PLOTS);
@@ -1880,6 +2066,25 @@ document.getElementById('vel-y-step').addEventListener('change', e => {
   renderSpatialPlots();
 });
 
+// XY controls never change the vertical pair's Y, field, or viewport.
+document.getElementById('vel-top-type').addEventListener('change', e => {
+  ST.top.type = e.target.value; syncIterationControls(); renderTopPair();
+});
+document.getElementById('vel-top-scale').addEventListener('change', e => { ST.top.scale = e.target.value; renderTopPair(); });
+document.getElementById('vel-top-z').addEventListener('input', e => setModelZ(e.target.value));
+document.getElementById('vel-top-z-num').addEventListener('change', e => setModelZ(e.target.value));
+document.getElementById('vel-top-z-dec').addEventListener('click', () => setModelZ(ST.top.z - ST.top.zStep));
+document.getElementById('vel-top-z-inc').addEventListener('click', () => setModelZ(ST.top.z + ST.top.zStep));
+document.getElementById('vel-top-z-step').addEventListener('change', e => {
+  const step = Number(e.target.value), depth = modelExtentKm()[2];
+  if (!Number.isFinite(step) || step <= 0 || step > depth) {
+    e.target.value = ST.top.zStep;
+    return;
+  }
+  ST.top.zStep = step;
+  configureModelZ(); renderTopPair();
+});
+
 // Ray Count
 document.getElementById('rc-ev').addEventListener('change', async e => {
   ST.rc.event = +e.target.value; syncSelections();
@@ -1923,6 +2128,8 @@ async function renderPlotForDownload(plotId) {
   switch (plotId) {
     case 'plot-vel': await renderVelPair(); break;
     case 'plot-tr': await renderVelPair(); break;
+    case 'plot-vel-top':
+    case 'plot-tr-top': await renderTopPair(); break;
     case 'plot-rc': await renderRayCount(true); break;
     case 'plot-wt': await renderWt(); break;
     case 'plot-G': await renderG(true); break;
@@ -1939,6 +2146,14 @@ async function renderPlotForDownload(plotId) {
 }
 
 function plotContext(plotId) {
+  if (plotId === 'plot-vel-top' || plotId === 'plot-tr-top') {
+    const field = plotId === 'plot-tr-top' ? 'true'
+      : ST.top.type === 'iter' && !publishedIterations().length ? 'initial' : ST.top.type;
+    const depthZ = ST.top.z;
+    const label = `${ST.run} · iter ${ST.iter} · ${field} · XY · Z depth ${depthZ} km`
+      + (field === 'delta_s' ? ` · update ${ST.iter} → ${ST.iter + 1}` : '');
+    return {field, depthZ, label};
+  }
   const fields = {'plot-tr':'true', 'plot-rc':'ray_count', 'plot-wt':'weights', 'plot-G':'G',
     'plot-timing':'timing', 'plot-quality':'quality', 'plot-hypoq-trend':'residual_trend',
     'plot-hypoq-hist':'residual_by_event', 'plot-hypod-trend':'distance_trend', 'plot-hypod-hist':'distance_by_event'};
@@ -1961,6 +2176,7 @@ async function downloadPlot(plotId, filename) {
   const margin = {...el.layout.margin};
   const renderToken = PLOT_RENDER_TOKENS.get(plotId);
   const field = el.dataset.renderField, y = el.dataset.renderY;
+  const spatialName = el.dataset.renderDepthZ !== undefined ? `XY_depthZ_${el.dataset.renderDepthZ}` : `y_${y}`;
   const context = el.dataset.renderContext;
   try {
     // Title/margin only: never alter axes or uirevision for export.
@@ -1968,7 +2184,7 @@ async function downloadPlot(plotId, filename) {
     if (runToken !== LOAD_RUN_TOKEN || PLOT_RENDER_TOKENS.get(plotId) !== renderToken) return;
     await Plotly.downloadImage(el, {
       format: 'png', width: 1200, height: 700,
-      filename: `${run}_iter_${iter}_${field}_y_${y}_${filename}`.replace(/[^\w.\-]/g, '_'),
+      filename: `${run}_iter_${iter}_${field}_${spatialName}_${filename}`.replace(/[^\w.\-]/g, '_'),
     });
   } finally {
     if (runToken === LOAD_RUN_TOKEN && PLOT_RENDER_TOKENS.get(plotId) === renderToken) {
@@ -2029,27 +2245,29 @@ window.addEventListener('keydown', e => {
 function observeModelHeaders() {
   if (typeof CSS === 'undefined' || typeof CSS.supports !== 'function'
       || CSS.supports('grid-template-rows', 'subgrid') || typeof ResizeObserver === 'undefined') return;
-  const headers = ['vel-header', 'tr-header'].map(id => document.getElementById(id));
-  if (headers.some(header => typeof header?.getBoundingClientRect !== 'function')) return;
-  const measure = () => {
-    // Remove our previous minimum before reading natural wrapped heights, so
-    // both headers can shrink again when the viewport widens.
-    headers.forEach(header => { header.style.minHeight = ''; });
-    if (headers.some(header => header.closest('.panel')?.classList.contains('fullscreen'))) return;
-    const height = Math.max(...headers.map(header => header.getBoundingClientRect().height));
-    if (height > 0) headers.forEach(header => { header.style.minHeight = `${height}px`; });
-  };
-  let scheduled = false;
-  const observer = new ResizeObserver(() => {
-    if (scheduled) return;
-    scheduled = true;
-    const apply = () => { scheduled = false; measure(); };
-    // Defer writes out of the observer delivery cycle and coalesce notifications.
-    if (typeof window.requestAnimationFrame === 'function') window.requestAnimationFrame(apply);
-    else setTimeout(apply, 0);
-  });
-  headers.forEach(header => observer.observe(header));
-  measure();
+  for (const ids of [['vel-header', 'tr-header'], ['vel-top-header', 'tr-top-header']]) {
+    const headers = ids.map(id => document.getElementById(id));
+    if (headers.some(header => typeof header?.getBoundingClientRect !== 'function')) continue;
+    const measure = () => {
+      // Remove our previous minimum before reading natural wrapped heights, so
+      // both headers can shrink again when the viewport widens.
+      headers.forEach(header => { header.style.minHeight = ''; });
+      if (headers.some(header => header.closest('.panel')?.classList.contains('fullscreen'))) return;
+      const height = Math.max(...headers.map(header => header.getBoundingClientRect().height));
+      if (height > 0) headers.forEach(header => { header.style.minHeight = `${height}px`; });
+    };
+    let scheduled = false;
+    const observer = new ResizeObserver(() => {
+      if (scheduled) return;
+      scheduled = true;
+      const apply = () => { scheduled = false; measure(); };
+      // Defer writes out of the observer delivery cycle and coalesce notifications.
+      if (typeof window.requestAnimationFrame === 'function') window.requestAnimationFrame(apply);
+      else setTimeout(apply, 0);
+    });
+    headers.forEach(header => observer.observe(header));
+    measure();
+  }
 }
 
 function observePlotSizes() {

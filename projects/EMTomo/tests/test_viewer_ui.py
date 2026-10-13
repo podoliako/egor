@@ -415,9 +415,14 @@ def test_no_completed_iterations_fetch_only_initial_and_truth():
     """)
     _drain(context)
     urls = _value(context, 'urls')
-    assert len(urls) == 2
-    assert any('model_type=initial' in url for url in urls)
-    assert any('model_type=true' in url for url in urls)
+    assert len(urls) == 4
+    for horizontal in (False, True):
+        pair_urls = [url for url in urls if ('plane=xy' in url) == horizontal]
+        assert len(pair_urls) == 2
+        assert any('model_type=initial' in url for url in pair_urls)
+        assert any('model_type=true' in url for url in pair_urls)
+    assert not any('model_type=iter' in url for url in urls)
+    assert _value(context, "elements['plot-vel-top'].dataset.renderField") == 'initial'
     assert not any('/weights_list' in url or 'type=weights' in url for url in urls)
     assert _value(context, "elements['iter-slider'].disabled") is True
     assert _value(context, "selectedUpdateState()") == 0
@@ -892,3 +897,488 @@ def test_network_errors_are_explicit_and_refresh_guard_is_released():
     assert 'API error: network unavailable' == _value(context, "elements['tr-empty'].textContent")
     assert 'API error: network unavailable' == _value(context, "elements['refresh-status'].textContent")
     assert _value(context, 'ST._refreshing') is False
+
+
+@pytest.mark.parametrize('failed', [False, True])
+def test_ray_status_badge_counts_real_attempts_and_warns_on_losses(failed):
+    context = _context()
+    data = {'available': True, 'expected': 6, 'reached': 5 if failed else 6,
+            'failed': int(failed), 'used': 4 if failed else 6, 'n_events': 3,
+            'n_hypotheses': 3, 'events_with_failed_rays': int(failed),
+            'hypotheses_with_insufficient_stations': int(failed),
+            'failures': [{'event': 2, 'hypothesis': 0, 'stations': [1]}] if failed else []}
+    context.eval('const status = ' + json.dumps(data) + ';')
+    context.eval("""
+      ST.meta.reference_event_ids = ['source-A','source-B','source-C'];
+      const urls = [];
+      const fetch = url => { urls.push(url); return Promise.resolve({ok:true,json:()=>Promise.resolve(status)}); };
+      renderRayStatus();
+    """)
+    _drain(context)
+    assert _value(context, 'urls') == ['/api/runs/run-test/ray_status?iter=0']
+    text = _value(context, "elements['ray-status-badge'].textContent")
+    assert text == ('Лучи: 5 / 6 · потеряно 1 · использовано 4' if failed else 'Лучи: 6 / 6')
+    assert _value(context, "elements['ray-status-badge'].classList.contains('ray-status-warning')") is failed
+    assert _value(context, "elements['ray-status-badge'].classList.contains('ray-status-ok')") is not failed
+    if failed:
+        assert 'Ev source-C, гипотеза 0: станции 1' in _value(context, "elements['ray-status-badge'].title")
+
+
+@pytest.mark.parametrize('reason', ['not_recorded', 'not_completed', 'invalid_artifact'])
+def test_unavailable_ray_accounting_never_shows_zero_or_assumed_success(reason):
+    context = _context()
+    context.eval('const status = ' + json.dumps({'available': False, 'reason': reason}) + ';')
+    context.eval("""
+      const fetch = url => Promise.resolve({ok:true,json:()=>Promise.resolve(status)});
+      renderRayStatus();
+    """)
+    _drain(context)
+    assert _value(context, "elements['ray-status-badge'].textContent") == ('Лучи: ошибка' if reason == 'invalid_artifact' else 'Лучи: нет данных')
+    assert _value(context, 'ST.rayStatus') is None
+
+
+def test_ray_accounting_does_not_request_incomplete_cycles():
+    context = _context()
+    context.eval("""
+      ST.info.iterations = [];
+      const urls = [], fetch = url => { urls.push(url); throw new Error('unexpected request'); };
+      renderRayStatus();
+    """)
+    _drain(context)
+    assert _value(context, 'urls') == []
+    assert _value(context, "elements['ray-status-badge'].textContent") == 'Лучи: —'
+
+
+def test_late_ray_accounting_cannot_overwrite_new_iteration_or_run():
+    context = _context()
+    context.eval("""
+      ST.info.iterations = [0,1];
+      const pending = [], fetch = url => new Promise(resolve=>pending.push(resolve));
+      renderRayStatus();
+      ST.iter = 1; renderRayStatus();
+      const good = {available:true,expected:10,reached:10,used:10,failed:0,failures:[],hypotheses_with_insufficient_stations:0};
+      pending[1]({ok:true,json:()=>Promise.resolve(good)});
+    """)
+    _drain(context)
+    context.eval("pending[0]({ok:true,json:()=>Promise.resolve({...good,reached:5,used:4,failed:5})})")
+    _drain(context)
+    assert _value(context, "elements['ray-status-badge'].textContent") == 'Лучи: 10 / 10'
+    context.eval("renderRayStatus(); ST.run = 'new-run'; clearRayStatus('Лучи: загрузка…'); pending[2]({ok:true,json:()=>Promise.resolve(good)})")
+    _drain(context)
+    assert _value(context, "elements['ray-status-badge'].textContent") == 'Лучи: загрузка…'
+    assert _value(context, 'ST.rayStatus') is None
+
+
+def _top_slices(context):
+    context.eval("""
+      const urls = [];
+      const topTruth = {slice:[[4700,4800,4900],[5000,5100,5300]],
+        shape:[2,3],full_shape:[2,3,4],cell_size:60000,vmin:4700,vmax:5300,
+        x_km:[60,180],y_km:[20,60,100],z_km:36,
+        x_edges_km:[0,120,240],y_edges_km:[0,40,80,120]};
+      const topInv = {slice:[[4900,5000],[5100,5200],[5000,5000]],
+        shape:[3,2],full_shape:[3,2,8],cell_size:10000,vmin:4900,vmax:5200,
+        x_km:[40,120,200],y_km:[30,90],z_km:36};
+    """)
+
+
+def test_top_row_is_between_y_pair_and_ray_coverage_and_uses_subgrid():
+    html = VIEWER.read_text(encoding='utf-8')
+    assert html.index('id="model-row"') < html.index('id="model-top-row"') < html.index('id="plot-rc"')
+    for plot in ('vel-top', 'tr-top'):
+        assert f'id="panel-{plot}"' in html
+        assert f'id="plot-{plot}"' in html
+        assert f'data-plot="plot-{plot}"' in html
+    assert '#model-top-row > .panel { display: grid; grid-row: span 2; grid-template-rows: subgrid;' in html
+    assert '#model-top-row > .panel.fullscreen { display: flex;' in html
+    assert '#model-top-row .y-group' in html
+
+
+def test_top_urls_native_truth_xy_axes_transpose_and_shared_cividis():
+    context = _context()
+    _top_slices(context)
+    context.eval("""
+      ST.vel.y = 60; ST.top.z = 36;
+      ST.truthEdges = {x:[0,60,240],z:[0,120]};
+      const fetch = url => {urls.push(url);return Promise.resolve({ok:true,
+        json:()=>Promise.resolve(url.includes('model_type=true') ? topTruth : topInv)});};
+      renderTopPair();
+    """)
+    _drain(context)
+    assert _value(context, 'urls') == [
+        '/api/runs/run-test/slice?type=model&model_type=iter&iter=0&plane=xy&z_km=36&nx=192&ny=96&nz=96',
+        '/api/runs/run-test/slice?type=model&model_type=true&plane=xy&z_km=36',
+    ]
+    for plot in ('plot-vel-top', 'plot-tr-top'):
+        layout = _value(context, f"rendered['{plot}'].layout")
+        assert layout['xaxis']['range'] == [0, 240]
+        assert layout['yaxis']['range'] == [0, 120]
+        assert layout['xaxis']['title']['text'] == 'X (km)'
+        assert layout['yaxis']['title']['text'] == 'Y (km)'
+        assert layout['coloraxis']['cmin'] == 4700
+        assert layout['coloraxis']['cmax'] == 5300
+        assert layout['coloraxis']['colorscale'] == 'Cividis'
+        assert layout['uirevision'] == f'run-test:{plot}'
+        assert _value(context, f"rendered['{plot}'].traces[0].colorscale") == 'Cividis'
+        for axis in ('xaxis', 'yaxis'):
+            assert layout[axis]['tickmode'] == 'auto'
+            assert 'tickvals' not in layout[axis]
+    heat = _value(context, "rendered['plot-tr-top'].traces[0]")
+    assert heat['x'] == [60, 180]
+    assert heat['y'] == [20, 60, 100]
+    assert heat['z'] == [[4700, 5000], [4800, 5100], [4900, 5300]]
+    assert 'y=%{y' in heat['hovertemplate']
+    grid = _value(context, "rendered['plot-vel-top'].traces[1]")
+    assert grid['x'][::3][:3] == [0, 120, 240]
+    assert grid['y'][9::3] == [0, 40, 80, 120]
+    assert _value(context, 'ST.truthEdges') == {'x': [0, 60, 240], 'z': [0, 120]}
+    assert _value(context, 'ST.topTruthEdges') == {'x': [0, 120, 240], 'y': [0, 40, 80, 120]}
+    assert _value(context, "elements['tr-top-shape-badge'].textContent") == '2×3×4'
+    assert _value(context, "elements['tr-top-z-v'].textContent") == 'Z depth: 36.00 km'
+    assert _value(context, "elements['plot-tr-top'].dataset.renderDepthZ") == '36'
+    assert _value(context, "elements['plot-tr-top'].dataset.renderY ?? null") is None
+
+
+def test_top_controls_use_depth_extent_and_never_change_vertical_state_or_zoom():
+    context = _context()
+    _top_slices(context)
+    context.eval("""
+      ST.meta.grid_info.coarse_side_m = [240000,120000,80000];
+      configureModelY(true); configureModelZ(true);
+      ST.vel.y = 60; ST.vel.type = 'initial'; ST.rc.y = 24;
+      const fetch = url => {urls.push(url);return Promise.resolve({ok:true,json:()=>Promise.resolve(topInv)});};
+      trackPlotRender('plot-vel', [], mkLayout(24,12), PLY_CFG);
+    """)
+    _drain(context)
+    assert _value(context, 'ST.top.zStep') == 8
+    assert _value(context, "Number(elements['vel-top-z'].max)") == 80
+    assert _value(context, "Number(elements['vel-top-z'].step)") == 8
+    context.eval("""
+      elements['plot-vel'].layout.xaxis.range = [20,80];
+      elements['plot-vel'].layout.yaxis.range = [70,10];
+      elements['vel-top-z'].listeners.input({target:{value:'32'}});
+      elements['vel-top-z-inc'].listeners.click();
+      elements['vel-top-z-dec'].listeners.click();
+      elements['vel-top-z-step'].listeners.change({target:{value:'5'}});
+      elements['vel-top-z-num'].listeners.change({target:{value:'25'}});
+      elements['vel-top-type'].listeners.change({target:{value:'coverage_confidence'}});
+      elements['vel-top-scale'].listeners.change({target:{value:'fixed'}});
+    """)
+    _drain(context)
+    assert _value(context, '[ST.top.z, ST.top.zStep, ST.top.type, ST.top.scale]') == [25, 5, 'coverage_confidence', 'fixed']
+    assert _value(context, '[ST.vel.y, ST.vel.yStep, ST.vel.type, ST.vel.scale, ST.rc.y]') == [60, 12, 'initial', 'auto', 24]
+    assert _value(context, "elements['plot-vel'].layout.xaxis.range") == [20, 80]
+    assert _value(context, "elements['plot-vel'].layout.yaxis.range") == [70, 10]
+    assert all('plane=xy' in url and 'y_km=' not in url for url in _value(context, 'urls'))
+    context.eval("setModelZ(999); elements['vel-top-z-step'].listeners.change({target:{value:'0'}}); setModelZ('not a number')")
+    _drain(context)
+    assert _value(context, '[ST.top.z, ST.top.zStep]') == [80, 5]
+    context.eval("setModelZ(-1); elements['vel-type'].listeners.change({target:{value:'delta_s'}}); setModelY(24)")
+    _drain(context)
+    assert _value(context, '[ST.top.z, ST.top.zStep, ST.top.type]') == [0, 5, 'coverage_confidence']
+
+
+@pytest.mark.parametrize('kind', ['station', 'event'])
+def test_top_overlays_project_xy_fade_by_z_and_honor_global_visibility_and_ids(kind):
+    context = _context()
+    context.eval(f"const kind = {json.dumps(kind)}")
+    context.eval("""
+      ST.meta[`${kind}_locs`] = [[1000,90000,0],[2000,1000,1000],[3000,70000,12000],[4000,4000,120000]];
+      ST.meta.reference_event_ids = ['E9','E2','E7','E1'];
+      const traces = () => kind === 'station' ? stationTraces(-1,false,0,false,'xy') : eventTraces(-1,false,0,false,'xy');
+    """)
+    trace = _value(context, 'traces()[0]')
+    assert trace['x'] == [1, 2, 3, 4]
+    assert trace['y'] == [90, 1, 70, 4]
+    opacity = trace['marker']['opacity']
+    assert 1 == opacity[0] > opacity[1] > opacity[2] > opacity[3] > 0
+    assert trace['cliponaxis'] is False
+    context.eval('ST.top.zStep = 30; ST.meta.grid_info.fine_cell_size = 100')
+    assert _value(context, 'traces()[0].marker.opacity') == opacity
+    context.eval("ST.showStations = ST.showEvents = false")
+    assert _value(context, 'traces()') == []
+    highlighted = _value(context, "kind === 'station' ? stationTraces(2,false,12,false,'xy')[0] : eventTraces(2,false,12,false,'xy')[0]")
+    assert highlighted['x'] == [3]
+    assert highlighted['y'] == [70]
+    assert highlighted['marker']['opacity'] == [1]
+    assert highlighted['text'] == ['S2' if kind == 'station' else 'E7']
+    assert highlighted['customdata'][0][0] == (2 if kind == 'station' else 'E7')
+
+
+@pytest.mark.parametrize('field,units,palette', [
+    ('initial', 'V (m/s)', 'Cividis'),
+    ('delta_s', 'Δs (s/m)', None),
+    ('sensitivity_diagonal', 'diag(H) (m²/s²)', None),
+    ('coverage_confidence', 'Confidence (0–1)', None),
+])
+def test_top_fields_have_correct_urls_units_palettes_and_independent_truth_scale(field, units, palette):
+    context = _context()
+    _top_slices(context)
+    context.eval(f'ST.top.type = {json.dumps(field)}; ST.top.z = 36')
+    context.eval("""
+      const fetch = url => {urls.push(url);return Promise.resolve({ok:true,
+        json:()=>Promise.resolve(url.includes('model_type=true') ? topTruth : topInv)});};
+      renderTopPair();
+    """)
+    _drain(context)
+    url = _value(context, 'urls[0]')
+    assert ('type=model&model_type=initial' if field == 'initial' else f'type={field}') in url
+    assert 'iter=0&plane=xy&z_km=36' in url and 'y_km=' not in url
+    layout = _value(context, "rendered['plot-vel-top'].layout")
+    assert layout['coloraxis']['colorbar']['title']['text'] == units
+    if palette:
+        assert layout['coloraxis']['colorscale'] == palette
+    else:
+        assert layout['coloraxis']['colorscale'] != 'Cividis'
+        assert '&nx=' not in url
+    if field == 'delta_s':
+        assert [layout['coloraxis']['cmin'], layout['coloraxis']['cmax']] == [-5200, 5200]
+        assert _value(context, "elements['model-top-state-label'].textContent") == 'Update 0 → 1'
+    elif field == 'coverage_confidence':
+        assert [layout['coloraxis']['cmin'], layout['coloraxis']['cmax']] == [0, 1]
+    assert _value(context, "rendered['plot-tr-top'].layout.coloraxis.cmin") == 4700
+    assert _value(context, "rendered['plot-tr-top'].layout.coloraxis.cmax") == 5300
+    assert _value(context, "rendered['plot-tr-top'].layout.coloraxis.colorscale") == 'Cividis'
+
+
+@pytest.mark.parametrize('failed', ['velocity', 'truth'])
+def test_top_pair_api_failures_are_independent(failed):
+    context = _context()
+    _top_slices(context)
+    context.eval(f'const failed = {json.dumps(failed)}')
+    context.eval("""
+      const fetch = url => {
+        const fail = (failed === 'truth') === url.includes('model_type=true');
+        return Promise.resolve({ok:!fail,status:500,json:()=>Promise.resolve(topInv)});
+      };
+      renderTopPair();
+    """)
+    _drain(context)
+    good, bad = ('vel-top', 'tr-top') if failed == 'truth' else ('tr-top', 'vel-top')
+    assert _value(context, f"Boolean(rendered['plot-{good}'])") is True
+    assert _value(context, f"elements['{bad}-empty'].textContent") == 'HTTP 500'
+    assert _value(context, f"elements['plot-{bad}'].style.display") == 'none'
+
+
+def test_top_fixed_ranges_are_pair_shared_but_independent_of_vertical_cache():
+    context = _context()
+    _top_slices(context)
+    context.eval("""
+      ST.vel.scale = ST.top.scale = 'fixed';
+      ST.colorRanges.set('velocity', [1000,2000]);
+      const fetch = url => Promise.resolve({ok:true,json:()=>Promise.resolve(url.includes('model_type=true') ? topTruth : topInv)});
+      renderTopPair();
+    """)
+    _drain(context)
+    context.eval('topTruth.vmin = 4000; topTruth.vmax = 6000; ST.top.z = 60; renderTopPair()')
+    _drain(context)
+    for plot in ('plot-vel-top', 'plot-tr-top'):
+        assert _value(context, f"rendered['{plot}'].layout.coloraxis.cmin") == 4700
+        assert _value(context, f"rendered['{plot}'].layout.coloraxis.cmax") == 5300
+    assert _value(context, "ST.colorRanges.get('velocity')") == [1000, 2000]
+    context.eval("ST.top.scale = 'auto'; renderTopPair()")
+    _drain(context)
+    assert _value(context, "rendered['plot-vel-top'].layout.coloraxis.cmin") == 4000
+    assert _value(context, "rendered['plot-tr-top'].layout.coloraxis.cmax") == 6000
+
+
+def test_top_plots_keep_independent_zoom_through_depth_field_iteration_empty_and_export():
+    context = _context()
+    _top_slices(context)
+    context.eval("""
+      ST.info.iterations = [0,2]; configureModelZ(true);
+      const fetch = url => {urls.push(url);return Promise.resolve({ok:true,json:()=>Promise.resolve(
+        url.includes('/weights_list') ? [] : url.includes('/slice') ? topInv : {})});};
+      renderTopPair();
+    """)
+    _drain(context)
+    context.eval("""
+      elements['plot-vel-top'].layout.xaxis.range = [20,80];
+      elements['plot-vel-top'].layout.yaxis.range = [10,70];
+      elements['plot-tr-top'].layout.xaxis.range = [40,100];
+      elements['plot-tr-top'].layout.yaxis.range = [30,90];
+      setModelZ(36);
+      elements['vel-top-type'].listeners.change({target:{value:'delta_s'}});
+      setIter(2);
+    """)
+    _drain(context)
+    for plot, x, y in [('plot-vel-top', [20, 80], [10, 70]), ('plot-tr-top', [40, 100], [30, 90])]:
+        layout = _value(context, f"rendered['{plot}'].layout")
+        assert layout['xaxis']['range'] == x and layout['yaxis']['range'] == y
+        assert layout['uirevision'] == f'run-test:{plot}'
+    assert any('iter=2&plane=xy&z_km=36' in url for url in _value(context, 'urls'))
+    context.eval("emptyP('plot-vel-top','vel-top-empty','Temporarily empty'); downloadPlot('plot-vel-top','velocity_XY')")
+    _drain(context)
+    download = _value(context, 'downloads[0]')
+    assert download['options']['filename'] == 'run-test_iter_2_delta_s_XY_depthZ_36_velocity_XY'
+    assert 'XY · Z depth 36 km' in download['title']['text']
+    assert 'update 2 → 3' in download['title']['text']
+    assert ' · Y ' not in download['title']['text'] and 'Final' not in download['title']['text']
+    assert download['layout']['xaxis']['range'] == [20, 80]
+    assert _value(context, "elements['plot-vel-top'].layout.title") == {}
+    assert all(not any(key.startswith(('xaxis', 'yaxis')) for key in change) for change in _value(context, 'relayouts'))
+    assert _value(context, 'purged') == []
+    context.eval("elements['plot-tr-top'].layout.xaxis.range = [0,240]; renderTopPair()")
+    _drain(context)
+    assert _value(context, "rendered['plot-tr-top'].layout.xaxis.range") == [0, 240]
+    assert _value(context, "rendered['plot-vel-top'].layout.xaxis.range") == [20, 80]
+
+
+@pytest.mark.parametrize('change', ['depth', 'field', 'iteration'])
+def test_top_late_response_cannot_overwrite_new_selection_or_truth_edges(change):
+    context = _context()
+    _top_slices(context)
+    context.eval(f'const change = {json.dumps(change)}')
+    context.eval("""
+      ST.info.iterations = [0,1]; configureModelZ(true);
+      const pending = [], fetch = url => new Promise(resolve=>pending.push({url,resolve}));
+      renderTopPair();
+      if (change === 'depth') setModelZ(60);
+      if (change === 'field') elements['vel-top-type'].listeners.change({target:{value:'coverage_confidence'}});
+      if (change === 'iteration') {
+        setIter(1, true);
+        renderTopPair();
+      }
+      pending.slice(2).forEach(p=>p.resolve({ok:true,json:()=>Promise.resolve({...topInv,
+        vmin:0,vmax:1,x_edges_km:[0,80,160,240],y_edges_km:[0,60,120]})}));
+    """)
+    _drain(context)
+    context.eval("pending.slice(0,2).forEach(p=>p.resolve({ok:true,json:()=>Promise.resolve(topTruth)}))")
+    _drain(context)
+    assert _value(context, 'ST.topTruthEdges.x') == [0, 80, 160, 240]
+    assert _value(context, "rendered['plot-vel-top'].layout.coloraxis.cmax") == 1
+    assert _value(context, "elements['plot-vel-top'].dataset.renderDepthZ") == ('60' if change == 'depth' else '0')
+    assert _value(context, "elements['plot-vel-top'].dataset.renderIter") == ('1' if change == 'iteration' else '0')
+    assert _value(context, "elements['plot-vel-top'].dataset.renderField") == ('coverage_confidence' if change == 'field' else 'iter')
+
+
+def test_top_run_switch_purges_zoom_resets_controls_edges_cache_and_rejects_old_response():
+    context = _context()
+    _top_slices(context)
+    context.eval("""
+      const pending = [], fetch = url => new Promise(resolve=>pending.push({url,resolve}));
+      trackPlotRender('plot-vel-top', [], mkLayout(3,2,'V',null,'xy'), PLY_CFG);
+    """)
+    _drain(context)
+    context.eval("""
+      elements['plot-vel-top'].layout.xaxis.range = [20,80];
+      ST.top.z = 60; ST.top.type = 'delta_s';
+      ST.truthEdges = {x:[0,240],z:[0,120]}; ST.topTruthEdges = {x:[0,240],y:[0,120]};
+      ST.colorRanges.set('xy:velocity',[4700,5300]);
+      renderTopPair(); loadRun('next-run');
+    """)
+    assert _value(context, '[ST.top.z, ST.top.type, ST.topTruthEdges, ST.truthEdges, ST.colorRanges.size]') == [0, 'iter', None, None, 0]
+    for plot in ('vel-top', 'tr-top'):
+        assert _value(context, f"elements['plot-{plot}'].style.display") == 'none'
+        assert _value(context, 'purged').count(f'plot-{plot}') == 1
+        assert _value(context, f"elements['plot-{plot}'].dataset.renderDepthZ ?? null") is None
+    context.eval("""
+      pending.slice(0,2).forEach(p=>p.resolve({ok:true,json:()=>Promise.resolve(topTruth)}));
+      pending.slice(2).forEach(p=>p.resolve({ok:false,status:500}));
+    """)
+    _drain(context)
+    assert _value(context, 'ST.topTruthEdges') is None
+    assert _value(context, "elements['vel-top-empty'].textContent") == 'HTTP 500'
+    context.eval("trackPlotRender('plot-vel-top', [], mkLayout(3,2,'V',null,'xy'), PLY_CFG)")
+    _drain(context)
+    assert _value(context, "rendered['plot-vel-top'].layout.xaxis.range") == [0, 1]
+    assert _value(context, "rendered['plot-vel-top'].layout.uirevision") == 'next-run:plot-vel-top'
+
+
+@pytest.mark.parametrize('follow', [False, True])
+def test_top_initial_load_and_first_publication_never_fetch_unknown_iteration(follow):
+    context = _context()
+    _top_slices(context)
+    context.eval(f'ST.followIteration = {json.dumps(follow)}')
+    context.eval("""
+      const meta = ST.meta;
+      let info = {id:'next-run',iterations:[],completed_iterations:0,planned_iterations:12,n_events:1,n_stations:1};
+      const fetch = url => {urls.push(url);return Promise.resolve({ok:true,json:()=>Promise.resolve(
+        url.endsWith('/meta') ? meta : url.endsWith('/info') ? info : url.endsWith('/summary') ? [info]
+        : url.includes('/slice') ? topInv : [])});};
+      loadRun('next-run');
+    """)
+    _drain(context)
+    top_urls = [url for url in _value(context, 'urls') if 'plane=xy' in url]
+    assert len(top_urls) == 2
+    assert 'model_type=initial' in top_urls[0]
+    assert 'model_type=true' in top_urls[1]
+    assert not any('model_type=iter' in url or '/weights_list' in url for url in _value(context, 'urls'))
+    assert _value(context, '[ST.top.type, ST.top.zStep]') == ['iter', 12]
+    assert _value(context, "elements['plot-vel-top'].dataset.renderField") == 'initial'
+    context.eval("urls.length = 0; info = {...info,iterations:[0],completed_iterations:1}; doAutoRefresh()")
+    _drain(context)
+    assert any('model_type=iter&iter=0&plane=xy' in url for url in _value(context, 'urls'))
+    assert _value(context, "elements['plot-vel-top'].dataset.renderField") == 'iter'
+
+
+def test_top_global_toggles_highlight_refresh_and_resize_include_both_plots():
+    context = _context()
+    _top_slices(context)
+    context.eval("""
+      ST.meta.station_locs = [[1000,2000,0]];
+      ST.meta.event_locs = [[3000,4000,0]]; ST.meta.reference_event_ids = ['E42'];
+      const fetch = url => {urls.push(url);return Promise.resolve({ok:true,json:()=>Promise.resolve(
+        url.includes('/weights_list') ? [] : topInv)});};
+      elements['cb-grid'].listeners.change({target:{checked:false}});
+      elements['cb-stations'].listeners.change({target:{checked:false}});
+      elements['cb-events'].listeners.change({target:{checked:false}});
+    """)
+    _drain(context)
+    for plot in ('plot-vel-top', 'plot-tr-top'):
+        assert _value(context, f"rendered['{plot}'].traces.length") == 1
+    context.eval("_highlightHypoEvent(0,'hypoQ'); relayoutAll()")
+    _drain(context)
+    for plot in ('plot-vel-top', 'plot-tr-top'):
+        assert _value(context, f"rendered['{plot}'].traces.length") == 2
+        assert _value(context, f"rendered['{plot}'].traces[1].text") == ['E42']
+        assert plot in _value(context, 'resized')
+    context.eval("elements['cb-grid'].listeners.change({target:{checked:true}})")
+    _drain(context)
+    assert _value(context, "rendered['plot-tr-top'].traces[1].mode") == 'lines'
+
+
+def test_top_header_fallback_equalizes_each_pair_independently_and_shrinks():
+    context = _context()
+    context.eval("""
+      const CSS = {supports:()=>false}, observers = [], frames = [];
+      const ResizeObserver = class {
+        constructor(callback) {this.callback=callback;this.targets=[];observers.push(this);}
+        observe(target) {this.targets.push(target);}
+      };
+      window.requestAnimationFrame = callback => frames.push(callback);
+      const headers = ['vel-header','tr-header','vel-top-header','tr-top-header'].map(id=>document.getElementById(id));
+      const panels = headers.map(()=>makeElement()), heights = [80,30,120,40];
+      headers.forEach((header,i)=>{
+        header.closest = ()=>panels[i];
+        header.getBoundingClientRect = ()=>({height:Math.max(heights[i],parseFloat(header.style.minHeight)||0)});
+      });
+      observeModelHeaders();
+    """)
+    assert _value(context, 'observers.map(o=>o.targets.length)') == [2, 2]
+    assert _value(context, 'headers.map(h=>h.style.minHeight)') == ['80px', '80px', '120px', '120px']
+    context.eval('heights[2]=50; observers[1].callback(); observers[1].callback(); frames.shift()()')
+    assert _value(context, 'headers.map(h=>h.style.minHeight)') == ['80px', '80px', '50px', '50px']
+    context.eval("panels[2].classList.add('fullscreen'); observers[1].callback(); frames.shift()()")
+    assert _value(context, 'headers.map(h=>h.style.minHeight)') == ['80px', '80px', '', '']
+    context.eval("panels[2].classList.remove('fullscreen'); observers[1].callback(); frames.shift()()")
+    assert _value(context, 'headers.map(h=>h.style.minHeight)') == ['80px', '80px', '50px', '50px']
+    assert _value(context, 'relayouts') == []
+    assert _value(context, 'purged') == []
+
+
+def test_top_dense_grid_keeps_native_xy_edges_endpoints_and_vertical_edges_untouched():
+    context = _context()
+    context.eval("""
+      ST.truthEdges = {x:[0,60,240],z:[0,120]};
+      ST.topTruthEdges = {x:Array.from({length:97},(_,i)=>i*2.5),y:Array.from({length:49},(_,i)=>i*2.5)};
+      ST.topTruthEdges.x[7] = 17.75;
+    """)
+    grid = _value(context, "gridTrace(96,48,[1,1],false,'xy')")
+    x_edges = [i * 2.5 for i in range(0, 97, 7)] + [240]
+    x_edges[1] = 17.75
+    y_edges = [i * 2.5 for i in range(0, 49, 4)]
+    assert grid['x'][::3][:len(x_edges)] == x_edges
+    assert grid['y'][len(x_edges) * 3::3] == y_edges
+    assert _value(context, 'ST.topTruthEdges.x.length') == 97
+    assert _value(context, 'ST.truthEdges') == {'x': [0, 60, 240], 'z': [0, 120]}

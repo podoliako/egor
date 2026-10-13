@@ -238,7 +238,30 @@ def _requested_y(shape: tuple[int, ...], cell_size: float) -> tuple[float, int]:
     return y_km, _y_index(y_km, shape, cell_size)
 
 
-def _axes(response: dict, cell_size: float, y_km: float, extents_m=None) -> dict:
+def _requested_z(shape: tuple[int, ...], cell_size: float) -> tuple[float, int]:
+    raw = request.args.get("z_km")
+    try:
+        z_km = cell_size / 2000 if raw is None else float(raw)
+    except ValueError:
+        abort(400, description="Invalid z_km")
+    extent = shape[2] * cell_size / 1000
+    if not math.isfinite(z_km) or z_km < 0 or z_km > extent:
+        abort(400, description="z_km outside model bounds")
+    return z_km, min(int(z_km * 1000 / cell_size), shape[2] - 1)
+
+
+def _axes(response: dict, cell_size: float, y_km: float, extents_m=None, plane="xz") -> dict:
+    if plane == "xy":
+        nx, ny, nz = response["full_shape"]
+        sx, sy, _ = extents_m if extents_m is not None else (nx * cell_size, ny * cell_size, nz * cell_size)
+        response.update({
+            "origin_m": [0, 0, 0], "z_km": y_km, "slice_plane": "xy",
+            "x_km": ((np.arange(nx) + 0.5) * sx / nx / 1000).tolist(),
+            "y_km": ((np.arange(ny) + 0.5) * sy / ny / 1000).tolist(),
+            "x_edges_km": (np.arange(nx + 1) * sx / nx / 1000).tolist(),
+            "y_edges_km": (np.arange(ny + 1) * sy / ny / 1000).tolist(),
+        })
+        return response
     nx, _, nz = response["full_shape"]
     sx, _, sz = extents_m if extents_m is not None else (nx * cell_size, 0, nz * cell_size)
     response.update({
@@ -372,8 +395,14 @@ def _model_slice(
     y: int,
     meta: dict,
     target_shape: tuple[int, int, int] | None = None,
+    plane: str = "xz",
 ) -> tuple[np.ndarray, list[int], float]:
     """Return a model slice sampled like the cell-centred ray-tracing grid."""
+    if plane == "xy":
+        # A view makes depth the fixed axis without allocating a resampled volume.
+        arr = arr.transpose(0, 2, 1)
+        if target_shape is not None:
+            target_shape = (target_shape[0], target_shape[2], target_shape[1])
     params = meta.get("run_params") or {}
     grid = meta.get("grid_info") or {}
     subdivision = max(1, int(params.get("subdivision") or 1))
@@ -438,27 +467,29 @@ def _model_slice(
     )
     # GeoGrid stores interpolated velocity as float32; matching that precision
     # also prevents color scales from amplifying float64 round-off around constants.
+    if plane == "xy":
+        full_shape = [full_shape[0], full_shape[2], full_shape[1]]
     return np.asarray(result, dtype=np.float32), full_shape, cell_size
 
 
-def _target_shape() -> tuple[int, int, int] | None:
+def _target_shape(plane="xz") -> tuple[int, int, int] | None:
     names = ("nx", "ny", "nz")
     if not any(name in request.args for name in names):
         return None
     if not all(name in request.args for name in names):
         abort(400, description="nx, ny, nz must be specified together")
     values = tuple(_index(name) for name in names)
-    if any(value < 1 or value > _MAX_AXIS for value in values) or values[0] * values[2] > _MAX_PIXELS:
+    if any(value < 1 or value > _MAX_AXIS for value in values) or values[0] * values[1 if plane == "xy" else 2] > _MAX_PIXELS:
         abort(400, description="Requested model grid too large")
     return values
 
 
-def _model_grid_step(meta: dict, source_shape, target_shape) -> list[int]:
+def _model_grid_step(meta: dict, source_shape, target_shape, plane="xz") -> list[int]:
     mode = (meta.get("run_params") or {}).get("slowness_interpolation", "nearest")
     if mode != "nearest":
         return [1, 1]
     steps = []
-    for axis in (0, 2):
+    for axis in (0, 1 if plane == "xy" else 2):
         ratio = target_shape[axis] / source_shape[axis]
         steps.append(int(round(ratio)) if ratio >= 1 and float(ratio).is_integer() else 1)
     return steps
@@ -1055,6 +1086,47 @@ def api_hypo_metrics(rid):
     return jsonify(_collect_all_hypo_metrics(rd, meta, it))
 
 
+@app.route("/api/runs/<rid>/ray_status")
+def api_ray_status(rid):
+    """Reached / expected primary rays, only for an entirely published cycle."""
+    rd = _rd(rid)
+    iteration = _index("iter")
+    if iteration not in _completed_iterations(rd):
+        return jsonify({"available": False, "reason": "not_completed", "iter": iteration})
+    path = _child(rd, f"iter_{iteration}", "ray_status.json")
+    if not path.is_file():
+        return jsonify({"available": False, "reason": "not_recorded", "iter": iteration})
+    try:
+        status = json.loads(path.read_text())
+        counters = ("expected", "reached", "failed", "used", "n_events", "n_hypotheses",
+                    "events_with_failed_rays", "hypotheses_with_insufficient_stations")
+        if (not isinstance(status, dict) or type(status.get("schema_version")) is not int
+                or status["schema_version"] != 1
+                or any(type(status.get(key)) is not int or status[key] < 0 for key in counters)
+                or status["reached"] + status["failed"] != status["expected"]
+                or status["used"] > status["reached"]
+                or status["events_with_failed_rays"] > status["n_events"]
+                or status["hypotheses_with_insufficient_stations"] > status["n_hypotheses"]
+                or not isinstance(status.get("failures"), list)):
+            raise ValueError("Invalid ray counters")
+        failed_count = 0
+        for failure in status["failures"]:
+            if (not isinstance(failure, dict)
+                    or any(type(failure.get(key)) is not int or failure[key] < 0
+                           for key in ("event", "hypothesis"))
+                    or not isinstance(failure.get("stations"), list)
+                    or not failure["stations"]
+                    or any(type(station) is not int or station < 0 for station in failure["stations"])
+                    or len(set(failure["stations"])) != len(failure["stations"])):
+                raise ValueError("Invalid failed-ray indices")
+            failed_count += len(failure["stations"])
+        if failed_count != status["failed"]:
+            raise ValueError("Failed-ray details disagree with totals")
+    except (OSError, ValueError, TypeError):
+        return jsonify({"available": False, "reason": "invalid_artifact", "iter": iteration})
+    return jsonify({**status, "available": True, "iter": iteration})
+
+
 # ─── iter / event / weight lists ──────────────────────────────────────────────
 
 @app.route("/api/runs/<rid>/iters_list")
@@ -1146,12 +1218,14 @@ def _legacy_G_slice_response(path_stem: Path, meta: dict) -> dict:
 @app.route("/api/runs/<rid>/slice")
 def api_slice(rid):
     """
-    Universal 2-D y-slice endpoint.
+    Universal 2-D X-Z or X-Y slice endpoint.
 
     Query params
     ────────────
     type        model | weights | G | delta_s | ray_count | sensitivity_diagonal | coverage_confidence
-    y_km        float physical y coordinate in kilometres
+    plane       xz (default) | xy (models and scalar diagnostics only)
+    y_km        float physical y coordinate in kilometres for xz
+    z_km        float physical depth in kilometres for xy
     iter        int   iteration number
 
     type=model      model_type: initial | true | iter
@@ -1167,6 +1241,15 @@ def api_slice(rid):
     grid = meta.get("grid_info") or {}
     if dtype not in ("model", "weights", "G", "delta_s", "ray_count", "sensitivity_diagonal", "coverage_confidence"):
         abort(400, description="Invalid slice type")
+    plane = request.args.get("plane", "xz")
+    if plane not in ("xz", "xy"):
+        abort(400, description="Invalid slice plane")
+    if (plane == "xy" and "y_km" in request.args) or (plane == "xz" and "z_km" in request.args):
+        abort(400, description="Slice coordinate does not match plane")
+    if plane == "xy" and dtype not in ("model", "delta_s", "sensitivity_diagonal", "coverage_confidence"):
+        abort(400, description="Slice type only supports plane=xz")
+    fixed_axis = 2 if plane == "xy" else 1
+    requested_coordinate = _requested_z if plane == "xy" else _requested_y
     completed = _completed_iterations(rd, meta)
     mt = request.args.get("model_type", "iter" if completed else "initial")
     if dtype == "model" and mt not in ("initial", "true", "iter"):
@@ -1193,25 +1276,26 @@ def api_slice(rid):
                 abort(404, description="Reference model unavailable")
             if arr.ndim != 3 or not np.array_equal(origin, [0, 0, 0]) or not math.isfinite(cell_size) or cell_size <= 0:
                 abort(404)
-            y_km, y = _requested_y(arr.shape, cell_size)
-            return jsonify(_axes(_slice_resp(arr[:, y, :], list(arr.shape), cell_size), cell_size, y_km))
+            coordinate, index = requested_coordinate(arr.shape, cell_size)
+            s2d = arr[:, :, index] if plane == "xy" else arr[:, index, :]
+            return jsonify(_axes(_slice_resp(s2d, list(arr.shape), cell_size), cell_size, coordinate, plane=plane))
         if mt not in ("initial", "iter"):
             abort(400, description="Invalid model_type")
         path = _child(rd, "initial_model.npy") if mt == "initial" else _child(rd, f"iter_{it}", "model.npy")
         arr = _npy(path)
         if arr is not None and arr.ndim == 3:
-            target_shape = _target_shape()
+            target_shape = _target_shape(plane)
             full_shape = target_shape or tuple(int(size) * max(1, int(meta.get("run_params", {}).get("subdivision") or 1)) for size in arr.shape)
-            if any(size < 1 or size > _MAX_AXIS for size in full_shape) or full_shape[0] * full_shape[2] > _MAX_PIXELS:
+            if any(size < 1 or size > _MAX_AXIS for size in full_shape) or full_shape[0] * full_shape[1 if plane == "xy" else 2] > _MAX_PIXELS:
                 abort(400, description="Model grid too large; specify a smaller nx, ny, nz")
             extent_x = float(grid.get("coarse_side_m", [arr.shape[0] * float(grid.get("coarse_cell_size", 1))])[0])
             extents = grid.get("coarse_side_m") or [arr.shape[axis] * float(grid.get("coarse_cell_size", 1)) for axis in range(3)]
             cell_size = extent_x / full_shape[0]
             # The inversion domain is unchanged by resampling on each axis.
-            y_km, y = _requested_y(full_shape, float(extents[1]) / full_shape[1])
-            s2d, full_shape, cell_size = _model_slice(arr, y, meta, target_shape)
-            grid_step = _model_grid_step(meta, arr.shape, full_shape)
-            return jsonify(_axes(_slice_resp(s2d, full_shape, cell_size, grid_step), cell_size, y_km, extents))
+            coordinate, index = requested_coordinate(full_shape, float(extents[fixed_axis]) / full_shape[fixed_axis])
+            s2d, full_shape, cell_size = _model_slice(arr, index, meta, target_shape, plane)
+            grid_step = _model_grid_step(meta, arr.shape, full_shape, plane)
+            return jsonify(_axes(_slice_resp(s2d, full_shape, cell_size, grid_step), cell_size, coordinate, extents, plane))
 
     elif dtype in ("delta_s", "sensitivity_diagonal", "coverage_confidence"):
         arr = _npy(_child(rd, f"iter_{it}", f"{dtype}.npy"))
@@ -1270,8 +1354,9 @@ def api_slice(rid):
         extent_x = float(grid.get("coarse_side_m", [arr.shape[0] * float(grid.get("coarse_cell_size", 1))])[0])
         extents = grid.get("coarse_side_m") or [arr.shape[axis] * float(grid.get("coarse_cell_size", 1)) for axis in range(3)]
         cell_size = extent_x / arr.shape[0]
-        y_km, y = _requested_y(arr.shape, float(extents[1]) / arr.shape[1])
-        response = _axes(_slice_resp(arr[:, y, :], list(arr.shape), cell_size), cell_size, y_km, extents)
+        coordinate, index = requested_coordinate(arr.shape, float(extents[fixed_axis]) / arr.shape[fixed_axis])
+        s2d = arr[:, :, index] if plane == "xy" else arr[:, index, :]
+        response = _axes(_slice_resp(s2d, list(arr.shape), cell_size), cell_size, coordinate, extents, plane)
     response.update(response_extra)
     return jsonify(response)
 
