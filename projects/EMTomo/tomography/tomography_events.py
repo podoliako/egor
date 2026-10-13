@@ -7,6 +7,7 @@ from typing import Callable, Optional
 
 import numpy as np
 
+from eikonal import SOURCE_RADIUS_CELLS
 from instruments.instruments_coords import sample_cell_centered_trilinear_batch
 from instruments.instruments_ops import restriction_tables
 from instruments.likelihood import (
@@ -146,7 +147,7 @@ def process_event(
         if not weight > 0.0:
             continue
         trace = (fields.gx, fields.gy, fields.gz, fields.stations, position,
-                 h, RAY_STEP_CELLS, RAY_STEP_CELLS, RAY_MAX_STEPS, x_lo, x_hi)
+                 h, RAY_STEP_CELLS, RAY_STEP_CELLS, RAY_MAX_STEPS, x_lo, x_hi, SOURCE_RADIUS_CELLS)
         G_stations, reached = compute_G(*trace, *fields.restriction, fields.coarse_shape)
         reached = np.array(reached, dtype=bool, copy=True)
         if reached.shape != (n_stations,):

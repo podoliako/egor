@@ -239,8 +239,45 @@ def test_failed_ray_produces_no_sensitivity():
     gradients = np.zeros((1,) + shape, dtype=np.float32)
     sensitivity, reached = compute_G_all_stations_serial(
         gradients, gradients, gradients, np.zeros((1, 3)), np.array([4.0, 0.0, 0.0]),
-        1.0, 0.1, 0.1, 20, np.zeros(3), np.asarray(shape, float) - 1.0,
+        1.0, 0.1, 0.1, 20, np.zeros(3), np.asarray(shape, float) - 1.0, 3.0,
         *restriction_tables(shape, 1, "identity"), shape,
     )
     assert not reached[0]
     assert not np.any(sensitivity)
+
+
+def test_station_cell_sensitivity_matches_seeded_travel_times():
+    """The ray part inside the homogeneous seeding sphere belongs to the station's cell only."""
+    from instruments.instruments_ops import restriction_tables as tables
+    from raytracing import compute_G_all_stations
+
+    cell, sub = 500.0, 4
+    velocity = np.full((12, 6, 8), 4000.0)
+    velocity[:, :, 3:] = 5000.0
+    station = np.array([[2900.0, 1450.0, 0.0]])  # seeding sphere crosses into cell x index 6
+    event = np.array([5300.0, 2100.0, 2700.0])
+
+    def travel_time(v):
+        fine = VelocityModel(v, cell).refined(sub)
+        fields = station_travel_time_fields(fine, station)
+        point = metric_to_cell_coord(event, fine.cell_size)
+        return fields, fine, float(sample_cell_centered_trilinear_batch(fields, point)[0])
+
+    fields, fine, t0 = travel_time(velocity)
+    gx, gy, gz = (np.ascontiguousarray(g[None], dtype=np.float32) for g in np.gradient(fields[0], edge_order=1))
+    G, reached = compute_G_all_stations(
+        gx, gy, gz, metric_to_cell_coord(station, fine.cell_size), metric_to_cell_coord(event, fine.cell_size),
+        fine.cell_size, 0.1, 0.1, 50000, np.zeros(3), np.asarray(fine.shape, float) - 1, 3.0,
+        *tables(velocity.shape, sub), velocity.shape,
+    )
+    assert reached[0]
+    station_cell, neighbour = (5, 2, 0), (6, 2, 0)
+    derivative = {}
+    for index in (station_cell, neighbour):
+        perturbed = velocity.copy()
+        ds = 1e-3 / velocity[index]
+        perturbed[index] = 1 / (1 / velocity[index] + ds)
+        derivative[index] = (travel_time(perturbed)[2] - t0) / ds
+    assert G[0][station_cell] == pytest.approx(derivative[station_cell], rel=0.05)
+    assert G[0][neighbour] < 0.1 * G[0][station_cell]
+    assert np.sum(G[0] / velocity) == pytest.approx(t0, rel=0.01)

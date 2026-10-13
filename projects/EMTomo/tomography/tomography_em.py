@@ -34,7 +34,7 @@ def warm_up_jit() -> None:
     lo, hi = np.zeros(3), np.ones(3)
     tables = restriction_tables((1, 1, 1), 2, "nearest")
     for compute_G in (compute_G_all_stations_serial, compute_G_all_stations):
-        compute_G(gradient, gradient, gradient, stations, point, 1.0, 0.5, 0.5, 5, lo, hi,
+        compute_G(gradient, gradient, gradient, stations, point, 1.0, 0.5, 0.5, 5, lo, hi, 3.0,
                   *tables, (1, 1, 1))
     noise = PickNoise(0.01, 0.1, 0.0)
     negative_log_likelihood(np.zeros((2, 1), dtype=np.float32), np.zeros(2), noise)

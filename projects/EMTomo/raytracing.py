@@ -186,15 +186,74 @@ def _rasterize_nb(path, G, cell_len, ix, wx, iy, wy, iz, wz, eps=1e-12):
             t = t_next
 
 
+@njit(cache=True, fastmath=True)
+def _deposit_ray_nb(path, G, cell_len, ix, wx, iy, wy, iz, wz, station, source_radius):
+    """Rasterize a station ray consistently with the seeded travel-time field.
+
+    eikonal.travel_time_field treats the sphere of ``source_radius`` cells around
+    the station as homogeneous with the velocity of the station's own cell, so
+    the part of the ray inside it is credited to that cell only (length = the
+    radius, or the full distance when the hypocentre is inside the sphere).
+    """
+    if source_radius <= 0.0:
+        _rasterize_nb(path, G, cell_len, ix, wx, iy, wy, iz, wz)
+        return
+    n = path.shape[0]
+    r2 = source_radius * source_radius
+    inside_length = 0.0
+    k = -1
+    for p in range(n):
+        d2 = ((path[p, 0] - station[0]) ** 2 + (path[p, 1] - station[1]) ** 2
+              + (path[p, 2] - station[2]) ** 2)
+        if d2 < r2:
+            k = p
+            break
+    if k == 0:
+        inside_length = np.sqrt((path[0, 0] - station[0]) ** 2 + (path[0, 1] - station[1]) ** 2
+                                + (path[0, 2] - station[2]) ** 2)
+    elif k > 0:
+        # Clip the segment entering the sphere at its boundary.
+        a0 = path[k - 1, 0] - station[0];  a1 = path[k - 1, 1] - station[1];  a2 = path[k - 1, 2] - station[2]
+        d0 = path[k, 0] - path[k - 1, 0];  d1 = path[k, 1] - path[k - 1, 1];  d2_ = path[k, 2] - path[k - 1, 2]
+        qa = d0 * d0 + d1 * d1 + d2_ * d2_
+        qb = 2.0 * (a0 * d0 + a1 * d1 + a2 * d2_)
+        qc = a0 * a0 + a1 * a1 + a2 * a2 - r2
+        t = (-qb - np.sqrt(max(qb * qb - 4.0 * qa * qc, 0.0))) / (2.0 * qa) if qa > 0.0 else 0.0
+        t = min(max(t, 0.0), 1.0)
+        outer = np.empty((k + 1, 3))
+        outer[:k] = path[:k]
+        outer[k, 0] = path[k - 1, 0] + t * d0
+        outer[k, 1] = path[k - 1, 1] + t * d1
+        outer[k, 2] = path[k - 1, 2] + t * d2_
+        _rasterize_nb(outer, G, cell_len, ix, wx, iy, wy, iz, wz)
+        inside_length = source_radius
+    else:
+        _rasterize_nb(path, G, cell_len, ix, wx, iy, wy, iz, wz)
+        return
+    # The station's own fine cell, as chosen by eikonal.travel_time_field.
+    i = min(max(int(np.floor(station[0] + 0.5)), 0), ix.shape[1] - 1)
+    j = min(max(int(np.floor(station[1] + 0.5)), 0), iy.shape[1] - 1)
+    c = min(max(int(np.floor(station[2] + 0.5)), 0), iz.shape[1] - 1)
+    length = inside_length * cell_len
+    for a in range(2):
+        for b in range(2):
+            for e in range(2):
+                w = wx[a, i] * wy[b, j] * wz[e, c]
+                if w != 0.0:
+                    G[ix[a, i], iy[b, j], iz[e, c]] += length * w
+
+
 # ── Sensitivity builders ─────────────────────────────────────────────────────
 # Arguments: stacked travel-time gradients (n_st, nx, ny, nz) on the fine grid,
 # station positions (n_st, 3) and the hypocentre (3,) in fine continuous index
 # coordinates, fine cell size, ray step and tolerance (index units), step limit,
-# clipping bounds, restriction tables (see instruments_ops) and the output shape.
+# clipping bounds, the station seeding radius in fine cells (see eikonal; 0 to
+# rasterize the whole path), restriction tables (see instruments_ops) and the
+# output shape.
 
 @njit(parallel=True, cache=True, fastmath=True)
 def compute_G_all_stations(gx, gy, gz, sl, epic, cell_len, step, tol, max_steps,
-                           x_lo, x_hi, ix, wx, iy, wy, iz, wz, out_shape):
+                           x_lo, x_hi, source_radius, ix, wx, iy, wy, iz, wz, out_shape):
     """Ray lengths per output cell for every station, parallel over stations.
     Returns ``(G, reached)``; unreached stations get all-zero rows."""
     n_st = gx.shape[0]
@@ -207,13 +266,13 @@ def compute_G_all_stations(gx, gy, gz, sl, epic, cell_len, step, tol, max_steps,
         )
         reached[si] = ray_reached
         if ray_reached:
-            _rasterize_nb(path, G_all[si], cell_len, ix, wx, iy, wy, iz, wz)
+            _deposit_ray_nb(path, G_all[si], cell_len, ix, wx, iy, wy, iz, wz, sl[si], source_radius)
     return G_all, reached
 
 
 @njit(cache=True, fastmath=True)
 def compute_G_all_stations_serial(gx, gy, gz, sl, epic, cell_len, step, tol, max_steps,
-                                  x_lo, x_hi, ix, wx, iy, wy, iz, wz, out_shape):
+                                  x_lo, x_hi, source_radius, ix, wx, iy, wy, iz, wz, out_shape):
     """Same as compute_G_all_stations without prange, for fork worker processes."""
     n_st = gx.shape[0]
     G_all = np.zeros((n_st, out_shape[0], out_shape[1], out_shape[2]), dtype=np.float64)
@@ -225,5 +284,5 @@ def compute_G_all_stations_serial(gx, gy, gz, sl, epic, cell_len, step, tol, max
         )
         reached[si] = ray_reached
         if ray_reached:
-            _rasterize_nb(path, G_all[si], cell_len, ix, wx, iy, wy, iz, wz)
+            _deposit_ray_nb(path, G_all[si], cell_len, ix, wx, iy, wy, iz, wz, sl[si], source_radius)
     return G_all, reached
