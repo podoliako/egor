@@ -7,6 +7,7 @@ from collections.abc import Mapping
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+from uuid import uuid4
 
 import numpy as np
 
@@ -74,7 +75,7 @@ def summarize_ray_status(event_logs, n_stations: int) -> Optional[dict]:
 class TomographyLogger:
     """
     Directory layout:
-        runs/run_<method>_v<version>_<tags>_<timestamp>/
+        runs/run_<method>_v<version>_<tags>_<timestamp>_<uuid>/
           meta.json
           initial_model.npy / final_model.npy
           timing.jsonl / timing_summary.json / quality.jsonl
@@ -109,7 +110,7 @@ class TomographyLogger:
         self.started_at = datetime.now(timezone.utc)
         timestamp = self.started_at.astimezone().strftime("%Y%m%d_%H%M%S")
         tag_part = "_".join(f"{key}-{value}" for key, value in self.run_tags.items())
-        parts = ["run", self.run_name, f"v{self.run_version}", tag_part, timestamp]
+        parts = ["run", self.run_name, f"v{self.run_version}", tag_part, timestamp, uuid4().hex]
         self.run_id = "_".join(part for part in parts if part)
         self.run_dir = Path(base_dir) / self.run_id
         self.run_dir.mkdir(parents=True, exist_ok=False)

@@ -1,0 +1,11 @@
+{
+  "station_count": 26,
+  "event_count": 3780,
+  "station_elevation_min_m": 327.0,
+  "station_elevation_max_m": 1166.0,
+  "station_elevation_range_m": 839.0,
+  "stations_above_old_model": 26,
+  "vertical_datum_assumption": "station h=elevation_m; event h=-catalogue_depth_m; not independently verified",
+  "input_modified": false,
+  "new_solver_run": false
+}

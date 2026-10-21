@@ -1,0 +1,26 @@
+Experiment flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001: 1920 events, 52 stations, inversion grid (20, 7, 7), cell 1000 m
+1/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+2/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+3/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+4/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+5/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+6/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+7/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+8/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+9/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+10/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+11/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+12/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+[TomographyLogger] Run saved to: /mnt/disk01/egor/projects/EMTomo/runs/run_fl-hard-c1000-flat4-20x7x7km-52st-1920ev-grid24x8x10-z0.5-5.5-noise01-pick001_v1.4_ncand-5_topn-1_mode-hard_dmin-1_lam-0.5_temp-1.0_sub-8_cov-1.0_20261013_200119

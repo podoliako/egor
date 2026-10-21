@@ -8,3 +8,6 @@
 *.out
 *.run.xml
 *.synctex.gz
+
+# Keep manuscript figures despite repository-wide plot exclusions.
+!figures/*.png

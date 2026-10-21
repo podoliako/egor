@@ -284,6 +284,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   <div class="ctrl-group" id="run-control">
     <span class="ctrl-label">Run</span>
     <select id="run-select"><option value="">— loading —</option></select>
+    <button id="copy-run-id" type="button" title="Copy full run ID" disabled>Copy ID</button>
   </div>
   <div class="vsep"></div>
 
@@ -297,9 +298,9 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
   <div class="vsep"></div>
 
   <div class="toggle-row">
-    <label class="toggle-item"><input type="checkbox" id="cb-grid"     checked> Grid</label>
-    <label class="toggle-item"><input type="checkbox" id="cb-stations" checked> Stations</label>
-    <label class="toggle-item"><input type="checkbox" id="cb-events"   checked> Events</label>
+    <label class="toggle-item"><input type="checkbox" id="cb-grid"> Grid</label>
+    <label class="toggle-item"><input type="checkbox" id="cb-stations"> Stations</label>
+    <label class="toggle-item"><input type="checkbox" id="cb-events"> Events</label>
   </div>
   <div class="vsep"></div>
 
@@ -646,7 +647,7 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
 /* ── State ── */
 const ST = {
   run: null, iter: 0, meta: null, info: null,
-  showGrid: true, showStations: true, showEvents: true,
+  showGrid: false, showStations: false, showEvents: false,
   vel:    { type: 'iter', y: 0, yStep: 1, scale: 'auto' },
   tr:     { y: 0 },
   truthEdges: null,
@@ -1006,6 +1007,7 @@ function populateRunSelect(runs, selectedId) {
   if (!runs?.length) {
     const option = document.createElement('option');
     option.value = ''; option.textContent = 'No runs found'; sel.appendChild(option);
+    document.getElementById('copy-run-id').disabled = true;
     return;
   }
   const groups = new Map();
@@ -1032,6 +1034,7 @@ function populateRunSelect(runs, selectedId) {
     sel.appendChild(group);
   }
   if (selectedId && runs.some(r => r.id === selectedId)) sel.value = selectedId;
+  document.getElementById('copy-run-id').disabled = !sel.value;
 }
 
 function publicationSignature(info) {
@@ -2029,7 +2032,31 @@ function setIter(v, debounce = false) {
 
 document.getElementById('iter-slider').addEventListener('input', e => setIter(e.target.value, true));
 document.getElementById('iter-num').addEventListener('change', e => setIter(e.target.value));
-document.getElementById('run-select').addEventListener('change',  e => { if (e.target.value) loadRun(e.target.value); });
+document.getElementById('run-select').addEventListener('change', e => { if (e.target.value) loadRun(e.target.value); });
+let COPY_RUN_ID_TIMER = null;
+document.getElementById('copy-run-id').addEventListener('click', async e => {
+  const id = document.getElementById('run-select').value;
+  if (!id) return;
+  const button = e.currentTarget;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(id);
+    } else {
+      const input = document.createElement('textarea');
+      input.value = id; input.style.position = 'fixed'; input.style.opacity = '0';
+      document.body.appendChild(input);
+      try {
+        input.select();
+        if (!document.execCommand('copy')) throw new Error('Clipboard unavailable');
+      } finally { input.remove(); }
+    }
+    button.textContent = 'Copied!';
+  } catch (error) {
+    button.textContent = 'Copy failed';
+  }
+  clearTimeout(COPY_RUN_ID_TIMER);
+  COPY_RUN_ID_TIMER = setTimeout(() => { button.textContent = 'Copy ID'; }, 2000);
+});
 document.getElementById('cb-grid').addEventListener('change', e => { ST.showGrid = e.target.checked; renderSpatialPlots(); });
 document.getElementById('cb-stations').addEventListener('change', e => { ST.showStations = e.target.checked; renderSpatialPlots(); });
 document.getElementById('cb-events').addEventListener('change', e => { ST.showEvents = e.target.checked; renderSpatialPlots(); });
@@ -2293,6 +2320,7 @@ async function init() {
     const option = document.createElement('option'); option.value = '';
     option.textContent = dataMessage(runs, 'Run summary API unavailable');
     document.getElementById('run-select').appendChild(option);
+    document.getElementById('copy-run-id').disabled = true;
     document.getElementById('refresh-status').textContent = option.textContent;
     return;
   }

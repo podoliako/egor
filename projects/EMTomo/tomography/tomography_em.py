@@ -21,7 +21,7 @@ METHOD_DESCRIPTION = {
     "weight_likelihood": "gaussian_independent_absolute_picks_marginal_origin_uniform_candidates",
     "normal_equations": "station_precision_weighted_profiled_origin",
     "candidate_selection": "likelihood_shortlist_of_n_candidates_refined_then_best_top_n",
-    "travel_times": "skfmm_order2_exact_station_homogeneous_sphere",
+    "travel_times": "skfmm_order2_exact_station_homogeneous_sphere_v2",
 }
 _RUNTIME_FIELDS = ("runs_dir", "save_runs")
 

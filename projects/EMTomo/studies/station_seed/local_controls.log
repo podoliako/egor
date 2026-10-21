@@ -1,0 +1,100 @@
+FD station 0: 6 cells, 1920 events
+FD station 24: 6 cells, 1920 events
+FD station 51: 6 cells, 1920 events
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent baseline {'cycle': 1, 'rms_m_s': 2.8231595527948797e-13, 'top_rms_m_s': 3.2155493553843715e-13, 'top_min_m_s': -9.094947017729282e-13, 'top_max_m_s': 9.094947017729282e-13}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent baseline {'cycle': 2, 'rms_m_s': 1.3104421872513548, 'top_rms_m_s': 3.3824685669875385, 'top_min_m_s': -5.26916451348734, 'top_max_m_s': 23.834360881824523}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent baseline {'cycle': 3, 'rms_m_s': 3.1981415165260034, 'top_rms_m_s': 7.92455409135826, 'top_min_m_s': -17.897449480577507, 'top_max_m_s': 31.972825021639437}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent baseline {'cycle': 4, 'rms_m_s': 3.858175287641469, 'top_rms_m_s': 9.433869846432508, 'top_min_m_s': -27.795718712198777, 'top_max_m_s': 37.78803498389425}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent baseline {'cycle': 5, 'rms_m_s': 4.083028355939539, 'top_rms_m_s': 9.859235738727396, 'top_min_m_s': -27.7950773522075, 'top_max_m_s': 38.83838727057173}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent baseline {'cycle': 6, 'rms_m_s': 4.206842963855413, 'top_rms_m_s': 10.081090331161944, 'top_min_m_s': -27.914163447024293, 'top_max_m_s': 38.84205545374971}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent baseline {'cycle': 7, 'rms_m_s': 4.297053159064261, 'top_rms_m_s': 10.236524419131715, 'top_min_m_s': -28.267278804424222, 'top_max_m_s': 38.8398584416268}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent baseline {'cycle': 8, 'rms_m_s': 4.365930975692397, 'top_rms_m_s': 10.345980609524613, 'top_min_m_s': -28.58992897766484, 'top_max_m_s': 38.83331810899108}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent baseline {'cycle': 9, 'rms_m_s': 4.419270597284547, 'top_rms_m_s': 10.42009661622011, 'top_min_m_s': -28.806344874894876, 'top_max_m_s': 38.76739422941091}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent baseline {'cycle': 10, 'rms_m_s': 4.465196765449498, 'top_rms_m_s': 10.477800412669819, 'top_min_m_s': -29.035431693825103, 'top_max_m_s': 38.74831489371354}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent baseline {'cycle': 11, 'rms_m_s': 4.502872895324058, 'top_rms_m_s': 10.516146926436905, 'top_min_m_s': -29.177718123820796, 'top_max_m_s': 38.63074868341482}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent baseline {'cycle': 12, 'rms_m_s': 4.537222855686409, 'top_rms_m_s': 10.547564816408075, 'top_min_m_s': -29.330024377406062, 'top_max_m_s': 38.55631888875678}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent homogenized {'cycle': 1, 'rms_m_s': 2.8231595527948797e-13, 'top_rms_m_s': 3.2155493553843715e-13, 'top_min_m_s': -9.094947017729282e-13, 'top_max_m_s': 9.094947017729282e-13}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent homogenized {'cycle': 2, 'rms_m_s': 1.3104421872513548, 'top_rms_m_s': 3.3824685669875385, 'top_min_m_s': -5.26916451348734, 'top_max_m_s': 23.834360881824523}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent homogenized {'cycle': 3, 'rms_m_s': 3.4364728062235734, 'top_rms_m_s': 8.37627524822588, 'top_min_m_s': -23.382457291631454, 'top_max_m_s': 33.80664763066625}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent homogenized {'cycle': 4, 'rms_m_s': 3.831023665094208, 'top_rms_m_s': 9.091234169693896, 'top_min_m_s': -23.681861159082473, 'top_max_m_s': 36.54067404230227}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent homogenized {'cycle': 5, 'rms_m_s': 4.005323997084275, 'top_rms_m_s': 9.32907441463117, 'top_min_m_s': -21.134674274730514, 'top_max_m_s': 35.59049870287345}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent homogenized {'cycle': 6, 'rms_m_s': 4.106293441676169, 'top_rms_m_s': 9.445138765689679, 'top_min_m_s': -19.846899873929942, 'top_max_m_s': 34.081890220623336}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent homogenized {'cycle': 7, 'rms_m_s': 4.183969715284369, 'top_rms_m_s': 9.523943399455652, 'top_min_m_s': -19.394118010294733, 'top_max_m_s': 33.08263279382072}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent homogenized {'cycle': 8, 'rms_m_s': 4.248715960114807, 'top_rms_m_s': 9.585605213292265, 'top_min_m_s': -19.32636533570303, 'top_max_m_s': 32.45166978443649}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent homogenized {'cycle': 9, 'rms_m_s': 4.301374502445858, 'top_rms_m_s': 9.615640818179038, 'top_min_m_s': -19.0945671118875, 'top_max_m_s': 31.742351868638707}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent homogenized {'cycle': 10, 'rms_m_s': 4.348545344486203, 'top_rms_m_s': 9.639275139810605, 'top_min_m_s': -18.996189916007097, 'top_max_m_s': 31.23543751267971}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent homogenized {'cycle': 11, 'rms_m_s': 4.397594644575174, 'top_rms_m_s': 9.626831456102146, 'top_min_m_s': -17.7926468861383, 'top_max_m_s': 30.599563662100536}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+self_consistent homogenized {'cycle': 12, 'rms_m_s': 4.452782705198593, 'top_rms_m_s': 9.654294250438104, 'top_min_m_s': -18.05396804333168, 'top_max_m_s': 30.08382855117179}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic baseline {'cycle': 1, 'rms_m_s': 8.83476676173064, 'top_rms_m_s': 17.419745502736188, 'top_min_m_s': -26.56073375108781, 'top_max_m_s': 54.98051871913867}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic baseline {'cycle': 2, 'rms_m_s': 12.216675006459724, 'top_rms_m_s': 24.712789242536235, 'top_min_m_s': -37.797186009156576, 'top_max_m_s': 76.87262872014617}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic baseline {'cycle': 3, 'rms_m_s': 14.094113605799874, 'top_rms_m_s': 28.95839126866107, 'top_min_m_s': -48.99259289427664, 'top_max_m_s': 83.10821133302989}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic baseline {'cycle': 4, 'rms_m_s': 15.191839884770891, 'top_rms_m_s': 31.263183331484075, 'top_min_m_s': -54.306592278743665, 'top_max_m_s': 86.28740762617917}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic baseline {'cycle': 5, 'rms_m_s': 16.014445468266825, 'top_rms_m_s': 32.85670531878443, 'top_min_m_s': -58.119528853284464, 'top_max_m_s': 89.06926758238887}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic baseline {'cycle': 6, 'rms_m_s': 16.692592133980394, 'top_rms_m_s': 34.138473264887935, 'top_min_m_s': -60.82339134711356, 'top_max_m_s': 91.74836863458313}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic baseline {'cycle': 7, 'rms_m_s': 17.273494936233686, 'top_rms_m_s': 35.14862058216366, 'top_min_m_s': -63.13275256208499, 'top_max_m_s': 96.1345293896029}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic baseline {'cycle': 8, 'rms_m_s': 17.770438883148685, 'top_rms_m_s': 35.930978173126476, 'top_min_m_s': -65.17135340111872, 'top_max_m_s': 99.1834915734762}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic baseline {'cycle': 9, 'rms_m_s': 18.212688307987733, 'top_rms_m_s': 36.56738110237398, 'top_min_m_s': -66.99460130674697, 'top_max_m_s': 101.47680577700885}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic baseline {'cycle': 10, 'rms_m_s': 18.579504943104624, 'top_rms_m_s': 36.929247507612494, 'top_min_m_s': -68.52895588736646, 'top_max_m_s': 103.03177242335823}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic baseline {'cycle': 11, 'rms_m_s': 18.915509569135516, 'top_rms_m_s': 37.26053343070913, 'top_min_m_s': -69.63401513203371, 'top_max_m_s': 104.15013751628521}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic baseline {'cycle': 12, 'rms_m_s': 19.229571000900567, 'top_rms_m_s': 37.54259309433307, 'top_min_m_s': -70.70805576997873, 'top_max_m_s': 105.0117271838999}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic homogenized {'cycle': 1, 'rms_m_s': 8.83476676173064, 'top_rms_m_s': 17.419745502736188, 'top_min_m_s': -26.56073375108781, 'top_max_m_s': 54.98051871913867}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic homogenized {'cycle': 2, 'rms_m_s': 12.186513242055529, 'top_rms_m_s': 24.533540093977333, 'top_min_m_s': -39.61811219324545, 'top_max_m_s': 77.68619880007554}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic homogenized {'cycle': 3, 'rms_m_s': 13.994424055449745, 'top_rms_m_s': 28.31350266698881, 'top_min_m_s': -49.14105485068967, 'top_max_m_s': 88.85540659173921}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic homogenized {'cycle': 4, 'rms_m_s': 15.252319937378362, 'top_rms_m_s': 31.193501994621368, 'top_min_m_s': -55.2777356679926, 'top_max_m_s': 91.53291508416896}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic homogenized {'cycle': 5, 'rms_m_s': 16.086212620212557, 'top_rms_m_s': 32.88352828401715, 'top_min_m_s': -59.306303494524855, 'top_max_m_s': 93.72784458417436}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic homogenized {'cycle': 6, 'rms_m_s': 16.7544868744028, 'top_rms_m_s': 34.19934123330772, 'top_min_m_s': -62.33181642135196, 'top_max_m_s': 95.75672422794969}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic homogenized {'cycle': 7, 'rms_m_s': 17.33850245888694, 'top_rms_m_s': 35.26647775966168, 'top_min_m_s': -64.66517926490633, 'top_max_m_s': 96.96146189411957}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic homogenized {'cycle': 8, 'rms_m_s': 17.854565025516088, 'top_rms_m_s': 36.11470155456002, 'top_min_m_s': -66.78331607692007, 'top_max_m_s': 100.51187878409655}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic homogenized {'cycle': 9, 'rms_m_s': 18.311283449339506, 'top_rms_m_s': 36.79002960030983, 'top_min_m_s': -68.70338830396486, 'top_max_m_s': 103.61304672145161}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic homogenized {'cycle': 10, 'rms_m_s': 18.68493357342816, 'top_rms_m_s': 37.164592073041106, 'top_min_m_s': -70.30560798343686, 'top_max_m_s': 105.74652535712539}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic homogenized {'cycle': 11, 'rms_m_s': 18.965706460240256, 'top_rms_m_s': 37.32892556087657, 'top_min_m_s': -71.27833059144768, 'top_max_m_s': 105.21801139107538}
+[Rays] 1920/1920 reached, 0 failed, 1920 used
+analytic homogenized {'cycle': 12, 'rms_m_s': 19.26773800022681, 'top_rms_m_s': 37.567296439479406, 'top_min_m_s': -72.28970188048197, 'top_max_m_s': 105.47786570883}
+Results: /mnt/disk01/egor/projects/EMTomo/studies/station_seed/local_results.json

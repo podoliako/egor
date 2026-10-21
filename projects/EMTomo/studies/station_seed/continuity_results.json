@@ -1,0 +1,73 @@
+{
+  "python": "3.12.3",
+  "numpy": "2.4.0",
+  "skfmm": "2025.06.23",
+  "sphere_3d": {
+    "max_velocity_change_m_s": 4.547473508864641e-13,
+    "orders": {
+      "1": {
+        "max_abs_difference_s": 7.505107646466058e-14,
+        "rms_difference_s": 1.124403233747454e-14,
+        "max_abs_index": [
+          43,
+          24,
+          24
+        ]
+      },
+      "2": {
+        "max_abs_difference_s": 0.0017434310629648175,
+        "rms_difference_s": 0.00013734235089900705,
+        "max_abs_index": [
+          11,
+          0,
+          19
+        ]
+      }
+    },
+    "shape": [
+      48,
+      32,
+      32
+    ],
+    "cell_size_m": 125.0,
+    "source_m": [
+      1000.0,
+      875.0,
+      0.0
+    ],
+    "radius_m": 375.0,
+    "changed_slice": "[4:8,4:8,:4], excluding sphere",
+    "returned_field_dtype": "float64",
+    "common_R_over_v_added": false
+  },
+  "four_zero_nodes_2d": {
+    "max_velocity_change_m_s": 4.547473508864641e-13,
+    "orders": {
+      "1": {
+        "max_abs_difference_s": 8.881784197001252e-16,
+        "rms_difference_s": 9.136393292687141e-17,
+        "max_abs_index": [
+          0,
+          3
+        ]
+      },
+      "2": {
+        "max_abs_difference_s": 0.007774820488150702,
+        "rms_difference_s": 0.0015889172517676345,
+        "max_abs_index": [
+          0,
+          0
+        ]
+      }
+    },
+    "shape": [
+      24,
+      24
+    ],
+    "zero_seed_slice": "[7:9,7:9]",
+    "changed_slice": "[4:8,4:8]",
+    "negative_phi_nodes": 0,
+    "homogeneous_sphere": false
+  },
+  "interpretation": "Order-2 jumps occur without a sphere or inward propagation; order 1 is a control only."
+}

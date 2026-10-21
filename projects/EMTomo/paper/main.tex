@@ -113,76 +113,128 @@ Travel-time tomography remains useful for constructing and refining local veloci
 
 Established joint-inversion methods iteratively update the velocity structure and an individual location estimate for each earthquake \parencite{thurber1983}. They differ in how those estimates are initialized: tomoDD uses initial event locations \parencite{zhang2003}, whereas LOTOS determines them from arrival times and station coordinates in a one-dimensional reference model before three-dimensional inversion \parencite{koulakov2009}. In these formulations, locations enter velocity updates as individual estimates rather than as weighted alternatives. Probabilistic methods address different parts of this problem. Event-location methods can characterize alternative hypocenters given a prescribed velocity model \parencite{lomax2000,smith2022}. Bayesian joint inversion has been demonstrated for both one-dimensional velocity structure \parencite{ryberg2019} and three-dimensional local-earthquake tomography using trans-dimensional Monte Carlo sampling \parencite{pianaagostinetti2015}; the latter jointly samples hypocenters and velocity structure without requiring catalog locations as starting coordinates. DeepGEM proposes generalized expectation--maximization for blind inversion \parencite{gao2021}, while a recent three-dimensional variational double-difference method quantifies uncertainty in the velocity structure \parencite{yang2025}. These approaches differ in their treatment of location uncertainty and computational strategy; joint probabilistic 3D inversion without catalog starting locations is therefore not unique to EMTomo.
 
-Against this background, we ask a narrower practical question: under otherwise matched settings, how does replacing one best-fitting hypocenter with several weighted location hypotheses affect three-dimensional travel-time inversion? We present EMTomo, an iterative framework that alternates between locating events in the current velocity model and updating the model by regularized inversion. It requires arrival-time picks associated with individual events, station coordinates, and an initial velocity model defined on the inversion grid; the initial model may be one-dimensional or three-dimensional. The inversion uses one selected phase (P or S) at a time and does not require catalog hypocenter coordinates. EMTomo uses differences between arrivals at pairs of stations for the same event, which eliminate that event's origin time. This is distinct from tomoDD's double-difference formulation, which compares arrival times from pairs of events at common stations \parencite{zhang2003}. Candidate locations are selected from the within-event misfit and can contribute to the model update with weights. We compare single-location and multiple-hypothesis updates within EMTomo across a series of synthetic three-dimensional checkerboard tests, spherical anomalies, and a more natural tomography-derived velocity model, using both idealized and real event--station geometries. This within-method comparison isolates the effect of retaining multiple location hypotheses. We also use tomoDD as an established external reference to put reconstruction quality in the context of a widely used joint-inversion workflow, rather than to attribute differences between the two methods solely to the handling of location uncertainty. Both methods receive the same synthetic arrival-time picks, referenced to the earliest station arrival for each event; tomoDD additionally receives initial hypocenters obtained by perturbing the true synthetic locations, whereas EMTomo does not use initial event coordinates. Because the methods differ in their inputs, velocity parameterization, and interpolation, the comparison is intended to characterize their behavior in these specified settings rather than claim a universal resolution advantage.
+A practical motivation is to reconstruct three-dimensional velocity structure when reliable catalog hypocenters are unavailable, without committing the velocity update to a single estimated location for each event. We present EMTomo, which starts from arrival-time picks, station coordinates, and an initial velocity model, but does not require initial hypocenter coordinates. It alternates between evaluating possible event locations in the current model and updating the velocity model using either one selected location (hard assignment) or several weighted location hypotheses (soft assignment). This is a computationally different choice from the joint sampling of hypocenters and velocity structure by \textcite{pianaagostinetti2015}; we do not claim that joint probabilistic 3D inversion without initial catalog locations is new. Our question is whether retaining several plausible locations is useful in this iterative travel-time inversion setting, and how the resulting reconstructions compare with an established joint-inversion workflow.
 
-\todo{Before submission: specify how candidate-location weights relate to the probabilistic model and whether the implemented iteration satisfies EM assumptions; add a paper roadmap once the experiments are finalized. In Experiments, document the independent PyKonal forward solver used to generate synthetic arrival times, the skfmm solver used by EMTomo, the chosen tomography-derived model and real source--receiver geometry, the checkerboard block sizes and spherical anomalies, and the shared per-event earliest-arrival reference, the noise applied to tomoDD's true synthetic starting hypocenters, and whether tomoDD receives explicitly computed inter-event differential times or forms them internally. Describe the common arrival-time picks, differing inputs and initialization, grids, regularization, and runtime; report that EMTomo uses nearest-neighbor interpolation in the tests whereas tomoDD uses trilinear interpolation, and interpret resolution differences with this limitation in mind. If the Python implementation is released, provide a stable repository link and a code-availability statement. In Discussion, note that joint P/S inversion and time-lapse applications are outside the scope of this study.}
+We investigate this question in three synthetic experiment series. First, checkerboard tests keep the inversion-cell size fixed while varying the size of the cubic velocity anomalies; they compare hard-assignment EMTomo with tomoDD initialized from hypocenters perturbed by location noise. Second, a layered velocity model with spherical anomalies, inverted from a layered starting model, is tested with an artificial event--station geometry using hard-assignment EMTomo and tomoDD with and without noise in its initial hypocenters; its matched soft-assignment comparison remains to be completed. Third, the same layered model is tested with event and station locations taken from the 2011 Geysers configuration, including a separate EMTomo soft-assignment candidate-count study. EMTomo requires no initial hypocenters, whereas tomoDD does; the methods also use different velocity parameterizations. We therefore evaluate tomoDD against a trilinear oracle fitted to the known velocity field as a reference for what its representation can resolve, rather than interpreting every difference from the true field as an inversion error. The comparisons characterize these specified setups, not a universal advantage of either method.
+
+\todo{Before submission: provide a stable repository link and a code-availability statement if the implementation is released. In Discussion, note that joint P/S inversion and time-lapse applications are outside the scope of this study. Remaining experiment-specific checks are listed at the end of Section~\ref{sec:experiments}.}
 
 \section{Method}
 \label{sec:method}
 
-  \subsection{Forward Problem: Ray-Based Travel-Time Computation}
-  \label{subsec:forward}
+This section describes EMTomo's v1.4 framework used in the layered-model experiments. The older checkerboard runs are identified separately in Section~\ref{subsec:checkerboard_results}.
 
-  \todo{Ray tracing scheme, eikonal solver / shooting. Reference to initial velocity model parameterization.
-  -- anisotropy is not included in our method}
+\subsection{Parameterization and observations}
+\label{subsec:parameterization}
 
-  The travel time $\tauijk{n}$ from a candidate hypocenter cell $(i,j,k)$ to station $n$
-  is a functional of the 3D slowness field $S(\mathbf{x})$, discretized into $L$ cells.
-  The \emph{sensitivity matrix} $\mathbf{G}$ relates perturbations in slowness to
-  perturbations in travel time:
+We represent the isotropic velocity model by $L$ values $v_\ell>0$ at the centers of uniform cubic inversion cells, and perform the update in slowness $s_\ell=1/v_\ell$. The vector $\mathbf{s}=(s_1,\ldots,s_L)^{\mathsf T}$ contains the slowness values of all inversion cells. Similar blockwise slowness models were used by \textcite{aki1976}. For travel-time calculations, each inversion cell is divided into equal cubic subcells; the subdivision factor sets their number along each side. This does not add inversion parameters. The true model used to generate synthetic data may have an even finer grid. Slowness on the computational grid can be assigned by nearest-neighbor or trilinear interpolation. We use nearest-neighbor interpolation in all experiments: each subcell has the slowness of its parent inversion cell. An initial velocity model is required.
 
-  \begin{equation}
-    G_{n\ell}^{\,ijk} \;=\; \frac{\partial \tauijk{n}}{\partial S_{\ell}},
-    \label{eq:sensitivity}
-  \end{equation}
+For a catalog of $E$ events, let $t_{en}$ be the observed arrival time of one selected seismic phase from event $e$ at station $n$. Its predicted value is $o_e+T_n(\mathbf{h}_e;\mathbf{s})$, where $\mathbf{h}_e\in\mathbb{R}^3$ is the hypocenter, $o_e$ is the origin-time offset, and $T_n$ is the travel time to station $n$. With Gaussian errors, origin time can be integrated out analytically, as in NonLinLoc \parencite{lomax2000}. Given the velocity model and the hypocenter, its estimate is
+\begin{equation}
+\widehat{o}_e=\frac{\sum_n p_{en}\bigl[t_{en}-T_n(\mathbf{h}_e;\mathbf{s})\bigr]}{\sum_n p_{en}},
+\qquad p_{en}=\sigma_{en}^{-2},
+\label{eq:origin_time_estimate}
+\end{equation}
+where $\sigma_{en}^2$ is the timing-error variance defined in Section~\ref{subsec:estep}. This estimate uses the same time reference as the observed arrivals. After eliminating origin times, the problem has $L+3E$ remaining unknowns: $L$ slowness values and three coordinates per event. We do not require initial hypocenters, but we do need to know which event each arrival belongs to.
 
-  where $S_{\ell}$ is the slowness of cell $\ell$ and $G_{n\ell}^{\,ijk}$ equals the
-  ray-path length through cell $\ell$ for the ray connecting $(i,j,k)$ to station $n$.
-  \todo{Add eikonal / shooting reference here.}
+\subsection{Travel-time fields on the fine grid}
+\label{subsec:forward}
 
-  \subsection{Probabilistic Formulation}
-  \label{subsec:probabilistic}
-  \todo{
-    Observed data: arrival times $\{t_{ij}\}$.\\
-    Model parameters: velocity field $\mathbf{m}$.\\
-    Latent variables: hypocenter locations $\{\mathbf{h}_i\}$ and origin times.\\
-    Likelihood, prior, and complete-data log-likelihood.
-  }
+On the computational grid defined above, we use the second-order fast-marching solver in \texttt{scikit-fmm} \parencite{scikitfmm} to compute one first-arrival travel-time field $T_n(\mathbf{x};\mathbf{s})$ per station at each iteration. By reciprocity, the travel time from a station to an event equals the time from the event to the station. We can therefore reuse each station field for all events.
 
-  \subsection{EM Algorithm}
-  \label{subsec:em}
+Stations and events need not lie at grid centers. The field initialization uses the actual station coordinates, and trilinear interpolation gives travel times at continuous event coordinates. This interpolates travel times, not the blockwise slowness model. Figure~\ref{fig:forward_grids} illustrates the grids and the travel-time calculation for one station--event pair.
 
-  \todo{
-    Connecting text: formal EM interpretation --- complete data, incomplete data,
-    Q-function. Cite Dempster et al.\ (1977).
-  }
+\begin{figure}[tbp]
+\centering
+\fbox{\begin{minipage}[c][4cm][c]{0.9\textwidth}
+\centering
+\textit{Figure to be added}\\[1em]
+Coarse inversion cells and fine computational cells.\\
+A station and an event away from cell centers.\\
+The station travel-time field sampled at the event position.
+\end{minipage}}
+\caption{Inversion and computational grids, with travel-time evaluation for one station--event pair.}
+\label{fig:forward_grids}
+\end{figure}
 
-  The full algorithm alternates between the two steps above until convergence
-  (Algorithm~\ref{alg:em}).
+\subsection{Event-location step: candidate positions and weights}
+\label{subsec:estep}
 
-  \begin{algorithm}[t]
-  \caption{EM-based 3D seismic tomography}
-  \label{alg:em}
-  \begin{algorithmic}[1]
-    \Require Arrival times $\{t_{ni}\}$; initial slowness model $\svec^{(0)}$
-    \Ensure  Updated slowness model $\svec^{*}$; hypocenter set $\{(i^*,j^*,k^*)_e\}$
-    \State $k \leftarrow 0$
-    \Repeat
-      \State \textbf{E-step:} for each event $e$, evaluate $\Phi_{ijk}$ and locate
-             $(i^*,j^*,k^*)_e \leftarrow \arg\min_{ijk}\,\Phi_{ijk}$
-      \State \textbf{M-step:} assemble $\Gtil$ and $\rvec$;
-             solve the regularized inverse problem for $\ds^{(k)}$;
-             update $\svec^{(k+1)} \leftarrow \svec^{(k)} + \ds^{(k)}$
-      \State $k \leftarrow k + 1$
-    \Until{$\|\ds^{(k)}\| < \varepsilon$ \textbf{ or } $k = k_{\max}$}
-    \State \Return $\svec^{(k)}$, hypocenter estimates
-  \end{algorithmic}
-  \end{algorithm}
+We keep the velocity model fixed and use the station travel-time fields computed in the previous step (Section~\ref{subsec:forward}). Each field gives the travel time between a station and each fine-grid cell center. For a trial event position $\mathbf{h}$, subtracting this travel time from the observed arrival gives a station-specific estimate of origin time:
+\begin{equation}
+\widehat{o}_{en}(\mathbf{h})=t_{en}-T_n(\mathbf{h};\mathbf{s}).
+\end{equation}
+We do this for all stations that recorded the event. These estimates refer to the same event time, so we compare them with their weighted mean $\widehat{o}_e(\mathbf{h})$ from Eq.~\eqref{eq:origin_time_estimate}. We define the timing residual and the weighted squared misfit as
+\begin{equation}
+\delta t_{en}(\mathbf{h})=\widehat{o}_{en}(\mathbf{h})-\widehat{o}_e(\mathbf{h}),
+\qquad
+\chi_e^2(\mathbf{h})=\sum_n p_{en}(\mathbf{h})\,[\delta t_{en}(\mathbf{h})]^2.
+\end{equation}
+A smaller misfit means that the stations give more consistent estimates of origin time. The weights $p_{en}=1/\sigma_{en}^2$ account for arrival-time uncertainty. We use
+\begin{equation}
+\sigma_{en}^2(\mathbf{h})=
+\bigl(\alpha T_n(\mathbf{h};\mathbf{s})\bigr)^2+\sigma_{\mathrm{pick}}^2+\sigma_{\mathrm{model}}^2,
+\qquad p_{en}(\mathbf{h})=\sigma_{en}^{-2}(\mathbf{h}),
+\end{equation}
+where $\alpha$ is dimensionless, while $\sigma_{\mathrm{pick}}$ and $\sigma_{\mathrm{model}}$ are in seconds. The term $\alpha T_n$ allows larger timing errors for longer travel times; $\sigma_{\mathrm{pick}}$ describes absolute picking error, and $\sigma_{\mathrm{model}}$ allows for modeling error. The errors are assumed Gaussian, but their variances need not be equal. These three parameters are set before inversion, not estimated during it. By default, $\alpha$ and $\sigma_{\mathrm{pick}}$ are read from the synthetic-data noise settings, unless explicitly overridden; $\sigma_{\mathrm{model}}$ is specified separately.
 
-  \subsubsection{E-step: Hypocenter Estimation}
-  \label{subsubsec:estep}
+The squared misfit is the data-fit part of our criterion. Integrating out origin time under a uniform prior gives the full negative log likelihood
+\begin{equation}
+\Phi_e(\mathbf{h})=
+\frac{1}{2}\chi_e^2(\mathbf{h})
++\frac{1}{2}\sum_n\log\sigma_{en}^2
++\frac{1}{2}\log\!\left(\sum_n p_{en}\right).
+\label{eq:location_cost}
+\end{equation}
+up to a constant shared by all trial positions. The logarithmic terms are needed when the variances change with the trial position. If the variances are fixed, ranking positions by $\Phi_e$ is equivalent to ranking them by $\chi_e^2$.
 
-  \todo{Intro sentence: given fixed $\svec^{(k)}$, find the best-fit hypocenter for each event.}
+Evaluating $\Phi_e$ at all fine-grid cell centers gives a cost field for the event. We select a chosen number of low-cost cells, skipping cells too close to those already selected. The minimum separation is set in fine-grid cells using the largest coordinate difference (Chebyshev distance). We then refine the position within each selected cell by a local search for a lower cost, using trilinearly interpolated travel times. This distance constraint applies to the selected cells, not to the final continuous positions. After refinement, we rank the candidates again and keep a chosen number of the best locations. For these locations $\mathbf{h}_{ej}$ with costs $\Phi_{ej}$, the weights are
+\begin{equation}
+w_{ej}=\frac{\exp[-(\Phi_{ej}-\min_k\Phi_{ek})/\theta]}{
+\sum_k\exp[-(\Phi_{ek}-\min_i\Phi_{ei})/\theta]},
+\label{eq:location_weights}
+\end{equation}
+where $\theta>0$ controls how strongly the weights favor the best candidate; $\theta=1$ gives normalized likelihood weights.
+
+We may test many candidates but keep only some for the velocity update. Hard mode uses only the best one, with weight one. Soft mode uses the retained candidates with the weights above. Testing many candidates is therefore not the same as using soft mode; with one retained candidate, both modes are identical.
+
+\subsection{Velocity-update step: ray sensitivities and inversion}
+\label{subsec:mstep}
+
+At fixed candidate hypocenters, first-order changes in travel time are approximated by $T_n(\mathbf{h}_{ej};\mathbf{s}+\delta\mathbf{s})\simeq T_n(\mathbf{h}_{ej};\mathbf{s})+\sum_{\ell=1}^L G_{en\ell}^{(j)}\,\delta s_\ell$. The row $G_{en\ell}^{(j)}$ is approximated by the length of the ray from $\mathbf{h}_{ej}$ to station $n$ within inversion cell $\ell$. We compute spatial gradients of the station travel-time fields on the fine grid and interpolate them along each ray. Starting at the candidate hypocenter, we follow the negative gradient toward the station, accumulate path lengths in fine cells, and sum them into the coarse inversion cells. Within the small homogeneous sphere used to initialize the station field, path length is assigned to the station cell, consistently with that local approximation. Rays that do not reach the station are excluded from the update.
+
+For each event and retained hypothesis, let $\mathbf{r}_{ej}$ collect observed minus predicted arrivals at stations with successful rays, let $G_{ej}$ collect their sensitivity rows, and set $p_{en}=1/\sigma_{en}^2(\mathbf{h}_{ej})$. Rather than add origin-time increments as unknowns, we remove their effect with precision-weighted station means:
+\begin{equation}
+\widetilde{r}_{en}^{(j)}=r_{en}^{(j)}-\frac{\sum_m p_{em}r_{em}^{(j)}}{\sum_m p_{em}},\qquad
+\widetilde{G}_{en:}^{(j)}=G_{en:}^{(j)}-\frac{\sum_m p_{em}G_{em:}^{(j)}}{\sum_m p_{em}}.
+\label{eq:centered_rows}
+\end{equation}
+Only valid stations enter these sums. Holding locations and weights fixed during this step, the linearized, damped least-squares update minimizes
+\begin{equation}
+\sum_{e,j}w_{ej}\sum_{n}p_{en}
+\bigl(\widetilde{r}_{en}^{(j)}-\widetilde{G}_{en:}^{(j)}\delta\mathbf{s}\bigr)^2
++\delta\mathbf{s}^{\mathsf T}D\,\delta\mathbf{s},
+\label{eq:mstep_objective}
+\end{equation}
+where $D$ is a diagonal damping matrix; its entries can be increased for poorly illuminated cells. Accordingly, the implementation accumulates
+\begin{equation}
+H=\sum_{e,j}w_{ej}\widetilde{G}_{ej}^{\mathsf T}P_{ej}\widetilde{G}_{ej},\qquad
+\mathbf{b}=\sum_{e,j}w_{ej}\widetilde{G}_{ej}^{\mathsf T}P_{ej}\widetilde{\mathbf{r}}_{ej},\qquad
+(H+D)\delta\mathbf{s}=\mathbf{b},
+\label{eq:normal_equations}
+\end{equation}
+with $P_{ej}=\operatorname{diag}(p_{en})$. We update the slowness by $\delta\mathbf{s}$, convert back to velocity, and optionally limit the fractional velocity change in each cell. Repeating the location and velocity steps for a prescribed number of cycles produces the final model.
+
+\subsection{Mathematical basis and limitations}
+\label{subsec:mathematical_basis}
+
+Under independent Gaussian pick errors, Eq.~\eqref{eq:location_cost} follows from marginalizing the origin time. At $\theta=1$, Eq.~\eqref{eq:location_weights} gives posterior weights on the retained hypotheses with equal prior probabilities, not a full spatial posterior. Soft assignment averages their quadratic data-fit contributions; hard assignment retains only the best hypothesis. A related approach is DeepGEM \parencite{gao2021}, which uses a normalizing flow to approximate the source posterior in variational EM for blind seismic tomography; here the approximation is a finite set of weighted locations.
+
+For isotropic propagation, small perturbations, and no ray-path switching, Fermat's principle supports the frozen-ray slowness linearization. Weighted centering is an origin-time-only form of parameter elimination, related to the broader source-parameter separation of \textcite{pavlis1980}; it does not project out spatial hypocenter corrections. With locations, weights, and variances fixed, $H\succeq0$, and strictly positive damping gives $H+D\succ0$. The unclipped update therefore uniquely minimizes Eq.~\eqref{eq:mstep_objective}, reducing this quadratic objective relative to a zero update unless that update is already optimal.
+
+This local result does not establish monotonic improvement of the nonlinear likelihood. The candidate set changes between iterations, ray sensitivities are approximate, and model-dependent variances are frozen in the M-step; tempering and step clipping introduce further departures from exact EM. Thus the standard EM monotonicity guarantee \parencite{dempster1977} does not directly apply. Regularization stabilizes the update but cannot resolve velocity--location ambiguities unsupported by the data.
+
+\input{experiments}
 
 \printbibliography
 

@@ -1,0 +1,156 @@
+surface_top_center | factored: 0.003s, rms=4.77697e-17s max=3.33067e-16s | corrected_skfmm_order2: 0.005s, rms=0.0023683s max=0.00537144s
+first_cell_center | factored: 0.003s, rms=3.91483e-17s max=2.22045e-16s | corrected_skfmm_order2: 0.005s, rms=0.00219784s max=0.00651214s
+fractional_interior | factored: 0.003s, rms=2.58791e-17s max=1.11022e-16s | corrected_skfmm_order2: 0.005s, rms=0.00381048s max=0.013191s
+upper_x_face | factored: 0.003s, rms=5.7777e-17s max=3.33067e-16s | corrected_skfmm_order2: 0.005s, rms=0.00390681s max=0.0126383s
+source_at_output_center | factored: 0.002s, rms=2.86053e-17s max=1.66533e-16s | corrected_skfmm_order2: 0.005s, rms=0.00224876s max=0.00651214s
+whole_domain_seed | factored: 0.000s, rms=0s max=0s | corrected_skfmm_order2: 0.000s, rms=0s max=0s
+thin_domain | factored: 0.000s, rms=0s max=0s | corrected_skfmm_order2: 0.000s, rms=4.98498e-16s max=1.27676e-15s
+corner_000 | factored: 0.003s, rms=8.31435e-17s max=5.55112e-16s | corrected_skfmm_order2: 0.005s, rms=0.00396198s max=0.00755129s
+corner_001 | factored: 0.003s, rms=8.50459e-17s max=5.55112e-16s | corrected_skfmm_order2: 0.005s, rms=0.00396198s max=0.00755129s
+corner_010 | factored: 0.003s, rms=8.22525e-17s max=5.55112e-16s | corrected_skfmm_order2: 0.005s, rms=0.00396198s max=0.00755129s
+corner_011 | factored: 0.003s, rms=8.96568e-17s max=5.55112e-16s | corrected_skfmm_order2: 0.005s, rms=0.00396198s max=0.00755129s
+corner_100 | factored: 0.003s, rms=8.02545e-17s max=5.55112e-16s | corrected_skfmm_order2: 0.005s, rms=0.00396198s max=0.00755129s
+corner_101 | factored: 0.003s, rms=8.69617e-17s max=5.55112e-16s | corrected_skfmm_order2: 0.005s, rms=0.00396198s max=0.00755129s
+corner_110 | factored: 0.003s, rms=8.34966e-17s max=5.55112e-16s | corrected_skfmm_order2: 0.005s, rms=0.00396198s max=0.00755129s
+corner_111 | factored: 0.003s, rms=1.04214e-16s max=5.55112e-16s | corrected_skfmm_order2: 0.005s, rms=0.00396198s max=0.00755129s
+Saved homogeneous: 0.129s -> factored_screen.json
+readonly_noncontiguous | factored: 0.013s | corrected_skfmm_order2: 0.004s
+nonstation_inside_changed_to_1000 | factored: 0.013s | corrected_skfmm_order2: 0.004s
+nonstation_inside_changed_to_7000 | factored: 0.013s | corrected_skfmm_order2: 0.004s
+explicitly_homogenized_equivalence | factored: 0.013s | corrected_skfmm_order2: 0.004s
+outside_heterogeneity_must_matter | factored: 0.013s | corrected_skfmm_order2: 0.004s
+invariants: {"readonly_noncontiguous_input_unchanged": true, "field_does_not_alias_input": true, "homogenized_fine_slowness_outside_exact": true, "homogenized_fine_slowness_inside_exact": true, "node_average_max_abs_difference_s_per_m": 1.0842021724855044e-19, "internal_nodal_seed_bitwise_unchanged": true, "reconstructed_pipeline_equals_public": true, "internal_factor_min": 0.00026516160916747675, "internal_factor_max": 0.00033674356231217363, "effective_slowness_min": 0.0002061542516996638, "effective_slowness_max": 0.00034695425574410115, "audit_cycles": 5, "audit_change": 0.0, "outside_or_nonfinite_sources_rejected": [true, true, true], "default_float32_contract": true, "internal_factor_within_effective_slowness_bounds": true, "node_average_matches_independent_valid_neighbors": true}
+Saved invariants: 0.150s -> factored_screen.json
+symmetry_reference | factored: 0.023s | corrected_skfmm_order2: 0.006s
+reflect_axis_0 | factored: 0.022s | corrected_skfmm_order2: 0.007s
+reflect_axis_1 | factored: 0.023s | corrected_skfmm_order2: 0.007s
+reflect_axis_2 | factored: 0.023s | corrected_skfmm_order2: 0.006s
+permute_102 | factored: 0.022s | corrected_skfmm_order2: 0.006s
+permute_210 | factored: 0.024s | corrected_skfmm_order2: 0.007s
+permute_120 | factored: 0.023s | corrected_skfmm_order2: 0.006s
+Saved symmetry: 0.212s -> factored_screen.json
+heterogeneous_ulp_reference | factored: 0.054s | corrected_skfmm_order2: 0.017s
+block_-1x1_ulp | factored: 0.055s | corrected_skfmm_order2: 0.017s
+block_+1x1_ulp | factored: 0.083s | corrected_skfmm_order2: 0.020s
+block_-1x8_ulp | factored: 0.064s | corrected_skfmm_order2: 0.019s
+block_+1x8_ulp | factored: 0.063s | corrected_skfmm_order2: 0.019s
+block_-1x64_ulp | factored: 0.068s | corrected_skfmm_order2: 0.020s
+block_+1x64_ulp | factored: 0.064s | corrected_skfmm_order2: 0.020s
+random_signed_1_ulp_outside | factored: 0.065s | corrected_skfmm_order2: 0.020s
+random_signed_64_ulp_outside | factored: 0.064s | corrected_skfmm_order2: 0.020s
+station_-1x64_ulp | factored: 0.064s | corrected_skfmm_order2: 0.020s
+station_+1x64_ulp | factored: 0.064s | corrected_skfmm_order2: 0.020s
+block_plus_1e-06_m_s | factored: 0.064s | corrected_skfmm_order2: 0.020s
+block_plus_0.001_m_s | factored: 0.064s | corrected_skfmm_order2: 0.020s
+Saved ulp: 1.204s -> factored_screen.json
+layers_h125_fixed_R375 | factored: 0.025s, rms=0.0100336s max=0.0284532s | corrected_skfmm_order2: 0.010s, rms=0.0101815s max=0.0263622s
+layers_h62.5_fixed_R375 | factored: 0.183s, rms=0.00472595s max=0.0128643s | corrected_skfmm_order2: 0.078s, rms=0.00420294s max=0.0110085s
+layers_h62.5_shrinking_R3h | factored: 0.181s, rms=0.00472595s max=0.0128643s | corrected_skfmm_order2: 0.077s, rms=0.00475471s max=0.0122897s
+layers_h31.25_fixed_R375 | factored: 1.135s, rms=0.00224243s max=0.00586345s | corrected_skfmm_order2: 0.602s, rms=0.00209877s max=0.0056913s
+layers_h31.25_shrinking_R3h | factored: 1.129s, rms=0.00224243s max=0.00586345s | corrected_skfmm_order2: 0.588s, rms=0.00223847s max=0.00585903s
+layers_source_first_cell_center | factored: 0.025s, rms=0.0105487s max=0.0292181s | corrected_skfmm_order2: 0.008s, rms=0.0100981s max=0.0256962s
+Saved layered: 5.280s -> factored_screen.json
+boundary_slow_sphere_h125 | factored: 0.025s, rms=0.0120378s max=0.0379386s | corrected_skfmm_order2: 0.005s, rms=0.00226984s max=0.00485191s
+boundary_slow_sphere_h62.5 | factored: 0.165s, rms=0.00456675s max=0.0177311s | corrected_skfmm_order2: 0.042s, rms=0.000937175s max=0.00278317s
+boundary_slow_sphere_h31.25 | factored: 1.308s, rms=0.00324378s max=0.0129965s | corrected_skfmm_order2: 0.414s, rms=0.000477585s max=0.00166831s
+Saved boundary: 2.081s -> factored_screen.json
+Summary: {
+  "paired_cases": 49,
+  "successful_candidate_fields": 49,
+  "successful_baseline_fields": 49,
+  "largest_grid_nodes": 614705,
+  "all_successful_baselines_frozen_float32_verified": true,
+  "candidate_cycles_min": 1,
+  "candidate_cycles_max": 7,
+  "candidate_max_abs_relative_hamiltonian_residual": 1.3278267374516872e-13,
+  "timings_note": "Candidate wall_seconds excludes JIT warmup. Baseline wall_seconds includes a second frozen float32 verification solve; use native_float64_seconds for single-solve comparisons.",
+  "homogeneous_worst_candidate_abs_error_s": 5.551115123125783e-16,
+  "symmetry_worst_abs_s": {
+    "factored": 4.440892098500626e-16,
+    "corrected_skfmm_order2": 0.009621488101790865
+  },
+  "heterogeneous_ulp_worst_abs_change_s": {
+    "factored": 4.218847493575595e-15,
+    "corrected_skfmm_order2": 6.7390537594747e-14
+  },
+  "all_recorded_invariant_flags_true": true,
+  "execution_failures": [],
+  "interpretation": "Continuity, homogeneous exactness and iterative residual do NOT establish heterogeneous physical accuracy. Layered subregions and radial stress must be judged separately; no solver adjustment was made."
+}
+Findings: [
+  {
+    "severity": "accuracy_comparison",
+    "section": "layered",
+    "case": "layers_h125_fixed_R375",
+    "candidate_over_baseline_rms": 0.985473594812463,
+    "candidate_worse": false
+  },
+  {
+    "severity": "accuracy_comparison",
+    "section": "layered",
+    "case": "layers_h125_fixed_R375_shared_with_R3h",
+    "candidate_over_baseline_rms": 0.985473594812463,
+    "candidate_worse": false
+  },
+  {
+    "severity": "accuracy_comparison",
+    "section": "layered",
+    "case": "layers_h62.5_fixed_R375",
+    "candidate_over_baseline_rms": 1.1244385279932687,
+    "candidate_worse": true
+  },
+  {
+    "severity": "accuracy_comparison",
+    "section": "layered",
+    "case": "layers_h62.5_shrinking_R3h",
+    "candidate_over_baseline_rms": 0.9939524639968396,
+    "candidate_worse": false
+  },
+  {
+    "severity": "accuracy_comparison",
+    "section": "layered",
+    "case": "layers_h31.25_fixed_R375",
+    "candidate_over_baseline_rms": 1.0684522735241506,
+    "candidate_worse": true
+  },
+  {
+    "severity": "accuracy_comparison",
+    "section": "layered",
+    "case": "layers_h31.25_shrinking_R3h",
+    "candidate_over_baseline_rms": 1.0017713717707937,
+    "candidate_worse": true
+  },
+  {
+    "severity": "boundary_diagnostic",
+    "case": "boundary_slow_sphere_h125",
+    "gross_early_flag": false,
+    "early_beyond_voxel_continuum_envelope_s": 0.0,
+    "candidate_over_baseline_rms": 5.3033856836792514,
+    "min_error_s": -0.01168671023429696,
+    "max_error_s": 0.03793861246557084
+  },
+  {
+    "severity": "boundary_diagnostic",
+    "case": "boundary_slow_sphere_h62.5",
+    "gross_early_flag": false,
+    "early_beyond_voxel_continuum_envelope_s": 0.0,
+    "candidate_over_baseline_rms": 4.872889343851458,
+    "min_error_s": -0.01586511656089784,
+    "max_error_s": 0.0177310795644936
+  },
+  {
+    "severity": "boundary_diagnostic",
+    "case": "boundary_slow_sphere_h31.25",
+    "gross_early_flag": false,
+    "early_beyond_voxel_continuum_envelope_s": 0.0,
+    "candidate_over_baseline_rms": 6.79204285498878,
+    "min_error_s": -0.012996494492966915,
+    "max_error_s": 0.00856202925603844
+  },
+  {
+    "severity": "symmetry_warning",
+    "case": "reflect_axis_2",
+    "solver": "corrected_skfmm_order2",
+    "max_abs_change_s": 0.009621488101790865
+  }
+]

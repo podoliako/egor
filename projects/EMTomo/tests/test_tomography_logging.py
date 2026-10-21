@@ -37,16 +37,34 @@ def test_logger_uses_descriptive_run_id_and_persists_identity(tmp_path):
     logger.save_meta({}, [], [])
 
     assert re.fullmatch(
-        r"run_em-release_v1\.2\.3_topn-3_lam-0\.01_\d{8}_\d{6}", logger.run_id
+        r"run_em-release_v1\.2\.3_topn-3_lam-0\.01_\d{8}_\d{6}_[0-9a-f]{32}", logger.run_id
     )
 
     meta = json.loads((logger.run_dir / "meta.json").read_text())
+    assert meta["run_id"] == logger.run_dir.name == logger.run_id
     assert meta["run_name"] == "em-release"
     assert meta["run_version"] == "1.2.3"
     assert meta["run_tags"] == {"topn": "3", "lam": "0.01"}
     assert "started_at" in meta
     assert meta["viewer_completion_protocol"] == 1
     assert meta["viewer_ray_status_schema"] == 1
+
+
+def test_runs_with_same_name_get_distinct_ids(tmp_path, monkeypatch):
+    from datetime import datetime, timezone
+    from tomography import tomography_logging
+
+    class FixedDatetime:
+        @staticmethod
+        def now(tz):
+            return datetime(2026, 10, 18, 12, 0, 0, tzinfo=timezone.utc)
+
+    monkeypatch.setattr(tomography_logging, "datetime", FixedDatetime)
+    first = TomographyLogger(base_dir=tmp_path, run_name="em")
+    second = TomographyLogger(base_dir=tmp_path, run_name="em")
+    assert first.run_id != second.run_id
+    assert first.run_id.rsplit("_", 1)[0] == second.run_id.rsplit("_", 1)[0]
+    assert first.run_dir.is_dir() and second.run_dir.is_dir()
 
 
 def test_event_log_keeps_refined_positions_and_coverage_without_g(tmp_path):

@@ -1,0 +1,24 @@
+{
+  "preview_only": true,
+  "solver_changed": false,
+  "new_solver_run": false,
+  "grid_shape": [
+    160,
+    56,
+    56
+  ],
+  "cell_size_m": 125.0,
+  "top_elevation_m": 1166.0,
+  "surface_source": "station heights; linear inside hull, nearest outside; NOT DEM",
+  "extrapolated_columns": 2455,
+  "total_columns": 8960,
+  "rock_voxels": 484154,
+  "air_voxels": 17606,
+  "rendered_faces": 42698,
+  "velocity_array_sha256": "2c72bf242a398bfc954d069b6b1befd6beb58b67a4e55ef59be2f475789a3bff",
+  "station_burial_below_stair_surface_min_m": 0.0,
+  "station_burial_below_stair_surface_max_m": 127.0,
+  "air": "excluded mask, not a zero/low-speed medium; visualization only",
+  "vertical_datum": "station h=elevation, event h=-catalog depth; common datum assumed, not verified",
+  "events_below_7km_grid": 4
+}

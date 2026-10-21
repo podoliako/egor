@@ -1,0 +1,49 @@
+{
+  "initial_model_source": {
+    "run_id": "run_fl-hard-c1000-flat4-20x7x7km-52st-1920ev-grid24x8x10-z0.5-5.5-noise01-pick001_v1.4_ncand-5_topn-1_mode-hard_dmin-1_lam-0.5_temp-1.0_sub-8_cov-1.0_20261013_200119",
+    "completed_updates": 8,
+    "checkpoint": "runs/run_fl-hard-c1000-flat4-20x7x7km-52st-1920ev-grid24x8x10-z0.5-5.5-noise01-pick001_v1.4_ncand-5_topn-1_mode-hard_dmin-1_lam-0.5_temp-1.0_sub-8_cov-1.0_20261013_200119/iter_8/model.npy",
+    "checkpoint_sha256": "6e5e1e80879e5984a8b18d070338be49f50cc3646ff60ac2a41bf79296c16948",
+    "source_cell_size_m": 1000.0,
+    "target_cell_size_m": 500.0,
+    "transfer": "nearest; split each parent into 2x2x2 identical cells",
+    "fine_grid_velocity_bitwise_identical": true,
+    "hypocentres_transferred": false
+  },
+  "shape": [
+    40,
+    14,
+    14
+  ],
+  "fine_cell_size_m": 125.0,
+  "cycles": 12,
+  "mode": "hard",
+  "forward": "skfmm_order2_exact_station_homogeneous_sphere"
+}
+Run directory: /mnt/disk01/egor/projects/EMTomo/runs/run_fl-hard-c500-from-c1000-c8-flat4-20x7x7km-52st-1920ev-grid24x8x10-z0.5-5.5-noise01-pick001_v1.4_mode-hard_cell-500_sub-4_init-c1000-c8_20261017_140657
+1/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+2/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+3/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+4/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+5/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+6/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+7/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+8/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+9/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+10/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+11/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+12/12
+[Rays] 99840/99840 reached, 0 failed, 99840 used
+[TomographyLogger] Run saved to: /mnt/disk01/egor/projects/EMTomo/runs/run_fl-hard-c500-from-c1000-c8-flat4-20x7x7km-52st-1920ev-grid24x8x10-z0.5-5.5-noise01-pick001_v1.4_mode-hard_cell-500_sub-4_init-c1000-c8_20261017_140657
+Summary: /mnt/disk01/egor/projects/EMTomo/studies/flatlayers/multiscale_result.json

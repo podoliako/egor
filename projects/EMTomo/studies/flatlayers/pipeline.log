@@ -1,3 +1,14 @@
 2026-10-13 18:09:58 forward start
 2026-10-13 18:19:32 pipeline stopped by request before inversions; forward left running
 2026-10-13 18:46:14 runs.sh waiting for forward output
+2026-10-13 20:01:17 forward output ready
+2026-10-13 20:01:17 start fixed-c1000
+2026-10-13 20:01:17 start hard-c1000
+2026-10-13 20:01:17 start fixed-c500
+2026-10-13 20:01:17 start hard-c500
+2026-10-13 20:03:15 end fixed-c1000 (exit 0)
+2026-10-13 20:09:50 end fixed-c500 (exit 0)
+2026-10-13 20:12:01 end hard-c1000 (exit 0)
+2026-10-13 20:15:42 end hard-c500 (exit 0)
+2026-10-13 20:15:42 writing report
+2026-10-13 20:15:54 done (report exit 0)

@@ -39,7 +39,12 @@ def travel_time_field(velocity: np.ndarray, cell_size: float, source_m) -> np.nd
     inside = phi <= 0.0
     if inside.all():
         return (distance / source_velocity).astype(np.float32)
-    times = np.asarray(skfmm.travel_time(phi, velocity, dx=cell_size, order=2), dtype=np.float64)
+    # FMM initializes nodes on both sides of phi=0; overwriting the returned
+    # inner times alone would leave sensitivity to the original inner medium.
+    # Keep the caller's model unchanged (it can be read-only/shared by workers).
+    seeded_velocity = velocity.copy()
+    seeded_velocity[inside] = source_velocity
+    times = np.asarray(skfmm.travel_time(phi, seeded_velocity, dx=cell_size, order=2), dtype=np.float64)
     times += radius / source_velocity
     times[inside] = distance[inside] / source_velocity
     return times.astype(np.float32)
