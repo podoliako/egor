@@ -112,6 +112,92 @@ def negative_log_likelihood(predicted_times_s, observed_s, noise: PickNoise, nor
     return half_chi2 + normalization
 
 
+@njit(cache=True)
+def _negative_log_likelihood_batch_kernel(
+    predicted, observed, relative_sigma, constant_variance, tile_size, compute_normalization,
+):
+    n_stations, n_points = predicted.shape
+    n_events = observed.shape[0]
+    out = np.empty((n_events, n_points))
+    width = min(tile_size, n_points)
+    times = np.empty(width)
+    precisions = np.empty(width)
+    sum_p = np.empty(width)
+    sum_log_variance = np.empty(width)
+    sum_pr = np.empty((n_events, width))
+    sum_pr2 = np.empty((n_events, width))
+    for start in range(0, n_points, tile_size):
+        count = min(width, n_points - start)
+        sum_p[:] = 0.0
+        sum_log_variance[:] = 0.0
+        sum_pr[:, :] = 0.0
+        sum_pr2[:, :] = 0.0
+        for station in range(n_stations):
+            for point in range(count):
+                time = np.float64(predicted[station, start + point])
+                variance = (relative_sigma * time) ** 2 + constant_variance
+                precision = 1.0 / variance
+                times[point] = time
+                precisions[point] = precision
+                sum_p[point] += precision
+                if compute_normalization:
+                    sum_log_variance[point] += np.log(variance)
+            for event in range(n_events):
+                observed_time = observed[event, station]
+                for point in range(count):
+                    residual = observed_time - times[point]
+                    precision = precisions[point]
+                    sum_pr[event, point] += precision * residual
+                    sum_pr2[event, point] += precision * residual * residual
+        for point in range(count):
+            normalization = 0.0
+            if compute_normalization:
+                normalization = 0.5 * sum_log_variance[point] + 0.5 * np.log(sum_p[point])
+            for event in range(n_events):
+                out[event, start + point] = 0.5 * max(
+                    sum_pr2[event, point] - sum_pr[event, point] ** 2 / sum_p[point], 0.0
+                ) + normalization
+    return out
+
+
+def negative_log_likelihood_batch(
+    predicted_times_s, observed_s, noise: PickNoise, normalization=None, tile_size=1024,
+):
+    """Evaluate a caller-sized event batch, returning float64 ``(B, *grid)``.
+
+    Predictions have shape ``(S, *grid)`` and finite observations ``(B, S)``.
+    Precision and (when needed) normalization are computed once per station/tile
+    and shared across events, retaining the single-event station summation order.
+    Scratch space is O(B * tile_size), in addition to the result and any copy
+    needed to make predictions contiguous. No full station/event/grid cube is
+    formed; callers control peak output memory by choosing B (including zero).
+
+    ``normalization`` has the same meaning as in ``negative_log_likelihood``:
+    a scalar or array broadcastable to ``grid``, shared by all batch rows.
+    """
+    observed = np.asarray(observed_s, dtype=np.float64)
+    if observed.ndim != 2 or not np.all(np.isfinite(observed)):
+        raise ValueError("Observed times must be a finite (batch, stations) array")
+    if isinstance(tile_size, (bool, np.bool_)) or not isinstance(tile_size, (int, np.integer)) or tile_size < 1:
+        raise ValueError("tile_size must be a positive integer")
+    flat, shape = _station_major(predicted_times_s, observed.shape[1])
+    if normalization is not None:
+        try:
+            normalization = np.broadcast_to(np.asarray(normalization, dtype=np.float64), shape)
+        except ValueError as exc:
+            raise ValueError("normalization must be broadcastable to the prediction grid") from exc
+    if observed.shape[0] == 0:
+        return np.empty((0, *shape), dtype=np.float64)
+    out = _negative_log_likelihood_batch_kernel(
+        flat, np.ascontiguousarray(observed), float(noise.relative_sigma),
+        float(noise.constant_variance), int(tile_size),
+        normalization is None and noise.relative_sigma != 0,
+    ).reshape((observed.shape[0], *shape))
+    if normalization is not None:
+        out += normalization
+    return out
+
+
 def candidate_weights(negative_log_likelihoods, temperature: float = 1.0) -> np.ndarray:
     """Normalized posterior weights for equally probable a priori hypotheses.
 

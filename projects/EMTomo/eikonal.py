@@ -62,23 +62,46 @@ def _solve_in_worker(source_m) -> np.ndarray:
     return travel_time_field(_WORKER["velocity"], _WORKER["cell_size"], source_m)
 
 
+def _init_shared_worker(velocity: np.ndarray, cell_size: float, buffer, shape) -> None:
+    _init_worker(velocity, cell_size)
+    _WORKER["fields"] = np.frombuffer(buffer, dtype=np.float32).reshape(shape)
+
+
+def _solve_into_shared_worker(task) -> int:
+    index, source_m = task
+    _WORKER["fields"][index] = _solve_in_worker(source_m)
+    return index
+
+
 def station_travel_time_fields(model: VelocityModel, stations_m, n_workers: int = 1) -> np.ndarray:
-    """Travel-time fields ``(n_stations, nx, ny, nz)``, one fast-marching solve per station."""
+    """Travel-time fields ``(n_stations, nx, ny, nz)``, one fast-marching solve per station.
+
+    Parallel workers write disjoint slices of a RawArray rather than sending
+    fields through the pool's result pipe. The returned ndarray retains the
+    buffer through its base chain, including after the worker pool exits.
+    """
     stations = np.asarray(stations_m, dtype=np.float64).reshape(-1, 3)
     if len(stations) == 0:
         raise ValueError("At least one station is required")
-    fields = np.empty((len(stations),) + model.shape, dtype=np.float32)
     if n_workers <= 1 or len(stations) == 1:
+        fields = np.empty((len(stations),) + model.shape, dtype=np.float32)
         for index, station in enumerate(stations):
             fields[index] = travel_time_field(model.velocity, model.cell_size, station)
         return fields
 
     context = mp.get_context("fork")
+    shape = (len(stations),) + model.shape
+    # RawArray's mmap-backed heap can fall back to temporary-file storage when
+    # /dev/shm is too small; unlike named SharedMemory it need not fit there.
+    buffer = context.RawArray("f", int(np.prod(shape)))
+    fields = np.frombuffer(buffer, dtype=np.float32).reshape(shape)
     with context.Pool(
         min(n_workers, len(stations)),
-        initializer=_init_worker,
-        initargs=(model.velocity, model.cell_size),
+        initializer=_init_shared_worker,
+        initargs=(model.velocity, model.cell_size, buffer, shape),
     ) as pool:
-        for index, field in enumerate(pool.imap(_solve_in_worker, list(stations))):
-            fields[index] = field
+        # Exhaust the results so every write completes and worker exceptions
+        # propagate instead of returning a partially populated output.
+        for _ in pool.imap(_solve_into_shared_worker, enumerate(stations)):
+            pass
     return fields

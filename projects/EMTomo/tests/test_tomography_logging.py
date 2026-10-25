@@ -302,7 +302,7 @@ def _mock_event_computation(monkeypatch, masks):
     monkeypatch.setattr(em, "station_travel_time_fields",
                         lambda fine, stations, workers: np.ones((len(stations), *fine.shape)))
     monkeypatch.setattr(em, "run_events",
-                        lambda *args: (np.zeros((8, 8)), np.zeros(8), [(0, log)]))
+                        lambda *args, **kwargs: (np.zeros((8, 8)), np.zeros(8), [(0, log)]))
     monkeypatch.setattr(em, "solve_slowness_update",
                         lambda *args, **kwargs: (np.zeros((2, 2, 2)), np.ones((2, 2, 2)),
                                                 np.ones((2, 2, 2))))

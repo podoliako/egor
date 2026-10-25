@@ -48,6 +48,16 @@ class InversionConfig:
     save_runs: bool = True
     log_g_per_weight: bool = False
 
+    # Execution controls; these do not change the inversion model or Powell settings.
+    likelihood_batch_size: int = 8
+    likelihood_batch_memory_mb: int = 128
+    compact_rays: bool = True
+    fast_refinement: bool = True
+    linear_solver: str = "auto"
+    matrix_free_min_voxels: int = 8192
+    solver_rtol: float = 1e-10
+    solver_maxiter: int | None = None
+
     def __post_init__(self):
         def positive(name):
             value = getattr(self, name)
@@ -65,10 +75,28 @@ class InversionConfig:
                      "weight_model_sigma_s", "lambda_reg", "coverage_damping_power"):
             nonnegative(name)
         for name in ("subdivision", "n_cycles", "n_candidates", "weights_top_n",
-                     "weights_min_distance", "n_workers"):
+                     "weights_min_distance", "n_workers", "likelihood_batch_size",
+                     "likelihood_batch_memory_mb", "matrix_free_min_voxels"):
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, (int, np.integer)) or value < 1:
                 raise ValueError(f"{name} must be a positive integer")
+        if self.solver_maxiter is not None:
+            if (isinstance(self.solver_maxiter, bool)
+                    or not isinstance(self.solver_maxiter, (int, np.integer))
+                    or self.solver_maxiter < 1):
+                raise ValueError("solver_maxiter must be a positive integer or None")
+        for name in ("compact_rays", "fast_refinement"):
+            if not isinstance(getattr(self, name), bool):
+                raise ValueError(f"{name} must be a bool")
+        if not isinstance(self.linear_solver, str) or self.linear_solver not in (
+            "auto", "dense", "matrix_free", "legacy",
+        ):
+            raise ValueError("linear_solver must be 'auto', 'dense', 'matrix_free', or 'legacy'")
+        if self.linear_solver == "matrix_free" and (self.lambda_reg is None or self.lambda_reg <= 0):
+            raise ValueError("linear_solver='matrix_free' requires lambda_reg > 0")
+        if (not isinstance(self.solver_rtol, (int, float, np.integer, np.floating))
+                or not np.isfinite(self.solver_rtol) or not 0.0 < self.solver_rtol < 1.0):
+            raise ValueError("solver_rtol must be finite and in (0, 1)")
         if self.weights_top_n > self.n_candidates:
             raise ValueError("weights_top_n must not exceed n_candidates")
         if self.slowness_interpolation not in ("nearest", "trilinear"):

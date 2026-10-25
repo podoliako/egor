@@ -25,6 +25,10 @@ def _optional_fraction(text: str):
     return None if text.lower() == "none" else float(text)
 
 
+def _optional_int(text: str):
+    return None if text.lower() == "none" else int(text)
+
+
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("experiment_id", help="Name of matching input/ and output/ experiment directories")
@@ -66,6 +70,22 @@ def _parser() -> argparse.ArgumentParser:
     option("coverage-damping-power", type=float)
     option("max-velocity-step-fraction", type=_optional_fraction,
            help="Per-cycle relative velocity limit per cell, or 'none'")
+    option("likelihood-batch-size", type=int,
+           help="Maximum events per likelihood batch (>= 1)")
+    option("likelihood-batch-memory-mb", type=int,
+           help="Per-event-worker cost-cube budget in MB; always allow at least one event")
+    option("compact-rays", action=argparse.BooleanOptionalAction,
+           help="Use compact ray sensitivities instead of dense station/voxel arrays")
+    option("fast-refinement", action=argparse.BooleanOptionalAction,
+           help="Use fused compiled interpolation/likelihood with unchanged Powell settings")
+    option("linear-solver", choices=("auto", "dense", "matrix_free", "legacy"),
+           help="auto: dense below threshold or without damping; matrix_free requires lambda-reg > 0")
+    option("matrix-free-min-voxels", type=int,
+           help="Minimum inversion voxel count for auto matrix-free solving (>= 1)")
+    option("solver-rtol", type=float,
+           help="Matrix-free solver relative residual tolerance, strictly between 0 and 1")
+    option("solver-maxiter", type=_optional_int,
+           help="Matrix-free solver iteration limit (positive integer), or 'none' for solver default")
     option("workers", type=int)
     option("run-name")
     option("runs-dir")

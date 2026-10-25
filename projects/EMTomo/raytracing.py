@@ -2,11 +2,14 @@
 
 compute_G_all_stations        — prange over stations; use in a single process
 compute_G_all_stations_serial — single-threaded; use inside fork workers
+compute_G_all_stations_compact — single-threaded CSR construction for workers
 """
 from __future__ import annotations
 
 import numpy as np
-from numba import njit, prange # pyright: ignore[reportMissingImports]
+from numba import njit, prange, types # pyright: ignore[reportMissingImports]
+from numba.experimental import jitclass # pyright: ignore[reportMissingImports]
+from scipy.sparse import csr_matrix
 
 
 # ── Numba kernels ─────────────────────────────────────────────────────────────
@@ -241,6 +244,110 @@ def _deposit_ray_nb(path, G, cell_len, ix, wx, iy, wy, iz, wz, station, source_r
                 w = wx[a, i] * wy[b, j] * wz[e, c]
                 if w != 0.0:
                     G[ix[a, i], iy[b, j], iz[e, c]] += length * w
+
+
+@jitclass([
+    ("values", types.float64[:, :, ::1]),
+    ("seen", types.boolean[::1]),
+    ("touched", types.int64[::1]),
+    ("count", types.int64),
+])
+class _TouchedRow:
+    """Array-like accumulator specialized by Numba in the *same* deposition kernels.
+
+    Tracking first writes avoids a dictionary lookup per tiny deposition, and
+    lets extraction/clearing visit only touched cells. The separate seen mask
+    also handles zero-length deposits without recording duplicate indices.
+    """
+
+    def __init__(self, shape):
+        self.values = np.zeros((shape[0], shape[1], shape[2]), dtype=np.float64)
+        size = shape[0] * shape[1] * shape[2]
+        self.seen = np.zeros(size, dtype=np.bool_)
+        self.touched = np.empty(size, dtype=np.int64)
+        self.count = 0
+
+    def __getitem__(self, index):
+        return self.values[index]
+
+    def __setitem__(self, index, value):
+        i, j, k = index
+        flat = (i * self.values.shape[1] + j) * self.values.shape[2] + k
+        if not self.seen[flat]:
+            self.seen[flat] = True
+            self.touched[self.count] = flat
+            self.count += 1
+        self.values[index] = value
+
+
+@njit(cache=True, fastmath=True)
+def _compute_G_compact_nb(gx, gy, gz, sl, epic, cell_len, step, tol, max_steps,
+                          x_lo, x_hi, source_radius, ix, wx, iy, wy, iz, wz, out_shape):
+    n_st = gx.shape[0]
+    row = _TouchedRow(out_shape)
+    values = row.values.reshape(-1)
+    reached = np.zeros(n_st, dtype=np.bool_)
+    indptr = np.zeros(n_st + 1, dtype=np.int64)
+    # Per-ray arrays keep construction O(M + nnz + S), not O(S*M). They are
+    # copied once into CSR buffers below; no ray is traced a second time.
+    row_data = []
+    row_indices = []
+    tol_sq = tol * tol
+    for si in range(n_st):
+        path, ray_reached = _trace_ray_nb(
+            gx[si], gy[si], gz[si], sl[si], epic, step, tol_sq, max_steps, x_lo, x_hi,
+        )
+        reached[si] = ray_reached
+        if ray_reached:
+            _deposit_ray_nb(path, row, cell_len, ix, wx, iy, wy, iz, wz, sl[si], source_radius)
+        data = np.empty(row.count, dtype=np.float64)
+        indices = np.empty(row.count, dtype=np.int64)
+        count = 0
+        for p in range(row.count):
+            index = row.touched[p]
+            value = values[index]
+            if value != 0.0:
+                data[count] = value
+                indices[count] = index
+                count += 1
+            values[index] = 0.0
+            row.seen[index] = False
+        row.count = 0
+        row_data.append(data[:count])
+        row_indices.append(indices[:count])
+        indptr[si + 1] = indptr[si] + count
+
+    data = np.empty(indptr[-1], dtype=np.float64)
+    indices = np.empty(indptr[-1], dtype=np.int64)
+    for si in range(n_st):
+        data[indptr[si]:indptr[si + 1]] = row_data[si]
+        indices[indptr[si]:indptr[si + 1]] = row_indices[si]
+    return data, indices, indptr, reached
+
+
+def compute_G_all_stations_compact(gx, gy, gz, sl, epic, cell_len, step, tol, max_steps,
+                                   x_lo, x_hi, source_radius, ix, wx, iy, wy, iz, wz, out_shape):
+    """Return ``(CSR[S, prod(out_shape)], reached[S])`` without a dense S*M array.
+
+    Arguments and numerical kernels are identical to the dense serial builder;
+    columns use C-order flattening. Failed rays have empty rows, and successful
+    zero-length rays remain marked reached. The result has sorted, unique
+    indices and no explicit zeros. Construction is serial (no Numba thread pool).
+
+    A reusable row costs O(M) workspace, with O(nnz + S) sparse buffers. Only
+    touched cells are extracted and cleared, preserving deposition order and
+    avoiding per-station O(M) work. To warm up before launching fork workers,
+    call this function once with representative arguments/dtypes (one station
+    is enough); it is a Python CSR wrapper, not a Numba dispatcher.
+    """
+    data, indices, indptr, reached = _compute_G_compact_nb(
+        gx, gy, gz, sl, epic, cell_len, step, tol, max_steps, x_lo, x_hi,
+        source_radius, ix, wx, iy, wy, iz, wz, out_shape,
+    )
+    size = int(out_shape[0]) * int(out_shape[1]) * int(out_shape[2])
+    result = csr_matrix((data, indices, indptr), shape=(gx.shape[0], size))
+    result.sort_indices()
+    return result, reached
 
 
 # ── Sensitivity builders ─────────────────────────────────────────────────────

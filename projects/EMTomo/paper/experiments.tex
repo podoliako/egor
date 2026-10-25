@@ -88,6 +88,33 @@ TomoDD has lower volume RMSE for 60-km cubes; for 40- and 30-km cubes the differ
 \label{fig:checkerboards}
 \end{figure}
 
+\subsubsection{Scaled checkerboards with the current implementation}
+\label{subsec:scaled_checkerboards}
+
+Figures~\ref{fig:checkerboard_geometry_current} and~\ref{fig:checkerboard_comparison_current} show a separate, scaled checkerboard series on a $24\times12\times12$~km domain, with cube sides 6, 4, and 3~km ($n_x=4,6,8$). The geometry contains 1200 events and 98 surface stations. Both methods start from a homogeneous 5~km/s velocity model and use 1-km velocity parameterizations. The saved observations in this series have 1\% relative and 0.01-s absolute pre-reference noise. EMTomo uses 12 hard-assignment updates, 15 candidates with top-1 selection, regularization parameter $\lambda=1$, and coverage-damping power zero. The tomoDD results are from three joint iterations with a 1-km per-coordinate Gaussian perturbation of the initial hypocenters (seed 42). The numerical scores in Table~\ref{tab:checkerboards} describe the legacy, larger-domain runs above, not these scaled reconstructions.
+
+\clearpage
+\begin{landscape}
+\begin{figure}[p]
+\centering
+\includegraphics[width=\linewidth]{figures/checkerboard_nx6_geometry.pdf}
+\begin{singlespace}
+\caption{Scaled checkerboard model and acquisition geometry for $n_x=6$. (a) Surface velocity field and plan-view projections of stations (grey triangles) and events (white stars); arrows mark the sections at $Y=10$~km and $X=6$~km. (b,c) The corresponding vertical velocity sections, with all stations and events projected onto each plane. Coincident projections are drawn once: each event marker represents six events in (a), ten in (b), and twenty in (c); station markers represent seven stations in (b) and fourteen in (c). (d) The common homogeneous initial velocity model for EMTomo and tomoDD, also used for $n_x=4$ and 8. Depth is positive downward. Alternating frame segments are 2~km long.}
+\label{fig:checkerboard_geometry_current}
+\end{singlespace}
+\end{figure}
+\end{landscape}
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=\textwidth,height=0.79\textheight,keepaspectratio]{figures/checkerboard_nx4_nx6_nx8_comparison.pdf}
+\begin{singlespace}
+\caption{Scaled checkerboard reconstructions. Columns show truth, EMTomo after 12 updates with coverage-damping power zero, tomoDD after three iterations, and the saved trilinear representation oracle. The upper three rows are vertical sections at $Y=10$~km for $n_x=4,6,8$; the lower three rows are horizontal sections at depth $Z=5$~km in the same order. True and EMTomo fields are piecewise constant; tomoDD and its oracle use native trilinear velocity interpolation. The oracle is a truth-only representation reference, not an inversion result. All panels share the velocity scale in km/s; no stations or events are overlaid.}
+\label{fig:checkerboard_comparison_current}
+\end{singlespace}
+\end{figure}
+\clearpage
+
 \subsection{Layered model with spherical anomalies: artificial geometry}
 \label{subsec:sphere_results}
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from time import perf_counter
 from typing import Optional
 
 import numpy as np
@@ -9,12 +10,13 @@ from config import InversionConfig
 from eikonal import station_travel_time_fields
 from instruments.instruments_coords import metric_to_cell_coord
 from instruments.instruments_ops import restriction_tables
-from instruments.likelihood import PickNoise, negative_log_likelihood
-from raytracing import compute_G_all_stations, compute_G_all_stations_serial
+from instruments.hypocentre_objective import make_refinement_objective
+from instruments.likelihood import PickNoise, negative_log_likelihood, negative_log_likelihood_batch
+from raytracing import compute_G_all_stations_compact, compute_G_all_stations_serial
 from velocity_model import VelocityModel
 from .tomography_events import EventSettings, IterationFields, run_events
 from .tomography_logging import TomographyLogger, summarize_ray_status
-from .tomography_math import solve_slowness_update
+from .tomography_math import MatrixFreeNormalEquations, accumulate_normal_equations, solve_slowness_update
 
 # Recorded in meta.json so that runs with different formulations are not compared.
 METHOD_DESCRIPTION = {
@@ -33,12 +35,23 @@ def warm_up_jit() -> None:
     point = np.zeros(3, dtype=np.float64)
     lo, hi = np.zeros(3), np.ones(3)
     tables = restriction_tables((1, 1, 1), 2, "nearest")
-    for compute_G in (compute_G_all_stations_serial, compute_G_all_stations):
+    # Do not initialize a parallel Numba/OpenMP runtime before forking workers.
+    for compute_G in (compute_G_all_stations_serial, compute_G_all_stations_compact):
         compute_G(gradient, gradient, gradient, stations, point, 1.0, 0.5, 0.5, 5, lo, hi, 3.0,
                   *tables, (1, 1, 1))
     noise = PickNoise(0.01, 0.1, 0.0)
     negative_log_likelihood(np.zeros((2, 1), dtype=np.float32), np.zeros(2), noise)
     negative_log_likelihood(np.zeros(2), np.zeros(2), noise)
+    fields = np.zeros((2, 2, 2, 2), dtype=np.float32)
+    negative_log_likelihood_batch(fields, np.zeros((2, 2)), noise, normalization=0.0)
+    make_refinement_objective(fields, np.zeros(2), noise)(point)
+    hessian, rhs = np.zeros((1, 1)), np.zeros(1)
+    accumulate_normal_equations(hessian, rhs, np.ones((2, 1)), np.zeros(2),
+                                np.ones(2, dtype=bool), np.ones(2), 1.0)
+    operator = MatrixFreeNormalEquations(1)
+    accumulate_normal_equations(operator, rhs, np.ones((2, 1)), np.zeros(2),
+                                np.ones(2, dtype=bool), np.ones(2), 1.0)
+    operator.matvec(np.ones(1))
 
 
 def run_em(
@@ -142,6 +155,15 @@ def run_em(
     return logger
 
 
+def _normal_solver(config: InversionConfig, n_vox: int) -> str:
+    if config.linear_solver == "matrix_free":
+        return "matrix_free"
+    if (config.linear_solver == "auto" and config.lambda_reg > 0
+            and n_vox >= config.matrix_free_min_voxels):
+        return "matrix_free"
+    return "dense"
+
+
 def make_tomography_step(
     model: VelocityModel,
     arrivals: np.ndarray,
@@ -150,17 +172,27 @@ def make_tomography_step(
     config: InversionConfig,
     iteration: int = 0,
     logger: Optional[TomographyLogger] = None,
+    diagnostics: Optional[dict] = None,
 ):
     """One EM cycle; returns ``(delta_s, sensitivity_diagonal, coverage_confidence)``."""
+    wall = {}
+    started = perf_counter()
     fine = model.refined(config.subdivision, config.slowness_interpolation)
+    wall["refine_model_s"] = perf_counter() - started
+    started = perf_counter()
     times = station_travel_time_fields(fine, stations_m, config.n_workers)
+    wall["station_fields_s"] = perf_counter() - started
+    started = perf_counter()
     if logger is not None:
         logger.save_station_fields(iteration, times)
+    wall["save_fields_s"] = perf_counter() - started
+    started = perf_counter()
     fields = IterationFields.from_times(
         times, metric_to_cell_coord(stations_m, fine.cell_size), fine.cell_size,
         config.subdivision, noise, config.slowness_interpolation,
     )
-    del times
+    del times, fine
+    wall["prepare_fields_s"] = perf_counter() - started
     settings = EventSettings(
         subdivision=config.subdivision,
         slowness_interpolation=config.slowness_interpolation,
@@ -172,20 +204,38 @@ def make_tomography_step(
         noise=noise,
         log_g_per_weight=config.log_g_per_weight and logger is not None,
         log_misfit=logger is not None and logger.save_misfit,
+        log_diagnostics=logger is not None,
+        likelihood_batch_size=config.likelihood_batch_size,
+        likelihood_batch_memory_mb=config.likelihood_batch_memory_mb,
+        compact_rays=config.compact_rays,
+        fast_refinement=config.fast_refinement,
+        normal_solver=_normal_solver(config, fields.n_vox),
     )
-    hessian, rhs, event_logs = run_events(arrivals, fields, settings, config.n_workers)
+    event_diagnostics = {}
+    started = perf_counter()
+    hessian, rhs, event_logs = run_events(
+        arrivals, fields, settings, config.n_workers, diagnostics=event_diagnostics,
+    )
+    wall["events_s"] = perf_counter() - started
 
+    started = perf_counter()
     if logger is not None:
-        ray_counts = []
+        ray_counts = None
         for event, log in event_logs:
             logger.save_event_data(iteration, event, log)
-            ray_counts.extend(log.ray_count_per_weight.values())
-        if ray_counts:
-            logger.save_ray_count(iteration, np.add.reduce(ray_counts))
+            for counts in log.ray_count_per_weight.values():
+                if ray_counts is None:
+                    ray_counts = np.zeros(model.shape, dtype=np.result_type(counts.dtype, np.int64))
+                ray_counts += counts
+        if ray_counts is not None:
+            logger.save_ray_count(iteration, ray_counts)
+        del ray_counts
         ray_status = logger.save_ray_status(iteration, event_logs, len(fields.stations))
     else:
         ray_status = summarize_ray_status(event_logs, len(fields.stations))
 
+    del fields, event_logs
+    wall["save_events_s"] = perf_counter() - started
     if ray_status is None:
         print("[Rays] unavailable: missing active-hypothesis masks", flush=True)
     else:
@@ -196,7 +246,9 @@ def make_tomography_step(
             flush=True,
         )
 
-    return solve_slowness_update(
+    solver_diagnostics = {}
+    started = perf_counter()
+    result = solve_slowness_update(
         hessian,
         rhs,
         model.shape,
@@ -204,7 +256,18 @@ def make_tomography_step(
         coverage_damping_power=config.coverage_damping_power,
         coverage_floor=config.coverage_floor,
         coverage_reference_percentile=config.coverage_reference_percentile,
+        solver="legacy" if config.linear_solver == "legacy" else "auto",
+        rtol=config.solver_rtol,
+        maxiter=config.solver_maxiter,
+        diagnostics=solver_diagnostics,
     )
+    wall["solve_s"] = perf_counter() - started
+    performance = {"wall_s": wall, "events": event_diagnostics, "solver": solver_diagnostics}
+    if diagnostics is not None:
+        diagnostics.update(performance)
+    if logger is not None:
+        logger.save_performance(iteration, performance)
+    return result
 
 
 def update_velocity(

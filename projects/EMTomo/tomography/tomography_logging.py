@@ -253,6 +253,9 @@ class TomographyLogger:
             json.dump({"iter": iteration, "elapsed_s": elapsed}, f)
             f.write("\n")
 
+    def save_performance(self, iteration: int, performance: dict) -> None:
+        self._save_json(self.iter_dir(iteration) / "performance.json", {"iter": iteration, **performance})
+
     def complete_iteration(self, iteration: int) -> None:
         """Publish only after the update and every configured save have succeeded."""
         self._save_json(
