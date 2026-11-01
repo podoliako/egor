@@ -1,0 +1,65 @@
+{
+  "depth_km": 1.5,
+  "parameter_set": "dd1-d40-s5",
+  "iteration": 3,
+  "absolute_dd_weight": [
+    1.0,
+    1.0
+  ],
+  "damping": 40,
+  "smoothing": [
+    5,
+    5,
+    5
+  ],
+  "initial_sigma_km_per_coordinate": 1,
+  "seed": 42,
+  "hypocentres_fixed": false,
+  "color_limits_km_s": [
+    3.4,
+    5.8
+  ],
+  "panels": [
+    {
+      "label": "3D L2 oracle",
+      "slice_rmse_m_s": 183.99345263414904,
+      "volume_rmse_m_s": 142.85930378323886
+    },
+    {
+      "label": "Artificial geometry",
+      "run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5",
+      "events": 1920,
+      "slice_rmse_m_s": 250.33684117007581,
+      "volume_rmse_m_s": 404.07193732329523,
+      "location_rms_m": 277.8779473253042
+    },
+    {
+      "label": "Geysers geometry",
+      "run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_dd1_geometry_20261026/outputs/geysers-dd1-d40-s5",
+      "events": 3776,
+      "slice_rmse_m_s": 476.0344495481198,
+      "volume_rmse_m_s": 496.07047980592677,
+      "location_rms_m": 573.7629756914494
+    }
+  ],
+  "sampling": "Native trilinear Vp at exact depth, 125-m XY centres, deeper truth cell at boundary",
+  "oracle_note": "Full-volume velocity L2 fit, not a slice-specific optimum",
+  "source_sha256": {
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/benchmark/tomodd_benchmark/compare_emtomo_flat4.py": "69070bb9f82d0052a422d1faa0e8e0a703e4839167100c5c60278ed4183298c5",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_dd1_geometry_20261026/manifest.json": "049e927f726a164ee0c183b27893c3c3b6a995f3938e1c4e3e927ddc401d6ebf",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_dd1_geometry_20261026/status.json": "04a6b5014b9b882b5658f245d863499db5bd1d5425a5875546172f2a3252a45c",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5/config.json": "f965bf4155f54e94bac998bc7c74b6bd45e7b2171310ae9ebac35254f1f4b150",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5/state.npz": "b1f73fa6877a85316f24d67a90b2c8036fe2bc4c821bc937da5ee8c544a77f48",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5/results.json": "6d7c877bcc73dbbcd0d5b3052e32f3adfc43b088def85611ef228022590ff1b3",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5/worker_info.json": "0211e28e6c14ccd6406dbd25911065e23b53b58fae23396e7c6d4161e0bc6581",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5/work/inversion/tomoDD.vel": "9c5f3f6a2da752941cd68debb3ba8efb95c2e062eebc497267f29bfd0168d545",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5/work/inversion/tomoDD-SE.inp": "0ae8f5b024c56c065f98e977b688dd3d5ade3fc5da3475a280530107202af7a6",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_dd1_geometry_20261026/outputs/geysers-dd1-d40-s5/config.json": "4df390a2a486dd62f63d7eac1c108b4679e0bf60fc55a4e087caeb91975f463b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_dd1_geometry_20261026/outputs/geysers-dd1-d40-s5/state.npz": "bb801d3ce41b200187b729991edac2ee1a41d7bbbddf3272f082905636b2ad95",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_dd1_geometry_20261026/outputs/geysers-dd1-d40-s5/results.json": "58faca0131dbc014a9f6a268ec8410c6d0beb2abd591ec4e4c0340ad2e7e7475",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_dd1_geometry_20261026/outputs/geysers-dd1-d40-s5/worker_info.json": "aff10754a2883adfba0bd7bfe343455257080d9c277a86ef9e61e8bbef25c1c2",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_dd1_geometry_20261026/outputs/geysers-dd1-d40-s5/work/inversion/tomoDD.vel": "ba0d2b37396db60f626a079abe3408bea82110d2a390bd31f64486f29f229e0d",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_dd1_geometry_20261026/outputs/geysers-dd1-d40-s5/work/inversion/tomoDD-SE.inp": "c38f8df740d9d9c71f1bbae8e5f8fe7196f7aea3f2d677954e21581ec3f50bf1"
+  },
+  "script_sha256": "607c99559ce9d61eb14c2b8cce0921c82d66f423dd9c97bb0136ac6f35ba85a2"
+}

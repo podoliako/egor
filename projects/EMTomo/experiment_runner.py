@@ -12,7 +12,8 @@ from pathlib import Path
 import numpy as np
 
 from config import InversionConfig
-from experiment_data import DEFAULT_EXPERIMENTS_ROOT, _sha256, load_tomography_experiment
+from experiment_data import (DEFAULT_EXPERIMENTS_ROOT, _sha256, load_tomography_experiment,
+                             load_real_pick_experiment)
 from instruments.likelihood import PickNoise
 from tomography.tomography_em import run_em, warm_up_jit
 from velocity_model import VelocityModel, block_average_slowness
@@ -21,16 +22,21 @@ from velocity_model import VelocityModel, block_average_slowness
 @dataclass(frozen=True)
 class PreparedInversion:
     initial_model: VelocityModel
-    reference_model: VelocityModel
+    reference_model: VelocityModel | None
     station_ids: tuple[str, ...]
     event_ids: tuple[str, ...]
     station_locs: np.ndarray
     arrivals_table: np.ndarray
-    noise_sigmas: tuple[float, float]
+    noise_sigmas: tuple[float, float] | None
 
 
-def resolve_pick_noise(config: InversionConfig, noise_sigmas: tuple[float, float]) -> PickNoise:
-    """Explicit config overrides win over the experiment's observation-noise metadata."""
+def resolve_pick_noise(config: InversionConfig, noise_sigmas: tuple[float, float] | None) -> PickNoise:
+    """Explicit overrides win; unknown real-pick uncertainty is never silently zero."""
+    if noise_sigmas is None:
+        if config.weight_noise_relative_sigma is None or config.weight_noise_absolute_sigma_s is None:
+            raise ValueError("Real picks require explicit relative and absolute likelihood sigmas; "
+                             "raw quality codes are not calibrated uncertainties")
+        noise_sigmas = (config.weight_noise_relative_sigma, config.weight_noise_absolute_sigma_s)
     relative, absolute = noise_sigmas
     if config.weight_noise_relative_sigma is not None:
         relative = config.weight_noise_relative_sigma
@@ -88,6 +94,35 @@ def prepare_inversion(experiment_id: str, config: InversionConfig,
     return PreparedInversion(initial, reference, data.station_ids, data.event_ids,
                              np.asarray(data.station_coordinates_m, dtype=np.float64),
                              data.arrival_times_s, data.noise_sigmas)
+
+
+def prepare_real_inversion(directory, config: InversionConfig, *,
+                           initial_model: VelocityModel) -> PreparedInversion:
+    """An explicit regional start replaces synthetic source/truth model semantics."""
+    data = load_real_pick_experiment(directory)
+    if (initial_model.cell_size != config.cell_size
+            or not np.allclose(np.asarray(initial_model.shape) * initial_model.cell_size,
+                               data.domain_extent_m, rtol=1e-12, atol=0)):
+        raise ValueError("Initial model/grid must exactly tile the real-pick domain")
+    return PreparedInversion(initial_model, None, data.station_ids, data.event_ids,
+                             data.station_coordinates_m, data.arrival_times_s, None)
+
+
+def run_real_experiment(directory, config: InversionConfig, *, initial_model: VelocityModel,
+                        validate_only: bool = False):
+    """Run training-only EM without catalog starts/priors or fictitious truth metrics."""
+    prepared = prepare_real_inversion(directory, config, initial_model=initial_model)
+    if validate_only:
+        return prepared
+    noise = resolve_pick_noise(config, prepared.noise_sigmas)
+    warm_up_jit()
+    return run_em(config, prepared.initial_model, prepared.arrivals_table, prepared.station_locs,
+                  noise, reference_model=None,
+                  source_experiment={"kind": "real_picks", "directory": str(Path(directory).resolve()),
+                                     "arrays_sha256": _sha256(Path(directory) / "arrivals.npz"),
+                                     "metadata_sha256": _sha256(Path(directory) / "metadata.json"),
+                                     "station_ids": list(prepared.station_ids),
+                                     "event_ids": list(prepared.event_ids)})
 
 
 def run_saved_experiment(experiment_id: str, config: InversionConfig,

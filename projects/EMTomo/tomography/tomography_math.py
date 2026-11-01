@@ -61,16 +61,20 @@ def refine_hypocentre_in_cell(
     noise: PickNoise,
     *,
     accelerated: bool = True,
+    station_indices=None,
 ) -> tuple[np.ndarray, float]:
     """Continuous maximum-likelihood position of one hypothesis within its cell."""
     start = np.asarray(cell_index, dtype=np.float64)
     bounds = cell_coord_bounds(tuple(int(v) for v in cell_index), station_fields.shape[1:])
 
     if accelerated:
-        objective = make_refinement_objective(station_fields, observed, noise)
+        objective = make_refinement_objective(station_fields, observed, noise,
+                                              station_indices=station_indices)
     else:
         def objective(coord):
-            predicted = sample_cell_centered_trilinear_batch(station_fields, coord)
+            predicted = sample_cell_centered_trilinear_batch(
+                station_fields, coord, station_indices=station_indices,
+            )
             return float(negative_log_likelihood(predicted, observed, noise))
 
     start_value = objective(start)

@@ -1,0 +1,1313 @@
+Y2000 SHADOW FORMAT & NCSN DATA CODES
+
+blame Fred Klein for this document          revised March 7, 2006
+
+This shadow2000.doc file is a Microsoft word document, and is also available as an Acrobat pdf file suitable for display or printing on all computers using Adobe's viewer, and as a text file shadow2000.txt.  These documents can be found online in ehzftp.wr.usgs.gov/klein/docs and at the NCSN/UCB data center.    
+
+Shadow 2000 format is a kludge developed to store the most essential event and station data for local earthquakes in California. It is a good example of incremental growth. Its virtues are that it exists, several programs support it, and the NCSN catalog is presently in this format. Shadow format is rooted in old style HYPO71 phase cards, and is the same as Hypoinverse-2000 archive format.  The phase format grew into the Hypoinverse-2000 archive format by filling in blanks and adding a summary line with the location and other event data as a header of each event. The next addition occurred when we needed places to store RTP and CUSP coda duration fit parameters and data to locate the CUSP archive tape and the seismograms on it. These data were put on "shadow" cards following each line of the Hypoinverse archive format.  In 1999, the format was revised to store years as 4-digits, expand magnitudes to 2 decimal places, and group the parts of the 10-letter station codes together.
+
+The structure of a full shadow format file is as follows. Like a HYPO71 phase file, a file may contain any number of events. Events within a file are in chronological order. All shadow cards begin with a $ sign (items 2, 3, 5 and 7 below). There is one header (items 1, 2, 3) and one terminator (items 6 and 7) per event. There may be any number of stations (items 4 and 5).  All formats are column oriented and there are no standard field delimiters.  The FORTRAN formats below are to be used for reading the fields. Decimal points may or may not appear, and if not, their places are implied by the format as indicated. 
+
+1) A summary line with location and other event data;
+2) The first summary shadow begins with "$1" and has reference time and archive tape information for CUSP events (the fields are empty for RTP events); 
+3) Additional and optional event shadows may follow, presently to a maximum of 4, beginning with "$2", etc. 
+
+Data for each station (of which there may be any number) follow and consist of pairs of lines:
+
+1) Phase lines with data for individual stations; 
+2) Phase lines are followed by one shadow line with coda duration parameters and seismogram recovery data;
+
+The event ends with:
+
+1) A terminator card with an ID number and an optional trial hypocenter; and 
+2) The terminator shadow, presently mostly blank. 
+
+There are standard subsets of these full shadow files. Stripping out all shadow cards (lines beginning with $) results in a basic HYPOINVERSE archive file.  This form omits coda duration fit parameters and seismogram pointers. Thus pre-RTP and pre-CUSP data exist without shadow ($) cards. Keeping only the summary header produces a catalog file of summary data suitable for programs like EQSELECT, SELECT and QPLOT.
+
+This document also has the format of the master station location and history file calsta2000.loc. It lists every channel picked or recorded by the NCSN, their operation dates, and the various station codes including SEED used through the years.
+
+TABLE OF CONTENTS
+SUMMARY HEADER FORMAT Y2000	2
+SUMMARY SHADOW FORMAT	3
+MAGNITUDES	4
+PREFERRED MAGNITUDE SELECTION ORDER	4
+AUXILIARY EVENT REMARKS	5
+STATION ARCHIVE FORMAT Y2000	5
+STATION SHADOW FORMAT	7
+STATION ARRIVAL TIME WEIGHTING	8
+EVENT TERMINATOR FORMAT	9
+EVENT TERMINATOR SHADOW	9
+MASTER STATION LOCATION/HISTORY FILE (calsta2000.loc)	9
+GPS/topo datum & location status code table	10
+FORMAT OF THE HYPOINVERSE-2000 STATION FILE	11
+SUMMARY HYPO71 FORMAT Y2000	12
+Table 1. DATA SOURCE CODES	13
+Table 2. NETWORK OWNER/OPERATOR CODES	14
+Table 3a. 3-LETTER USGS COMPONENT CODE DEFINITIONS	15
+Table 3b. 3-LETTER SEED COMPONENT CODE DEFINITIONS	16
+Table 3c. NCSN 3-LETTER COMPONENT (CHANNEL) CODES	17
+Table 4. STATION OR PHASE REMARK CODES	20
+Table 5. 1-LETTER REGION CODE	21
+Table 6. 2-LETTER PORTABLE NET CODES	21
+Table 7. REGIONS BY 3-LETTER CODE	22
+Table 8. MULTIPLE VELOCITY MODELS	24
+Table 9.  WEIGHT CODES FOR TIMES, AMPLITUDES & DURATIONS	28
+SUMMARY HEADER FORMAT Y2000
+
+Start		Fortran
+Col.	Len.	Format	Data     (* indicates a new/revised field )
+
+1	4	I4	Year. *
+5	8	4I2	Month, day, hour and minute.
+13	4	F4.2	Origin time seconds.
+17	2	F2.0	Latitude (deg). First character must not be blank.
+19	1	A1	S for south, blank otherwise.
+20	4	F4.2	Latitude (min).
+24	3	F3.0	Longitude (deg).
+27	1	A1	E for east, blank otherwise.
+28	4	F4.2	Longitude (min).
+32	5	F5.2	Depth (km).
+37	3	F3.2	Magnitude from maximum S amplitude from NCSN stations *
+40	3	I3	Number of P & S times with final weights greater than 0.1.
+43	3	I3	Maximum azimuthal gap, degrees.
+46	3	F3.0	Distance to nearest station (km).
+49	4	F4.2	RMS travel time residual.
+53	3	F3.0	Azimuth of largest principal error (deg E of N).
+56	2	F2.0	Dip of largest principal error (deg).
+58	4    	F4.2	Size of largest principal error (km).
+62	3	F3.0	Azimuth of intermediate principal error.
+65	2	F2.0	Dip of intermediate principal error.
+67	4	F4.2	Size of intermediate principal error (km).
+71	3	F3.2	Coda duration magnitude from NCSN stations. *
+74	3	A3	Event location remark. (See table 7 below).
+77	4	F4.2	Size of smallest principal error (km).
+81	2	2A1	Auxiliary remarks (See note below).
+83	3	I3	Number of S times with weights greater than 0.1.
+86	4	F4.2	Horizontal error (km).
+90	4	F4.2	Vertical error (km).
+94	3	I3	Number of P first motions. *
+97	4	F4.1	Total of NCSN S-amplitude mag weights ~number of readings.*
+101	4	F4.1	Total of NCSN duration mag weights ~number of readings. *
+105	3	F3.2	Median-absolute-difference of NCSN S-amp magnitudes.
+108	3	F3.2	Median-absolute-difference of NCSN duration magnitudes.
+111	3	A3	3-letter code of crust and delay model. (See table 8 below).
+114	1	A1	Last authority for earthquake N=NCSC (USGS), B=UC Berkeley. (A T in this column is meaningless)
+115	1	A1	Most common P & S data source code. (See table 1 below).
+116	1	A1	Most common duration data source code. (See cols. 71-73)
+117	1	A1	Most common amplitude data source code.
+118	1	A1	Coda duration magnitude type code 
+119	3    	I3     Number of valid P & S readings (assigned weight > 0).
+122	1	A1	S-amplitude magnitude type code 
+123	1	A1	"External" magnitude label or type code. Typically L for ML or W for MW. This information is not computed by Hypoinverse, but passed along, as computed by UCB. 
+124	3	F3.2	"External" magnitude.
+127	3	F3.1	Total of "external" magnitude weights (~ number of readings).
+130	1	A1	Alternate amplitude magnitude label or type code (i.e. L for ML calculated by Hypoinverse from Wood Anderson amplitudes).
+131	3	F3.2	Alternate amplitude magnitude.
+134	3	F3.1	Total of the alternate amplitude mag weights ~no. of readings.
+137	10	I10	Event identification number
+147	1	A1	Preferred magnitude label code chosen from those available.
+148	3	F3.2	Preferred magnitude, chosen by the Hypoinverse PRE command.
+151	4	F4.1	Total of the preferred mag weights (~ number of readings). *
+155	1	A1	Alternate coda duration magnitude label or type code (i.e. Z).
+156	3	F3.2	Alternate coda duration magnitude.
+159	4	F4.1	Total of the alternate coda duration magnitude weights. *
+163	1	A1	QDDS version number of information. Starts at 0 for quick look reports. Incremented by one each time new information is added or revised: from quick location, final earthworm location with MD, ML added, etc. 
+164	1	A1	"Origin instance" version number, distinguishes between different origins (hypocenters).  It starts with 'a' ('0' for quick-look reports) and runs through the alphabet.  When Berkeley has a final magnitude for each origin, the character is promoted to upper-case.
+
+SUMMARY SHADOW FORMAT 
+
+Most of these fields hold CUSP related data.  If the event was only on the RTP or earthworm and CUSP did not digitize the event, all fields up to col. 80, except the "$1" identifier are blank.  This format did not change with the Y2000 revision.  Any data beyond column 80 is erroneous.
+
+Cols	Len.	Format	Data
+
+1-2	2	'$1'		Designates Shadow Summary Card
+3-6	4	I4		Reference time: year
+7-10	4	2I2		Reference time: month, day
+11-14	4	2I2		Reference time: hour, minute
+15-20	6	F6.3		Reference time: seconds
+
+			First Arkive Tape:
+21-23	3	A3		Network Identifier (e.g. CAL, CIT, HVO)
+24	1	1X		blank
+25-34	10	I10		Arkive tape number
+35-44	10	I10		Arkive event id number
+45-50	6	I6		File number on Arkive tape
+
+			Second Arkive Tape (rare):
+51-53	3	A3		Network Identifier
+54	1	1X		blank
+55-64	10	I10		Arkive tape number
+65-74	10	I10		Arkive event id number
+75-80	6	I6		File number on Arkive tape
+MAGNITUDES
+
+The NCSN computes several types of magnitudes, depending on the type of data available, the era of network operation, and the size of the earthquake.  The "primary" magnitudes are those that are available for most events, particularly events less than magnitude 3.5.  Because the primary magnitudes saturate for events above M4.5, the NCSN also computes "alternate" magnitudes (coda or amplitude) from low-gain instruments that generally remain on-scale during large earthquakes.  We also provide "external" local magnitudes (ML) computed by UC
+Berkeley.  Where available, the UC Berkeley magnitude supercedes the USGS magnitude.
+
+Because each magnitude is appropriate for a given magnitude range, we provide a "preferred" magnitude in columns 148-150.  The logic for selecting the preferred magnitude is shown in the table below.  It attempts to provide the most reliable estimate for each earthquake.  Going down the table, as soon as a magnitude satisfies the criteria, it is chosen as preferred.  Note that variations in magnitude estimates are expected when using different methods.  There is no "correct" magnitude.  The preferred magnitude may have unusual statistical properties because it is drawn from different magnitude types.
+
+Magnitude fields are filled only if the magnitudes were calculated.  A "zero" magnitude value means none was calculated.  Each magnitude is in a fixed position.  Alternate magnitudes use the label codes given by the Hypoinverse FC2 and XC2 commands, or the external label code.
+
+CODE  EXPLANATION
+
+               PRIMARY MAGNITUDES
+D     Coda duration magnitude (Eaton, BSSA, v.82 p.533, 1992).
+      Uses all components. Formerly code E.
+X     S-wave maximum amplitude magnitude. Eaton, BSSA, v.82 p.533, 1992). 
+      Uses all components. 
+
+               EXTERNAL MAGNITUDES
+L     Local magnitude as computed by UC Berkeley 
+S     Surface wave Ms
+W     Moment magnitude
+G     Geysers net duration mag computed by LBL (uncalibrated)
+
+               ALTERNATE MAGNITUDES
+L     Local magnitude computed by NCSN from UCB Wood Anderson amplitudes.
+Z     Low gain (Z comp) coda duration magnitude of Hirshorn and Lindh (1989?). 
+P     Initial P-wave amplitude magnitude. Uses all components. Not in use.
+G     Low-gain initial P-wave amplitude magnitude. Uses low-gain Z component.
+	Not in use.
+A     S-wave maximum amplitude magnitude for which amplitude data are lost.
+PREFERRED MAGNITUDE SELECTION ORDER
+
+Order label   label   mag   sum_mag_wts  mag_MAD   min #   min  type
+      code   column columns   columns    columns  readings mag 
+----------------------------------------------------------------------
+ 1.     L or W 123  124-126   127-129     N/A       0      3.0  "external"
+ 2.     D      118   71- 73   101-104    108-110    1      0.0  "primary dur"
+ 3.     X or A 122   37- 39    97-100    105-107    1      0.0  "primary amp"
+ 4.     L      130  131-133   134-136     N/A       4      4.0  "alternate amp"
+ 5.     L or G 123  124-126   127-129     N/A       0      0.0  "external"
+ 6.     L      130  131-133   134-136     N/A       0      0.0  "alternate amp"
+
+AUXILIARY EVENT REMARKS 
+
+Assigned by analyst (col. 81):
+Q  Quarry blast
+R  Explosion, as for a refraction source (formerly code E)
+N  NTS blast
+F  Felt
+M  Multiple event (Two events close in time and space are each marked M)
+B  Blast (HVO)
+T  Tremor associated (HVO)
+L  Long period (HVO)
+
+Assigned by HYPOINVERSE (col. 82):
+#  Location had convergence problems such as maximum number of iterations or
+   failure to reach a minimum RMS.
+-  Depth was poorly constrained and was held fixed at its current value.
+X  Location fixed to trial hypocenter.
+
+STATION ARCHIVE FORMAT Y2000
+
+The following line appears for each station. If CUSP digitized the event, an entry may appear for saved traces such as time code or stations from which no information was measured. The unique designation of a station name has expanded with time, reflecting the increase in sensor types and conflicts with station names in use by other
+networks.  We formally define a station name with 10 letters as the concatenation of the 5-letter site code, 2-letter network code, and 3-letter component code.  An additional 2-letter location code will be used in the future to accommodate cases where the other fields would be the same.  Hypoinverse optionally uses 1 or 3 letter component codes, and both are listed in the print file.  NCSN practice is to use the 3-letter code for station matching, and the 1-letter code as a convenience label only.  The number of decimal places N is implied by the fortran format (ie F5.N).
+
+
+
+Station archive format Y2000
+
+Start		Fortran
+Col.	Len.	Format	Data
+1	5	A5	5-letter station site code, left justified.
+6	2	A2	2-letter seismic network code.
+8	1	1X	Blank
+9	1	A1	One letter station component code.
+10	3	A3	3-letter station component code.
+13	1	1X	Blank
+14	2	A2	P remark such as "IP".
+16	1	A1	P first motion.
+17	1	I1	Assigned P weight code.
+18	4	I4	Year.
+22	8	4I2	Month, day, hour and minute.
+30	5	F5.2	Second of P arrival.
+35	4	F4.2	P travel time residual.
+39	3	F3.2	Normalized P weight actually used.
+42	5	F5.2	Second of S arrival.
+47	2	A2	S remark such as "ES".
+49	1	1X	Blank
+50	1	I1	Assigned S weight code.
+51	4	F4.2	S travel time residual.
+55	7	F7.2	Amplitude (Peak-to-peak in Develocorder or paper mm).
+62	2	I2	Amp units code. 0=PP mm, 1=0 to peak mm, 2=dig. counts.
+64	3	F3.2	S weight actually used.
+67	4	F4.2	P delay time.
+71	4	F4.2	S delay time.
+75	4	F4.1	Epicentral distance (km).
+79	3	F3.0	Emergence angle at source.
+82	1	I1	Amplitude magnitude weight code.
+83	1	I1	Duration magnitude weight code.
+84	3	F3.2	Period at which the amplitude was measured for this station.
+87	1	A1	1-letter station remark. (See table 4 below).
+88	4	F4.0	Coda duration in seconds.
+92	3	F3.0	Azimuth to station in degrees E of N.
+95	3	F3.2	Duration magnitude for this station.
+98	3	F3.2	Amplitude magnitude for this station.
+101	4	F4.3	Importance of P arrival.
+105	4	F4.3	Importance of S arrival.
+109	1	A1	Data source code (See table 1 below).
+110	1	A1	Label code for duration magnitude from FC1 or FC2 command.
+111	1	A1	Label code for amplitude magnitude from XC1 or XC2 command.
+112	2	A2	2-letter station location code (unused at present).
+114	2	I2	Amplitude type 0=unspecified 1=Wood-Anderson 2=velocity
+			3=acceleration 4=no magnitude
+116	3	A3	Alternate 3-letter component code (USGS or SEED)
+119	1	A1	X if station amplitude magnitude was not used in event mag.
+120	1	A1	X if station duration magnitude was not used in event mag.
+
+STATION SHADOW FORMAT
+
+The shadow format differs for RTP and CUSP data. Columns 1-41 are the same for both. You can discriminate between RTP and CUSP shadows before reading them by looking on the phase card. RTP phases will have a data
+source (col. 109) of R, P, or M and (usually) corresponding P remark  (cols. 14-15) of XP, YP and ZP.  Earthworm data follows the RTP format, but has a data source code of W.  Any data beyond column 92 is erroneous.
+
+The coda duration fit parameters result from a fit of the coda envelope to the form 10**A * t**-Q where 10**A is in units of digital counts and t is in seconds after the P time. If Q is fixed at 1.8 (QFIX), the resulting A is AFIX below.  If both are fit simultaneously, AFREE and QFREE are stated below. For more on coda duration fitting see Carl Johnson's thesis (Caltech 1979) or Hirshorn et al., Real Time Signal Duration Magnitudes from Low-gain Short Period seismometers, USGS Open File Report 87-630, 1987.
+
+For RTP data, the AMH tuple provides data for cols 44-50.  Up to six time/amplitude data pairs describing the coda duration decay are written. See Al Lindh for a description of these data.
+RTP, EARTHWORM AND CUSP
+Cols.		Format	Data
+1-2		'$ '		Designator for shadow phase card.
+3-5		I3		No. of (averaged) amplitude windows used in
+				coda duration fit algorithm.
+6-10		F5.2		AFIX  (see above).
+11-15		F5.2		QFIX  (see above).
+16-20		F5.2		AFREE (see above).
+21-25		F5.2		QFREE (see above).
+
+26-30		F5.2, 1X	RMS of L1 fit to coda duration amplitude windows.
+32-35		A4		Coda phase descriptor (See table below).
+36-40		I5, 1X	Coda duration time (seconds) as measured
+				directly i.e., not recalculated.
+CUSP ONLY
+Cols.	Format	Data
+42-45	'AHS '	Amplitude descriptor, peak S-wave half amplitude value as computed for MCD tuple.
+46-50	I5	Amplitude corresponding to phase card cols 42-45
+51	'1'	First/Second  arkive tape source
+52-53	I2	CUSP set number for these phase data
+54-57	I4	CUSP pin number for these phase data
+58-67	I10	Offset: number of words in Arkive file before first word of the seismogram
+68-77	F10.5	Toffset:  offset time of first data point for this seismogram, relative to reference time in cols 4-19 of shadow summary card.
+78-84	I7	Nwords: number of words in this seismogram
+85-92	F8.6	Digint: digitization interval, seconds
+93-95	A3	Digitizer device code (see table 1)
+
+RTP AND EARTHWORM
+42-43	'PH'	Amplitude descriptor, peak P-wave half amplitude
+44-45	A1,I1	Phase descriptor and weight assigned by RTP to the amplitude it reports; e.g. P0. Weight code is the number of the first 3 P peaks that clipped. From indices(2,3) of the PHASE attribute of the AMH tuple.
+46-50	I5	Amplitude corresponding to cols 42-45, from the AMP attribute of AMH tuple. PERiod attribute is available but is not written out.
+51-57	I3,I4	Time-amplitude data pair #1
+58-64	I3,I4	Time-amplitude data pair #2
+65-71	I3,I4	Time-amplitude data pair #3
+72-78	I3,I4	Time-amplitude data pair #4
+79-85	I3,I4	Time-amplitude data pair #5
+86-92	I3,I4	Time-amplitude data pair #6
+93-95	A3	Digitizer device code (see table 1)
+4-LETTER CODA DESCRIPTOR
+
+First letter:
+P  Normal termination of coda; RTP codas < 144 sec.
+S  Short or premature termination of coda; recalculated RTP codas > 144 sec.
+N  Noisy coda with early termination. RTP gave a negative duration time.
+
+Second letter:
+T  Bad coda duration computed using the wrong clipping value (CUSP only).
+S  Normal case of coda duration longer than S-P time.
+P  P coda; duration less than S-P time.
+
+Third letter:
+_  (space) Did not do a coda fit.
+X  Coda duration is from a fixed L1 norm fit to the average absolute amplitudes.
+R  Coda duration is from a free L1 norm fit to the average absolute amplitudes.
+N  Normal coda, no fits were necessary.
+
+Fourth letter
+0-4 Coda weight (0=full weight, 4=no weight).
+STATION ARRIVAL TIME WEIGHTING
+
+This is a brief description of the types of weight factors applied to P and S times in the hypocenter inversion.  The final weight actually used (output in columns 39-41 of the station archive record) is the product of 3 factors: 1) the assigned weight, 2) the distance weight, and 3) the residual weight.  After all weight terms are multiplied together, the resulting station weights are normalized so the weights total the integer number of station times used in the inversion.
+
+The assigned weight is input as a 1-digit code in col 17. The assignment is made by the analyst or picker software and depends on the impulsiveness or emergence of the waveform. 0 is full weight (1.0), 1 is 0.5, 2 is 0.2, 3 is 0.1 and codes 4-9 are no (0.0) weight.  Usually codes 5-9 are reserved for "outweighted" readings that have had a 5 added to their initial weight codes because it is a duplicate reading or because the reading does not fit the solution at all.  See table 9.
+
+The distance weight out-weights distant stations whose travel times are poorly modeled.  When the distance to the second closest station (D2) is less than 15 km, stations closer than 52.5 km are given full weight, stations farther than 105 km are given no weight, and a cosine taper is used between.  When D2 is more than 15 km, stations closer than D2*3.5 km are given full weight, stations farther than D2*7.0 km are given no weight, and a cosine taper is used between.  This expands the distance weighting when the earthquake is outside or in a thin part of the network.  Distance weighting is applied only after the 4th iteration when the solution has stabilized.
+
+The residual weight out-weights stations whose residuals are large because they are often mis-picked.  When the RMS residual is less than 0.10 sec, stations with residual less than 0.20 sec are given full weight, stations with residual more than 0.30 sec are given no weight, and a cosine taper is used between.  When the RMS residual is more than 0.10 sec, stations with residual less than 2*RMS sec are given full weight, stations with residual more than 3*RMS sec are given no weight, and a cosine taper is used between.  This expands the weighting to include more stations for poor, high RMS events.  Residual weighting is applied only after the 4th iteration when the solution has stabilized.
+EVENT TERMINATOR FORMAT
+
+Normally the event terminator will contain only the event ID number. It signals the end of an event because the station code is blank. Fields are reserved for an optional trial hypocenter or fixed depth control. HYPOINVERSE may use either this trial hypocenter or the hypocenter on the event header.  See the HYPOINVERSE documentation for more information on trial hypocenters.
+
+Cols.	Format	Data
+1-4	4X,2X	Must be blank.
+7-10	2I2	Trial hour and minute.
+11-14	F4.2	Trial second.
+15-16	F2.0,1X	Trial latitude (deg).
+18-21	F4.2	Trial latitude (min).
+22-24	F3.0,1X	Trial longitude (deg).
+26-29	F4.2	Trial longitude (deg).
+30-34	F5.2	Trial depth (a negative value fixes depth).
+35-62	28X	blank
+63-72	I10	ID number
+EVENT TERMINATOR SHADOW
+
+1-2	'$ '	Shadow card designator
+3-62	60X	blank
+63-72	I10	ID number
+
+The following tables were modified from Klein et al., Seismic Station Data for Northern California and Surrounding Areas, USGS Open File Report 88-448, 1988.
+MASTER STATION LOCATION/HISTORY FILE (calsta2000.loc)
+Although not part of the shadow format or catalog phase data, this file is often read by users of the catalog.
+
+The file calsta2000.loc presently resides in Menlo Park on andreas.wr.usgs.gov in /home1/calnet/klein/stas/ and also in ftp anonymous in ehzftp.wr.usgs.gov/klein/stations.  Additional stations not currently used in NCSN phase data are in more2000.loc in the same directories.
+
+The file calsta2000.loc has the complete history of the NCSN network.  The file has most stations in the surrounding networks but is not updated as frequently.  The on and off dates are as accurate as possible.  Calsta2000.loc also has the station name history.  Codes are here for pre-1977 (4-letters), 1977-1986 (4-letters including component), 1986-1994 (5-letters including net and component), and 1994-2006 (10-letters including net and component).  The "unique" or "universal" station codes consist of a 3-5 letter site code, 2-letter net code and 3-letter USGS component codes.  The 1-letter component code is used as a label in various station files, but is not unique. Starting in 2006, it is expected that 3-letter SEED component codes will be used instead of the USGS codes.  The ambiguity of SEED codes, together with station moves, also requires 2-letter location codes. The SEED station codes consist of a 3-5 letter site code, 2-letter net code, 3-letter SEED component codes, and a 2-letter location code. The location code "-" is used as a default for station where a location code tie-breaker is not required.
+
+Most NCSN stations with coordinates to 4 decimal places of minutes of lat/lon have been surveyed with GPS instrumentation.  These precise locations have mostly replaced the locations estimated from a topographic map, that are all that is available for abandoned sites.  The elevation at these GPS sites is referenced to the geoid instead of sea level.
+
+cols. length heading data
+1-5      5   SITE    Station site code (within its own network)
+6-7      2   NET     Unique station net code (assigned by IRIS)
+9-11     3   USGS    USGS component (channel) code (SEED for some digitals) 
+                     These 3 fields are the "unique" station code (1994-2006).
+
+13-15    3   RATN    Station name code (Rationalized code 1986-94)
+16       1           1-letter network code (Rationalized code 1986-94)
+18       1   C       1-letter component code (Rationalized code 1986-94)
+
+21-24    4   4LET    "New" 4-letter code 1977-86, 4th letter is the component
+26-29    4   OLD     "Old" or standard code (pre-1977 for USGS)
+
+31-32    2   LAT     North latitude, degrees
+34-40    7           North latitude, minutes (F7.4)
+42-44    3   LON     West longitude, degrees
+46-52    7           West longitude, minutes (F7.4)
+55-58    4   ELEV    Elevation, meters
+
+60       1   R       Geographic region code of Eaton
+61       1   G       GPS/topo datum & location status code (see below)
+63-84   22           Full geographic name. "&" in col 84 if the channel is a 
+                     duplicate and temporary alias name no longer used (DDI aka
+                     HV1) or an additional decimation with the same SNC code.
+85       1           Colon (:) if non-USGS station recorded in Menlo Park,
+                     Semi-colon (;) if non-USGS station formerly recorded in MP
+                     Comma (,) if non-USGS station maintained but not recorded,
+                     or used in another station database.
+86-89    4   ORG     Network owner/operator code
+
+90-97    8   OPERATN Start date of operation of instrument (YYYYMMDD)
+99-106   8           End date of operation of instrument (YYYYMMDD)
+109-116  8   DATAUSE Start date of USGS-MP usage of data (YYYYMMDD)
+118-125  8           End date of USGS-MP usage of data (YYYYMMDD)
+
+127-129  3   SEED    SEED code for component, non-unique mapping to USGS code.
+131-132  2   LOC     2-letter location code for breaking ties, not used yet.
+
+134-137 4   ON      On time (hr-min GMT) of start date of operation.
+139-142  4   OFF     Off time (hr-min GMT) of end date of operation.
+144-147  4   JPE     Jerry Eaton's station name. Same as 4-letter name for
+                     USGS-Menlo stations.
+
+149-152  4   ALIAS   Alias, erroneous or unofficial name.
+154-157  4           Additional alias, erroneous or unofficial name.
+GPS/topo datum & location status code table
+(see spreadsheet.txt for more notes about the use of this location status code in the NCSN)
+code definition:			  	  comment:
+A    WGS84 handheld GPS of sensor	Most common NCSN case, within 2 meters 
+					of sensor
+B    WGS84 sensor offset from GPS 	Offset (distance & azimuth) estimated
+					from nearby GPS location
+E    WGS84 GPS external antenna	Self-reported GPS of telemetry antenna			
+N    WGS84 nearby handheld GPS		GPS of nearby, outdoor location 
+D    WGS84 hi-acc differential GPS	The highest accuracy GPS we can do 
+					(seldom used)
+C    WGS84 from topo map location	Never GPS'ed, converted from topo map 
+T    NAD27 topo map			Never GPS'ed, from topo map only, ie from
+					abandoned site
+W    WGS84 either antenna/sensor	GPS exact site undocumented
+blank   Not yet determined.  
+
+FORMAT OF THE HYPOINVERSE-2000 STATION FILE 
+This is the format of the station file read by the Hypoinverse2000 location program.  Although not part of the shadow format or catalog phase data, this file is often read by users of the catalog.  NCSN uses a computer program called STADCK to read calsta2000.loc and write a Hypoinverse2000 station file for a specified time period.  This format list is from the Hypoinverse2000 manual.  Most of the delay, calibration or magnitude correction fields will be undefined in most versions of this file, and the values will be defined later in the catalog processing.
+
+Start		Fortran
+Col.	Len.	Format	Data
+1	5	A5,1X	Station site code. The first character may not be the $ character.
+7	2	A2,1X	Seismic network code.
+10	1	A1 	Optional 1-letter station component code.
+11	3	A3,1X	3-letter component or channel code.
+15	1	A1 	Station weight code (in units of 0.1) by which the weights assigned each P & S phase are to be multiplied. Use the digits 0-9 for the weight in tenths; "*" or "0" for no weight; or any other character (including blank) for full weight.
+16	2	I2, 1X	Latitude, degrees.
+19	7	F7.4	Latitude, minutes.
+26	1	A1 	N or blank for north latitude, S for south.
+27	3	I3, 1X	Longitude, degrees.
+31	7	F7.4	Longitude, minutes.
+38	1	A1	W or blank for west longitude, E for east.
+39	4	4X 	Reserved for elevation in m. Not used by HYPOINVERSE.
+43	3	F3.1,2X 	Default period (in sec) at which the maximum amplitude will be read for this station. Must be greater than 0.1.
+48	1	A1	Put a "2" or "A" here to designate this as an alternate crust model station. Both alternate and primary crustal models must be in use. Stations may also be tagged for use with an alternate model in the delay file.
+49	1	A1	Optional station remark field to copy to print output.
+50	5	F5.2, 1X 	P delay (sec) for delay set 1.
+56	5	F5.2, 1X 	P delay (sec) for delay set 2.
+62	5	F5.2 	Amplitude magnitude correction. If in the range +/-2.4, the correction is included (by addition) in the amplitude magnitude, If you don't want a station's magnitude used in the event magnitude, use a correction of 5.0 plus the actual correction. You can also assign a zero weight (see next).
+67	1	A1	Amplitude magnitude weight code. Codes 0-9, "*" and blank are used the same as the P & S weight codes (col 15). The actual magnitude weight used is the product of those on the station and phase cards.  See also col 62.
+68	5	 F5.2 	Duration magnitude correction (works the same as the amplitude magnitude correction).
+73	1	 A1 	Duration magnitude weight code (works the same as the amplitude weight code).
+74	1	I1	Instrument type code.
+75	6	F6.2 	Calibration factor.
+81-82	2	A2	2-letter location code (component extension)
+
+SUMMARY HYPO71 FORMAT Y2000
+The real-time computers in Menlo Park, among others, produce data in this format.  It is more readable than, but is a subset of the Hypoinverse format.  For code definitions, such as data source code, see other tables in shadow.doc.  The format is identical to the pre-Y2000 format except that the years are expanded to 4-digits, everything is moved 2 cols to the right, and the 3-letter location is added on the end.
+
+* indicates a new/revised field
+
+Start		Fortran
+Col.	Len.	Format	Data
+1	4	I4	Year *
+5	4	2I2	Month and day.
+9	1	1X	Must be blank
+10	4	2I2	Hour and minute.
+14	6	F6.2	Origin time seconds.
+20	3	F3.0	Latitude (deg).
+23	1	A1	S for south latitude, blank otherwise.
+24	5	F5.2	Latitude (min).
+29	4	F4.0	Longitude (deg).
+33	1	A1	E for east longitude, blank otherwise.
+34	5	F5.2	Longitude (min).
+39	7	F7.2	Depth (km).
+46	1	1X	Blank
+47	1	A1	Magnitude type code.
+48	5	F5.2	Magnitude.
+53	3	I3	Number of P & S times with weights greater than 0.1.
+56	4	F4.0	Maximum azimuthal gap.
+60	5	F5.1	Distance to nearest station (km).
+65	5	F5.2	RMS travel time residual.
+70	5	F5.1	Horizontal error (km).
+75	5	F5.1	Vertical error (km).
+80	1	A1	Remark: Q if Quarry blast.
+81	1	A1	Remark: Quality flag A-D.
+82	1	A1	Remark: Data source code. (See table 1; ie W= earthworm).
+83	1	1X	Blank
+84	10	I10	Event identification number
+94	1	1X	Blank
+95	1	A1	QDDS version number of information. Starts at 0 for quick look reports. Incremented by one each time new information is added or revised: from quick location, final earthworm location with MD, ML added, etc. 
+96	1	A1	"Origin instance" version number, distinguishes between different origins (hypocenters).  It starts with 'a' ('0' for quick-look reports) and runs through the alphabet.  When Berkeley has a final magnitude for each origin, the character is promoted to upper-case.
+
+Table 1. DATA SOURCE CODES
+ (_ stands for a blank space. The code in [], or the last 3 letters of the 6-letter code is the CUSP digitizer device code)
+
+1-let-code Meaning              Original 6-letter codes
+Analog stations only (readings, no seismograms)
+H     Hand timed                H_____  ______  1_____  CALNEW  CALDVL  CALHEL
+R     Main RTP                  XP P-remark. May find:  R_____  2_____ CALRTP
+P     Prototype RTP             YP P-remark. May find:  CALPRO
+O     Motorola RTP              CALMOT
+W     Earthworm (real time picks, no seismograms)
+
+J     Jerry Eaton hand timed    ______
+U     U. Nevada Reno readings   RENO__  _ENO__  RENO_1
+B     UC Berkeley readings
+Y     Woodward-Clyde readings
+T     Tera Corp. or PG&E readings
+
+Analog stations digitized at a central site (seismograms available)
+2     CUSP Tustin A/D #2        CALT2_  _ALT2_ [T2]
+4     Pasadena Tustin #2        CITT2_
+8     Pasadena VAX digitized    CITFMT  
+E     CUSP-Eclipse digitized from FM tape    CALECL  _ALECL [ECL]
+F     CUSP-VAX/750 digitized from FM tape    CALFMT  CALFM3 CALFT3 [FM]
+N     CUSP/Earthworm National digitizer   [NTL]
+C     HVO CUSP (supported, but unused in NCSN catalog)      [OBI], [XOB]
+0	(zero) CUSP/Tustin at Reno, 1980's to 1/1/2000
+
+Codes presently unused in NCSN catalog: will be reassigned in future
+6     Pasadena 11/34 online     CITS34  
+7     Pasadena Nova/Eclipse     CITD1_  
+9     presently unused
+
+Analog stations digitized at a non-Menlo digitizer generally using earthworm
+I     Imported National digitizer grams from Reno  [IM1]
+Z     Imported National digitizer grams from Simmler (Caltech)  [IM2]
+V     Imported National digitizer grams from Bakersfield (Caltech)  [IM3]
+S     Imported National digitizer grams from Pasadena (Caltech)  [IM4]
+G     Imported National digitizer grams from Edwards AFB (Caltech) [IM5]
+M     Imported National digitizer grams from Ft. Scotty (Caltech)
+Q	National digitizer at Mammoth [ML1]
+C	National digitizer at Geyser Peak [GP1]
+K	National digitizer at Carr Hill [CH1]
+L	National digitizer at Sonoma Mountain [SM1]
+1 National digitizer at Mount Tamalpais [TM1]
+3	National digitizer at Vollmer Peak [VP1]
+5	National digitizer at Lawrence Livermore N.L. [LL1]
+
+X     Analog 50 sps digitized by Nanometrics HRD [HRX] Trident [BM1],[WH1]
+D     Calif. Department of Water Resources ("soon" after 9/03) [DWR]
+
+"Digital" stations
+A     Digitized at seismometer (e.g. Nanometrics [HRD], digital seismic 
+telemetry units [DST], Reftek [REF, RNW], Kinemetrics [K2], Reno Reftek [R32], [RF1], Quanterra [QS1])
+
+?     (or blank) Unknown or undefined			
+
+Table 2. NETWORK OWNER/OPERATOR CODES 
+The N code was the 1-letter net code formerly used by Menlo Park.  In the former usage, it was the fourth letter of the 4-letter station code, for example "CALM".
+
+The IRIS code is now the official net code used with station site codes.  In addition to regular NCSN stations, NC is also used for defunct nets for which the USGS archives phase data.  A unique net code allows nets to duplicate each other's site codes.  The NEIS code was used in publications such as the Historical Survey of US Seismic Stations (Poppe, USGS Prof Paper 1096) and Seismograph Station Codes & Coordinates (Presgrave et al, USGS Open File Report 85-714). The ORG code is used in Menlo's master station history file calsta2000.loc.
+
+  IRIS  NEIS   ORG   Operator
+N code  code   code
+A                    Special purpose, i.e a tie-breaker
+B  BK   BRK    UCB   UC Berkeley, including digital seismic network BDSN
+C  CI   PAS    GSP   Caltech-USGS Pasadena
+C  CI          GSPM  Formerly operated by Menlo, now by Pasadena
+C  CI   PAS    CIT   Caltech, original pre-USGS stations
+C* TS*         CIT   Caltech terrascope (BAR,GSC,ISA,MLA,PAS,PFO,SBC,SVD)
+D  SN          GSD   Southern Nevada Net (UN Reno, formerly USGS Denver)
+F  PX          UCS   Parkfield net (Duke/UC Santa Barbara/Berkeley/USGS)
+G  NC   CDMG   CDM   Calif. Div. of Mines and Geology
+L  NC   LAC    LLL   Lawrence Livermore Labs, Livermore net
+L  LL   LAC    LLL   Lawrence Livermore Labs, NTS net
+M  NC   MNLO   GSM   USGS Menlo
+M  NC   MNLO   GSMP  Formerly operated by Pasadena, now by Menlo
+O  UW          UWA   Univ. of Washington Oregon stations
+P  NC          5DY,DIG,SMO,CEN   USGS Menlo portables
+P  NC                (Non-USGS portables use P and UNR, CIT etc.)
+R  NN   REN    UNR   Northern Nevada (Univ. of Nevada Reno)
+S  LA   USC    USC   Univ. of Southern Calif., now merged with CI.
+T  NC          TER   Terra Corp. (Mendocino area)
+U  UU          UUT   University of Utah regional network
+W  WR   CDWR   DWR   Calif. Div. of Water Resources
+X  MX   ECX    ECX   Mexican national network, CICESE, Ensenada, Mexico
+Y  NC          WCC   Woodward-Clyde & PG&E (Sierra foothills)
+Y  PG          PGE   Pacific Gas & Electric Co. (Diablo Canyon)
+   AZ          UCSD  Anza network, UC San Diego
+   CE		   CDMG  Calif. Div. of Mines and Geology strong motion
+   GO          NEIC  USGS National Earthquake Info Center -Golden Network
+   NP          NSMP  National strong motion program (accelerographs)
+   SD?         SD    UC San Diego, So. Calif. Earthquake Center
+   US          NEIC  US National network, ANSS backbone of USGS/NEIC
+   XL          GSM   USGS Menlo portable deployments starting in 1998,
+                     which may not follow any standard portable naming.
+   XN          DUK   Duke Univ. portable deployment, Mammoth area 1997.
+
+* Caltech's broadband Terrascope stations now use the net code CI
+because of intermixing with the short period network.
+
+Table 3a. 3-LETTER USGS COMPONENT CODE DEFINITIONS 
+
+This table defines the letters used in the NSCN channel definitions.  The NCSN channel identifier distinguishes different components at the same station site.  For older analog stations, NCSN codes differ from SEED codes (table 3b), but for newer digital stations, NCSN uses SEED-compatible codes.  The NCSN naming condenses all component information into 3 letters.  CUSP and NCSN software do not have space for separate gain and transmission path codes and condenses this information into the NCSN 3-letter code.  In the case of broadband stations and most UCB stations, NCSN uses the SEED codes.  Newer channel parlance can use a 2-letter "location" code to enhance the SEED code by distinguishing between similar channels that would have the same SEED code, but the location code has not yet (as of 9/00) been implemented by the NCSN.
+
+The first NCSN letter describes the sensor type and frequency band, the second the gain and the third the sensor orientation or direction.  All network channels must use these standard codes to allow ready identification of channels.  For example, the standard short-period vertical network station uses the code VHZ.  The equivalent NCSN 1-letter code is V.  In some contexts, the 3-letter codes can be abbreviated to the older 1-letter codes.
+
+An astute observer will observe that neither NCSN nor SEED codes are applied consistently with the definitions.  The net codes should keep the 10-letter codes for each channel unique, however.
+Sensor type and frequency band (first letter of 3-letter code)
+
+V  short period seismometer (i.e. L4C)
+E  short period seismometer (some digital stations, SEED convention)
+A  accelerometer or FBA
+B  broadband or Strekheisen (i.e. STS-2)
+W  Wood-Anderson
+L  long period seismometer (used for digitally transmitted terrascope data)
+D  dilatometer 
+T  time trace 
+H  short period seismometer (often downhole)
+X  Experimental
+Gain (including telemetry type and dynamic range) (second letter)
+
+H  high gain     (12-24 db attenuation for USGS seismometers)
+M  medium gain [proposed, presently unused]
+L  low gain seismometer (42-48 db attenuation for USGS seismometers)
+N  accelerometer
+F  very low gain (72 db attenuation for USGS seismometers)
+S  strong motion  (very very low gain)
+D  high gain, digital telemetry, high dynamic range
+Orientation (third letter; these are the same as the SEED codes)
+
+Z  vertical
+E  east-west
+N  north-south
+1,2,3  non-traditional or unknown orientations
+I or blank   no orientation, isotropic compenent
+             (dilatometer, hydrophone, time trace)
+
+
+
+Table 3b. 3-LETTER SEED COMPONENT CODE DEFINITIONS 
+SEED (Standard for the Exchange of Earthquake Data) channel code definition is found in appendix A of the SEED manual.  The relevant parts of the definition are restated here.  The first column of the SEED code is the band code (sample rate and corner period), the second is the instrument type (including gain) and the third is the orientation.  
+Band code
+	Band type	sample rate 	corner period
+E	extremely short period	>80 hz	<10 s
+S	short period	>10 to <80	<10
+D	very very short period	~500 hz
+H	high broad band	>80	>10
+B	broad band	>10 to <80	>10
+M	mid period	>1 to <10
+L	long period	~1
+V	very long period	~0.1
+U	ultra long period	~0.01
+R	extremely long period	~0.001
+A	administrative
+W	weather
+X	experimental
+Instrument code
+H	high gain seismometer
+L	low gain seismometer (formerly also used for SEED accelerometers)
+N	accelerometer
+G	gravimeter
+M	mass position seismometer
+Z	synthesized beams
+A	tiltmeter
+P	very short period seismometer (5-10 or higher hz)
+F	magnetometer
+B	creepmeter
+S	linear strainmeter
+V	volumetric strain
+T	tide meter
+R	rainfall
+O	water current
+W	wind
+K	temperature
+I	humidity
+D	pressure
+U	bolometer
+E	electronic test point
+Q	electric potential
+C	calibration input	 X (experimental?), J, Y unused
+Orientation code
+ZNE	vertical, NS, EW
+ABC	triaxial (along the edges of a cube turned up on a corner)
+TR	transverse, radial
+123	orthogonal, nontraditional or borehole
+UWV	optional
+
+Table 3c. NCSN 3-LETTER COMPONENT (CHANNEL) CODES
+The 3-letter USGS codes (which are sometimes abbreviated to a non-unique 1-letter) are used by NCSN.  This table should list all possible 3-letter USGS component codes found in the catalog in the column marked USGS.   The SEED code is the equivalent standard code for data exchange (table 3b), and is in use with some USGS stations.  In general, USGS=SEED codes are used for "digital" stations and USGS codes are for analog stations.  Some channel types for some stations are present in this table and the catalog with two different codes.  This is equivalent to the case of backward non-uniqueness from the SEED code to the USGS code (see footnote 1).  Examples of double representation (backward non-uniqueness) include: (1) the USGS code (like VDZ) and the newer SEED code (EHZ) can both be in the catalog, even for the same station at different times; (2) older UCB stations in the merged USGS-UCB catalog are present twice (eg.  WLN for the USGS version, and EHN for UCB Wood-Anderson: data can be present for one code, the other, or both.); (3) some identical high gain vertical stations use the SHZ code when from the UCB catalog and VHZ when from the USGS catalog.  SHZ normally refers to 50 sample per sec data, and may be a 20 sps decimated version of a 100 sps VHZ station.  
+
+This messy USGS code situation was addressed in 2004.  A large table of channels recorded by the USGS-Menlo Park now has both the USGS code, the SEED code, and the 2-letter "location" code that is sometimes used to supplement and break ties when two USGS codes translate to the same SEED code.  The location code may appear below as a supplement to the SEED code.  This "spreadsheet" table also has time-dependent gain, response, sample rate, field visit, decimation, sensor moves, serial numbers, digitizers, sensor and digitizer sensitivity information for every channel for every epoch.  Tables also rename specific channels to avoid errors and duplicating codes.  As of Oct 2004, seismograms have been renamed to SEED compatible channel and location codes, but the catalog of picks and locations has not.
+
+1   USGS  SEED
+USGS velocity seismometer stations:
+V    VHZ  EHZ1 vertical high gain velocity (0-30 db attenuation, gen. 12 or 18)
+Z    VLZ  ELZ  vertical low gain     "      (36-48 db attenuation, gen. 48)
+E    VLE  ELE  east horizontal       "      (36-48 db attenuation, gen. 42)
+N    VLN  ELN  north horizontal      "                    "
+E    VHE  EHE1 east horiz high gain velocity  (0-30 db attenuation, seldom used)
+N    VHN  EHN1 north horiz high gain velocity  (0-30 db atten, seldom used)
+V    EHZ  EHZ1 high gain, digital station (CREST, ANSS)
+
+F    VFZ  EHZ-101  very low gain velocity vertical (54-80 db atten., gen. 72)
+G    VFN  ELN1           "             north         "
+H    VFE  ELE1           "             east          "
+
+U    VDZ  EHZ1,2 hi gain seis., digital (DST), vertical
+W    VDN  EHN2,3 hi gain seis., digital (DST), north
+X    VDE  EHE2,3 hi gain seis., digital (DST), east
+U    EHZ  EHZ  hi gain seismometer, digital (Nanometrics, K2), vertical
+W    EHN  EHN  hi gain seismometer, digital (Nanometrics, K2), north
+X    EHE  EHE  hi gain seismometer, digital (Nanometrics, K2), east
+
+W    VDN  EP22,3 hi gain seismometer in borehole with unknown orientation
+X    VDE  EP32,3 hi gain seismometer in borehole with unknown orientation
+W    EP2  EP2  hi gain seismometer in borehole with unknown orientation
+X    EP3  EP3  hi gain seismometer in borehole with unknown orientation
+
+D    VL1  EL1  additional rotated velocity horizontal (rare)
+O    VL2  EL2  		"
+
+Accelerometers
+I    ADZ  HNZ1,2,3 vert force-balance-accel., digital DST (2.0g vv low gain)
+J    ADN  HNN1,2,3 north        "                 "
+K    ADE  HNE1,2,3 east         "                 "
+I    ADZ  HN12,3 vert borehole FBA, digital 
+J    ADN  HN22,3 borehole FBA, digital, unknown orientation
+K    ADE  HN32,3 borehole FBA, digital, unknown orientation
+I    HN1  HN1  vert borehole FBA, digital 
+J    HN2  HN2  borehole FBA, digital, unknown orientation
+K    HN3  HN3  borehole FBA, digital, unknown orientation
+  
+I    ASZ  HNZ1 vert force-balance-accel. (2.0g  v. v. low gain), analog
+J    ASN  HNN1 north        "                 "
+K    ASE  HNE1 east         "                 "
+A    AFZ  HLZ  vert         "            (0.2g very low gain)
+B    AFN  HLN  north        "                 "
+C    AFE  HLE  east         "                 "
+
+I    HLZ  HNZ2 vert  Episensor accel., digital system, old L code
+J    HLN  HNN2 north        "                 "
+K    HLE  HNE2 east         "                 "
+I    HNZ  HNZ  vert  Episensor accel., digital system, correct N code
+J    HNN  HNN  north        "                 "
+K    HNE  HNE  east         "                 "
+
+I    BLZ  BNZ  vert  Episensor accelerometer, 50 sps, old L code
+J    BLN  BNN  north        "                 "
+K    BLE  BNE  east         "                 "
+I    BNZ  BNZ  vert  Episensor accelerometer, 50 sps, correct N code
+J    BNN  BNN  north        "                 "
+K    BNE  BNE  east         "                 "
+
+Broadband velocity stations (generally also have accelerometers)
+1    HHZ  HHZ  vert broad band (Guralp, Nanomet., Reftek, Kinemetrics, 100 sps)
+2    HHN  HHN  north     "        "
+3    HHE  HHE  east      "        "
+4    BHZ  BHZ  vert    broad band (Guralp, 50 samples/sec)
+5    BHN  BHN  north     "        "
+6    BHE  BHE  east      "        "
+
+Other USGS channels
+P    DDI  HV12 dilatometer, digital telemetry (gain 1), isotropic orientation
+P    HV1  HV1  dilatometer, digital telemetry (gain 1)
+P    DSI  HV1-401  dilatometer (gain 1)
+Q    DFI  HV1-201       "      (gain 12)
+R    DLI  HV11          "      (gain 50)
+S    DHI  HV1-101       "      (gain 200)
+T    T    AT   time code (CUSP recording)
+
+UC Berkeley WA stations, USGS compatible amplitudes from the calnet catalog:
+L    WLN  EHN1 NS Wood-Anderson torsion (2100X - 2800X) 
+M    WLE  EHE1 EW Wood-Anderson        " 
+X    WFN  ELN1 NS lo-gain torsion (BKY 700X, CIT 100X)
+Y    WFE  ELE1 EW lo-gain torsion (BKY 700X, CIT 100X)
+
+Older UC Berkeley stations, UCB data:
+L    EHN  EHN1 NS Wood-Anderson torsion (2100X - 2800X) 
+M    EHE  EHE1 EW Wood-Anderson        " 
+
+V    SHZ  SHZ  Vert Willmore MK II, Benioff or other
+X    ELN  ELN1 NS lo-gain torsion (BKY 700X, CIT 100X)
+Y    ELE  ELE1 EW lo-gain torsion (BKY 700X, CIT 100X)
+
+The following codes are for the Caltech Terrascope or Berkeley BDSN stations:
+This constitutes a standard set present at every UCB BDSN station.
+
+1    HHZ  HHZ  vert    very broad band (analog telem., CUSP recording, 100 sps)
+2    HHN  HHN3 north     "        "
+3    HHE  HHE3 east      "        "
+4    BHZ  BHZ  vert    very broad band (Streckeisen STS-2/VBB, 20 samples/sec)
+5    BHN  BHN  north     "        "
+6    BHE  BHE  east      "        "
+7    LHZ  LHZ  vert    long period (Streckeisen STS-2/UVBB, 1 sample/sec)
+8    LHN  LHN  north     "        "
+9    LHE  LHE  east      "        "
+
+I    HLZ  HNZ  vert  FBA-23 accelerometer, 80 or 100 sps, old L code
+J    HLN  HNN3 north        "                 "
+K    HLE  HNE3 east         "                 "
+I    HNZ  HNZ  vert  FBA-23 accelerometer, 80 or 100 sps, correct N code
+J    HNN  HNN  north        "                 "
+K    HNE  HNE  east         "                 "
+
+BERKELEY SEED USAGE:
+(-) indicates seldom used codes
+The following channels use SEED codes, USGS Menlo Park uses only SEED codes:
+
+Wood-Anderson response stations:
+---  EHN,3 EHE: Wood-Anderson analog (2800X, 0.8 s) (pre 1994)
+---  ELN,3 ELE: Low-gain Torsion (100X or 700 max, paper records)
+---  BHN, BHE: Wood-Anderson synthetic (0.8 s); High-gain Torsion (14 000 max)
+---  HHN,3 HHE: Wood-Anderson synthetic (0.8 s); High-gain Torsion (14 000 max)
+---  HLN,3 HLE: Wood-Anderson synthetic (0.8 s); High-gain Torsion (14 000 max)
+
+Broad band BDSN stations:
+HHZ, HHN, HHE: 80 or 100 sps Streckeisen STS-2/VBB, STS-1/UVBB, Guralp CMG-40T,
+               or Teledyne Geotech 8700, SL-210 or SL-220
+BHZ, BHN, BHE: 20 sps Streckeisen STS-2/VBB, STS-1/UVBB, or Guralp CMG-40T
+LHZ, LHN, LHE: 1 sps Streckeisen STS-1/UVBB or STS-2/VBB,
+               Teledyne Geotech SL-210 or SL-200, Guralp CMG-3 or
+               Streckeisen STS-1/UVBB (CMB)
+
+Force balence accelerometers:
+HLZ, HLN, HLE: 80 or 100 sps Kinemetrics FBA-23
+CL1, CL2, CL3: Wilcoxin borehole accelerometer, 500 sps, rotated horizontals
+HL1, HL2, HL3: Wilcoxin borehole accelerometer, 100 sps, rotated horizontals
+BL1, BL2, BL3: Wilcoxin borehole accelerometer, 20 sps, rotated horizontals
+BLZ, BLN, BLE: 20 or 50 sps Kinemetrics FBA-23 (-)
+LLZ            1 sps Kinemetrics FBA-23 (-)
+
+HNZ, HNN, HNE: 80 or 100 sps Kinemetrics FBA-23
+CN1, CN2, CN3: Wilcoxin borehole accelerometer, 500 sps, rotated horizontals
+HN1, HN2, HN3: Wilcoxin borehole accelerometer, 100 sps, rotated horizontals
+BN1, BN2, BN3: Wilcoxin borehole accelerometer, 20 sps, rotated horizontals
+BNZ, BNN, BNE: 20 or 50 sps Kinemetrics FBA-23 (-)
+LNZ            1 sps Kinemetrics FBA-23 (-)
+
+Codes used occasionally, for example at the BKS vault or special stations:
+     BHR, BHT: 20 sps Streckeisen STS-1/UVBB
+     LHR, LHT: 1 sps Streckeisen STS-1/UVBB (360 sec) or STS-1/VBB (300 sec)
+VHZ, VHN, VHE: 0.1 sps very long period channel
+UHZ, UHN, UHE: 0.01 sps ultra long period channel
+MHZ, MHN, MHE: DWSSN station at CMB, Guralp CMG-3
+
+Older codes used at the BKS vault:
+               1=vertical, 2,3=sometimes 45 degree rotated, sometimes normal
+               horizontals
+     EH2, EH3: Wood-Anderson synthetic (0.8 s); High-gain Torsion (14 000 max)
+BH1, BH2, BH3: 20 sps Sprengnether S-5100 ULPV Broadband
+HH1, HH2, HH3: 100 sps Sprengnether S-5100 ULPV Filtered Displacement
+LH1, LH2, LH3: 1 sps Sprengnether S-5100 ULPV Broadband
+UH1, UH2, UH3: 0.01 sps Sprengnether S-5100 ULPV ultra long period, analog
+LHZ          : Press-Ewing (15.0 s) (at BRK before 1995)
+
+Other digital stations:
+DP1  DP2, DP3: Borehole geophone, 500 sps
+EP1, EP2, EP3: Borehole geophone, 100 sps (-)
+
+Older analog stations:
+SHZ or SH1,2,3: 50 sps Willmore MK II, Benioff 100 kg (0.8 s) or 14.7 kg, 
+               Geotech S-13 or GS-13, Filtered Geotech 7507 or
+               Mark Products L-4C
+
+CALTECH SEED USAGE FOR TERRASCOPE STATIONS:
+HHZ, HHN, HHE: 100 sps, Streckeisen, analog telemetry, CUSP recording
+BHZ, BHN, BHE: 20 sps Streckeisen STS-2/VBB, digital telemetry
+HLZ, HLN, HLE: 100 sps low gain
+ELZ, ELN, ELE: 100 sps Kinemetrics FBA-23
+EHZ, EHN, EHE:
+LHZ, LHN, LHE:
+BLZ, BLN, BLE:
+
+UNIVERSITY OF NEVADA RENO SEED USAGE:
+     SHN, SHE: Teledyne Geotech SL-210 & SL-220
+HHZ, HHN, HHE: 100 sps Teledyne Geotech SL-210 & SL-220
+
+Notes:
+
+1 No uniqueness backward.  Both the VHZ code for analog, low dynamic range stations and VDZ code for high dynamic range (DST or Nanometrics) digital stations map into the same EHZ SEED code.  This means that once the mapping to SEED codes takes place, that any differences must be handled on a station-by-station basis.  For example, coda durations from VDZ stations before 8/18/2000 are corrupted, and it will no longer be possible to use the component code to mark these as unusable.  Similarly, both the analog ASZ accelerometers and the digital ADZ accelerometers become the SEED code HNZ.
+
+Some stations, like older UCB Wood-Anderson stations, are referred to by the USGS code WLN if the source was the NCSN catalog, and EHN if the source was UCB.  Data can be present for either version of the station or both.
+
+2 Rename.  In September 2000 the existing Nanometrics and Kinemetrics-2 digital stations were "renamed" by using new component codes to label them as they were recorded.  The rename did not occur by overwriting older, archived data, but that was expected to happen sometime in the future.  Both old and new codes are required to completely support these stations.  This rename was to bring the codes into SEED compliance, and sometimes to distinguish them from analog stations in the processing.
+
+3 No uniqueness forward.  Note that the mapping from NCSN to SEED code is not unique, and that the same NCSN code can be used for stations of different types that have different SEED codes.
+Table 4. STATION OR PHASE REMARK CODES
+
+ (These codes are not universally applied to all phases; _ stands for a blank space).
+
+1-let-code  Meaning                   Original 3-letter codes
+A           Calibration card          CAL
+B           Coda read to backgrd.     BGC  BGK  BCK
+C           Clipped                   CLP  CMX
+D           Dead trace                DED  OUT  NNE  DWK  _NE  NE_  N/E
+E           Emergent                  VVE
+F           F-P uncertain             FPQ  FP?
+G           Guessed time              GES  GUS  EST
+M           Max amplitude read        MAX  MX_
+N           Noisy trace               NOI  NSE  NOY  NOE
+P           Amplitude is of P wave    PMX
+S           Spiky trace               SPI  SPK
+T           Cross-talk                _CF  CF_  CF?  CFQ
+W           Weak signal               WEK  WKE  VWK
+Table 5. 1-LETTER REGION CODE 
+
+(First letter of N.Calif. USGS stations.  Regions in parentheses are not used in the normal USGS code convention, but were devised for Southern California).
+
+A  Auburn region                         N  Napa Valley region
+B  San Juan Bautista region              O  Oroville region
+C  Calaveras region                      P  Parkfield region
+D  Mojave desert                         Q  (Southern Nevada)
+E  (Elsinore fault region)               R  (Riverside region)
+F  (San Fernando and Los Angeles basins) S  Santa Barbara region
+G  Geysers region                        T  (Tejon pass region)
+H  Hollister region                      U  (Northern Nevada (UNR net))
+I  (Imperial valley)                     V  Oregon
+J  San Jose region                       W  Walker pass region
+K  Klamath mountain region               X  (Mexico)
+L  Lassen and Shasta region              Y
+M  Melones and Mammoth regions           Z
+Table 6. 2-LETTER PORTABLE NET CODES
+The 4-letter station code for portables generally consists of the 2-letter net code, a 1-digit number or letter (number of the station within the portable deployment), and the letter 'P' for portable. The catalog does not have data from a few of the portable deployments listed below.  USGS Menlo portable deployments starting in 1998 may use an IRIS-assigned XL as the net code and may not follow any standard portable site-code naming.
+
+    Region or name           Dates       Operator
+BA, BB, BC, BD, BE, BF, BL & BM
+    Bear Valley              7/74-1/75   USGS 10-day
+BI  Bishop                   1978
+CA  Long Valley Caldera      3/84        USGS
+CH  Chalfant Valley          7/86        USGS
+CL  Long Valley              6-9/81      CDMG
+CO  Coalinga                 5-9/83      USGS
+CP  Coalinga GEOS            5/83        USGS digital GEOS
+CS  Coso Hot Springs         5-6/77      USGS Centipede
+DA, DB, DD, DE, DF, DG, DH, DI, DJ, DK, DL, DM, DS:
+    Dry Lake centipede (BV)  9-11/78     USGS
+DC  Dos Cuadras Ocean Bot.   12/75-1/76  USGS OBS
+DU  Durwood Meadows          10-11/83    USGS 5-day
+EU  Eureka & Cape Mendocino  11-12/80    USGS
+GE  Geysers                  8-12/81     USGS
+HP  Bear Valley              7-9/67      USGS
+JA  Long Valley              1/83        USGS
+KE  Kettleman Hills          8/85        USGS
+LA  Lassen Park              7-10/80     USGS 5-day
+LI  Livermore                1-2/80      LLL
+MC  Mono Craters             7-8/82      USGS
+MD  Mount Diablo             6-7/70      USGS
+MH  Morgan Hill GEOS         4-5/84      USGS digital GEOS
+MI  Morgan Hill 5-day        4-5/84      USGS
+ML  Mammoth Lakes            5-6/80      USGS
+MM     "      "                 "        Caltech
+MN     "      "                 "        UNR
+MO     "      "                 "        USGS digital GEOS
+MP     "      "              78-82       CDMG
+MQ  Mammoth Mountain         6/23-27/89  USGS - GEOS
+MR  Mammoth                  8/82        USGS
+NB  North Bay area           12/03-12/04 USGS, Jack Boatwright
+OR  Oroville                 8/75-76     DWR
+OW     "                     8/75        Woodward Clyde
+PB  Point Buchon             12/80-5/81  USGS
+PK  Parkfield
+PM  Point Mugu               2-4/73      USGS
+RO  Rocklin                  6/78        CDMG
+RV  Round Valley             11/84       USGS
+SA  San Andreas              1-5/70      USGS
+SB  San Juan Bautista        5-6/81      USGS
+SC  Santa Cruz Mtns.         9/67        USGS
+SH  Shasta                   8/78        USGS
+SP  Shasta (Stevens Pass)    8/78        USGS
+SR  Santa Rosa               10/69       USGS
+ST  Shasta (tennant)         1/81        USGS
+SU  Point Sur                1-2/84      USGS
+UA  UNR Mammoth              10/78       UNR
+UB  UNR Mammoth              10-11/79    UNR
+UD  UNR Round Valley         11/84       UNR
+UE  UNR Chalfant Valley      7/86        UNR
+UF  UNR Mammoth              5/82        UNR
+UO  Union Oil, Medicine Lake 8/84        Union Oil
+
+(XL)  Santa Clara Valley Experiment, 6-11/1998, USGS
+Table 7. REGIONS BY 3-LETTER CODE
+
+(Regions labeled with '%' are aggregates of smaller regions and should not appear on the summary cards.)
+
+Code Name                   region number
+ALM  Lake Almanor                58
+ALU  Alum Rock                   21
+ANN  Anno Nuevo                  34
+AUB  Auburn                      60
+BAK  Bakersfield                 75
+BAR  Bartlett Springs Fault      49
+BIT  Bitterwater Valley          12
+BLM  Black Mountain               2
+BRC  Basin & Range Calif %       64
+BUS  Busch Fault                  5
+BVL  Bear Valley                 11
+CAS  Casa Diablo Mtn. (VOT)      95
+CHA  Chalk Bluffs (VOT)          97
+CHV  Chalfant Valley (BRC)       79
+COA  Coalinga                    31
+CON  Concord Fault               18
+COS  Coso Range (BRC)            81
+CRV  Ciervo Hills                30
+CYN  Coyote North                23
+CYS  Coyote South                24
+DAN  Danville                    19
+DEL  Del Norte                   52
+DEV  Death Valley (BRC)          85
+DOM  Resurgent Dome (LVC)        91
+EMO  East Moat (LVC)             89
+EUR  Eureka                      51
+GAR  Garlock Fault               83
+GEY  Geysers                     43
+GLA  Glass Mtn. (MOB)            77
+GOL  Gold Hill                   15
+GRN  Greenville Fault            26
+GVL  Green Valley Fault          46
+HAM  Mt. Hamilton                27
+HAY  Hayward Fault               16
+HCF  Hilton Crk. Flt. (LVC)      93
+HOL  Hollister                    9
+INC  Inyo Craters (LVC)          86
+IWV  Indian Wells Val. (BRC)     82
+JQN  San Joaquin Valley          54
+KAI  Kaiser Peak                 65
+KLA  Klamath Mountains           55
+KON  Konocti Bay                 44
+LAS  Lassen                      57
+LOM  Loma Prieta                  3
+LVC  Long Valley Caldera %       66
+MAA  Maacama Fault               48
+MAM  Mammoth Mtn. (LVC)          92
+MAR  Marin                       41
+MCA  Mono Caldera (MOB)          74
+MEN  Mendocino Escarpment        50
+MID  Middle Mountain             14
+MIS  Mission Fault               17
+MOB  Mono Basin %                63
+MOD  Modoc Plateau               72
+MOL  Mono Lake (MOB)             78
+MON  Monterey Bay                35
+MOR  Mt. Morrison (RSM)          98
+NAP  West Napa Fault             45
+NEV  Nevada                      73
+NMO  North Moat (LVC)            88
+ORE  Oregon                      71
+ORO  Oroville                    59
+ORT  Ortigaleta Fault            28
+OWV  Owens Valley (BRC)          84
+PAI  Paicines                    10
+PAN  Panoche Pass                29
+PAR  Point Arena                 47
+PIN  Pinnacles                    8
+PON  Pacific Ocean N             70
+POS  Pacific Ocean S            103
+QUI  Quiensabe                   25
+ROB  Paso Robles                 38
+ROG  Rogers Creek Fault          42
+RSM  Red Slate Mountain %        68
+RVL  Round Valley (VOT)          96
+SAC  Sacramento Valley           53
+SAL  Salinas Valley              36
+SAR  Sargent Fault                4
+SBA  Santa Barbara               94
+SCA  Southern Calif.             69
+SCV  Santa Clara Valley          33
+SFB  South S.F. Bay              32
+SFL  San Felipe                  22
+SFP  S.F. Peninsula               1
+SHA  Shasta                      56
+SHE  Sherwin Lakes (RSM)         99
+SIL  Silver Peak (RSM)          100
+SIM  Simmler                     40
+SJB  San Juan Bautista            6
+SLA  Slack Canyon                13
+SMO  South Moat (LVC)            90
+SSM  San Simeon                  39
+STN  Stone Canyon                 7
+SUN  Sunol                       20
+SUR  Big Sur (Hosgri Fault)      37
+VOT  Volcanic Tableland %        67
+WAK  Walker Lane                 62
+WCN  Wheeler Crest No. (RSM)    101
+WCS  Wheeler Crest So. (RSM)    102
+WHI  White Mountains (BRC)       80
+WMO  West Moat (LVC)             87
+WWF  White Wolf Falut            76
+YOS  Yosemite                    61
+Table 8. MULTIPLE VELOCITY MODELS
+Different crustal models and station delay sets are used for regions in Northern California. Events falling between regions will use a combination of 2 or 3 models. Two regions have different models for either side of the San Andreas Fault. An event in a dual-model region uses separate models for stations on different sides of the fault regardless of which side of the fault the epicenter is on. The Loma Prieta region uses model LOM for stations on the west (Pacific) side and model LON for stations on the east (North American) side. The code LOM labels all events that use these two models. The Bear Valley region uses model GAB for stations on the Gabilan (west) side and model DIA for stations on the Diablo (east) side. The three Parkfield areas use identical models but slightly different sets of station delays.
+
+Similarly, some adjacent models are paired in the sense that the models are identical.  The station delays, however, differ slightly.  These include the San Francisco peninsula north (PEN) and south (PES), and 3 Parkfield models (PGH, PMM, and PSM).
+
+The velocity models used by Hypoinverse for locating the NCSN catalog have linear velocity gradients within layers and no first-order velocity discontinuities.  Most models were originally homogeneous layer models, and were often "smoothed" by replacing many velocity steps with fewer layers with gradients.  This gradient approach eliminates the artificial discontinuities of layer models, improves convergence and stability, and eliminates multiple refractions at the
+same take off angle.
+
+A description of the models and maps of the regions assigned to each model are published in The Northern California Seismic Network Bulletin 1992 by Oppenheimer et al., USGS open file report 93-578.  The report also includes a set of station delays for each model, but these have been slightly improved by an additional iteration of removing the average
+station residual from a set of earthquakes from the catalog.  Stations that have moved a short distance (< 1 km) have duplicate delays unless there is enough data for an independent delay determination.  Following the next table is a list of the velocity-depth points of the gradient models: the actual model connects these points with gradients, and the last velocity is the constant half-space velocity underlying the model.  I also list the original homogeneous layer models specified by the depth to layer top and the constant layer velocity.
+
+Code Name              Delay  Source of original model                How
+                       status                                         derived
+AUB  Auburn              2    Eaton & Simirenko (OFR 80-604, 1980)  test&modify
+BAE  Bartlett Spr east   2    Castillo pers. comm. (1991)             VELEST
+BAR  Bartlett Spr Fault  2    Castillo pers. comm. (1991)             VELEST
+BAS  Basin & Range       2    averaged Prodehl (Prof Pap 1034, 1979)  refract
+COA  Coalinga            2    Eaton OFR 85-44 (1985)                test&modify
+CON  Concord-Calaveras   2    Klein pers. comm. (1991)                VELEST
+COY  Coyote Lake         2    Reasenberg & Ellsworth (JGR 1982)       VELEST
+CST  Central Coast       2    Poley & Eaton pers. comm.             test&modify
+DIA  Diablo-Bear Valley  2    Dietz pers. comm. &                     VELEST
+       (west)                 Walter & Mooney (BSSA 1982)             refract
+EBY  East Bay (unused)   2    Olson pers. comm. &
+                              Ellsworth & Marks OFR (1980)            VELEST
+GAB  Gabilan-Bear Valley 2    Dietz pers. comm. &                     VELEST
+       (east)                 Walter & Mooney (BSSA 1982)             refract
+GEY  Geysers             2    Eberhart-Phillips & Oppenheimer JGR '84 VELEST 
+HAY  Hayward Fault       2    Klein pers. comm. (1990)                VELEST
+LAS  Lassen              2    S. Walter pers. comm.                   VELEST
+LEW  Mt. Lewis           2    Klein pers. comm. (1990)                VELEST
+LIV  Livermore-Antioch   2    Klein pers. comm. (1991)                VELEST
+LOM  Loma Prieta (west)  2    J. Olsen and M. Zoback (1995)           VELEST
+LON  Loma Prieta (east)  2    J. Olsen and M. Zoback (1995)           VELEST
+MAA  Maacama Fault       2    Castillo pers. comm. (1991)             VELEST
+MAM  Mammoth Lakes       2    Kissling (PhD thesis 1986?) &           refract &
+                              Cockerham & Kissling pers. comm.        inversion
+MAN  Maacama North       2    Castillo pers. comm. (1991)             VELEST
+MEN  Mendocino           2    Magee pers. comm. (1991)                VELEST
+MOR  Morgan Hill         2    Cockerham & Eaton
+                              (USGS Bulletin 1639, 1987)              VELEST
+NBY  North S.F. Bay      2    Eberhart-Phillips & Oppenheimer
+                              (JGR 1984)                              VELEST
+NCG  N. Calif. gradient  2    default model derived from:
+NCA  N.Cal layer (unused)2    standard NCSN, Eaton pers. comm.    test&modify
+PAR  Parkfield (unused)  2    Poley & Eaton pers. comm.             test&modify
+PEN  SF Peninsula north  2    Olson (Proc. Rec. Crus. Mvmts. 1987?)   VELEST
+PES  SF Peninsula south  2    Olson (Proc. Rec. Crus. Mvmts. 1987?)   VELEST
+PGH  Park.-Gold Hill     2    Poley & Eaton pers. comm.             test&modify
+PMM  Park.-Middle Mtn.   2    same as PGH.                          test&modify
+PSM  Park.-Simmler       2    same as PGH                           test&modify
+PTA  Pt Arena, Ft Bragg  2    Castillo pers. comm. (1991)             VELEST
+SCA  Southern Calif.     2    Jones pers. comm.                       refract?
+SHA  Shasta & Oregon     2    average from Zucca et al. (JGR 1986)    refract
+SJB  San Juan Bautista   2    Moths pers. comm.                       VELEST
+  (SJB replaced by extended Loma Prieta model)
+TRA  Transverse Ranges   2    Prodehl PP-1034 (1979)                  refract
+TRE  Tres Pinos          2    Dietz pers. comm. &                     VELEST
+                              Walter & Mooney (BSSA 1982)             refract
+WAL  Walker Pass         2    Jones & Dollar (BSSA 1986)            test&modify
+
+The status codes for the station delays are:
+1  Delays are from original investigator for layer model.
+2  Delays refined for present region and gradient model from original delays.
+
+Depth-Velocity points for models with linear gradients in layers
+
+Earthquake locations are processed by Hypoinverse-2000 using linear gradient crustal models.
+Code, Depth Z (km), Velocity V (km/s)
+
+AUB	Z 0.00 1.00 34.00 36.00
+V 4.80 6.20  6.85  8.00
+BAE	Z 0.00 4.50 18.60 28.50
+V 4.20 5.80  6.05  7.80
+BAR	Z 0.00 2.00 19.00 21.00 29.00 31.00
+V 4.00 5.46  6.08  6.60  6.80  7.80
+BAS	Z 0.00 7.10 28.60 32.60
+V 4.00 5.95  6.60  7.85
+COA	Z 0.00 2.20 14.00 26.00 30.00
+V 2.00 4.30  6.25  6.80  7.95
+CON	Z 0.00 2.00 12.00 24.00 26.00
+V 2.50 4.70  5.77  6.12  7.95
+COY	Z 0.00 1.40 5.80 10.60 24.00 26.00
+V 3.80 5.30 6.12  6.37  6.59  8.00
+CST	Z 0.00 2.50 8.00 23.80 26.80
+V 2.95 5.13 6.20  6.65  8.12
+DIA	Z 0.00 1.50 5.80 14.40 15.60 29.00 31.00
+V 2.45 4.62 5.80  6.05  6.85  7.15  7.95
+GAB	Z 0.00 4.00 22.50 25.50
+V 3.73 6.07  6.47  7.95
+GEY	Z 0.00 3.00 8.0020.0022.00
+V 4.10 5.47 5.75 6.02 7.90
+HAY	Z 0.00 3.00 9.00 24.00 26.00
+V 3.70 5.17 5.90  6.38  7.98
+LAS	Z 0.00 4.50 9.00 29.00 31.00
+V 4.00 6.00 6.28  6.55  8.05
+LEW	Z 0.00 2.00 6.30 24.00 26.00
+V 3.18 5.23 5.89  6.40  7.95
+LIV	Z 0.00 6.80 14.00 24.00 26.00
+V 2.27 5.85  6.10  6.44  7.95
+LOM	Z 0.00 2.00 6.70 24.00 26.00
+V 3.00 4.95 5.94  6.64  8.00
+LON	Z 0.00 2.50 8.90 24.00 26.00
+V 2.53 5.44 6.29  6.69  7.98
+MAA	Z 0.00 3.60 16.60 24.00 26.00
+V 3.93 5.55  5.96  6.80  7.80
+MAM	Z 0.00 1.30 2.80 7.00 29.00 31.00 49.00 51.00
+V 3.52 3.67 5.53 6.03  6.28  6.51  6.85  8.00
+MAN	Z 0.00 2.10 14.00 24.00 26.00
+V 4.00 5.43  5.93  6.78  7.80
+MEN	Z 0.00 4.20 22.00 24.00
+V 3.50 5.05  6.90  7.90
+MOR	Z 0.00 1.00 4.20 10.00 24.00 26.00
+V 3.60 4.75 5.48  6.05  6.33  7.60
+NBY	Z 0.00 3.00 8.00 20.00 22.00
+V 4.10 5.47 5.75  6.02  7.90
+NCG	Z 0.00 3.50 23.00 27.00
+V 2.70 5.70  6.80  8.05
+PAR	Z 0.00 2.60 9.40 23.30 27.00
+V 2.25 5.30 6.10  6.70  8.00
+PEN	Z 0.00 2.00 7.10 22.50 24.50
+V 2.40 4.85 6.11  6.48  8.06
+PES	Z 0.00 2.00 7.10 22.50 24.50
+V 2.40 4.85 6.11  6.48  8.06
+PGH	Z 0.00 2.60 9.40 23.30 27.00
+V 2.25 5.30 6.10  6.70  8.00
+PMM	Z 0.00 2.60 9.40 23.30 27.00
+V 2.25 5.30 6.10  6.70  8.00
+PSM	Z 0.00 2.60 9.40 23.30 27.00
+V 2.25 5.30 6.10  6.70  8.00
+PTA	Z 0.00 2.50 19.80 26.60
+V 4.00 5.40  6.40  7.80
+SCA	Z 0.00 5.50 16.60 31.00 33.00
+V 4.80 6.17  6.60  6.85  7.80
+SHA	Z 0.00 5.00 38.10 42.50
+V 3.10 6.20  6.80  7.95
+TRA	Z 0.00 7.00 32.30 36.80
+V 3.10 6.10  6.73  8.10
+TRE	Z 0.00 2.00 5.60 14.40 16.00 28.40 30.00
+V 2.70 5.33 5.75  6.00  6.83  7.07  7.95
+WAL	Z 0.00 1.20 36.40 38.00
+V 2.80 5.70  7.20  7.90
+Velocity & Depth for homogeneous layer models 
+Initially, most models were derived with homogeneous layers.  Layer models are no longer used.
+Code, pairs of: (Velocity (km/s), Depth to top of layer (km))
+
+AUB 5.5  0.0,  6.   1.0,  6.8 20.0,  8.0  35.0
+BAE 4.43 0.00, 5.12 1.50, 5.76 3.50, 5.79 5.00, 5.95 7.50, 5.97 10.00,
+ 5.99 12.50, 6.08 15.00, 6.68 20.00, 7.76 25.00, 7.80 30.00
+BAR 4.39 0.00, 5.54 1.50, 5.62 3.50, 5.65 5.00, 5.66 7.50, 5.79 10.00,
+ 5.97 12.50, 6.08 15.00, 6.68 20.00, 6.76 25.00, 7.80 30.00
+COA 2.50 0.00, 4.30 1.50, 4.70  3.50, 5.60  7.00, 5.80  9.00, 6.30 14.00,
+ 6.60 15.50, 7.95 28.00
+CON 2.96 0.0, 3.19 1.0, 4.72 2.0, 4.95 4.0, 5.51 7.0, 5.96 12.0, 7.95 25.0
+COY 4.84  0.0, 5.39  1.5, 5.70  3.0, 5.89  4.25, 6.13  5.5, 6.20  6.75,
+ 6.28  8.0, 6.41 10.0, 6.50 12.5, 8.00 25.0
+CST 3.0  0.0, 5.7  1.5, 6.23 8.0, 6.43 12.33, 8.12 25.33
+DIA 3.50 0.00, 5.01 1.50, 5.88 5.10, 6.91 15.00, 7.95 29.00
+EBY 3.4  0.0, 4.7  1.0, 5.20 3.0, 5.6  5.0, 5.7  7.0, 5.8  9.0, 6.0 11.0,
+ 6.8 13.0, 8.0 25.0
+GAB 3.70 0.00, 5.45 1.30, 6.13 4.50, 6.36 10.00, 7.95 24.00
+GEY 4.43 0.0, 5.12 1.50, 5.47 3.00, 5.58 4.25, 5.62 6.0, 5.86 8.0, 7.9 21.0
+HAY 3.77  0.0, 4.64  1.0, 5.34  3.0, 5.75  6.0, 6.00  9.0, 6.22 14.0,
+ 7.98  25.0
+LAS 4.3  0.0, 5.5  2.0, 6.0  4.5, 6.17 6.0, 6.35 9.0, 8.05 30.0
+LEW 3.60 0.00, 5.03 1.00, 5.24 2.00, 5.66 4.00, 5.88 8.00, 5.91 10.00,
+ 6.16 14.00, 7.95 25.00
+LIV 2.56  0.0, 2.75  1.0, 3.56  2.0, 4.74  4.0, 5.60  7.0, 6.28 12.0,
+ 7.95 25.0
+LOM 3.36 0.00, 4.58 1.00, 5.25 2.00, 5.91 5.00, 6.13 8.00, 6.22 13.00,
+ 6.53 18.00, 8.00 25.00
+LON 3.00 0.00, 3.99 1.00, 5.57 2.00, 6.01 5.00, 6.32 8.00, 6.46 13.00,
+ 6.58 18.00, 7.98 25.00
+MAA 4.15 0.00, 4.65 1.00, 5.49 2.50, 5.57 4.00, 5.63 6.50, 5.72 8.00,
+ 5.81 10.00, 5.86 12.00, 5.91 14.00, 6.08 16.00, 6.68 20.00, 7.76 25.00,
+ 7.80 30.00
+MAM 3.55 0.0, 3.57 0.5, 3.70 1.0, 5.35 2.0, 5.67 3.0, 5.90  5.0,
+ 6.02  7.0, 6.07 10.0, 6.10 14.0, 6.18 18.0, 6.67 30.0, 8.00 50.0
+MAN 4.36 0.00, 5.46 1.50, 5.60 3.50, 5.63 5.00, 5.66 7.50, 5.78 10.00,
+ 6.00 12.50, 6.21 15.00, 6.68 20.00, 7.76 25.00, 7.80 30.00
+MEN 3.90 0.00, 5.10 3.00, 5.51 6.00, 5.95 12.00, 6.78 18.00, 7.60 24.00,
+ 7.83 27.00, 7.903 0.00
+MOR 3.67 0.00, 4.80 0.50, 5.27 2.00, 5.76 4.20, 6.05 10.00, 6.20 14.00,
+ 7.60 25.00
+NBY 4.43 0.0, 5.12 1.5, 5.47 3.0, 5.58 4.25, 5.62 6.0, 5.86 8.0, 7.9 21.0
+NCA 4.00 0.00, 5.90 3.50, 6.80 15.00, 8.05 25.00
+PAR 1.42  0.00, 3.24 0.25, 4.82  1.50, 5.36 2.50 , 5.60 3.50, 5.87 6.00,          6.15 9.00, 6.60 15.00, 8.00 25.00                                               PEN 2.94 0.00, 4.21 1.00, 5.20 2.00, 5.93 5.00, 6.16 8.00, 6.25 11.00,
+ 6.30 14.00, 6.35 17.00, 8.06 23.50
+PGH same as PAR                                              
+PMM same as PAR                                              
+PSM same as PAR                                              
+PTA 4.40 0.00, 5.30 1.50, 5.56 3.50, 5.66 5.00, 5.67 7.50, 5.68 10.00,
+ 5.85 12.50, 6.08 15.00, 6.68 20.00, 7.76 25.00, 7.80 30.00
+SCA 5.5 0.0, 6.3 5.5, 6.7 16., 7.8 32.
+SHA same as LAS
+SJB 3.483 0.0, 4.426 0.5, 5.101 1.0, 5.676 3.0, 5.897 5.0, 6.140 7.0
+ 6.212 9.0, 6.284 11.0, 6.412 13.0, 6.435 15.0, 6.812 18.0, 8.0 25.0
+TRA same as SCA
+TRE 3.57 0.00, 5.35 1.50, 5.83 5.10, 6.86 15.00, 7.95 29.00
+WAL 3.5 0.0, 5.8 1.0, 6.2 8.0, 6.9 22.0, 7.9 36.0
+Table 9.  WEIGHT CODES FOR TIMES, AMPLITUDES & DURATIONS
+
+P & S time weights.  The weight code is assigned by the analyst and is translated into an applied numerical weight used in the location.  The actual weight used in hypoinverse is this applied weight, multiplied by the distance weight times the residual weight.  The latter two weights start at 1.0 and decrease to 0.0 for very distant and very high residual stations.  The resulting weight is normalized (and can thus exceed 1.0), used in the inversion, and then output as the "weight used".  The "weight used" shows the relative influence of different picks on the solution.
+
+The subjective error is the one the analyst envisions when assigning the weight code.  The formal numerical error is the standard timing error (a constant for all earthquakes) divided by the applied weight.  The formal error only influences the location errors like erh and erz.  The standard timing error is subjectively set and is presently 0.10 sec.  It is used to scale the covariance matrix and is the net result of all unmodeled timing errors such as reading error and the deviation
+of the real earth from the assumed crustal model.
+
+code   applied  subjective  formal
+       weight   error, sec  error sec
+0       1.0       0.02       0.10
+1       0.5       0.10       0.20
+2       0.2       0.20       0.50
+3       0.1       0.30       1.00
+4-9     0.0        -          -
+
+Amplitude and duration magnitude weight codes.  The applied weights are used in the calculation of the weighted median event magnitude.  Each station magnitude is computed individually and then sorted into increasing order.  The weighted median magnitude is the magnitude corresponding to the point in the sorted list which has accumulated
+half of the total weight of all readings.
+
+code   applied
+       weight
+0       1.00
+1       0.75
+2       0.50
+3       0.25
+4-9 0.00
+
+
+
+
+1
+
+

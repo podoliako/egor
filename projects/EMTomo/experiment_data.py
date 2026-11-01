@@ -51,6 +51,68 @@ class TomographyExperiment:
     noise_sigmas: tuple[float, float]  # relative, absolute seconds
 
 
+@dataclass(frozen=True)
+class RealPickExperiment:
+    """Training-only observations: NaN means absent, never a synthetic time.
+
+    There is no velocity truth, event location, or catalog-origin field here.
+    """
+
+    domain_extent_m: tuple[float, float, float]
+    station_ids: tuple[str, ...]
+    event_ids: tuple[str, ...]
+    station_coordinates_m: np.ndarray
+    arrival_times_s: np.ndarray
+
+
+def load_real_pick_experiment(directory) -> RealPickExperiment:
+    """Read a hashed sparse training archive without opening catalog/holdout files."""
+    directory = Path(directory)
+    metadata = json.loads((directory / "metadata.json").read_text())
+    if metadata.get("schema") != "emtomo.real_picks.v1":
+        raise ValueError("Unsupported real-pick schema")
+    if metadata.get("time_reference") != "earliest_training_pick_per_event":
+        raise ValueError("Real observations must use training-only time references")
+    if metadata.get("units") != {"coordinates": "m", "arrival_time": "s"}:
+        raise ValueError("Real observations require SI units")
+    extent = np.asarray(metadata.get("domain_extent_m"), dtype=float)
+    if extent.shape != (3,) or not np.all(np.isfinite(extent) & (extent > 0)):
+        raise ValueError("Invalid real-pick domain extent")
+    minimum = metadata.get("minimum_training_picks")
+    if type(minimum) is not int or minimum < 2:
+        raise ValueError("minimum_training_picks must be an integer >= 2")
+    archive = directory / "arrivals.npz"
+    if metadata.get("arrays_sha256") != _sha256(archive):
+        raise ValueError("Real-pick arrays SHA256 mismatch")
+    with np.load(archive, allow_pickle=False) as data:
+        if set(data.files) != {"event_ids", "station_ids", "station_coordinates_m", "arrival_times_s"}:
+            raise ValueError("Unexpected training archive fields (no catalog or truth allowed)")
+        ids = []
+        for name in ("station_ids", "event_ids"):
+            values = data[name]
+            if (values.ndim != 1 or values.dtype.kind != "U" or not len(values)
+                    or any(not v for v in values) or len(set(values)) != len(values)):
+                raise ValueError(f"Invalid or duplicate {name}")
+            ids.append(tuple(str(v) for v in values))
+        stations, events = ids
+        xyz = np.asarray(data["station_coordinates_m"], dtype=float)
+        times = np.asarray(data["arrival_times_s"], dtype=float)
+    if (xyz.shape != (len(stations), 3) or not np.isfinite(xyz).all()
+            or np.any(xyz < 0) or np.any(xyz > extent)):
+        raise ValueError("Invalid station coordinates or station outside domain")
+    if times.shape != (len(events), len(stations)):
+        raise ValueError("Arrival matrix does not match event/station IDs")
+    observed = np.isfinite(times)
+    if np.isinf(times).any() or np.any(times[observed] < 0):
+        raise ValueError("Observed arrivals must be finite and nonnegative; missing must be NaN")
+    if np.any(observed.sum(axis=1) < minimum):
+        raise ValueError("Event has fewer than minimum_training_picks")
+    if np.any(np.nanmin(times, axis=1) > 1e-8):
+        raise ValueError("Each event needs a zero earliest training arrival")
+    xyz.flags.writeable = times.flags.writeable = False
+    return RealPickExperiment(tuple(extent), stations, events, xyz, times)
+
+
 def _sha256(path):
     digest = hashlib.sha256()
     with path.open("rb") as stream:

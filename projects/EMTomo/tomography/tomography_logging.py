@@ -33,7 +33,11 @@ def _ray_status_rows(log, n_stations=None):
 
 
 def summarize_ray_status(event_logs, n_stations: int) -> Optional[dict]:
-    """Count primary traces only, requiring masks for every positive hypothesis."""
+    """Count observed-station primary traces; missing picks are not ray failures.
+
+    Reached/observed masks and reported failure indices use global station order.
+    Legacy logs without an observation mask are treated as fully observed.
+    """
     summary = {
         "schema_version": 1,
         "expected": 0,
@@ -50,18 +54,25 @@ def summarize_ray_status(event_logs, n_stations: int) -> Optional[dict]:
         indices, rows = _ray_status_rows(log, n_stations)
         if len(indices) != np.count_nonzero(np.asarray(log.weights) > 0):
             return None
+        observed = getattr(log, "observed_mask", None)
+        observed = np.ones(n_stations, dtype=bool) if observed is None else np.asarray(observed, dtype=bool)
+        if observed.shape != (n_stations,):
+            raise ValueError("Observation mask must have one entry per global station")
+        n_observed = int(np.count_nonzero(observed))
         summary["n_events"] += 1
         event_failed = False
         for index, reached in zip(indices, rows):
+            if np.any(reached & ~observed):
+                raise ValueError("Unobserved stations cannot have reached rays")
             count = int(np.count_nonzero(reached))
             summary["n_hypotheses"] += 1
-            summary["expected"] += n_stations
+            summary["expected"] += n_observed
             summary["reached"] += count
             if count >= 2:
                 summary["used"] += count
             else:
                 summary["hypotheses_with_insufficient_stations"] += 1
-            failed = np.flatnonzero(~reached).tolist()
+            failed = np.flatnonzero(observed & ~reached).tolist()
             if failed:
                 event_failed = True
                 summary["failures"].append({
@@ -86,7 +97,7 @@ class TomographyLogger:
             ray_status.json           ← aggregate primary-trace accounting
             event_<j>/
               weights.npz / residuals.npy
-              ray_status.npz          ← reached station masks per active hypothesis
+              ray_status.npz          ← global reached masks; observed_mask for sparse events
               weight_<w>/
                 G_stations_sparse.npz  ← compact fine-grid ray paths
                 ray_count.npy          ← station ray count (coarse grid)
@@ -214,15 +225,22 @@ class TomographyLogger:
         return summary
 
     def save_event_data(self, iteration: int, event_idx: int, log):
-        """Store one event's hypotheses (a ``tomography_events.EventLog``)."""
+        """Store hypotheses with global station axes and sparse observation metadata.
+
+        Sparse events include ``observed_mask`` in weights.npz and ray_status.npz;
+        residuals and G offsets retain global station order for existing readers.
+        """
         event_dir = self.iter_dir(iteration) / f"event_{event_idx}"
         event_dir.mkdir(exist_ok=True)
+        observed = getattr(log, "observed_mask", None)
+        observation_metadata = {} if observed is None else {"observed_mask": np.asarray(observed, dtype=bool)}
         self._save_npz(
             event_dir / "weights.npz",
             weight_shape=np.asarray(log.misfit_shape, dtype=np.int32),
             weight_indices=np.asarray(log.candidate_cells, dtype=np.int32),
             positions=np.asarray(log.positions, dtype=np.float64),
             weight_values=np.asarray(log.weights, dtype=np.float64),
+            **observation_metadata,
         )
         if log.misfit is not None and self.save_misfit:
             self._save_npy(event_dir / "misfit.npy", log.misfit)
@@ -231,6 +249,7 @@ class TomographyLogger:
         if len(indices):
             self._save_npz(
                 event_dir / "ray_status.npz", hypothesis_indices=indices, reached=reached,
+                **observation_metadata,
             )
 
         for w_idx, ray_count in log.ray_count_per_weight.items():

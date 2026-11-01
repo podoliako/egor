@@ -1,0 +1,5 @@
+* Interoperability only; ph2dt graph differs from strict degree-4 graph
+station.dat
+phase.dat
+* MINWGHT MAXDIST MAXSEP MAXNGH MINLNK MINOBS MAXOBS MINSEP
+0 1000 3 4 1 1 60 0

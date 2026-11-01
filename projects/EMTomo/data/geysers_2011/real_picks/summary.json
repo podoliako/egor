@@ -1,0 +1,413 @@
+{
+  "source_experiment_id": "geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001",
+  "source_input_sha256": {
+    "events.csv": "d7f6af385a08edf1b4f622e35c08d6f40bbc06d2d60e3ab9e42a730e3dedd786",
+    "stations.csv": "59895d722cff63e2f087438704631ae6740f2f76dd7065ce64bad8e6b69be4e3"
+  },
+  "requested_events": 3776,
+  "catalog_events_found": 3776,
+  "events_with_P": 3776,
+  "missing_catalog_event_ids": [],
+  "event_ids_without_P": [],
+  "P_picks": 49158,
+  "stations": 31,
+  "P_picks_existing26": 42920,
+  "P_picks_other_stations": 6238,
+  "unique_event_station_pairs": 49158,
+  "pairs_with_multiple_P_picks": 0,
+  "exact_duplicate_records_removed": 0,
+  "weight_codes": {
+    "5": 31816,
+    "7": 17342
+  },
+  "negative_seconds_from_catalog_origin": 2,
+  "catalog_origins_changed": 0,
+  "max_catalog_origin_shift_s": 0.01,
+  "filtering": "Exact existing event IDs; all stations/channels; P records only; no weight/quality rejection.",
+  "station_scope": "All reporting stations in the EGS/BG event phase archive, not limited to our 26.",
+  "timing": "Observed UTC picks; catalog origin is not ground truth. Relative times use earliest downloaded P per event.",
+  "weight_policy": "Preserved raw Hypoinverse weight codes; not interpreted as timing uncertainty.",
+  "requests": [
+    {
+      "file": "raw/2011-04-01.html",
+      "sha256": "b8cb9f30170de1a3ddbf7698a2a473cab5d1e45d1a48b2d51636a25f0d3c1e5f",
+      "bytes": 469260,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/01,00:00:00",
+        "maxtime": "2011/04/02,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 183,
+      "selected_P_records": 2414
+    },
+    {
+      "file": "raw/2011-04-02.html",
+      "sha256": "e8c07dc719bb6be6e58764814bbbfcd85cab1b4030720209ff5ffceac6d2dbf3",
+      "bytes": 508601,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/02,00:00:00",
+        "maxtime": "2011/04/03,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 193,
+      "selected_P_records": 2488
+    },
+    {
+      "file": "raw/2011-04-03.html",
+      "sha256": "22febb175c204372309422e9dcad427ed725e36e71e455b05a37ebc1e208af53",
+      "bytes": 494319,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/03,00:00:00",
+        "maxtime": "2011/04/04,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 193,
+      "selected_P_records": 2542
+    },
+    {
+      "file": "raw/2011-04-04.html",
+      "sha256": "a526d13c5f580849b39556dd103a42cd99ba776e9887d1441c3a869db1ac2684",
+      "bytes": 526518,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/04,00:00:00",
+        "maxtime": "2011/04/05,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 207,
+      "selected_P_records": 2680
+    },
+    {
+      "file": "raw/2011-04-05.html",
+      "sha256": "5de02a328b1b88b05f9a574dde509a37035b03e71cb0f2471914f1494b49ab7c",
+      "bytes": 485482,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/05,00:00:00",
+        "maxtime": "2011/04/06,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 192,
+      "selected_P_records": 2489
+    },
+    {
+      "file": "raw/2011-04-06.html",
+      "sha256": "991adfc0189cda3afe62e4867e7887999e02ff4ad44ade5e8663cfd95f309914",
+      "bytes": 433188,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/06,00:00:00",
+        "maxtime": "2011/04/07,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 166,
+      "selected_P_records": 2200
+    },
+    {
+      "file": "raw/2011-04-07.html",
+      "sha256": "4ce4043ac90da5815870117cad366e7fcbcb30b5f281b879ac93adcc9997248d",
+      "bytes": 371207,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/07,00:00:00",
+        "maxtime": "2011/04/08,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 142,
+      "selected_P_records": 1934
+    },
+    {
+      "file": "raw/2011-04-08.html",
+      "sha256": "dc273d6ca2c8315388ce3693c47e7a54774112200acd551638888f0d809cedb4",
+      "bytes": 492378,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/08,00:00:00",
+        "maxtime": "2011/04/09,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 187,
+      "selected_P_records": 2390
+    },
+    {
+      "file": "raw/2011-04-09.html",
+      "sha256": "3eccf9fd82713ebfe78d5e61c5417e1a59a476c426fabd7637b2b1d14c475a6e",
+      "bytes": 595990,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/09,00:00:00",
+        "maxtime": "2011/04/10,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 216,
+      "selected_P_records": 2981
+    },
+    {
+      "file": "raw/2011-04-10.html",
+      "sha256": "69ffd69db0d43118269832b2b418c2fabbf0cb852242b995928e74b0acc4fe7e",
+      "bytes": 508962,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/10,00:00:00",
+        "maxtime": "2011/04/11,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 186,
+      "selected_P_records": 2461
+    },
+    {
+      "file": "raw/2011-04-11.html",
+      "sha256": "78d1b1ca364197230ec0c0d25bb3bd477a0eabde3acda5138a4096b10473c628",
+      "bytes": 534859,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/11,00:00:00",
+        "maxtime": "2011/04/12,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 203,
+      "selected_P_records": 2774
+    },
+    {
+      "file": "raw/2011-04-12.html",
+      "sha256": "e076706bbab21fb7d8872ea8c1eafcb6f7338e484b1b6ab0a2118d47a2688d35",
+      "bytes": 509077,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/12,00:00:00",
+        "maxtime": "2011/04/13,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 190,
+      "selected_P_records": 2609
+    },
+    {
+      "file": "raw/2011-04-13.html",
+      "sha256": "d903de286c42ea0578209489d4ce508c1e03c4a1e5ae45b6d8e3164646cd8f6b",
+      "bytes": 482334,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/13,00:00:00",
+        "maxtime": "2011/04/14,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 189,
+      "selected_P_records": 2513
+    },
+    {
+      "file": "raw/2011-04-14.html",
+      "sha256": "d1b1b19abbad014686e5a90f2b215178a80825acd83fa869faca4de5812a8a41",
+      "bytes": 533173,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/14,00:00:00",
+        "maxtime": "2011/04/15,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 205,
+      "selected_P_records": 2726
+    },
+    {
+      "file": "raw/2011-04-15.html",
+      "sha256": "37077349f4e99c5b14c999cc73eae812b8901659258a42396fac30cf58a459fa",
+      "bytes": 493105,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/15,00:00:00",
+        "maxtime": "2011/04/16,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 190,
+      "selected_P_records": 2548
+    },
+    {
+      "file": "raw/2011-04-16.html",
+      "sha256": "06118e45733266092ce87e733ea60ee1586d0ee842a5632bf0ea2fad8252a282",
+      "bytes": 498921,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/16,00:00:00",
+        "maxtime": "2011/04/17,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 193,
+      "selected_P_records": 2482
+    },
+    {
+      "file": "raw/2011-04-17.html",
+      "sha256": "c6a6977ab14f025a7fd319214e34443344a1a6551c7eed0fbf657b7fc07c15ed",
+      "bytes": 363964,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/17,00:00:00",
+        "maxtime": "2011/04/18,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 150,
+      "selected_P_records": 1760
+    },
+    {
+      "file": "raw/2011-04-18.html",
+      "sha256": "0bddf558e74a21b0061e6f0942b5457b14b6260f05d1b458c01f87e3aa22a358",
+      "bytes": 461779,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/18,00:00:00",
+        "maxtime": "2011/04/19,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 206,
+      "selected_P_records": 2391
+    },
+    {
+      "file": "raw/2011-04-19.html",
+      "sha256": "5676354e6168d10a163d6601bb127936b7b05131ec5a0095025fce2d163018e2",
+      "bytes": 469765,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/19,00:00:00",
+        "maxtime": "2011/04/20,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 202,
+      "selected_P_records": 2383
+    },
+    {
+      "file": "raw/2011-04-20.html",
+      "sha256": "99d732dca5c8507bdcf011b9d71eb15afd9de164ea785318ba3dbb1b53884100",
+      "bytes": 474103,
+      "endpoint": "https://ncedc.org/cgi-bin/catalog-search2.pl",
+      "method": "POST",
+      "parameters": {
+        "catalog": "BG",
+        "format": "egsphraw",
+        "mintime": "2011/04/20,00:00:00",
+        "maxtime": "2011/04/21,00:00:00",
+        "minmag": "-2",
+        "maxmag": "10",
+        "outputloc": "web",
+        "searchlimit": "100000"
+      },
+      "selected_events": 183,
+      "selected_P_records": 2393
+    }
+  ],
+  "created_utc": "2026-10-28T18:50:25.383Z"
+}

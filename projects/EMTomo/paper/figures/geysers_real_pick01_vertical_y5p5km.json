@@ -1,0 +1,41 @@
+{
+  "section_y_km": 5.5,
+  "extent_km": [
+    23.0,
+    11.0,
+    7.0
+  ],
+  "color_limits_km_s": [
+    2.6,
+    7.6
+  ],
+  "labels": [
+    "Initial 1-D | actual EMTomo 1 km cells",
+    "EMTomo hard | 21 updates, run stopped early",
+    "EMTomo soft | final, 24 updates",
+    "tomoDD | final, 3 velocity updates"
+  ],
+  "hard_status": "failed; last fully completed 21 updates, not final 24",
+  "tomoDD_retained_events": 3467,
+  "native_projection": "geographic lon/lat/sea-level depth interpolated at rotated local XZ coordinates",
+  "em_projection": "nearest 1 km cell model, no smoothing",
+  "initial_policy": "Actual EMTomo cell-centre regional start; tomoDD samples the same profile on its native nodes.",
+  "truth_available": false,
+  "no_solver_calls": true,
+  "source_sha256": {
+    "/mnt/disk01/egor/projects/EMTomo/data/geysers_2011/real_experiment_v1/geometry.json": "2fd23e5d4845a87194fff5291cef0fef3acb890eec2b040331247e68c52a0c99",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_20261031_pick01/inputs/initial_velocity_m_s.npy": "2397e5d9af94a7cb5e5ed41c61101beef91d2ecc5035d046abd5328549ebf2d5",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_20261031_pick01/inputs/regional_model.json": "ff3041ebff999e1f6812cd31c219377ec1b4565ae65f63fb1d8c0111ca72936b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_20261031_pick01/cases/tomodd/result.json": "cdbff16916e18b7fe55885a0791a4e70aff84c6ba295535a78a265546c040275",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_20261031_pick01/cases/tomodd/work/MOD": "70851505e630adb31f3469695b36e53e1f42a72ff9cb6513e9fd5d6133c71613",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_20261031_pick01/cases/tomodd/work/Vp_model.dat": "78007e441ef7b4c61f2769a410711eae916e35c2e1af414541dcbc0b676851ad",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-hard-pick01_v1.5-sparse-real_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261031_205113_e54bf29d173e4b6eb65267c4b23c9cff/meta.json": "d975c2c129950f93d8be877e0dc8e6b34e0307983cc28a05e33b0b1f5079c2b1",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_20261031_pick01/cases/hard/result.json": "e3bfdfd38266e1ffac0682a7b3d98aec27cbe6edf8abe06c22ecba030a6eb88a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-hard-pick01_v1.5-sparse-real_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261031_205113_e54bf29d173e4b6eb65267c4b23c9cff/iter_20/model.npy": "932c30aad6958973e2fe74c383a0a33817ad1643af0335e0e659c590977bf1f8",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-hard-pick01_v1.5-sparse-real_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261031_205113_e54bf29d173e4b6eb65267c4b23c9cff/iter_20/delta_s.npy": "8148e8fe211f41ce4fc784324f48a2bdd2a664987584fed5d022041b909c4067",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-hard-pick01_v1.5-sparse-real_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261031_205113_e54bf29d173e4b6eb65267c4b23c9cff/iter_21/model.npy": "5e48bb6fb976efaa8c831922d88c535106a58fbe0eea53fb6cacb188243dd63a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-soft-pick01_v1.5-sparse-real_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261031_212721_a465dc2b9e7744f0b7a82a48f4a8f923/meta.json": "64046802649c8beb0d56e009b17790f7195039e82e2c89c53a238d43ada4019f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_20261031_pick01/cases/soft/result.json": "b6cf3e0dd27db9747657ebef01c59453dce67438c424b40af2f1d7a0a863c9e6",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-soft-pick01_v1.5-sparse-real_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261031_212721_a465dc2b9e7744f0b7a82a48f4a8f923/final_model.npy": "f8723086f49929f61b94ee8cdc90d208c7bf5af1efa72833611e08e32adcbd6d"
+  }
+}

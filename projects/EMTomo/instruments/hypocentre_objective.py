@@ -4,7 +4,7 @@ from __future__ import annotations
 import numpy as np
 from numba import njit
 
-from instruments.likelihood import PickNoise
+from instruments.likelihood import PickNoise, validate_station_indices
 
 
 @njit(cache=True, inline="always")
@@ -20,7 +20,7 @@ def _lerp(a, b, weight, float32_intermediates):
 
 @njit(cache=True)
 def _refinement_objective_kernel(
-    fields, observed, coord, relative_sigma, constant_variance, float32_intermediates,
+    fields, observed, coord, relative_sigma, constant_variance, float32_intermediates, stations=None,
 ):
     for axis in range(3):
         if not np.isfinite(coord[axis]):
@@ -37,7 +37,8 @@ def _refinement_objective_kernel(
     sum_pr = 0.0
     sum_pr2 = 0.0
     sum_log_variance = 0.0
-    for station in range(fields.shape[0]):
+    for local in range(observed.size):
+        station = local if stations is None else stations[local]
         c00 = _lerp(fields[station, i0, j0, k0], fields[station, i1, j0, k0], di, float32_intermediates)
         c10 = _lerp(fields[station, i0, j1, k0], fields[station, i1, j1, k0], di, float32_intermediates)
         c01 = _lerp(fields[station, i0, j0, k1], fields[station, i1, j0, k1], di, float32_intermediates)
@@ -47,7 +48,7 @@ def _refinement_objective_kernel(
         time = _lerp(c0, c1, dk, float32_intermediates)
         variance = (relative_sigma * time) ** 2 + constant_variance
         precision = 1.0 / variance
-        residual = observed[station] - time
+        residual = observed[local] - time
         sum_p += precision
         sum_pr += precision * residual
         sum_pr2 += precision * residual * residual
@@ -59,14 +60,15 @@ def _refinement_objective_kernel(
     return value
 
 
-def make_refinement_objective(station_fields, observed, noise: PickNoise):
+def make_refinement_objective(station_fields, observed, noise: PickNoise, *, station_indices=None):
     """Return ``objective(cell_coord)`` for the existing bounded Powell search.
 
     Static inputs are validated once. Fields must be float32/64 ``(S, nx, ny,
     nz)``, with S >= 2 and nonempty spatial axes; strided arrays are supported
     without copying the field volume. Like the existing likelihood, field values
     are not scanned for finiteness. Observations must be a finite vector of S
-    picks. The callback retains its input arrays; do not mutate them during use.
+    picks (or one per ``station_indices`` entry when selecting a subset without
+    copying fields). The callback retains its inputs; do not mutate them during use.
 
     The compiled path preserves coordinate clipping, staged x/y/z interpolation,
     NumPy's intermediate dtype promotion, station summation order, and the
@@ -80,8 +82,14 @@ def make_refinement_objective(station_fields, observed, noise: PickNoise):
     if fields.dtype not in (np.float32, np.float64):
         raise ValueError("station_fields must have float32 or float64 dtype")
     observed = np.asarray(observed, dtype=np.float64)
-    if observed.ndim != 1 or observed.size != fields.shape[0] or not np.all(np.isfinite(observed)):
+    if observed.ndim != 1 or not np.all(np.isfinite(observed)):
         raise ValueError("Expected one finite observation per station")
+    if station_indices is None:
+        if observed.size != fields.shape[0]:
+            raise ValueError("Expected one finite observation per station")
+        stations = None
+    else:
+        stations = validate_station_indices(station_indices, fields.shape[0], observed.size)
     relative_sigma = float(noise.relative_sigma)
     constant_variance = float(noise.constant_variance)
     # Probe the actual array/scalar promotion rule, rather than assuming a NumPy
@@ -96,7 +104,7 @@ def make_refinement_objective(station_fields, observed, noise: PickNoise):
         if coord.shape != (3,):
             raise ValueError("cell_coord must contain three finite coordinates")
         return _refinement_objective_kernel(
-            fields, observed, coord, relative_sigma, constant_variance, float32_intermediates,
+            fields, observed, coord, relative_sigma, constant_variance, float32_intermediates, stations,
         )
 
     return objective

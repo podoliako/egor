@@ -1,0 +1,52 @@
+{
+  "schema": "geysers.real_methods.v1",
+  "preparation_complete": true,
+  "inversions_launched": false,
+  "split_manifest_sha256": "8be5c92ff7932495efcf898141200004fd6f530368c37e4e10f9ddb7e8a39a43",
+  "regional_source_sha256": "b292262941f880fa8f5bc81114c4bc4a080a89b843b068f22b8e53ec53abaa23",
+  "config_sources_sha256": {
+    "runs/geysers_faulted_layers/soft_screen_20261028/cases/s16/result.json": "fea1f84a23e2bb376d4e801a8c538b1aee63dbaa6a03c2a203f456db0cb50973",
+    "runs/geysers_faulted_layers/soft_screen_20261028/cases/h07/result.json": "0595af9539e6bf1e3aa5eca3f130b161b6da7d3979367b873a278f006e274489"
+  },
+  "source_code_sha256": {
+    "studies/geysers_real_picks/finalize.py": "d6d3abadcde9581f906d6fa264a8fd51aa227572162f3ba0d07852b5b2436692",
+    "studies/geysers_real_picks/tomodd_inputs.py": "421651b2cb7a74e64eb54167cf9efb3ca186bbb076d9a814c2927889f567376f"
+  },
+  "config_changes": "Regional explicit start, sparse real observations, unknown pick sigma (not synthetic zero); other numerical settings retained",
+  "noise_policy": "No noise added to measurements or tomoDD catalog; EMTomo likelihood sigmas must be explicitly chosen using train only before inversion",
+  "catalog_policy": "tomoDD catalog starts, sigma=0; EMTomo has no catalog-location/origin input or prior",
+  "cv_policy": "Future scoring must use final model and training-only location/origin estimate; never refit origin on holdout",
+  "native_validation": "Python format/geometry/pair audit only; native solver has not been executed",
+  "native_solver": {
+    "path": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/tomoDD-SE",
+    "sha256": "0c686a17b8f519adaa52281d6950cb45782e5fd5996a334ae65d986e272fa7a4",
+    "horizontal_guard_fixed": true
+  },
+  "counts": {
+    "events": 3471,
+    "stations": 31,
+    "train": 42973,
+    "holdout": 4775,
+    "differential_observations": 54317,
+    "event_pairs": 6925,
+    "isolated_events": 2
+  },
+  "output_sha256": {
+    "emtomo_configs.json": "2ad2bff4fae1271b4b4c6078aa367a646163aa8c6b970b525bf78063bafbf5a0",
+    "initial_velocity_m_s.npy": "2397e5d9af94a7cb5e5ed41c61101beef91d2ecc5035d046abd5328549ebf2d5",
+    "regional_model.json": "ff3041ebff999e1f6812cd31c219377ec1b4565ae65f63fb1d8c0111ca72936b",
+    "tomodd/MOD": "70851505e630adb31f3469695b36e53e1f42a72ff9cb6513e9fd5d6133c71613",
+    "tomodd/absolute.dat": "6a3d26301749a6b215cbc92aee5e23cc553e002a1f7848441f3b549f9f19f8b5",
+    "tomodd/ak135.15.SKS": "7744c108e13cb385762da76ded76c9444924dd48ceeab4ba719d3050fd3559fd",
+    "tomodd/dt.cc": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tomodd/dt.ct": "24cdfda0c61b897a10c8fab6fcb71f800317e4a86d136d2a48743c5bc8e7d601",
+    "tomodd/event.dat": "e720796835c2916c42ed63c4477504f7b9f563e79f023e632547fd9d2622c643",
+    "tomodd/grid.dat": "533ccb96d374c9d06f5a7f820fbf27de09d91a522db1da59372fb59e5f1b73aa",
+    "tomodd/layer-16.dat": "8921e57b6caea421d0ca3d45dce8f015688f489d2370deda38b286523a92abf4",
+    "tomodd/manifest.json": "3ca74a2095545d7769cd274f1e92fae24fe7a17a5f1be8082b714b8e0978f77b",
+    "tomodd/ph2dt.inp": "ef461cb94ff86c53d3fced2adf78446a81072b70031879503fa4763dd2155fb7",
+    "tomodd/phase.dat": "333093bf86a8ce0f9f65ee09e49f91cb8b6abb2335331a8558be3ef210ea7d96",
+    "tomodd/station.dat": "c0f5561f1aabcdee1af8e1aa1dc99ef294a0bec5331dc350d4288e2e432c3c11",
+    "tomodd/tomoDD-SE.inp": "2f52372334c0ae0b48e9e08d14a76cdb689083d596b13d6d2d5b7cded16e9cae"
+  }
+}

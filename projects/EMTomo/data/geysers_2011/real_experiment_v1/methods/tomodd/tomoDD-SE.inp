@@ -1,0 +1,44 @@
+* tomoDD-SE real training picks; corrected dd1-d40-s5 build required
+* cross correlation differential times:
+dt.cc
+* catalog differential times:
+dt.ct
+* event file:
+event.dat
+* station file:
+station.dat
+* original locations:
+tomoDD.loc
+* relocations:
+tomoDD.reloc
+* station information:
+tomoDD.sta
+* residual information:
+tomoDD.res
+* source parameter information:
+
+* Velocity file
+tomoDD.vel
+* Vp Model
+Vp_model.dat
+* Vs Model
+Vs_model.dat
+* Absolute file
+absolute.dat
+* IDAT IPHA DIST
+2 1 1000
+* OBSCC OBSCT Air_dep
+0 0 -4.0
+* ISTART ISOLV NSET
+2 2 1
+* iuses iuseq invdel stepl
+1 0 0 0.05
+* wlat wlon rota
+38.80275000 -122.77070000 0
+* weight1 weight2 weight3 CC_format
+5 5 5 1
+* NITER WTCCP WTCCS WRCC WDCC WTCTP WTCTS WRCT WDCT WTDD DAMP JOINT THRE
+3 -9 -9 -9 -9 1 0.08 -9 -9 1 40 1 0
+* CID
+0
+* ID

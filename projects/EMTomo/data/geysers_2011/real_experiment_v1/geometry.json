@@ -1,0 +1,51 @@
+{
+  "catalog_z_formula_for_tomoDD_only": "1166 + 1000*depth_km",
+  "datum_caveat": "Station elevations and catalog depths are assumed to share a sea-level vertical datum; compatibility has not been independently established.",
+  "domain_bounds_in_old_coordinates_m": [
+    [
+      -3000,
+      20000
+    ],
+    [
+      0,
+      11000
+    ],
+    [
+      0,
+      7000
+    ]
+  ],
+  "domain_extent_m": [
+    23000,
+    11000,
+    7000
+  ],
+  "domain_origin_m": [
+    0,
+    0,
+    0
+  ],
+  "east_km_per_longitude_degree": "111.320*cos(radians(38.80275))",
+  "geographic_reference_in_new_xy_m": [
+    13000,
+    3500
+  ],
+  "local_xy_to_old_xy_offset_m": [
+    10000,
+    3500
+  ],
+  "north_km_per_latitude_degree": 110.574,
+  "old_to_new_translation_m": [
+    3000,
+    0,
+    0
+  ],
+  "projection": "prepare_geysers_geometry.local_xy_km",
+  "reference_latitude": 38.80275,
+  "reference_longitude": -122.7707,
+  "station_z_formula": "1166 - elevation_m",
+  "top_elevation_m": 1166,
+  "x_azimuth_degrees": 135.0,
+  "y_azimuth_degrees": 225.0,
+  "z_direction": "positive_down"
+}

@@ -98,6 +98,7 @@ class EventLog:
     G_per_weight: Optional[dict]
     ray_count_per_weight: dict
     ray_reached_per_weight: dict = field(default_factory=dict)
+    observed_mask: Optional[np.ndarray] = None  # global station order; None means all observed
 
 
 def _sparsify_G_stations(G_fine, fine_shape=None) -> dict[str, np.ndarray]:
@@ -126,6 +127,38 @@ def _sparsify_G_stations(G_fine, fine_shape=None) -> dict[str, np.ndarray]:
     }
 
 
+def validate_arrivals(arrivals, n_stations):
+    """Dense event/global-station table; NaN alone denotes an unobserved pick."""
+    arrivals = np.asarray(arrivals, dtype=np.float64)
+    if arrivals.ndim != 2 or arrivals.shape[1] != n_stations:
+        raise ValueError("Arrivals must have shape (events, global stations)")
+    if np.any(np.isinf(arrivals)):
+        raise ValueError("Arrivals must not contain inf; use NaN for unobserved picks")
+    insufficient = np.flatnonzero(np.count_nonzero(~np.isnan(arrivals), axis=1) < 2)
+    if insufficient.size:
+        raise ValueError(f"Each event requires at least two observed picks; insufficient events: {insufficient.tolist()}")
+    return arrivals
+
+
+def _trace_observed(compute_G, trace, restriction, shape, station_indices):
+    """Trace contiguous observed runs using views of the shared gradient volumes."""
+    if station_indices is None:
+        return compute_G(*trace, *restriction, shape)
+    gx, gy, gz, stations, *parameters = trace
+    rows, masks = [], []
+    for run in np.split(station_indices, np.flatnonzero(np.diff(station_indices) != 1) + 1):
+        selected = slice(int(run[0]), int(run[-1]) + 1)
+        rays, reached = compute_G(gx[selected], gy[selected], gz[selected], stations[selected],
+                                  *parameters, *restriction, shape)
+        reached = np.asarray(reached, dtype=bool)
+        if reached.shape != (len(run),):
+            raise ValueError("Ray reached mask must have one entry per observed station")
+        rows.append(rays)
+        masks.append(reached.copy())
+    rays = sparse.vstack(rows, format="csr") if sparse.issparse(rows[0]) else np.concatenate(rows)
+    return rays, np.concatenate(masks)
+
+
 def process_event(
     observed: np.ndarray,
     fields: IterationFields,
@@ -137,33 +170,53 @@ def process_event(
     cost: Optional[np.ndarray] = None,
     timings: Optional[dict] = None,
 ) -> EventLog:
-    """Select and weight hypocentre hypotheses, then add their rays to ``hessian`` and ``rhs``."""
+    """Add one event's normal equations using only its finite picks.
+
+    ``observed`` is in global station order, with NaN for missing picks. Logs keep
+    that order: unobserved residual rows/columns are NaN, reached masks are false,
+    and G rows are empty. ``observed_mask`` distinguishes missing from failed rays.
+    A supplied ``cost`` must already use this event's observed station subset.
+    """
     if settings.candidate_mode not in ("soft", "hard"):
         raise ValueError("candidate_mode must be 'soft' or 'hard'")
     observed = np.asarray(observed, dtype=np.float64)
+    if observed.ndim != 1:
+        raise ValueError("Observed times must be a vector in global station order")
+    validate_arrivals(observed[None, :], len(fields.stations))
+    observed_mask = ~np.isnan(observed)
+    station_indices = None if observed_mask.all() else np.flatnonzero(observed_mask)
+    subset_kwargs = {} if station_indices is None else {"station_indices": station_indices}
+    if station_indices is not None:
+        observed = observed[station_indices]
     noise = settings.noise
 
     if compute_G is None:
         compute_G = compute_G_all_stations_compact if settings.compact_rays else compute_G_all_stations_serial
     if cost is None:
         started = perf_counter()
-        cost = negative_log_likelihood(fields.times, observed, noise, fields.normalization)
+        cost = negative_log_likelihood(
+            fields.times, observed, noise,
+            fields.normalization if station_indices is None else None, **subset_kwargs,
+        )
         _record_time(timings, "likelihood_s", started)
     started = perf_counter()
     if settings.weights_top_n > settings.n_candidates:
         raise ValueError("weights_top_n must not exceed n_candidates")
     cells = select_candidate_cells(cost, settings.n_candidates, settings.weights_min_distance)
     if settings.fast_refinement:
-        refined = [refine_hypocentre_in_cell(fields.times, observed, cell, noise) for cell in cells]
+        refined = [refine_hypocentre_in_cell(fields.times, observed, cell, noise, **subset_kwargs)
+                   for cell in cells]
     else:
-        refined = [refine_hypocentre_in_cell(fields.times, observed, cell, noise, accelerated=False)
+        refined = [refine_hypocentre_in_cell(fields.times, observed, cell, noise,
+                                             accelerated=False, **subset_kwargs)
                    for cell in cells]
     # Rank by the refined likelihood: the best grid cell need not hold the best position.
     best = np.argsort([value for _, value in refined], kind="stable")[:settings.weights_top_n]
     cells = cells[best]
     positions = np.asarray([refined[i][0] for i in best], dtype=np.float64)
     costs = np.asarray([refined[i][1] for i in best], dtype=np.float64)
-    predicted = np.stack([sample_cell_centered_trilinear_batch(fields.times, p) for p in positions])
+    predicted = np.stack([sample_cell_centered_trilinear_batch(fields.times, p, **subset_kwargs)
+                          for p in positions])
 
     weights = candidate_weights(costs, settings.temperature)
     if settings.candidate_mode == "hard":
@@ -179,14 +232,16 @@ def process_event(
     G_per_weight = {} if settings.log_g_per_weight else None
     ray_count_per_weight = {}
     ray_reached_per_weight = {}
-    n_stations = len(fields.stations)
+    n_stations = observed.size
     for index, (position, weight) in enumerate(zip(positions, weights)):
         if not weight > 0.0:
             continue
         trace = (fields.gx, fields.gy, fields.gz, fields.stations, position,
                  h, RAY_STEP_CELLS, RAY_STEP_CELLS, RAY_MAX_STEPS, x_lo, x_hi, SOURCE_RADIUS_CELLS)
         started = perf_counter()
-        G_stations, reached = compute_G(*trace, *fields.restriction, fields.coarse_shape)
+        G_stations, reached = _trace_observed(
+            compute_G, trace, fields.restriction, fields.coarse_shape, station_indices,
+        )
         _record_time(timings, "rays_s", started)
         started = perf_counter()
         reached = np.array(reached, dtype=bool, copy=True)
@@ -196,7 +251,9 @@ def process_event(
                 f"({n_stations},), got {reached.shape}"
             )
         # Keep the normal-equation trace, not the optional fine-grid re-trace.
-        ray_reached_per_weight[index] = reached
+        global_reached = np.zeros(len(fields.stations), dtype=bool)
+        global_reached[observed_mask] = reached
+        ray_reached_per_weight[index] = global_reached
         residuals = observed - predicted[index]
         accumulate_normal_equations(
             hessian, rhs, G_stations, residuals, reached,
@@ -205,11 +262,21 @@ def process_event(
         _record_time(timings, "assembly_s", started)
         started = perf_counter()
         if settings.log_diagnostics and first_residuals is None:
-            first_residuals = residuals[:, None] - residuals[None, :]
+            global_residuals = np.full(len(fields.stations), np.nan)
+            global_residuals[observed_mask] = residuals
+            first_residuals = global_residuals[:, None] - global_residuals[None, :]
         if G_per_weight is not None:
             fine_shape = fields.times.shape[1:]
-            G_fine, _ = compute_G(*trace, *restriction_tables(fine_shape, 1, "identity"), fine_shape)
-            G_per_weight[index] = _sparsify_G_stations(G_fine, fine_shape)
+            G_fine, _ = _trace_observed(
+                compute_G, trace, restriction_tables(fine_shape, 1, "identity"), fine_shape, station_indices,
+            )
+            packed = _sparsify_G_stations(G_fine, fine_shape)
+            if station_indices is not None:
+                # Empty global rows keep existing artifact readers' station IDs valid.
+                counts = np.zeros(len(fields.stations), dtype=np.int64)
+                counts[station_indices] = np.diff(packed["offsets"])
+                packed["offsets"] = np.concatenate(([0], np.cumsum(counts)))
+            G_per_weight[index] = packed
         if settings.log_diagnostics:
             counts = np.asarray((G_stations > 0).sum(axis=0)).reshape(fields.coarse_shape)
             ray_count_per_weight[index] = counts.astype(np.int16)
@@ -230,6 +297,7 @@ def process_event(
         G_per_weight=G_per_weight,
         ray_count_per_weight=ray_count_per_weight,
         ray_reached_per_weight=ray_reached_per_weight,
+        observed_mask=observed_mask if station_indices is not None else None,
     )
 
 
@@ -273,22 +341,28 @@ def _process_events(event_indices, arrivals, fields, settings, compute_G=None,
     for start in range(0, len(event_indices), batch_size):
         batch = event_indices[start:start + batch_size]
         costs = None
+        full_offsets = []
         if batch_size > 1:
-            started = perf_counter()
-            costs = negative_log_likelihood_batch(
-                fields.times, arrivals[list(batch)], settings.noise, fields.normalization,
-            )
-            _record_time(timings, "likelihood_s", started)
+            batch_arrivals = arrivals[list(batch)]
+            full_offsets = np.flatnonzero(np.all(np.isfinite(batch_arrivals), axis=1))
+            if len(full_offsets):
+                started = perf_counter()
+                costs = negative_log_likelihood_batch(
+                    fields.times, batch_arrivals[full_offsets], settings.noise, fields.normalization,
+                )
+                _record_time(timings, "likelihood_s", started)
+        # Sparse rows compute their own scores and subset normalization in process_event.
+        cost_rows = {} if costs is None else dict(zip(full_offsets, costs))
         for offset, event in enumerate(batch):
             try:
                 log = process_event(
                     arrivals[event], fields, settings, hessian, rhs, compute_G,
-                    cost=None if costs is None else costs[offset], timings=timings,
+                    cost=cost_rows.get(offset), timings=timings,
                 )
             except Exception as error:
                 raise RuntimeError(f"Failed to process event {event}") from error
             logs.append((event, log))
-        del costs
+        del costs, cost_rows
     return hessian, rhs, logs
 
 
@@ -338,10 +412,12 @@ def _process_chunk(task):
 
 def run_events(arrivals, fields: IterationFields, settings: EventSettings, n_workers: int = 1,
                *, diagnostics: Optional[dict] = None):
-    """Return ordered normal equations/logs; diagnostics sum worker times, not wall time."""
-    arrivals = np.asarray(arrivals, dtype=np.float64)
-    if arrivals.ndim != 2 or arrivals.shape[1] != len(fields.stations) or not np.all(np.isfinite(arrivals)):
-        raise ValueError("Arrivals must be a finite (events, stations) array")
+    """Return ordered normal equations/logs for an event/global-station arrival table.
+
+    NaN denotes missing picks; each event needs at least two finite observations.
+    Diagnostics sum worker times, not wall time.
+    """
+    arrivals = validate_arrivals(arrivals, len(fields.stations))
     if settings.normal_solver not in ("dense", "matrix_free"):
         raise ValueError("normal_solver must be dense or matrix_free")
     if settings.likelihood_batch_size < 1 or settings.likelihood_batch_memory_mb < 1:

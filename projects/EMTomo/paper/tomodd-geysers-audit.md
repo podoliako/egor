@@ -2,6 +2,8 @@
 
 Date: 2026-10-21. No inversions, forward solves, or builds were run. No original run artifacts or paper claims were changed. Inputs, saved solver sources, logs, hashes, observation rows, pair graphs, and selected iteration-3 fields were inspected. New slice scores were recomputed from saved fields using the native interpolation/history helpers exposed by `paper/evaluate_metrics.py`.
 
+> **2026-10-26 follow-up:** the later fixed-source forward test found unintended AK135 support influence from the ray routine's 0.1-degree regional exclusion. A private guard-only control removes the observed homogeneous-test failures. This older read-only audit did not exercise that path and is not a clean forward-validation certificate. See `tomodd-homogeneous-diagnostic.md`. The subsequent 2026-10-27 matched `dd1-d40-s5` inversion check is documented in `tomodd-guard-fix-comparison.md`: velocity RMSE did not improve with the guard correction on either geometry.
+
 ## Main finding
 
 No Geysers-specific input-coordinate, elevation-sign, observation-assembly, model-initialization, capacity, or solver-termination failure was found. This does **not** demonstrate that the shared tomoDD settings are appropriate for both geometries.

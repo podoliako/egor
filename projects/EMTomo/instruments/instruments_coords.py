@@ -18,7 +18,7 @@ def cell_coord_bounds(cell_index, shape):
     return tuple(bounds)
 
 
-def sample_cell_centered_trilinear_batch(fields: np.ndarray, cell_coord) -> np.ndarray:
+def sample_cell_centered_trilinear_batch(fields: np.ndarray, cell_coord, *, station_indices=None) -> np.ndarray:
     """Trilinear sampling of cell-centred fields shaped ``(..., nx, ny, nz)``."""
     if not isinstance(fields, np.ndarray) or fields.ndim < 3:
         raise ValueError("fields must have at least three dimensions")
@@ -35,10 +35,12 @@ def sample_cell_centered_trilinear_batch(fields: np.ndarray, cell_coord) -> np.n
     k1 = min(k0 + 1, spatial_shape[2] - 1)
     di, dj, dk = coord - np.array((i0, j0, k0), dtype=np.float64)
 
-    c00 = fields[..., i0, j0, k0] * (1.0 - di) + fields[..., i1, j0, k0] * di
-    c10 = fields[..., i0, j1, k0] * (1.0 - di) + fields[..., i1, j1, k0] * di
-    c01 = fields[..., i0, j0, k1] * (1.0 - di) + fields[..., i1, j0, k1] * di
-    c11 = fields[..., i0, j1, k1] * (1.0 - di) + fields[..., i1, j1, k1] * di
+    # Index corners, not whole station volumes, for partially observed events.
+    selected = Ellipsis if station_indices is None else station_indices
+    c00 = fields[selected, i0, j0, k0] * (1.0 - di) + fields[selected, i1, j0, k0] * di
+    c10 = fields[selected, i0, j1, k0] * (1.0 - di) + fields[selected, i1, j1, k0] * di
+    c01 = fields[selected, i0, j0, k1] * (1.0 - di) + fields[selected, i1, j0, k1] * di
+    c11 = fields[selected, i0, j1, k1] * (1.0 - di) + fields[selected, i1, j1, k1] * di
     c0 = c00 * (1.0 - dj) + c10 * dj
     c1 = c01 * (1.0 - dj) + c11 * dj
     return np.asarray(c0 * (1.0 - dk) + c1 * dk, dtype=np.float64)

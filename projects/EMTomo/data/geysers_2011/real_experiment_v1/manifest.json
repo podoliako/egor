@@ -1,0 +1,71 @@
+{
+  "catalog_policy": "tomoDD ONLY; all original source event IDs including exclusions; pick origins authoritative",
+  "counts": {
+    "events_without_holdout": 285,
+    "excluded_events": 305,
+    "excluded_picks": 1410,
+    "holdout_picks": 4775,
+    "retained_events": 3471,
+    "retained_picks": 47748,
+    "six_pick_events_without_holdout": 285,
+    "source_events": 3776,
+    "source_picks": 49158,
+    "stations": 31,
+    "training_picks": 42973
+  },
+  "datum_caveat": "Station elevations and catalog depths are assumed to share a sea-level vertical datum; compatibility has not been independently established.",
+  "emtomo_input": "emtomo/ ONLY; no catalog, UTC timestamps, event coordinates, truth, or holdout",
+  "exclusions": {
+    "fewer_than_6_available_P_picks": 305
+  },
+  "execution": {
+    "forward_modeling": false,
+    "inversion": false
+  },
+  "geometry_policy": "Fixed reference/rotation; x_new=x_old+3000; y unchanged; H=1166; never recentered",
+  "hypocenter_truth": {
+    "available": false
+  },
+  "noise": {
+    "sigma_s": null,
+    "status": "unknown"
+  },
+  "output_sha256": {
+    "catalog.csv": "90b2ead26ddc599accd611e5c9db269c92e327e31795a8fa101694b35f5bcdf4",
+    "emtomo/arrivals.npz": "41293e1624554fcdaab7513f8f2b83ac092048e8a1147fe8c24fae79e544b154",
+    "emtomo/metadata.json": "45a91ee13743f9ae2fb95a8110c8c31f551239b62d5b67c3a1bf782b4c4fa394",
+    "event_time_references.csv": "b48519058b4111583e8be3d1c18d075ada11efb7411a695917465b55e1b0caaf",
+    "excluded_events.csv": "1beaab55189418b984e09203f96de7a681d76c937705cf8ecf9a9b28504a9292",
+    "excluded_picks.csv": "abb15f7e0ae448c3a8b426dc1df2e927ebdda54aeb9586344877e7499de15f62",
+    "geometry.json": "2fd23e5d4845a87194fff5291cef0fef3acb890eec2b040331247e68c52a0c99",
+    "holdout.csv": "f608fff3f3f35d8651f0a5e86096fe82e49aa3149743888f21e8a0d978c315fd",
+    "split_counts.csv": "bc2c09e180599cc50f9ff2148a0730522f782215c7de377f4112126bbff21dd6",
+    "stations.csv": "c5f92142357eb0407b7ef34a62c016c8fe2b37e2cdfaddb59cd5fb553bfb1748",
+    "train.csv": "2b7b3a6cd4bbde10f9792d06638c51f348316152665d491b3500f5c5be1b35d8"
+  },
+  "quality_policy": "No additional QC or weight-code mapping; negative origin-relative times retained",
+  "schema": "geysers.real_experiment.v1",
+  "source_sha256": {
+    "data/geysers_2011/bg_stations_2011.txt": "ffc4f76ebf63955d38877f0cee912c49721c0cfdcb7d8160dadf42fd39630666",
+    "data/geysers_2011/events_metric_all.csv": "5ce25ea9be583ab87c70ad5ba45abcbf6f94c95a7bf7e01326fc163ca8a8e991",
+    "data/geysers_2011/real_picks/P_picks.csv": "5e608234a98e368ca5877316932aa3c1f4e2e29796b873f2aa50fc477384e93e",
+    "prepare_geysers_geometry.py": "f0211db0e9c7784febc502c9646316a2d91d3803a48d428e2788c219e44b8054",
+    "studies/geysers_real_picks/prepare.py": "3167f91673f65232a3aa7c350142e7b6ac8cd4144c7f732d271ea426abb84d27"
+  },
+  "split_policy": {
+    "fraction": 0.1,
+    "input_order_independent": true,
+    "minimum_training_picks": 6,
+    "quotas": "floor(n/10), then largest n-10*q deficit; cap n-6; seeded SHA256 ties",
+    "seed": 42,
+    "selection": "smallest SHA256(seed, pick, event_id, network, station)",
+    "six_pick_events": "all train; no holdout or per-event CV",
+    "target": "round_half_up(0.10 * picks_after_n_lt_6_exclusion)",
+    "unit": "individual_event_station_P_pick"
+  },
+  "time_policy": "UTC differences from earliest TRAIN pick; held-out relative times may be negative",
+  "velocity_model": {
+    "chosen": null,
+    "status": "pending_user_clarification"
+  }
+}

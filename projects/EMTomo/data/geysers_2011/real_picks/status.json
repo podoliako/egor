@@ -1,0 +1,12 @@
+{
+  "status": "completed",
+  "requested_events": 3776,
+  "completed_days": 20,
+  "total_days": 20,
+  "updated_utc": "2026-10-28T18:50:25.384Z",
+  "downloaded_P_records": 49158,
+  "matched_events": 3776,
+  "P_picks": 49158,
+  "stations": 31,
+  "events_with_P": 3776
+}

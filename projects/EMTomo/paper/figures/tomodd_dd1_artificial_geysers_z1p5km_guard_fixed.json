@@ -1,0 +1,79 @@
+{
+  "depth_km": 1.5,
+  "parameter_set": "dd1-d40-s5",
+  "iteration": 3,
+  "absolute_dd_weight": [
+    1.0,
+    1.0
+  ],
+  "damping": 40,
+  "smoothing": [
+    5,
+    5,
+    5
+  ],
+  "initial_sigma_km_per_coordinate": 1,
+  "seed": 42,
+  "hypocentres_fixed": false,
+  "guard_fixed_comparison": true,
+  "includes_before": false,
+  "color_limits_km_s": [
+    3.4,
+    5.8
+  ],
+  "panels": [
+    {
+      "label": "3D L2 oracle",
+      "slice_rmse_m_s": 183.99345263414904,
+      "volume_rmse_m_s": 142.85930378323886
+    },
+    {
+      "label": "Artificial geometry \u00b7 corrected guard",
+      "run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5",
+      "events": 1920,
+      "horizontal_guard_corrected": true,
+      "solver_sha256": "0c686a17b8f519adaa52281d6950cb45782e5fd5996a334ae65d986e272fa7a4",
+      "slice_rmse_m_s": 360.6993238072893,
+      "volume_rmse_m_s": 506.35421052149434,
+      "location_rms_m": 349.5761024193798
+    },
+    {
+      "label": "Geysers geometry \u00b7 corrected guard",
+      "run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5",
+      "events": 3776,
+      "horizontal_guard_corrected": true,
+      "solver_sha256": "0c686a17b8f519adaa52281d6950cb45782e5fd5996a334ae65d986e272fa7a4",
+      "slice_rmse_m_s": 489.5492610803216,
+      "volume_rmse_m_s": 500.9807168194559,
+      "location_rms_m": 568.6369193013668
+    }
+  ],
+  "sampling": "Native trilinear Vp at exact depth, 125-m XY centres, deeper truth cell at boundary",
+  "oracle_note": "Full-volume velocity L2 fit, not a slice-specific optimum",
+  "source_sha256": {
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/benchmark/tomodd_benchmark/compare_emtomo_flat4.py": "69070bb9f82d0052a422d1faa0e8e0a703e4839167100c5c60278ed4183298c5",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/manifest.json": "ab118e22d4da095ccc96709f13d72cece388861594c9ae84cc37940ea5b6cc15",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/status.json": "bc5430cd2a92efa30bda1a1e50558970bd88514d637ad95416e2e4533fc2177d",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/manifest.json": "91acdc3c648099be7d6d77fd79d75ecf700116f01293737f82ee2f921aad9f8f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/RaySPDR2.f": "d2c58ee1e24883890f821e0d66fdb2690a43cabc69c263bc6d7cedf6979b2ee4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/horizontal_guard.patch": "943d10d6083c71b35a1d579b0a755d8bb9a57f9c217fdf95fe84bf00e783d171",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/RaySPDR2.o": "c69e4a06188f81014c4e3a0dcb92c72612871cc47553c78c74a20bb2a85a1f37",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/tomoDD-SE": "0c686a17b8f519adaa52281d6950cb45782e5fd5996a334ae65d986e272fa7a4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/original-tomoDD-SE": "33f41e0eddb2d6f82b860331f2f1803cb4b240f4671826610ceb948fef58c3f4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/commands.json": "037fe74e317d63e65fdcfc579ac73cbdf3c3978a22c2aa9486ce8280ed104b10",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/make_dry_run.log": "50227b9608248bd3bc9340513d4cb53ead30d208a45bab8cc7d664912f9c60fc",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/config.json": "046aeff53e96beaeb0d8932164290f0f6709a8b22937fc8b0c6d1831c8845a1f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/state.npz": "b7b7754f4ac474b6f0930a6bd50868c2b596212dcdc85fcaa980e356b87d6965",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/results.json": "cf1b7c26ca5577899aa78c08f754de197e36fd69835253f73e6d6b6b97c8ce74",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/worker_info.json": "a886d4d922929376ec91a29402971f5eb88070ed85385daab138d0b1ce518338",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/tomoDD.vel": "b32c09d40f0a8acc6b4f9b6ee7a624d61c9d67c9773b72974db4a4fb3f89182a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/tomoDD-SE.inp": "0ae8f5b024c56c065f98e977b688dd3d5ade3fc5da3475a280530107202af7a6",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/config.json": "7e037a20f9e87a1fe97a527d67a031fbf59fb65a26bba3e635407b2fe5e4eb33",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/state.npz": "232bcb7ab81065cc3a841e014a27cb4505d78d6c297bfc9d49d3833a563aa34c",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/results.json": "fc16db5c70ebad5dcf997b166bca32c8d6947b3dd2b286766e46c5248e3adb9b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/worker_info.json": "8e253b0df702c218f3d3dca3ca004de03875ee51b27f6bbdd3570e0b7167b50f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/tomoDD.vel": "552a109f0f0ab7bb0054f2bbd15ab26938a36da6d33014dc499e49f7538dc6a3",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/tomoDD-SE.inp": "c38f8df740d9d9c71f1bbae8e5f8fe7196f7aea3f2d677954e21581ec3f50bf1"
+  },
+  "script_sha256": "3466dc7cdb1237970ebfeeec9f12b304cd3f85fb2dc5e7ca0c6e41ba87ceff4e"
+}

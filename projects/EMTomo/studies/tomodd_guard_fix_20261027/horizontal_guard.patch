@@ -1,0 +1,7 @@
+--- a/RaySPDR2.f
++++ b/RaySPDR2.f
+@@ -840,2 +840,2 @@
+-      if(lo.GT.xn(1)+0.1.AND.lo.LT.xn(nx)-0.1.AND.la.GT.yn(1)+0.1
+-     &   .AND.la.LT.yn(ny)-0.1)then
++      if(lo.GT.xn(1).AND.lo.LT.xn(nx).AND.la.GT.yn(1)
++     &   .AND.la.LT.yn(ny))then

@@ -1,0 +1,128 @@
+{
+  "error": "Euclidean 3D distance in metres; all 1200 events per run, equal weight, no subset or tail clipping",
+  "ecdf": "Right-continuous step function F(x)=count(error <= x)/1200; ties grouped exactly",
+  "x_range_m": [
+    0,
+    2250.0
+  ],
+  "layout": "Colour encodes nx; solid EMTomo; dashed tomoDD",
+  "em_checkpoint_caveat": "iter_11 saved E-step locations precede the final (12th) M-step; no new relocation",
+  "em_coverage_damping_power": 0,
+  "quantiles": "NumPy linear interpolation (descriptive summaries)",
+  "rows": [
+    {
+      "nx": 4,
+      "em_run": "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17",
+      "em_location_iteration": 11,
+      "em_weights_row_id_sha256": "c5b034cda794b41a7ff970283d3e288d9105695ffc8c62c82801c1da3d0d7950",
+      "dd_run": "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx4-tomodd",
+      "dd_iterations": 3,
+      "statistics": {
+        "em": {
+          "n": 1200,
+          "rms_m": 315.0202170503938,
+          "median_m": 190.75874115042689,
+          "p90_m": 505.9133486354892,
+          "p95_m": 639.717949352789,
+          "max_m": 1726.4467003091,
+          "fraction_within_250m": 0.6483333333333333,
+          "fraction_within_500m": 0.8958333333333334
+        },
+        "dd": {
+          "n": 1200,
+          "rms_m": 379.8542631325029,
+          "median_m": 232.4820850001531,
+          "p90_m": 599.2154652941384,
+          "p95_m": 811.4043620243656,
+          "max_m": 2015.4366752637109,
+          "fraction_within_250m": 0.5408333333333334,
+          "fraction_within_500m": 0.85
+        }
+      }
+    },
+    {
+      "nx": 6,
+      "em_run": "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6",
+      "em_location_iteration": 11,
+      "em_weights_row_id_sha256": "cbeaf3226ab7afd865811cddd85deb2e02d797f5348bc59577a84a0c435f8ad6",
+      "dd_run": "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx6-tomodd",
+      "dd_iterations": 3,
+      "statistics": {
+        "em": {
+          "n": 1200,
+          "rms_m": 237.63717938434286,
+          "median_m": 130.3186681388296,
+          "p90_m": 373.3635181086752,
+          "p95_m": 485.1285020929172,
+          "max_m": 1398.3513956244599,
+          "fraction_within_250m": 0.7616666666666667,
+          "fraction_within_500m": 0.9541666666666667
+        },
+        "dd": {
+          "n": 1200,
+          "rms_m": 371.992336737509,
+          "median_m": 239.95037295565754,
+          "p90_m": 588.1477733711141,
+          "p95_m": 762.5445685479591,
+          "max_m": 1784.2265176637704,
+          "fraction_within_250m": 0.5266666666666666,
+          "fraction_within_500m": 0.8516666666666667
+        }
+      }
+    },
+    {
+      "nx": 8,
+      "em_run": "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217",
+      "em_location_iteration": 11,
+      "em_weights_row_id_sha256": "2cff2fd0fa2d85e345e4bd600ebc122229573872e1ea8ccb8f5d024fbbee4466",
+      "dd_run": "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx8-tomodd",
+      "dd_iterations": 3,
+      "statistics": {
+        "em": {
+          "n": 1200,
+          "rms_m": 254.13857000489784,
+          "median_m": 136.98442322495288,
+          "p90_m": 402.5445136598779,
+          "p95_m": 504.1927673022439,
+          "max_m": 1417.3713285049525,
+          "fraction_within_250m": 0.7641666666666667,
+          "fraction_within_500m": 0.9458333333333333
+        },
+        "dd": {
+          "n": 1200,
+          "rms_m": 380.49622545196553,
+          "median_m": 240.2260869140257,
+          "p90_m": 609.1082747515501,
+          "p95_m": 755.3570715162872,
+          "max_m": 1757.3885386345548,
+          "fraction_within_250m": 0.5191666666666667,
+          "fraction_within_500m": 0.8275
+        }
+      }
+    }
+  ],
+  "sha256": {
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/meta.json": "4c920cf80383655e06278604af5502254aa9f7b16584593974b700fc1914018f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/iter_11/complete.json": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx4_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/events.csv": "aeb02d32723b6bac51f05270c2ff00c525d25f9edb554ff91c5fa3c5131b8e56",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx4_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/stations.csv": "a591b34a0b1e3bcaca5d9ef3b9402ef3e0500d18fbde43bbaf1faa8594ee9102",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx4_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/model.npz": "a4280644abea988a7b486ba8d59409697fcaaf69c7fcd90f7956dbb785e26e98",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx4-tomodd/config.json": "57f73a180713e99860ee9d26bc4c57308a97f2880e1529d5da4e7e81e51ee261",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx4-tomodd/state.npz": "83f01a484af6e105a777194cd463271b208dfab4cf1a0b2b0aa5ea9fbb18481b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/meta.json": "27c972ada59278f9c885acfdfff035d8b8ea718e98700cbc958017b95b472eb1",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/iter_11/complete.json": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/events.csv": "aeb02d32723b6bac51f05270c2ff00c525d25f9edb554ff91c5fa3c5131b8e56",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/stations.csv": "a591b34a0b1e3bcaca5d9ef3b9402ef3e0500d18fbde43bbaf1faa8594ee9102",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/model.npz": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx6-tomodd/config.json": "06d697d0d334609187c21cc06f446ac21d1f7f8d77a5da6c045264a29d9db3cc",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx6-tomodd/state.npz": "5e8b3c4641d7bc2215fbba91966279b8c7dd5688995e0b1e14573de0c2fce76d",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/meta.json": "5bb742097fbb65ff15274997078b0bf39619ebb34ce9cb64013c7e076522d545",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/iter_11/complete.json": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx8_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/events.csv": "aeb02d32723b6bac51f05270c2ff00c525d25f9edb554ff91c5fa3c5131b8e56",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx8_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/stations.csv": "a591b34a0b1e3bcaca5d9ef3b9402ef3e0500d18fbde43bbaf1faa8594ee9102",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx8_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/model.npz": "a07fc74a6398ce90c21dc7bdc00fff7d536b1543cf51d7a3d98c8761c14df48a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx8-tomodd/config.json": "c41aefc37064b82da29848910ab4157426017509c062e968299f0b45b2d0d0db",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx8-tomodd/state.npz": "d46026c6b358030e0b966fafd3a154d2e90552fc37bbb7136d3c68b5cf3a0b3d",
+    "/mnt/disk01/egor/projects/EMTomo/paper/figures/checkerboard_location_error_ecdf.csv": "9f58fa2de8cbe8a1a0bb6068bc7918f837cf03d84ffa027a62196f21971871fb"
+  }
+}

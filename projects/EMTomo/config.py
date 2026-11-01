@@ -58,6 +58,9 @@ class InversionConfig:
     solver_rtol: float = 1e-10
     solver_maxiter: int | None = None
 
+    # Optional per-cycle temperatures; appended to preserve positional arguments.
+    temperature_schedule: tuple[float, ...] | None = None
+
     def __post_init__(self):
         def positive(name):
             value = getattr(self, name)
@@ -80,6 +83,14 @@ class InversionConfig:
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, (int, np.integer)) or value < 1:
                 raise ValueError(f"{name} must be a positive integer")
+        if self.temperature_schedule is not None:
+            if len(self.temperature_schedule) != self.n_cycles:
+                raise ValueError("temperature_schedule must contain exactly n_cycles values")
+            for value in self.temperature_schedule:
+                if (isinstance(value, (bool, np.bool_))
+                        or not isinstance(value, (int, float, np.integer, np.floating))
+                        or not np.isfinite(value) or value <= 0):
+                    raise ValueError("temperature_schedule values must be finite and positive, not bool")
         if self.solver_maxiter is not None:
             if (isinstance(self.solver_maxiter, bool)
                     or not isinstance(self.solver_maxiter, (int, np.integer))

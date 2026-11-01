@@ -92,17 +92,64 @@ def likelihood_normalization(predicted_times_s, noise: PickNoise):
     return values.reshape(shape)
 
 
-def negative_log_likelihood(predicted_times_s, observed_s, noise: PickNoise, normalization=None):
+@njit(cache=True)
+def _indexed_likelihood_kernel(predicted, observed, stations, relative_sigma, constant_variance):
+    """Sparse-event scores without materializing a station-subset field volume."""
+    n_points = predicted.shape[1]
+    sum_p = np.zeros(n_points)
+    sum_pr = np.zeros(n_points)
+    sum_pr2 = np.zeros(n_points)
+    sum_log_variance = np.zeros(n_points)
+    for local, station in enumerate(stations):
+        for point in range(n_points):
+            time = np.float64(predicted[station, point])
+            variance = (relative_sigma * time) ** 2 + constant_variance
+            precision = 1.0 / variance
+            residual = observed[local] - time
+            sum_p[point] += precision
+            sum_pr[point] += precision * residual
+            sum_pr2[point] += precision * residual * residual
+            if relative_sigma != 0.0:
+                sum_log_variance[point] += np.log(variance)
+    out = np.empty(n_points)
+    for point in range(n_points):
+        out[point] = 0.5 * max(sum_pr2[point] - sum_pr[point] ** 2 / sum_p[point], 0.0)
+        if relative_sigma != 0.0:
+            out[point] += 0.5 * sum_log_variance[point] + 0.5 * np.log(sum_p[point])
+    return out
+
+
+def validate_station_indices(station_indices, n_stations, n_observed):
+    indices = np.asarray(station_indices)
+    if (indices.ndim != 1 or indices.size != n_observed or indices.size < 2
+            or indices.dtype.kind not in "iu" or np.any(indices < 0)
+            or np.any(indices >= n_stations) or np.unique(indices).size != indices.size):
+        raise ValueError("station_indices must identify at least two distinct stations, one per observation")
+    return indices.astype(np.int64, copy=False)
+
+
+def negative_log_likelihood(predicted_times_s, observed_s, noise: PickNoise, normalization=None,
+                            *, station_indices=None):
     """``-log L`` of each hypothesis, up to a constant shared by all hypotheses.
 
     ``predicted_times_s`` is station-major, ``(n_stations, ...)``. Observed times
     are relative to an unknown common origin; it is integrated out under a flat
     prior, which yields the precision-weighted chi² about the weighted mean
     residual plus ``likelihood_normalization`` (pass it to reuse a precomputed one).
+    With ``station_indices``, observations are in that subset's order and the
+    subset normalization is computed directly; full-network normalization is invalid.
     """
     observed = np.asarray(observed_s, dtype=np.float64)
     if observed.ndim != 1 or not np.all(np.isfinite(observed)):
         raise ValueError("Observed times must be a finite vector")
+    if station_indices is not None:
+        flat, shape = _station_major(predicted_times_s)
+        indices = validate_station_indices(station_indices, flat.shape[0], observed.size)
+        if normalization is not None:
+            raise ValueError("Indexed likelihood computes its own observed-subset normalization")
+        return _indexed_likelihood_kernel(
+            flat, observed, indices, float(noise.relative_sigma), float(noise.constant_variance),
+        ).reshape(shape)
     flat, shape = _station_major(predicted_times_s, observed.size)
     half_chi2 = _half_chi2_kernel(
         flat, observed, float(noise.relative_sigma), float(noise.constant_variance)

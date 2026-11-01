@@ -1,0 +1,39 @@
+{
+  "name": "NCSN GEY regional linear-gradient Vp",
+  "source_url": "https://ncedc.org/ftp/pub/doc/ncsn/shadow2000.txt",
+  "source_sha256": "b292262941f880fa8f5bc81114c4bc4a080a89b843b068f22b8e53ec53abaa23",
+  "source_section": "Table 8: MULTIPLE VELOCITY MODELS",
+  "original_reference": "Eberhart-Phillips & Oppenheimer, JGR 1984 (as credited by NCEDC)",
+  "regional_reference": "Oppenheimer et al., NCSN Bulletin 1992, USGS OFR 93-578",
+  "source_depth_km": [
+    0.0,
+    3.0,
+    8.0,
+    20.0,
+    22.0
+  ],
+  "vp_km_s": [
+    4.1,
+    5.47,
+    5.75,
+    6.02,
+    7.9
+  ],
+  "interpolation": "linear in Vp; not slowness",
+  "datum_policy": "Assume source zero and catalog depth zero are sea level; not independently verified",
+  "local_depth_km": [
+    1.166,
+    4.166,
+    9.166,
+    21.166,
+    23.166
+  ],
+  "top_elevation_m": 1166,
+  "above_zero_policy": "constant Vp=4.10 km/s above source zero (explicit experiment choice)",
+  "below_last_node_policy": "constant Vp=7.90 km/s, per source half-space convention",
+  "station_delays": "not imported; no station-specific delay parameters",
+  "egs_catalog_model": "unknown: model-code columns 111-113 of downloaded headers are blank",
+  "grid_representation": "EMTomo cell-center samples, nearest subdivision; tomoDD nodal samples with native interpolation",
+  "vp_vs": 1.73,
+  "vp_vs_policy": "unused in P-only inversion; placeholder required by native MOD format"
+}

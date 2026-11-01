@@ -16,6 +16,7 @@ from time import perf_counter
 import numpy as np
 
 from .model import Arrival, ForwardConfig, PointSet, VelocityGrid
+from .noise import add_arrival_noise
 from . import solver
 
 
@@ -167,14 +168,22 @@ def _sha256(path):
 
 
 def run_experiment(root, experiment_id, config=ForwardConfig(), check_accuracy=False,
-                   max_difference_s=None, *, noise=None, workers=1) -> Path:
+                   max_difference_s=None, *, noise=None, workers=1,
+                   save_absolute_times=False) -> Path:
     """Compute existing inputs and atomically publish results exactly once.
 
     Times are relative to the earliest station arrival for each event, not
     event origin times. Elapsed time includes the optional convergence check.
     A threshold requires relative and absolute differences at r and 2r to be
     within the limit; this convergence indicator is not a guaranteed error bound.
+
+    With save_absolute_times=True, clean_times.npz caches noiseless absolute
+    seconds shaped (events, stations), Unicode IDs and coordinates in metres.
+    Arrivals reuse that solve, applying optional noise before normalization.
+    Explicit convergence checks still perform their own additional solves.
     """
+    if not isinstance(save_absolute_times, bool):
+        raise ValueError("save_absolute_times must be a bool")
     if max_difference_s is not None:
         try:
             max_difference_s = float(max_difference_s)
@@ -189,13 +198,34 @@ def run_experiment(root, experiment_id, config=ForwardConfig(), check_accuracy=F
         hashes = {name: _sha256(input_directory / name) for name in input_files}
         model, stations, events = load_inputs(root, experiment_id)
         started = perf_counter()
-        arrivals = _validated_arrivals(
-            (arrival.station_id, arrival.event_id, arrival.arrival_time_s)
-            for arrival in solver.compute_arrivals(
-                model=model, stations=stations, events=events, config=config,
-                workers=workers, **({"noise": noise} if noise is not None else {}),
+        if save_absolute_times:
+            absolute_times = solver.compute_travel_times(
+                model=model, stations=stations, events=events, config=config, workers=workers,
             )
-        )
+            np.savez(
+                temporary / "clean_times.npz",
+                absolute_times_s=absolute_times,
+                event_ids=np.asarray(events.ids, dtype=str),
+                station_ids=np.asarray(stations.ids, dtype=str),
+                event_coordinates_m=events.coordinates_m,
+                station_coordinates_m=stations.coordinates_m,
+            )
+            times = (add_arrival_noise(absolute_times, events.ids, stations.ids, noise)
+                     if noise is not None else absolute_times)
+            times = times - times.min(axis=1, keepdims=True)
+            arrivals = _validated_arrivals(
+                (station_id, event_id, times[e, s])
+                for e, event_id in enumerate(events.ids)
+                for s, station_id in enumerate(stations.ids)
+            )
+        else:
+            arrivals = _validated_arrivals(
+                (arrival.station_id, arrival.event_id, arrival.arrival_time_s)
+                for arrival in solver.compute_arrivals(
+                    model=model, stations=stations, events=events, config=config,
+                    workers=workers, **({"noise": noise} if noise is not None else {}),
+                )
+            )
         convergence = None
         if check_accuracy or max_difference_s is not None:
             convergence = solver.check_convergence(
@@ -256,6 +286,16 @@ def run_experiment(root, experiment_id, config=ForwardConfig(), check_accuracy=F
             "numpy_version": np.__version__,
             "convergence": "noiseless",
         }
+        if save_absolute_times:
+            metadata["absolute_times_cache"] = {
+                "file": "clean_times.npz",
+                "sha256": _sha256(temporary / "clean_times.npz"),
+                "array": "absolute_times_s",
+                "axes": ["event", "station"],
+                "time_reference": "event_origin",
+                "units": "s",
+                "noiseless": True,
+            }
         if max_difference_s is not None:
             metadata["max_difference_s"] = max_difference_s
         if convergence is not None:

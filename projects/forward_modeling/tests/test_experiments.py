@@ -13,6 +13,7 @@ import pytest
 from projects.forward_modeling import experiments as io
 from projects.forward_modeling import __main__ as cli
 from projects.forward_modeling.model import Arrival, ForwardConfig, PointSet, VelocityGrid
+from projects.forward_modeling.noise import NoiseConfig
 
 
 @pytest.fixture
@@ -39,6 +40,8 @@ def solver_mock(monkeypatch):
                                     "rms_absolute_time_difference_s": 0.001})
     monkeypatch.setattr(io, "version", Mock(return_value="0.4.1"))
     monkeypatch.setattr(io.solver, "compute_arrivals", compute)
+    monkeypatch.setattr(io.solver, "compute_travel_times",
+                        Mock(side_effect=AssertionError("Unexpected travel-time solve")))
     monkeypatch.setattr(io.solver, "check_convergence", convergence)
     return compute, convergence
 
@@ -107,12 +110,13 @@ def test_inputs_roundtrip(tmp_path, inputs):
             assert next(csv.reader(stream)) == [identifier, "x_m", "y_m", "z_m"]
 
 
+@pytest.mark.parametrize("save_kwargs", [{}, {"save_absolute_times": False}])
 @pytest.mark.parametrize("check_accuracy", [False, True])
-def test_run_roundtrip_metadata(tmp_path, inputs, solver_mock, check_accuracy):
+def test_run_roundtrip_metadata(tmp_path, inputs, solver_mock, check_accuracy, save_kwargs):
     source = io.save_inputs(tmp_path, "case", *inputs)
     config = ForwardConfig(refinement=2, source_radius_cells=3)
     destination = io.run_experiment(tmp_path, "case", config=config,
-                                    check_accuracy=check_accuracy)
+                                    check_accuracy=check_accuracy, **save_kwargs)
     assert destination == tmp_path / "output" / "case"
     assert {p.name for p in destination.iterdir()} == {"arrivals.csv", "metadata.json"}
     with (destination / "arrivals.csv").open(newline="") as stream:
@@ -122,6 +126,8 @@ def test_run_roundtrip_metadata(tmp_path, inputs, solver_mock, check_accuracy):
         ("001", "7", 0.), ("station,quoted", "0008", 0.125)]
     metadata = json.loads((destination / "metadata.json").read_text())
     assert "max_difference_s" not in metadata
+    assert "absolute_times_cache" not in metadata
+    io.solver.compute_travel_times.assert_not_called()
     assert metadata["config"] == asdict(config)
     assert metadata["config"] == {"refinement": 2, "source_radius_cells": 3}
     assert metadata["solver_name"] == "pykonal.EikonalSolver"
@@ -164,6 +170,107 @@ def test_run_roundtrip_metadata(tmp_path, inputs, solver_mock, check_accuracy):
         assert "convergence" not in metadata
 
 
+@pytest.mark.parametrize("noise", [None, NoiseConfig(0, 0, 123), NoiseConfig(0.1, 0.5, 123)])
+def test_save_absolute_times(tmp_path, inputs, solver_mock, monkeypatch, noise):
+    model, stations, events = inputs
+    stations = PointSet(ids=("001", "станция,№2"), coordinates_m=stations.coordinates_m)
+    io.save_inputs(tmp_path, "cached", model, stations, events)
+    absolute = np.array([[5., 8.], [11., 7.]])
+    absolute.flags.writeable = False
+    compute = Mock(return_value=absolute)
+    monkeypatch.setattr(io.solver, "compute_travel_times", compute)
+    noisy = (io.add_arrival_noise(absolute, events.ids, stations.ids, noise)
+             if noise is not None else absolute)
+    expected = noisy - noisy.min(axis=1, keepdims=True)
+    add_noise = Mock(wraps=io.add_arrival_noise)
+    monkeypatch.setattr(io, "add_arrival_noise", add_noise)
+    config = ForwardConfig(refinement=3)
+
+    destination = io.run_experiment(tmp_path, "cached", config=config, workers=3,
+                                    noise=noise, save_absolute_times=True)
+
+    compute.assert_called_once()
+    assert set(compute.call_args.kwargs) == {"model", "stations", "events", "config", "workers"}
+    assert compute.call_args.kwargs["config"] is config
+    assert compute.call_args.kwargs["workers"] == 3
+    assert compute.call_args.kwargs["events"].ids == events.ids
+    assert compute.call_args.kwargs["stations"].ids == stations.ids
+    solver_mock[0].assert_not_called()
+    solver_mock[1].assert_not_called()
+    if noise is None:
+        add_noise.assert_not_called()
+    else:
+        add_noise.assert_called_once_with(absolute, events.ids, stations.ids, noise)
+    np.testing.assert_array_equal(absolute, [[5., 8.], [11., 7.]])
+    assert {p.name for p in destination.iterdir()} == {
+        "arrivals.csv", "metadata.json", "clean_times.npz"}
+    with np.load(destination / "clean_times.npz", allow_pickle=False) as cache:
+        assert set(cache.files) == {
+            "absolute_times_s", "event_ids", "station_ids",
+            "event_coordinates_m", "station_coordinates_m"}
+        np.testing.assert_array_equal(cache["absolute_times_s"], absolute)
+        for name, points in (("event", events), ("station", stations)):
+            assert cache[f"{name}_ids"].dtype.kind == "U"
+            assert cache[f"{name}_ids"].tolist() == list(points.ids)
+            np.testing.assert_array_equal(cache[f"{name}_coordinates_m"], points.coordinates_m)
+    arrivals = io.load_arrivals(tmp_path, "cached")
+    assert [(a.event_id, a.station_id) for a in arrivals] == [
+        (event_id, station_id) for event_id in events.ids for station_id in stations.ids]
+    np.testing.assert_allclose([a.arrival_time_s for a in arrivals], expected.ravel())
+    metadata = json.loads((destination / "metadata.json").read_text())
+    assert metadata["absolute_times_cache"] == {
+        "file": "clean_times.npz",
+        "sha256": hashlib.sha256((destination / "clean_times.npz").read_bytes()).hexdigest(),
+        "array": "absolute_times_s",
+        "axes": ["event", "station"],
+        "time_reference": "event_origin",
+        "units": "s",
+        "noiseless": True,
+    }
+    assert metadata["noise"]["enabled"] is (noise is not None)
+    assert metadata["noise"]["config"] == (asdict(noise) if noise is not None else None)
+    assert metadata["time_reference"] == "earliest_station_arrival_per_event"
+
+
+def test_save_absolute_times_noise_before_normalization(tmp_path, inputs, solver_mock, monkeypatch):
+    io.save_inputs(tmp_path, "cached", *inputs)
+    absolute = np.array([[5., 8.], [11., 7.]])
+    compute = Mock(return_value=absolute)
+    monkeypatch.setattr(io.solver, "compute_travel_times", compute)
+    noise = NoiseConfig()
+
+    def noisy_picks(times, event_ids, station_ids, config):
+        np.testing.assert_array_equal(times, absolute)
+        assert event_ids == inputs[2].ids
+        assert station_ids == inputs[1].ids
+        assert config is noise
+        assert not (tmp_path / "output" / "cached").exists()
+        cache_path, = (tmp_path / "output").glob(".cached.tmp-*/clean_times.npz")
+        with np.load(cache_path, allow_pickle=False) as cache:
+            np.testing.assert_array_equal(cache["absolute_times_s"], absolute)
+        return np.array([[-2., -3.], [5., -1.]])
+
+    add_noise = Mock(side_effect=noisy_picks)
+    monkeypatch.setattr(io, "add_arrival_noise", add_noise)
+    destination = io.run_experiment(tmp_path, "cached", noise=noise, save_absolute_times=True)
+    compute.assert_called_once()
+    add_noise.assert_called_once()
+    np.testing.assert_array_equal(
+        [a.arrival_time_s for a in io.load_arrivals(tmp_path, "cached")], [1., 0., 6., 0.])
+    with np.load(destination / "clean_times.npz", allow_pickle=False) as cache:
+        np.testing.assert_array_equal(cache["absolute_times_s"], [[5., 8.], [11., 7.]])
+    np.testing.assert_array_equal(absolute, [[5., 8.], [11., 7.]])
+
+
+@pytest.mark.parametrize("flag", [None, 0, 1, "true", "false", [], np.bool_(True)])
+def test_invalid_save_absolute_times_before_staging(tmp_path, solver_mock, flag):
+    with pytest.raises(ValueError, match="save_absolute_times must be a bool"):
+        io.run_experiment(tmp_path, "case", save_absolute_times=flag)
+    assert list(tmp_path.iterdir()) == []
+    solver_mock[0].assert_not_called()
+    io.solver.compute_travel_times.assert_not_called()
+
+
 def test_no_overwrite(tmp_path, inputs, solver_mock):
     source = io.save_inputs(tmp_path, "case", *inputs)
     before = {p.name: p.read_bytes() for p in source.iterdir()}
@@ -188,8 +295,10 @@ def test_unsafe_ids(tmp_path, inputs, identifier):
     assert list(tmp_path.iterdir()) == []
 
 
+@pytest.mark.parametrize("save_absolute_times", [False, True])
 @pytest.mark.parametrize("stage", ["compute", "convergence", "metadata"])
-def test_failed_run_not_published(tmp_path, inputs, solver_mock, monkeypatch, stage):
+def test_failed_run_not_published(tmp_path, inputs, solver_mock, monkeypatch, stage,
+                                  save_absolute_times):
     io.save_inputs(tmp_path, "case", *inputs)
     output = tmp_path / "output"
     output.mkdir()
@@ -200,14 +309,19 @@ def test_failed_run_not_published(tmp_path, inputs, solver_mock, monkeypatch, st
     def fail(*args, **kwargs):
         assert not (output / "case").exists()
         raise RuntimeError("interrupted")
+    compute = solver_mock[0]
+    if save_absolute_times:
+        compute = Mock(return_value=np.array([[5., 8.], [11., 7.]]))
+        monkeypatch.setattr(io.solver, "compute_travel_times", compute)
     if stage == "compute":
-        solver_mock[0].side_effect = fail
+        compute.side_effect = fail
     elif stage == "convergence":
         solver_mock[1].side_effect = fail
     else:
         monkeypatch.setattr(io.json, "dump", fail)
     with pytest.raises(RuntimeError, match="interrupted"):
-        io.run_experiment(tmp_path, "case", check_accuracy=True)
+        io.run_experiment(tmp_path, "case", check_accuracy=True,
+                          save_absolute_times=save_absolute_times)
     assert set(output.iterdir()) == {unrelated}
     assert sentinel.read_text() == "untouched"
 

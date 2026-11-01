@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from time import perf_counter
 from typing import Optional
 
@@ -14,7 +14,7 @@ from instruments.hypocentre_objective import make_refinement_objective
 from instruments.likelihood import PickNoise, negative_log_likelihood, negative_log_likelihood_batch
 from raytracing import compute_G_all_stations_compact, compute_G_all_stations_serial
 from velocity_model import VelocityModel
-from .tomography_events import EventSettings, IterationFields, run_events
+from .tomography_events import EventSettings, IterationFields, run_events, validate_arrivals
 from .tomography_logging import TomographyLogger, summarize_ray_status
 from .tomography_math import MatrixFreeNormalEquations, accumulate_normal_equations, solve_slowness_update
 
@@ -45,6 +45,9 @@ def warm_up_jit() -> None:
     fields = np.zeros((2, 2, 2, 2), dtype=np.float32)
     negative_log_likelihood_batch(fields, np.zeros((2, 2)), noise, normalization=0.0)
     make_refinement_objective(fields, np.zeros(2), noise)(point)
+    indices = np.arange(2, dtype=np.int64)
+    negative_log_likelihood(fields, np.zeros(2), noise, station_indices=indices)
+    make_refinement_objective(fields, np.zeros(2), noise, station_indices=indices)(point)
     hessian, rhs = np.zeros((1, 1)), np.zeros(1)
     accumulate_normal_equations(hessian, rhs, np.ones((2, 1)), np.zeros(2),
                                 np.ones(2, dtype=bool), np.ones(2), 1.0)
@@ -70,9 +73,11 @@ def run_em(
 
     Runs ``config.n_cycles`` cycles. ``reference_model`` is used only for the
     quality log. Returns the run logger, or None when runs are not saved.
+    Arrivals are dense (events, global stations); NaN marks unobserved P picks.
+    Each event must have at least two finite picks; infinities are rejected.
     """
-    arrivals = np.asarray(arrivals, dtype=np.float64)
     stations_m = np.asarray(stations_m, dtype=np.float64)
+    arrivals = validate_arrivals(arrivals, len(stations_m))
     run_name = run_name or config.run_name
     if config.save_runs and logger is None:
         logger = TomographyLogger(
@@ -132,8 +137,10 @@ def run_em(
             logger.start_iteration(iteration)
             logger.save_iteration_model(iteration, model.velocity)
 
+        step_config = (replace(config, temperature=config.temperature_schedule[iteration])
+                       if config.temperature_schedule is not None else config)
         delta_s, sensitivity, confidence = make_tomography_step(
-            model, arrivals, stations_m, noise, config, iteration=iteration, logger=logger,
+            model, arrivals, stations_m, noise, step_config, iteration=iteration, logger=logger,
         )
         model = VelocityModel(
             update_velocity(model.velocity, delta_s, config.max_velocity_step_fraction),
@@ -146,6 +153,11 @@ def run_em(
             logger.save_inversion_diagnostics(iteration, sensitivity, confidence)
             if reference_model is not None:
                 logger.save_quality(iteration, *model_errors(model.velocity, reference_model.velocity))
+            if config.temperature_schedule is not None:
+                logger._save_json(
+                    logger.iter_dir(iteration) / "temperature.json",
+                    {"iter": iteration, "temperature": float(step_config.temperature)},
+                )
             logger.complete_iteration(iteration)
 
     if logger is not None:
@@ -175,6 +187,7 @@ def make_tomography_step(
     diagnostics: Optional[dict] = None,
 ):
     """One EM cycle; returns ``(delta_s, sensitivity_diagonal, coverage_confidence)``."""
+    arrivals = validate_arrivals(arrivals, len(stations_m))
     wall = {}
     started = perf_counter()
     fine = model.refined(config.subdivision, config.slowness_interpolation)

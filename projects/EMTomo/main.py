@@ -61,6 +61,8 @@ def _parser() -> argparse.ArgumentParser:
     option("candidate-mode", choices=("soft", "hard"),
            help="soft: all weighted hypotheses; hard: the most likely of the same shortlist")
     option("temperature", type=float, help="Likelihood temperature: 1 is untempered")
+    option("temperature-schedule", type=float, nargs="+",
+           help="Per-cycle likelihood temperatures (exactly --cycles finite positive values)")
     option("weight-noise-relative-sigma", type=float,
            help="Override the relative pick-noise sigma from the experiment metadata")
     option("weight-noise-absolute-sigma-s", type=float,
