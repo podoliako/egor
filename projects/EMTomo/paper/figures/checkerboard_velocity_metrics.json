@@ -1,0 +1,597 @@
+{
+  "schema_version": 1,
+  "manifest": "/mnt/disk01/egor/projects/EMTomo/paper/figures/checkerboard_nx4_nx6_nx8_comparison.json",
+  "method": {
+    "metric": "sqrt(mean((v_est_m_s - v_truth_m_s)**2))",
+    "domain_xyz_km": [
+      [
+        0,
+        24
+      ],
+      [
+        0,
+        12
+      ],
+      [
+        0,
+        12
+      ]
+    ],
+    "sampling": "Uniform cell centres (i+0.5)*h; equal volume weights; all cells; no coverage mask",
+    "truth": "Native original piecewise constant cells, XYZ array order",
+    "em": "Native piecewise constant 1 km cells, final_model.npy in m/s",
+    "dd": "RegularGridInterpolator linear Vp, state.final_vp * 1000, ZYX; X+12,Y+6 km; full native grid including boundary nodes; no extrapolation",
+    "dd_oracle": "Saved state.oracle_vp, same interpolation; not an inversion, not refitted on these grids, not asserted to be the continuous-volume optimum",
+    "em_oracle": "Exact zero: truth boundaries align with 1 km cells",
+    "recommended_spacing_km": 0.03125,
+    "spacings_km": [
+      0.25,
+      0.125,
+      0.0625,
+      0.03125
+    ],
+    "legacy_checkerboard_used": false
+  },
+  "rows": [
+    {
+      "nx": 4,
+      "source_experiment": "checkerboard_24x12x12_nx4_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42",
+      "truth_model": "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx4_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/model.npz",
+      "truth_cell_size_km": 6.0,
+      "em_run": "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17",
+      "em_updates": 12,
+      "dd_run": "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx4-tomodd",
+      "dd_iterations": 3,
+      "dd_axes_zyx_km": [
+        [
+          -11.5,
+          0.5,
+          1.5,
+          2.5,
+          3.5,
+          4.5,
+          5.5,
+          6.5,
+          7.5,
+          8.5,
+          9.5,
+          10.5,
+          11.5,
+          23.5
+        ],
+        [
+          -11.5,
+          0.5,
+          1.5,
+          2.5,
+          3.5,
+          4.5,
+          5.5,
+          6.5,
+          7.5,
+          8.5,
+          9.5,
+          10.5,
+          11.5,
+          23.5
+        ],
+        [
+          -11.5,
+          0.5,
+          1.5,
+          2.5,
+          3.5,
+          4.5,
+          5.5,
+          6.5,
+          7.5,
+          8.5,
+          9.5,
+          10.5,
+          11.5,
+          12.5,
+          13.5,
+          14.5,
+          15.5,
+          16.5,
+          17.5,
+          18.5,
+          19.5,
+          20.5,
+          21.5,
+          22.5,
+          23.5,
+          35.5
+        ]
+      ],
+      "existing_dd_scores_reproduced": {
+        "spacing_km": 0.5,
+        "shape_xyz": [
+          48,
+          24,
+          24
+        ],
+        "samples": 27648,
+        "rmse_m_s": {
+          "em": 175.2891731991415,
+          "dd": 194.7539176571985,
+          "dd_oracle": 54.72565896148012
+        }
+      },
+      "existing_em_last_quality": {
+        "iter": 11,
+        "avg_abs_pct_dev": 2.8058602197075118,
+        "rms_m_s": 175.2891731991415
+      },
+      "grids": [
+        {
+          "spacing_km": 0.25,
+          "shape_xyz": [
+            96,
+            48,
+            48
+          ],
+          "samples": 221184,
+          "rmse_m_s": {
+            "em": 175.2891731991415,
+            "dd": 198.0908443600904,
+            "dd_oracle": 71.41659270100793
+          }
+        },
+        {
+          "spacing_km": 0.125,
+          "shape_xyz": [
+            192,
+            96,
+            96
+          ],
+          "samples": 1769472,
+          "rmse_m_s": {
+            "em": 175.2891731991415,
+            "dd": 198.9275699876274,
+            "dd_oracle": 75.06116451009626
+          }
+        },
+        {
+          "spacing_km": 0.0625,
+          "shape_xyz": [
+            384,
+            192,
+            192
+          ],
+          "samples": 14155776,
+          "rmse_m_s": {
+            "em": 175.2891731991415,
+            "dd": 199.13690971138826,
+            "dd_oracle": 75.94808125329911
+          }
+        },
+        {
+          "spacing_km": 0.03125,
+          "shape_xyz": [
+            768,
+            384,
+            384
+          ],
+          "samples": 113246208,
+          "rmse_m_s": {
+            "em": 175.28917319914152,
+            "dd": 199.18925457439627,
+            "dd_oracle": 76.16839004537981
+          }
+        }
+      ],
+      "recommended_rmse_m_s": {
+        "em": 175.28917319914152,
+        "dd": 199.18925457439627,
+        "dd_oracle": 76.16839004537981
+      },
+      "last_refinement_delta_m_s": {
+        "dd": 0.05234486300801677,
+        "dd_oracle": 0.22030879208070075
+      },
+      "initial_rmse_m_s": 250.0,
+      "em_constant_oracle_rmse_m_s": 0.0
+    },
+    {
+      "nx": 6,
+      "source_experiment": "checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42",
+      "truth_model": "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/model.npz",
+      "truth_cell_size_km": 4.0,
+      "em_run": "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6",
+      "em_updates": 12,
+      "dd_run": "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx6-tomodd",
+      "dd_iterations": 3,
+      "dd_axes_zyx_km": [
+        [
+          -11.5,
+          0.5,
+          1.5,
+          2.5,
+          3.5,
+          4.5,
+          5.5,
+          6.5,
+          7.5,
+          8.5,
+          9.5,
+          10.5,
+          11.5,
+          23.5
+        ],
+        [
+          -11.5,
+          0.5,
+          1.5,
+          2.5,
+          3.5,
+          4.5,
+          5.5,
+          6.5,
+          7.5,
+          8.5,
+          9.5,
+          10.5,
+          11.5,
+          23.5
+        ],
+        [
+          -11.5,
+          0.5,
+          1.5,
+          2.5,
+          3.5,
+          4.5,
+          5.5,
+          6.5,
+          7.5,
+          8.5,
+          9.5,
+          10.5,
+          11.5,
+          12.5,
+          13.5,
+          14.5,
+          15.5,
+          16.5,
+          17.5,
+          18.5,
+          19.5,
+          20.5,
+          21.5,
+          22.5,
+          23.5,
+          35.5
+        ]
+      ],
+      "existing_dd_scores_reproduced": {
+        "spacing_km": 0.3333333333333333,
+        "shape_xyz": [
+          72,
+          36,
+          36
+        ],
+        "samples": 93312,
+        "rmse_m_s": {
+          "em": 155.7359267158277,
+          "dd": 215.4144711760554,
+          "dd_oracle": 94.21609588951233
+        }
+      },
+      "existing_em_last_quality": {
+        "iter": 11,
+        "avg_abs_pct_dev": 2.4035765543990686,
+        "rms_m_s": 155.73592671582767
+      },
+      "grids": [
+        {
+          "spacing_km": 0.25,
+          "shape_xyz": [
+            96,
+            48,
+            48
+          ],
+          "samples": 221184,
+          "rmse_m_s": {
+            "em": 155.73592671582767,
+            "dd": 213.8154241921353,
+            "dd_oracle": 94.76130722795048
+          }
+        },
+        {
+          "spacing_km": 0.125,
+          "shape_xyz": [
+            192,
+            96,
+            96
+          ],
+          "samples": 1769472,
+          "rmse_m_s": {
+            "em": 155.7359267158277,
+            "dd": 214.81309745661716,
+            "dd_oracle": 97.88318303948253
+          }
+        },
+        {
+          "spacing_km": 0.0625,
+          "shape_xyz": [
+            384,
+            192,
+            192
+          ],
+          "samples": 14155776,
+          "rmse_m_s": {
+            "em": 155.73592671582767,
+            "dd": 215.06278061005324,
+            "dd_oracle": 98.65200238568313
+          }
+        },
+        {
+          "spacing_km": 0.03125,
+          "shape_xyz": [
+            768,
+            384,
+            384
+          ],
+          "samples": 113246208,
+          "rmse_m_s": {
+            "em": 155.73592671582773,
+            "dd": 215.12521797173798,
+            "dd_oracle": 98.84350943044197
+          }
+        }
+      ],
+      "recommended_rmse_m_s": {
+        "em": 155.73592671582773,
+        "dd": 215.12521797173798,
+        "dd_oracle": 98.84350943044197
+      },
+      "last_refinement_delta_m_s": {
+        "dd": 0.062437361684743564,
+        "dd_oracle": 0.1915070447588363
+      },
+      "initial_rmse_m_s": 250.0,
+      "em_constant_oracle_rmse_m_s": 0.0
+    },
+    {
+      "nx": 8,
+      "source_experiment": "checkerboard_24x12x12_nx8_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42",
+      "truth_model": "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx8_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/model.npz",
+      "truth_cell_size_km": 3.0,
+      "em_run": "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217",
+      "em_updates": 12,
+      "dd_run": "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx8-tomodd",
+      "dd_iterations": 3,
+      "dd_axes_zyx_km": [
+        [
+          -11.5,
+          0.5,
+          1.5,
+          2.5,
+          3.5,
+          4.5,
+          5.5,
+          6.5,
+          7.5,
+          8.5,
+          9.5,
+          10.5,
+          11.5,
+          23.5
+        ],
+        [
+          -11.5,
+          0.5,
+          1.5,
+          2.5,
+          3.5,
+          4.5,
+          5.5,
+          6.5,
+          7.5,
+          8.5,
+          9.5,
+          10.5,
+          11.5,
+          23.5
+        ],
+        [
+          -11.5,
+          0.5,
+          1.5,
+          2.5,
+          3.5,
+          4.5,
+          5.5,
+          6.5,
+          7.5,
+          8.5,
+          9.5,
+          10.5,
+          11.5,
+          12.5,
+          13.5,
+          14.5,
+          15.5,
+          16.5,
+          17.5,
+          18.5,
+          19.5,
+          20.5,
+          21.5,
+          22.5,
+          23.5,
+          35.5
+        ]
+      ],
+      "existing_dd_scores_reproduced": {
+        "spacing_km": 0.25,
+        "shape_xyz": [
+          96,
+          48,
+          48
+        ],
+        "samples": 221184,
+        "rmse_m_s": {
+          "em": 150.84141272719225,
+          "dd": 219.75037749784283,
+          "dd_oracle": 111.3136099094115
+        }
+      },
+      "existing_em_last_quality": {
+        "iter": 11,
+        "avg_abs_pct_dev": 2.339731571521568,
+        "rms_m_s": 150.84141272719225
+      },
+      "grids": [
+        {
+          "spacing_km": 0.25,
+          "shape_xyz": [
+            96,
+            48,
+            48
+          ],
+          "samples": 221184,
+          "rmse_m_s": {
+            "em": 150.84141272719225,
+            "dd": 219.75037749784283,
+            "dd_oracle": 111.3136099094115
+          }
+        },
+        {
+          "spacing_km": 0.125,
+          "shape_xyz": [
+            192,
+            96,
+            96
+          ],
+          "samples": 1769472,
+          "rmse_m_s": {
+            "em": 150.84141272719228,
+            "dd": 220.88129211272502,
+            "dd_oracle": 115.9788383260767
+          }
+        },
+        {
+          "spacing_km": 0.0625,
+          "shape_xyz": [
+            384,
+            192,
+            192
+          ],
+          "samples": 14155776,
+          "rmse_m_s": {
+            "em": 150.8414127271923,
+            "dd": 221.16452498420082,
+            "dd_oracle": 117.12596817794876
+          }
+        },
+        {
+          "spacing_km": 0.03125,
+          "shape_xyz": [
+            768,
+            384,
+            384
+          ],
+          "samples": 113246208,
+          "rmse_m_s": {
+            "em": 150.84141272719236,
+            "dd": 221.23536467726734,
+            "dd_oracle": 117.41161578773804
+          }
+        }
+      ],
+      "recommended_rmse_m_s": {
+        "em": 150.84141272719236,
+        "dd": 221.23536467726734,
+        "dd_oracle": 117.41161578773804
+      },
+      "last_refinement_delta_m_s": {
+        "dd": 0.07083969306651738,
+        "dd_oracle": 0.2856476097892795
+      },
+      "initial_rmse_m_s": 250.0,
+      "em_constant_oracle_rmse_m_s": 0.0
+    }
+  ],
+  "files_sha256": {
+    "/mnt/disk01/egor/projects/EMTomo/paper/evaluate_metrics.py": "0b0e2968f9759ba39b066816abd262112a8ed985e3cd001cabf46c890e3dcb16",
+    "/mnt/disk01/egor/projects/EMTomo/paper/figures/checkerboard_nx4_nx6_nx8_comparison.json": "f048492fb797332a3192c8d93ada0b5b475cbbe37f2f99aae86c01575b02989f",
+    "/mnt/disk01/egor/projects/EMTomo/paper/make_checkerboard_comparison.py": "76b7321416d13a13a19466bb25106a7e0e12a60877c24c1510c54f19a7cf8e9b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx4-tomodd/config.json": "57f73a180713e99860ee9d26bc4c57308a97f2880e1529d5da4e7e81e51ee261",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx4-tomodd/results.json": "247c1189c2f6c8951977ca2c9af3fd602e2c97bdfbee3e5e9922d1b3a4d98ccc",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx4-tomodd/state.npz": "83f01a484af6e105a777194cd463271b208dfab4cf1a0b2b0aa5ea9fbb18481b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx6-tomodd/config.json": "06d697d0d334609187c21cc06f446ac21d1f7f8d77a5da6c045264a29d9db3cc",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx6-tomodd/results.json": "5e2ce5878bf1e124bafd0348f4085c01a3f3c4e570bbfe7e03fa9f0012f6a79a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx6-tomodd/state.npz": "5e8b3c4641d7bc2215fbba91966279b8c7dd5688995e0b1e14573de0c2fce76d",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx8-tomodd/config.json": "c41aefc37064b82da29848910ab4157426017509c062e968299f0b45b2d0d0db",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx8-tomodd/results.json": "c8f83cd7d3e59d7c730d0765fc98c847b3f293825a588a9ee8147f59c32c96b9",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx8-tomodd/state.npz": "d46026c6b358030e0b966fafd3a154d2e90552fc37bbb7136d3c68b5cf3a0b3d",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx4_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/events.csv": "aeb02d32723b6bac51f05270c2ff00c525d25f9edb554ff91c5fa3c5131b8e56",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx4_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/generation.json": "d99b0e230868313836dcbe88723708bd2bf20fd9ab5fc0fcc53db23e1ec673fc",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx4_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/model.npz": "a4280644abea988a7b486ba8d59409697fcaaf69c7fcd90f7956dbb785e26e98",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx4_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/stations.csv": "a591b34a0b1e3bcaca5d9ef3b9402ef3e0500d18fbde43bbaf1faa8594ee9102",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/events.csv": "aeb02d32723b6bac51f05270c2ff00c525d25f9edb554ff91c5fa3c5131b8e56",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/generation.json": "f9141855aa6a906068a791a4a9aa2f06dd1a11ba4ecb8a6e719bfe8dc6ac2e55",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/model.npz": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/stations.csv": "a591b34a0b1e3bcaca5d9ef3b9402ef3e0500d18fbde43bbaf1faa8594ee9102",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx8_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/events.csv": "aeb02d32723b6bac51f05270c2ff00c525d25f9edb554ff91c5fa3c5131b8e56",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx8_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/generation.json": "c29c97ec3fbe713b1dd4226def34158861c61ca7da8c6bf7871f1f2f8728fe4b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx8_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/model.npz": "a07fc74a6398ce90c21dc7bdc00fff7d536b1543cf51d7a3d98c8761c14df48a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx8_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/stations.csv": "a591b34a0b1e3bcaca5d9ef3b9402ef3e0500d18fbde43bbaf1faa8594ee9102",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/final_model.npy": "a1a022a4442dd0f6d73566675acd91606405d2faf584014d55b8027d79efec30",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/initial_model.npy": "b7bfa47105d49faf565b8cdef99e97117b2095efb07b5e42ae04a962e4ba15bd",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/iter_0/complete.json": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/iter_1/complete.json": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/iter_10/complete.json": "8a5c226eda5b5d1cd91b7d56060583e7d51679ce69db7cda22b714a49f6d60e1",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/iter_11/complete.json": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/iter_2/complete.json": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/iter_3/complete.json": "6cf8fd8fe3cf21998735ac795d39e9f89dc0a885ad236d9f3857776cd1adb110",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/iter_4/complete.json": "072deec4a878a55eb5cb7f456a306186f45fd3225341c9fd6f54324db9ef34ed",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/iter_5/complete.json": "4bc033e329ed02355bafd75ae77694d5bc61a0caa67e47eb2f3c156d912547b9",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/iter_6/complete.json": "5f90ae222dba2e5a9ab56f0e30717cf445168801e92e5917e4c08db4ca1be77a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/iter_7/complete.json": "c1a041fce104543676af55b9dbc9a2ac1a149d6cc5773aa6aa9ac39cce188ab1",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/iter_8/complete.json": "722c37313d088726ea5288db4cd3917e52f6554034f29c7de0cba48fb822b5e9",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/iter_9/complete.json": "4bff94acedec71e460b69808d86e6ce75db5c72a932b99aac30c902b4ad187a8",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/meta.json": "4c920cf80383655e06278604af5502254aa9f7b16584593974b700fc1914018f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17/quality.jsonl": "3b8d5f6a3ae44bb844128b09f78bb90c1785dc430bedc8d347bf87ecac714305",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/final_model.npy": "2684b324777fe0408b11a46ceecf1723fff11b5bb951ab196a9f782028323851",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/initial_model.npy": "b7bfa47105d49faf565b8cdef99e97117b2095efb07b5e42ae04a962e4ba15bd",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/iter_0/complete.json": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/iter_1/complete.json": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/iter_10/complete.json": "8a5c226eda5b5d1cd91b7d56060583e7d51679ce69db7cda22b714a49f6d60e1",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/iter_11/complete.json": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/iter_2/complete.json": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/iter_3/complete.json": "6cf8fd8fe3cf21998735ac795d39e9f89dc0a885ad236d9f3857776cd1adb110",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/iter_4/complete.json": "072deec4a878a55eb5cb7f456a306186f45fd3225341c9fd6f54324db9ef34ed",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/iter_5/complete.json": "4bc033e329ed02355bafd75ae77694d5bc61a0caa67e47eb2f3c156d912547b9",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/iter_6/complete.json": "5f90ae222dba2e5a9ab56f0e30717cf445168801e92e5917e4c08db4ca1be77a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/iter_7/complete.json": "c1a041fce104543676af55b9dbc9a2ac1a149d6cc5773aa6aa9ac39cce188ab1",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/iter_8/complete.json": "722c37313d088726ea5288db4cd3917e52f6554034f29c7de0cba48fb822b5e9",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/iter_9/complete.json": "4bff94acedec71e460b69808d86e6ce75db5c72a932b99aac30c902b4ad187a8",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/meta.json": "27c972ada59278f9c885acfdfff035d8b8ea718e98700cbc958017b95b472eb1",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/quality.jsonl": "81cb8df4ae79088eb0b8ebd4b395a8efd25e52ce006e0d47a890aac978348c1a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/final_model.npy": "9010cb99f3297c29c6f5fb7dfea38c19b0a2584f15a1495161450bfe70d68c5b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/initial_model.npy": "b7bfa47105d49faf565b8cdef99e97117b2095efb07b5e42ae04a962e4ba15bd",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/iter_0/complete.json": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/iter_1/complete.json": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/iter_10/complete.json": "8a5c226eda5b5d1cd91b7d56060583e7d51679ce69db7cda22b714a49f6d60e1",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/iter_11/complete.json": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/iter_2/complete.json": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/iter_3/complete.json": "6cf8fd8fe3cf21998735ac795d39e9f89dc0a885ad236d9f3857776cd1adb110",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/iter_4/complete.json": "072deec4a878a55eb5cb7f456a306186f45fd3225341c9fd6f54324db9ef34ed",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/iter_5/complete.json": "4bc033e329ed02355bafd75ae77694d5bc61a0caa67e47eb2f3c156d912547b9",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/iter_6/complete.json": "5f90ae222dba2e5a9ab56f0e30717cf445168801e92e5917e4c08db4ca1be77a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/iter_7/complete.json": "c1a041fce104543676af55b9dbc9a2ac1a149d6cc5773aa6aa9ac39cce188ab1",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/iter_8/complete.json": "722c37313d088726ea5288db4cd3917e52f6554034f29c7de0cba48fb822b5e9",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/iter_9/complete.json": "4bff94acedec71e460b69808d86e6ce75db5c72a932b99aac30c902b4ad187a8",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/meta.json": "5bb742097fbb65ff15274997078b0bf39619ebb34ce9cb64013c7e076522d545",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx8-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_093634_ed4066420c1f463a943d7a73df856217/quality.jsonl": "866280491a259a5bba7d6d9b568def4cf9466bf70d52ef5b2205abfc280eb569"
+  },
+  "evaluator_sha256": "a801164daeae64c88ef95a20780ea91ade29c02d2cb50e1b21ff7803b371eec2",
+  "software": {
+    "python": "3.12.3",
+    "numpy": "2.4.0",
+    "scipy": "1.16.3"
+  }
+}

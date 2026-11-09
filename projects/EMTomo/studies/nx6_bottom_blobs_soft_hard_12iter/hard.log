@@ -1,0 +1,73 @@
+{
+  "state": "running",
+  "mode": "hard",
+  "pid": 1367997,
+  "started_at": "2026-11-07T19:06:44.286176+00:00",
+  "source_run": "run_onesided-full-soft50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_094430_ee66281e11c44fc8aa6262245b4d3065",
+  "experiment_id": "nx6_bottom_blobs_24x8x8_22st_600ev_noise01_pick005_seed42",
+  "config": {
+    "cell_size": 1000.0,
+    "subdivision": 8,
+    "slowness_interpolation": "nearest",
+    "initial_velocity_m_s": 5000.0,
+    "initial_gradient_m_s": null,
+    "initial_layer_boundaries_km": null,
+    "initial_layer_velocities_m_s": null,
+    "n_cycles": 12,
+    "n_candidates": 50,
+    "weights_top_n": 50,
+    "weights_min_distance": 7,
+    "candidate_mode": "hard",
+    "temperature": 1.0,
+    "weight_noise_relative_sigma": 0.01,
+    "weight_noise_absolute_sigma_s": 0.05,
+    "weight_model_sigma_s": 0.02,
+    "lambda_reg": 1.0,
+    "coverage_damping_power": 2.0,
+    "coverage_floor": 0.05,
+    "coverage_reference_percentile": 75.0,
+    "max_velocity_step_fraction": 0.02,
+    "n_workers": 4,
+    "run_name": "nx6-bottom-blobs-hard50-dmin7-12iter",
+    "run_version": "1.4",
+    "runs_dir": "/mnt/disk01/egor/projects/EMTomo/runs",
+    "save_runs": true,
+    "log_g_per_weight": true,
+    "likelihood_batch_size": 8,
+    "likelihood_batch_memory_mb": 128,
+    "compact_rays": true,
+    "fast_refinement": true,
+    "linear_solver": "auto",
+    "matrix_free_min_voxels": 8192,
+    "solver_rtol": 1e-10,
+    "solver_maxiter": null,
+    "temperature_schedule": null
+  }
+}
+Experiment nx6_bottom_blobs_24x8x8_22st_600ev_noise01_pick005_seed42: 600 events, 22 stations, inversion grid (24, 8, 8), cell 1000 m
+1/12
+[Rays] 13200/13200 reached, 0 failed, 13200 used
+2/12
+[Rays] 13200/13200 reached, 0 failed, 13200 used
+3/12
+[Rays] 13200/13200 reached, 0 failed, 13200 used
+4/12
+[Rays] 13200/13200 reached, 0 failed, 13200 used
+5/12
+[Rays] 13200/13200 reached, 0 failed, 13200 used
+6/12
+[Rays] 13200/13200 reached, 0 failed, 13200 used
+7/12
+[Rays] 13200/13200 reached, 0 failed, 13200 used
+8/12
+[Rays] 13200/13200 reached, 0 failed, 13200 used
+9/12
+[Rays] 13200/13200 reached, 0 failed, 13200 used
+10/12
+[Rays] 13200/13200 reached, 0 failed, 13200 used
+11/12
+[Rays] 13200/13200 reached, 0 failed, 13200 used
+12/12
+[Rays] 13200/13200 reached, 0 failed, 13200 used
+[TomographyLogger] Run saved to: /mnt/disk01/egor/projects/EMTomo/runs/run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e
+SAVED_RUN_ID=run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e

@@ -16,4 +16,4 @@ Full 3D errors for this selected 120-event row:
 
 These are subset location statistics, not full-catalog scores. The shared error gradient is white (#ffffff) at 0 m, blue (#0085ca) at 2000 m, and dark blue (#00239c) at 4000 m, with linear interpolation. The common scale includes all initial errors without clipping; consequently final-error colour differences are less pronounced than with the former 0–1000 m scale.
 
-Rebuild from the EMTomo directory with `python paper/make_checkerboard_locations.py`. PDF/SVG retain vector markers, lines and frame, with rasterized background fields. PNG is 300 dpi. Exact coordinates, errors in metres, source/checkpoint paths and hashes are stored in the accompanying JSON.
+Rebuild from the EMTomo directory with `python paper/paper_scripts/make_checkerboard_locations.py`. PDF/SVG retain vector markers, lines and frame, with rasterized background fields. PNG is 300 dpi. Exact coordinates, errors in metres, source/checkpoint paths and hashes are stored in the accompanying JSON.

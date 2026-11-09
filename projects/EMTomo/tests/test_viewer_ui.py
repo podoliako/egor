@@ -3,6 +3,7 @@
 QuickJS is optional for the Python project; tests skip when it is unavailable.
 """
 import json
+from math import exp
 from pathlib import Path
 
 import pytest
@@ -92,6 +93,373 @@ def _drain(context):
 
 def _value(context, expression):
     return json.loads(context.eval(f"JSON.stringify({expression})"))
+
+
+def test_hypocenter_dots_stay_smaller_than_fine_cells():
+    context = _context()
+    context.eval("""
+      const dots = hypocenterTraces([{coord: [1, 2, 3], weight: 0.75}], 0, false);
+      const plot = {
+        data: [{marker: {size: 13}}, ...dots],
+        _fullLayout: {
+          xaxis: {_length: 480, range: [0, 240]},
+          yaxis: {_length: 120, range: [120, 0]}
+        }
+      };
+      const restyles = [];
+      Plotly.restyle = (el, changes, indices) => {
+        restyles.push({changes, indices});
+        indices.forEach(i => { el.data[i].marker.size = changes['marker.size']; });
+        return Promise.resolve();
+      };
+      resizeHypocenterMarkers(plot);
+      resizeHypocenterMarkers(plot);
+    """)
+    assert _value(context, "dots[0].marker.symbol") == "circle"
+    assert _value(context, "dots[0].marker.color") == "#000000"
+    assert _value(context, "dots[0].marker.line.width") == 0
+    assert _value(context, "dots[0].x") == [3.75]
+    assert _value(context, "dots[0].y") == [8.75]
+    assert _value(context, "restyles") == [
+        {"changes": {"marker.size": 1.5}, "indices": [1]}
+    ]
+    context.eval("""
+      plot._fullLayout.xaxis.range = [0, 24];
+      plot._fullLayout.yaxis.range = [12, 0];
+      resizeHypocenterMarkers(plot);
+    """)
+    assert _value(context, "dots[0].marker.size") == 5
+    context.eval("""
+      plot._fullLayout.xaxis._length = 24;
+      resizeHypocenterMarkers(plot);
+    """)
+    assert _value(context, "dots[0].marker.size") == 1.5
+    assert _value(context, "plot.data[0].marker.size") == 13
+
+
+@pytest.mark.parametrize("hypocenters", ["[]", "null", "undefined"])
+@pytest.mark.parametrize("dim", [False, True])
+def test_hypocenter_traces_empty(hypocenters, dim):
+    context = _context()
+    assert _value(context, f"hypocenterTraces({hypocenters}, 0, {json.dumps(dim)})") == []
+
+
+@pytest.mark.parametrize("dim", [False, True])
+def test_hypocenter_traces_batch_fractional_coordinates_and_numeric_hover(dim):
+    context = _context()
+    context.eval("""
+      const hypotheses = [
+        {coord: [1.25, 2.5, 3.75], weight: 0.123456789},
+        {coord: [0, 7.3, 0.5], weight: 0},
+        {coord: [2.125, 0.25, 1.5], weight: 1}
+      ];
+    """)
+    traces = _value(context, f"hypocenterTraces(hypotheses, 7.5, {json.dumps(dim)})")
+    assert len(traces) == 1
+    trace = traces[0]
+    assert trace["type"] == "scatter"
+    assert trace["mode"] == "markers"
+    assert trace["meta"] == {"hypocenter": True}
+    assert trace["showlegend"] is False
+    assert trace["x"] == [4.375, 1.25, 6.5625]
+    assert trace["y"] == [10.625, 2.5, 5]
+    assert trace["customdata"] == [
+        [0, 4375, 7500, 10625, 0.123456789],
+        [1, 1250, 19500, 2500, 0],
+        [2, 6562.5, 1875, 5000, 1],
+    ]
+    assert all(type(value) in (int, float) for row in trace["customdata"] for value in row)
+    assert trace["hovertemplate"] == (
+        "Hypo %{customdata[0]}<br>x=%{customdata[1]:.2f}m"
+        "<br>y=%{customdata[2]:.2f}m<br>z=%{customdata[3]:.2f}m"
+        "<br>w=%{customdata[4]:.5g}<extra></extra>"
+    )
+    if dim:
+        assert trace["marker"]["opacity"] == pytest.approx([
+            1, 0.06 + 0.94 * exp(-1), 0.06 + 0.94 * exp(-5.625 / 12),
+        ])
+    else:
+        assert trace["marker"]["opacity"] == 1
+
+
+@pytest.mark.parametrize("count, trace_type", [(999, "scatter"), (1000, "scattergl"), (10000, "scattergl")])
+@pytest.mark.parametrize("dim", [False, True])
+def test_hypocenter_traces_preserve_every_point_in_one_batch(count, trace_type, dim):
+    context = _context()
+    hypotheses = [
+        {"coord": [i / 8, (i % 48) / 4, (i % 96) / 8], "weight": (i % 17) / 16}
+        for i in range(count)
+    ]
+    traces = _value(context, f"hypocenterTraces({json.dumps(hypotheses)}, 7.5, {json.dumps(dim)})")
+    assert len(traces) == 1
+    trace = traces[0]
+    assert trace["type"] == trace_type
+    assert trace["mode"] == "markers"
+    expected_rows = [
+        [i, *((coord + 0.5) * 2500 for coord in hypothesis["coord"]), hypothesis["weight"]]
+        for i, hypothesis in enumerate(hypotheses)
+    ]
+    assert trace["customdata"] == expected_rows
+    assert trace["x"] == [row[1] / 1000 for row in expected_rows]
+    assert trace["y"] == [row[3] / 1000 for row in expected_rows]
+    if dim:
+        assert trace["marker"]["opacity"] == pytest.approx([
+            0.06 + 0.94 * exp(-abs(row[2] / 1000 - 7.5) / 12)
+            for row in expected_rows
+        ])
+    else:
+        assert trace["marker"]["opacity"] == 1
+
+
+@pytest.mark.parametrize("count", [3, 10000])
+def test_hypocenter_marker_resize_changes_only_one_batch_not_other_overlays(count):
+    context = _context()
+    context.eval(f"""
+      const dots = hypocenterTraces(Array.from({{length: {count}}}, (_, i) =>
+        ({{coord: [i / 8, 2.5, 3.75], weight: 0.75}})), 7.5, true);
+    """)
+    context.eval("""
+      ST.showStations = true; ST.showEvents = true; ST.showGrid = true;
+      ST.meta.station_locs = [[1000, 2000, 0]];
+      ST.meta.event_locs = [[3000, 4000, 5000]];
+      const plot = {
+        data: [gridTrace(24, 12), ...stationTraces(-1, false, 7.5, true),
+               ...dots, ...eventTraces(-1, false, 7.5, true)],
+        _fullLayout: {
+          xaxis: {_length: 480, range: [0, 240]},
+          yaxis: {_length: 120, range: [120, 0]}
+        }
+      };
+      const restyles = [];
+      Plotly.restyle = (el, changes, indices) => {
+        restyles.push({changes, indices});
+        indices.forEach(i => { el.data[i].marker.size = changes['marker.size']; });
+        return Promise.resolve();
+      };
+    """)
+    before = _value(context, "plot.data")
+    assert len(before) == 4
+    context.eval("resizeHypocenterMarkers(plot); resizeHypocenterMarkers(plot);")
+    assert _value(context, "restyles") == [
+        {"changes": {"marker.size": 1.5}, "indices": [2]},
+    ]
+    before[2]["marker"]["size"] = 1.5
+    assert _value(context, "plot.data") == before
+    context.eval("""
+      plot._fullLayout.xaxis.range = [0, 24];
+      plot._fullLayout.yaxis.range = [12, 0];
+      resizeHypocenterMarkers(plot);
+      resizeHypocenterMarkers(plot);
+    """)
+    assert _value(context, "restyles") == [
+        {"changes": {"marker.size": 1.5}, "indices": [2]},
+        {"changes": {"marker.size": 5}, "indices": [2]},
+    ]
+    before[2]["marker"]["size"] = 5
+    assert _value(context, "plot.data") == before
+
+
+def test_weight_hypocenter_defaults_show_only_best():
+    context = _context()
+    assert _value(context, "[ST.wt.showPoints, ST.wt.showBest, ST.wt.showMean]") == [False, True, False]
+    traces = _value(context, """weightHypocenterTraces([
+      {coord: [0, 0, 0], weight: 2}, {coord: [1, 2, 3], weight: 6}
+    ], 0, false)""")
+    assert len(traces) == 1
+    assert traces[0]["meta"] == {"weightSummary": "best"}
+    assert traces[0]["customdata"] == [[3750, 6250, 8750]]
+    assert traces[0]["type"] == "scatter"
+
+
+@pytest.mark.parametrize("panel_y", [1.25, 101.25])
+@pytest.mark.parametrize("dim", [False, True])
+def test_weight_hypocenter_summaries_normalize_all_3d_hypotheses(panel_y, dim):
+    context = _context()
+    context.eval("""
+      ST.wt.showBest = true; ST.wt.showMean = true;
+      const hypotheses = [
+        {coord: [0, 0, 2], weight: 2},
+        {coord: [4, 20, 6], weight: 6},
+        {coord: [10, 40, 0], weight: 2}
+      ];
+    """)
+    traces = _value(context, f"weightHypocenterTraces(hypotheses, {panel_y}, {json.dumps(dim)})")
+    assert len(traces) == 2
+    summaries = {trace["meta"]["weightSummary"]: trace for trace in traces}
+    expected = {
+        "best": ([11250, 51250, 16250], "#d62728", "circle"),
+        "mean": ([12250, 51250, 11250], "#169447", "diamond"),
+    }
+    for kind, (metric, color, symbol) in expected.items():
+        trace = summaries[kind]
+        assert trace["meta"] == {"weightSummary": kind}
+        assert trace["type"] == "scatter"
+        assert trace["mode"] == "markers"
+        assert trace["customdata"][0] == pytest.approx(metric)
+        assert trace["x"] == pytest.approx([metric[0] / 1000])
+        assert trace["y"] == pytest.approx([metric[2] / 1000])
+        assert trace["marker"]["color"] == color
+        assert trace["marker"]["symbol"] == symbol
+        assert trace["marker"]["size"] == 12
+        opacity = 0.06 + 0.94 * exp(-abs(metric[1] / 1000 - panel_y) / 12) if dim else 1
+        assert trace["marker"]["opacity"] == pytest.approx(opacity)
+
+
+@pytest.mark.parametrize("scale", [1, 1e308])
+def test_weight_hypocenter_summaries_first_tie_and_overflow_safe_mean(scale):
+    context = _context()
+    context.eval(f"const scale = {scale}; ST.wt.showMean = true;")
+    traces = _value(context, """weightHypocenterTraces([
+      {coord: [10, 10, 10], weight: scale / 2},
+      {coord: [0, 2, 4], weight: scale},
+      {coord: [4, 6, 8], weight: scale}
+    ], 0, false)""")
+    assert len(traces) == 2
+    summaries = {trace["meta"]["weightSummary"]: trace for trace in traces}
+    assert summaries["best"]["customdata"] == [[1250, 6250, 11250]]
+    assert "Hypo 1" in summaries["best"]["hovertemplate"]
+    assert summaries["mean"]["customdata"][0] == pytest.approx([10250, 14250, 18250])
+    assert summaries["mean"]["x"] == pytest.approx([10.25])
+    assert summaries["mean"]["y"] == pytest.approx([18.25])
+
+
+@pytest.mark.parametrize("hypotheses", ["[]", "null", "undefined"])
+@pytest.mark.parametrize("show_points", [False, True])
+def test_weight_hypocenter_summaries_no_data(hypotheses, show_points):
+    context = _context()
+    context.eval(f"Object.assign(ST.wt, {{showPoints: {json.dumps(show_points)}, showBest: true, showMean: true}})")
+    assert _value(context, f"weightHypocenterTraces({hypotheses}, 0, false)") == []
+
+
+@pytest.mark.parametrize("show_best", [False, True])
+def test_weight_hypocenter_zero_total_omits_mean_but_can_show_first_best(show_best):
+    context = _context()
+    context.eval(f"ST.wt.showMean = true; ST.wt.showBest = {json.dumps(show_best)};")
+    traces = _value(context, """weightHypocenterTraces([
+      {coord: [1, 2, 3], weight: 0}, {coord: [9, 8, 7], weight: 0}
+    ], 0, false)""")
+    assert len(traces) == int(show_best)
+    if show_best:
+        assert traces[0]["meta"] == {"weightSummary": "best"}
+        assert traces[0]["customdata"] == [[3750, 6250, 8750]]
+
+
+@pytest.mark.parametrize("invalid", [
+    *[f"{{coord: [99, 99, 99], weight: {weight}}}" for weight in
+      ["-1", "NaN", "Infinity", "-Infinity", "'100'", "null", "undefined"]],
+    *[f"{{coord: {coord}, weight: 1e300}}" for coord in
+      ["null", "undefined", "[]", "[1, 2]", "[1, 2, 3, 4]",
+       "[NaN, 2, 3]", "[1, Infinity, 3]", "[1, 2, -Infinity]", "[1, '2', 3]"]],
+])
+def test_weight_hypocenter_summaries_exclude_invalid_weights_and_coordinates(invalid):
+    context = _context()
+    context.eval(f"const invalid = {invalid}; ST.wt.showMean = true;")
+    assert _value(context, "weightHypocenterTraces([invalid], 0, false)") == []
+    traces = _value(context, """weightHypocenterTraces([
+      invalid, {coord: [0, 0, 0], weight: 2}, {coord: [4, 8, 12], weight: 6}
+    ], 0, false)""")
+    assert len(traces) == 2
+    summaries = {trace["meta"]["weightSummary"]: trace for trace in traces}
+    assert summaries["best"]["customdata"] == [[11250, 21250, 31250]]
+    assert "Hypo 2" in summaries["best"]["hovertemplate"]
+    assert summaries["mean"]["customdata"][0] == pytest.approx([8750, 16250, 23750])
+
+
+@pytest.mark.parametrize("count", [999, 1000, 10000])
+@pytest.mark.parametrize("show_points", [False, True])
+@pytest.mark.parametrize("show_best", [False, True])
+@pytest.mark.parametrize("show_mean", [False, True])
+def test_weight_hypocenter_optional_trace_counts_and_renderer(count, show_points, show_best, show_mean):
+    context = _context()
+    context.eval(f"""
+      Object.assign(ST.wt, {json.dumps(dict(showPoints=show_points, showBest=show_best, showMean=show_mean))});
+      const hypotheses = Array.from({{length: {count}}}, (_, i) =>
+        ({{coord: [i / 8, (i % 48) / 4, (i % 96) / 8], weight: (i % 17) / 16}}));
+      const traces = weightHypocenterTraces(hypotheses, 7.5, true);
+    """)
+    assert _value(context, "traces.length") == sum([show_points, show_best, show_mean])
+    metadata = _value(context, "traces.map(trace => trace.meta)")
+    assert metadata.count({"hypocenter": True}) == int(show_points)
+    assert metadata.count({"weightSummary": "best"}) == int(show_best)
+    assert metadata.count({"weightSummary": "mean"}) == int(show_mean)
+    trace_type = "scattergl" if show_points and count >= 1000 else "scatter"
+    assert _value(context, "traces.map(trace => trace.type)") == [trace_type] * len(metadata)
+    if show_points:
+        assert _value(context, "traces[0].x.length") == count
+        assert _value(context, "traces[0].marker.color") == "#000000"
+        assert _value(context, "JSON.stringify(traces[0]) === JSON.stringify(hypocenterTraces(hypotheses, 7.5, true)[0])") is True
+
+
+@pytest.mark.parametrize("show_points", [False, True])
+def test_weight_hypocenter_marker_resize_never_shrinks_summaries(show_points):
+    context = _context()
+    context.eval(f"ST.wt.showPoints = {json.dumps(show_points)}; ST.wt.showMean = true;")
+    context.eval("""
+      const plot = {
+        data: weightHypocenterTraces(Array.from({length: 10000}, (_, i) =>
+          ({coord: [i / 8, 2.5, 3.75], weight: 0.75})), 7.5, true),
+        _fullLayout: {
+          xaxis: {_length: 480, range: [0, 240]},
+          yaxis: {_length: 120, range: [120, 0]}
+        }
+      };
+      const restyles = [];
+      Plotly.restyle = (el, changes, indices) => {
+        restyles.push({changes, indices});
+        indices.forEach(i => { el.data[i].marker.size = changes['marker.size']; });
+        return Promise.resolve();
+      };
+    """)
+    before = _value(context, "plot.data.filter(trace => trace.meta.weightSummary)")
+    context.eval("resizeHypocenterMarkers(plot); resizeHypocenterMarkers(plot);")
+    assert _value(context, "restyles") == (
+        [{"changes": {"marker.size": 1.5}, "indices": [0]}] if show_points else []
+    )
+    assert _value(context, "plot.data.filter(trace => trace.meta.weightSummary)") == before
+    assert [trace["marker"]["size"] for trace in before] == [12, 12]
+
+
+def test_weight_hypocenter_checkboxes_independently_update_state_and_render():
+    context = _context()
+    context.eval("""
+      const urls = [];
+      const sample = {slice: [[1, 2], [3, 4]], shape: [2, 2], full_shape: [96, 48, 48],
+        cell_size: 2500, hypocenters: [
+          {coord: [0, 0, 0], weight: 2}, {coord: [4, 20, 6], weight: 6}
+        ]};
+      const fetch = url => {
+        urls.push(url);
+        return Promise.resolve({ok: true, json: () => Promise.resolve(sample)});
+      };
+      ST.wt.y = 8.75;
+      renderWt();
+    """)
+    _drain(context)
+    assert _value(context, "rendered['plot-wt'].traces.map(trace => trace.meta?.weightSummary).filter(Boolean)") == ["best"]
+    states = {"showPoints": False, "showBest": True, "showMean": False}
+    other_state = _value(context, "[ST.rc, ST.G, ST.showEvents, ST.showStations]")
+    for request_count, (control, key, checked) in enumerate([
+        ("cb-wt-points", "showPoints", True),
+        ("cb-wt-mean", "showMean", True),
+        ("cb-wt-best", "showBest", False),
+        ("cb-wt-points", "showPoints", False),
+        ("cb-wt-best", "showBest", True),
+        ("cb-wt-mean", "showMean", False),
+    ], start=2):
+        event = json.dumps({"target": {"checked": checked}})
+        context.eval(f"elements['{control}'].listeners.change({event})")
+        _drain(context)
+        states[key] = checked
+        assert _value(context, "[ST.wt.showPoints, ST.wt.showBest, ST.wt.showMean]") == list(states.values())
+        assert _value(context, "[ST.wt.y, ST.wt.dim, ST.wt.event]") == [8.75, True, 0]
+        assert _value(context, "[ST.rc, ST.G, ST.showEvents, ST.showStations]") == other_state
+        assert _value(context, "urls") == [
+            "/api/runs/run-test/slice?type=weights&event=0&iter=0&y_km=8.75"
+        ] * request_count
+        metadata = _value(context, "rendered['plot-wt'].traces.map(trace => trace.meta).filter(Boolean)")
+        assert metadata.count({"hypocenter": True}) == int(states["showPoints"])
+        assert metadata.count({"weightSummary": "best"}) == int(states["showBest"])
+        assert metadata.count({"weightSummary": "mean"}) == int(states["showMean"])
 
 
 def test_y_control_is_in_km_and_default_step_is_one_tenth_of_width():

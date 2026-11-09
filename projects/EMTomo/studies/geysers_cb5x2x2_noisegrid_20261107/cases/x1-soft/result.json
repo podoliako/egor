@@ -1,0 +1,20 @@
+{
+  "status": "completed",
+  "case_id": "x1-soft",
+  "pid": 1382049,
+  "started_at": "2026-11-07T20:45:14.073211+00:00",
+  "actual_noise": {
+    "relative_sigma": 0.01,
+    "absolute_sigma_s": 0.05,
+    "seed": 42
+  },
+  "assumed_noise": {
+    "relative_sigma": 0.01,
+    "absolute_sigma_s": 0.05,
+    "model_sigma_s": 0.02
+  },
+  "run_id": "run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889",
+  "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889",
+  "final_model_sha256": "d7d163818d4732bbf80ee5b48ae8d07e8d9a1d4b1c511f0b0c420a5c5c35e625",
+  "finished_at": "2026-11-08T01:48:28.755708+00:00"
+}

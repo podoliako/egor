@@ -1,0 +1,18 @@
+{
+  "status": "running",
+  "case_id": "x1-soft",
+  "pid": 1376913,
+  "started_at": "2026-11-07T20:05:48.296647+00:00",
+  "actual_noise": {
+    "relative_sigma": 0.01,
+    "absolute_sigma_s": 0.05,
+    "seed": 42
+  },
+  "assumed_noise": {
+    "relative_sigma": 0.01,
+    "absolute_sigma_s": 0.05,
+    "model_sigma_s": 0.02
+  },
+  "run_id": "run_geysers-nx6-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_200601_f7d64a4c28a14e27b0a45d90e21ee2a7",
+  "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-nx6-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_200601_f7d64a4c28a14e27b0a45d90e21ee2a7"
+}

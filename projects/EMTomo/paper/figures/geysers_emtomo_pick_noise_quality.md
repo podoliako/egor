@@ -9,4 +9,4 @@ top and bottom axes describe the same noise levels, not independent experiments.
 All inversion settings, including assumed noise, remain fixed. One paired seed,
 no replicate-based uncertainty estimates. See CSV/JSON for all scores and provenance.
 
-Rebuild: `python -B paper/make_geysers_noise_quality.py`. No solves are launched.
+Rebuild: `python -B paper/paper_scripts/make_geysers_noise_quality.py`. No solves are launched.

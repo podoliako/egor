@@ -1,0 +1,119 @@
+{
+  "state": "completed",
+  "pid": 1382048,
+  "started_at": "2026-11-07T20:45:13.037511+00:00",
+  "cases": {
+    "x1-soft": {
+      "state": "completed",
+      "pid": 1382049,
+      "started_at": "2026-11-07T20:45:13.039277+00:00",
+      "run_id": "run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889",
+      "completed_iterations": 12,
+      "finished_at": "2026-11-08T01:48:31.253756+00:00",
+      "returncode": 0,
+      "timed_out": false
+    },
+    "x1-hard": {
+      "state": "completed",
+      "pid": 1382050,
+      "started_at": "2026-11-07T20:45:13.040297+00:00",
+      "run_id": "run_geysers-crop800-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_6b62894a48ed4afdb0fd7d213b6eafa8",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_6b62894a48ed4afdb0fd7d213b6eafa8",
+      "completed_iterations": 12,
+      "finished_at": "2026-11-07T22:56:10.209674+00:00",
+      "returncode": 0,
+      "timed_out": false
+    },
+    "x0p5-soft": {
+      "state": "completed",
+      "pid": 1382051,
+      "started_at": "2026-11-07T20:45:13.041468+00:00",
+      "run_id": "run_geysers-crop800-noise-x0p5-soft_v1.4_level-x0p5_mode-soft_ncand-50_topn-50_dmin-7_20261107_204526_f7d275af26d3435b90c61153e8879748",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p5-soft_v1.4_level-x0p5_mode-soft_ncand-50_topn-50_dmin-7_20261107_204526_f7d275af26d3435b90c61153e8879748",
+      "completed_iterations": 12,
+      "finished_at": "2026-11-08T01:33:17.648725+00:00",
+      "returncode": 0,
+      "timed_out": false
+    },
+    "x0p5-hard": {
+      "state": "completed",
+      "pid": 1382052,
+      "started_at": "2026-11-07T20:45:13.042415+00:00",
+      "run_id": "run_geysers-crop800-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_604003c4a0004a8589c29a4d91f2ba18",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_604003c4a0004a8589c29a4d91f2ba18",
+      "completed_iterations": 12,
+      "finished_at": "2026-11-07T22:55:14.153228+00:00",
+      "returncode": 0,
+      "timed_out": false
+    },
+    "x2-soft": {
+      "state": "completed",
+      "pid": 1392644,
+      "started_at": "2026-11-07T22:55:14.156952+00:00",
+      "run_id": "run_geysers-crop800-noise-x2-soft_v1.4_level-x2_mode-soft_ncand-50_topn-50_dmin-7_20261107_225515_a4e7056b2203486ab341dc040227d884",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x2-soft_v1.4_level-x2_mode-soft_ncand-50_topn-50_dmin-7_20261107_225515_a4e7056b2203486ab341dc040227d884",
+      "completed_iterations": 12,
+      "finished_at": "2026-11-08T03:45:45.775644+00:00",
+      "returncode": 0,
+      "timed_out": false
+    },
+    "x2-hard": {
+      "state": "completed",
+      "pid": 1392739,
+      "started_at": "2026-11-07T22:56:10.212438+00:00",
+      "run_id": "run_geysers-crop800-noise-x2-hard_v1.4_level-x2_mode-hard_ncand-50_topn-50_dmin-7_20261107_225611_264076196ac24f2683e7950e9304c30b",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x2-hard_v1.4_level-x2_mode-hard_ncand-50_topn-50_dmin-7_20261107_225611_264076196ac24f2683e7950e9304c30b",
+      "completed_iterations": 12,
+      "finished_at": "2026-11-08T01:11:23.128990+00:00",
+      "returncode": 0,
+      "timed_out": false
+    },
+    "x0p75-soft": {
+      "state": "completed",
+      "pid": 1397835,
+      "started_at": "2026-11-08T01:11:23.132823+00:00",
+      "run_id": "run_geysers-crop800-noise-x0p75-soft_v1.4_level-x0p75_mode-soft_ncand-50_topn-50_dmin-7_20261108_011124_f3b5b65a40114ad98f01fadaaa04d8b8",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p75-soft_v1.4_level-x0p75_mode-soft_ncand-50_topn-50_dmin-7_20261108_011124_f3b5b65a40114ad98f01fadaaa04d8b8",
+      "completed_iterations": 12,
+      "finished_at": "2026-11-08T05:56:58.911592+00:00",
+      "returncode": 0,
+      "timed_out": false
+    },
+    "x0p75-hard": {
+      "state": "completed",
+      "pid": 1398475,
+      "started_at": "2026-11-08T01:33:17.650239+00:00",
+      "run_id": "run_geysers-crop800-noise-x0p75-hard_v1.4_level-x0p75_mode-hard_ncand-50_topn-50_dmin-7_20261108_013318_01a4730c3d0a4e3995435f048bb3e57c",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p75-hard_v1.4_level-x0p75_mode-hard_ncand-50_topn-50_dmin-7_20261108_013318_01a4730c3d0a4e3995435f048bb3e57c",
+      "completed_iterations": 12,
+      "finished_at": "2026-11-08T03:44:01.593785+00:00",
+      "returncode": 0,
+      "timed_out": false
+    },
+    "x1p5-soft": {
+      "state": "completed",
+      "pid": 1399093,
+      "started_at": "2026-11-08T01:48:31.255296+00:00",
+      "run_id": "run_geysers-crop800-noise-x1p5-soft_v1.4_level-x1p5_mode-soft_ncand-50_topn-50_dmin-7_20261108_014832_501405498a9442429c8b81e8cae9bc48",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x1p5-soft_v1.4_level-x1p5_mode-soft_ncand-50_topn-50_dmin-7_20261108_014832_501405498a9442429c8b81e8cae9bc48",
+      "completed_iterations": 12,
+      "finished_at": "2026-11-08T06:33:56.928842+00:00",
+      "returncode": 0,
+      "timed_out": false
+    },
+    "x1p5-hard": {
+      "state": "completed",
+      "pid": 1403277,
+      "started_at": "2026-11-08T03:44:01.595778+00:00",
+      "run_id": "run_geysers-crop800-noise-x1p5-hard_v1.4_level-x1p5_mode-hard_ncand-50_topn-50_dmin-7_20261108_034402_711ba93edc74495496f5035c761ec93f",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x1p5-hard_v1.4_level-x1p5_mode-hard_ncand-50_topn-50_dmin-7_20261108_034402_711ba93edc74495496f5035c761ec93f",
+      "completed_iterations": 12,
+      "finished_at": "2026-11-08T05:57:14.666522+00:00",
+      "returncode": 0,
+      "timed_out": false
+    }
+  },
+  "updated_at": "2026-11-08T06:33:57.185568+00:00",
+  "finished_at": "2026-11-08T06:33:57.185554+00:00"
+}

@@ -1,0 +1,60 @@
+{
+  "source_model_article_doi": "10.1093/gji/ggab017",
+  "published_relocation_events": 2934,
+  "published_origin_min_utc": "2011-01-01T00:58:13.140000+00:00",
+  "published_origin_max_utc": "2011-12-31T22:27:19.080000+00:00",
+  "published_events_by_month": {
+    "1": 243,
+    "2": 192,
+    "3": 265,
+    "4": 331,
+    "5": 254,
+    "6": 281,
+    "7": 220,
+    "8": 239,
+    "9": 274,
+    "10": 175,
+    "11": 248,
+    "12": 212
+  },
+  "our_original_catalog_events": 3776,
+  "our_train_events": 3471,
+  "our_time_window_utc": [
+    "2011-04-01T00:00:00+00:00",
+    "2011-04-21T00:00:00+00:00"
+  ],
+  "published_relocations_in_our_window": 239,
+  "candidate_match_rule": {
+    "absolute_origin_difference_s_max": 0.5,
+    "horizontal_distance_km_max": 2,
+    "horizontal_projection": "110.574 km/degree latitude, 111.320*cos(38.80275 deg) km/degree longitude",
+    "match_selection": "nearest origin time in our original catalog; not an event-ID join"
+  },
+  "candidate_matches": 236,
+  "unique_our_candidate_event_ids": 236,
+  "candidate_matches_in_train": 236,
+  "candidate_matches_with_second_event_within_time_tolerance": 0,
+  "max_matched_origin_difference_s": 0.309999942779541,
+  "max_matched_horizontal_distance_km": 1.168199202103131,
+  "limitations": [
+    "Published relocation CSV has no event IDs or station/pick observations.",
+    "Candidate matches are not proof of identical P picks.",
+    "Published final relocation list (2934) is not the identical list of final Vp absolute-time input events (2937 reported in article)."
+  ],
+  "article_text_url": "https://par.nsf.gov/biblio/10316216/media/xml",
+  "article_vp_inputs_section_4_1": {
+    "initial_selected_events": 2994,
+    "network_stations": 34,
+    "absolute_times": 74652,
+    "absolute_time_events": 2937,
+    "catalogue_differential_times": 6222632,
+    "wcc_differential_times": 361752,
+    "absolute_time_processing": "Automatic AIC repicking in waveform windows around catalogue picks",
+    "solver": "tomoTD with station corrections"
+  },
+  "source_sha256": {
+    "geysers_2021/Geysers_EQReloc_Guo-Thurber2021GJI.CSV": "38c25e24f7ab501460c86c9b9669a0034586d3d5226af6cb2eee5e97f9dc1dba",
+    "geysers_2011/real_experiment_v1/catalog.csv": "90b2ead26ddc599accd611e5c9db269c92e327e31795a8fa101694b35f5bcdf4",
+    "geysers_2011/real_experiment_v1/split_counts.csv": "bc2c09e180599cc50f9ff2148a0730522f782215c7de377f4112126bbff21dd6"
+  }
+}

@@ -17,6 +17,7 @@ from velocity_model import VelocityModel
 from .tomography_events import EventSettings, IterationFields, run_events, validate_arrivals
 from .tomography_logging import TomographyLogger, summarize_ray_status
 from .tomography_math import MatrixFreeNormalEquations, accumulate_normal_equations, solve_slowness_update
+from .tomography_validation import evaluate_control_rmse, split_control_arrivals
 
 # Recorded in meta.json so that runs with different formulations are not compared.
 METHOD_DESCRIPTION = {
@@ -24,6 +25,8 @@ METHOD_DESCRIPTION = {
     "normal_equations": "station_precision_weighted_profiled_origin",
     "candidate_selection": "likelihood_shortlist_of_n_candidates_refined_then_best_top_n",
     "travel_times": "skfmm_order2_exact_station_homogeneous_sphere_v2",
+    "early_stopping": "held_out_pick_rmse_consecutive_insufficient_relative_improvements_min_3_updates",
+    "control_prediction": "best_refined_training_hypocentre_precision_weighted_training_origin",
 }
 _RUNTIME_FIELDS = ("runs_dir", "save_runs")
 
@@ -71,13 +74,40 @@ def run_em(
 ) -> Optional[TomographyLogger]:
     """Alternate hypocentre hypotheses (E-step) and one damped slowness update (M-step).
 
-    Runs ``config.n_cycles`` cycles. ``reference_model`` is used only for the
-    quality log. Returns the run logger, or None when runs are not saved.
+    Runs at most ``config.n_cycles`` cycles, with a fixed held-out pick split.
+    Stops after consecutive insufficient relative control-RMSE improvements,
+    never before three full updates. Each score relocalizes events in the updated
+    model using training picks only. The stopping update is retained, not rolled
+    back. With no control picks, runs all requested cycles. ``reference_model``
+    is used only for quality logging, never for stopping or fitting.
+    Returns the run logger, or None when runs are not saved.
     Arrivals are dense (events, global stations); NaN marks unobserved P picks.
     Each event must have at least two finite picks; infinities are rejected.
     """
     stations_m = np.asarray(stations_m, dtype=np.float64)
     arrivals = validate_arrivals(arrivals, len(stations_m))
+    training_arrivals, control_mask = split_control_arrivals(
+        arrivals, fraction=config.control_fraction, seed=config.control_seed,
+        min_training_picks=config.control_min_training_picks,
+    )
+    n_observed = int(np.count_nonzero(np.isfinite(arrivals)))
+    n_control = int(np.count_nonzero(control_mask))
+    control_split = {
+        "seed": int(config.control_seed),
+        "requested_fraction": float(config.control_fraction),
+        "actual_fraction": n_control / n_observed if n_observed else 0.0,
+        "n_observed": n_observed,
+        "n_control": n_control,
+        "n_training": n_observed - n_control,
+        "min_training_picks": int(config.control_min_training_picks),
+        "enabled": n_control > 0,
+    }
+    if n_control:
+        print(f"[Control] Held out {n_control}/{n_observed} picks "
+              f"({control_split['actual_fraction']:.2%}), seed={config.control_seed}", flush=True)
+    else:
+        reason = "disabled" if config.control_fraction == 0 else "no eligible control picks"
+        print(f"[Control] Early stopping {reason}; running up to {config.n_cycles} updates", flush=True)
     run_name = run_name or config.run_name
     if config.save_runs and logger is None:
         logger = TomographyLogger(
@@ -111,6 +141,8 @@ def run_em(
             coarse_side_m=round(initial_model.cell_size, 2),
             fine_side_m=round(fine_side, 2),
             viewer_quality_expected=reference_model is not None,
+            control_n_picks=n_control,
+            control_actual_fraction=control_split["actual_fraction"],
         )
         grid_info = {
             "coarse_cell_size": initial_model.cell_size,
@@ -121,6 +153,8 @@ def run_em(
             "fine_side_m": [initial_model.cell_size * n for n in initial_model.shape],
         }
         logger.save_initial_model(initial_model.velocity)
+        logger._save_npy(logger.run_dir / "control_mask.npy", control_mask)
+        logger._save_json(logger.run_dir / "control_split.json", control_split)
         # meta.json is the ready marker consumed by the live viewer.
         logger.save_meta(
             run_params=run_params,
@@ -131,6 +165,9 @@ def run_em(
         )
 
     model = initial_model
+    previous_rmse = None
+    insufficient_steps = 0
+    stop_reason = "max_cycles"
     for iteration in range(config.n_cycles):
         print(f"{iteration + 1}/{config.n_cycles}", flush=True)
         if logger is not None:
@@ -140,12 +177,39 @@ def run_em(
         step_config = (replace(config, temperature=config.temperature_schedule[iteration])
                        if config.temperature_schedule is not None else config)
         delta_s, sensitivity, confidence = make_tomography_step(
-            model, arrivals, stations_m, noise, step_config, iteration=iteration, logger=logger,
+            model, training_arrivals, stations_m, noise, step_config, iteration=iteration, logger=logger,
         )
         model = VelocityModel(
             update_velocity(model.velocity, delta_s, config.max_velocity_step_fraction),
             model.cell_size,
         )
+
+        control_score = None
+        if n_control:
+            started = perf_counter()
+            rmse = evaluate_control_rmse(
+                model, training_arrivals, arrivals, control_mask, stations_m, noise, step_config,
+            )
+            improvement = None
+            if previous_rmse is not None:
+                # Zero is already a perfect score: it cannot improve relatively.
+                improvement = ((previous_rmse - rmse) / previous_rmse
+                               if previous_rmse > 0 else None)
+                significant = rmse < previous_rmse * (1 - config.early_stopping_min_relative_improvement)
+                insufficient_steps = 0 if significant else insufficient_steps + 1
+            should_stop = iteration + 1 >= 3 and insufficient_steps >= config.early_stopping_patience
+            control_score = {
+                "iter": iteration,
+                "n_control": n_control,
+                "rmse_s": rmse,
+                "relative_improvement": improvement,
+                "insufficient_steps": insufficient_steps,
+                "stop": should_stop,
+                "wall_s": perf_counter() - started,
+            }
+            print(f"[Control] RMSE={rmse:.6g} s; insufficient improvements "
+                  f"{insufficient_steps}/{config.early_stopping_patience}", flush=True)
+            previous_rmse = rmse
 
         if logger is not None:
             logger.end_iteration(iteration)
@@ -153,6 +217,8 @@ def run_em(
             logger.save_inversion_diagnostics(iteration, sensitivity, confidence)
             if reference_model is not None:
                 logger.save_quality(iteration, *model_errors(model.velocity, reference_model.velocity))
+            if control_score is not None:
+                logger._save_json(logger.iter_dir(iteration) / "control.json", control_score)
             if config.temperature_schedule is not None:
                 logger._save_json(
                     logger.iter_dir(iteration) / "temperature.json",
@@ -160,9 +226,25 @@ def run_em(
                 )
             logger.complete_iteration(iteration)
 
+        if control_score is not None and control_score["stop"]:
+            stop_reason = "control_rmse_plateau"
+            print(
+                f"[EM] Stopping after {iteration + 1} velocity updates: control RMSE "
+                f"did not improve by more than {config.early_stopping_min_relative_improvement:.2%} "
+                f"for {insufficient_steps} consecutive steps",
+                flush=True,
+            )
+            break
+
     if logger is not None:
         logger.save_final_model(model.velocity)
         logger.save_timing_summary()
+        logger._save_json(logger.run_dir / "stopping.json", {
+            "reason": stop_reason,
+            "completed_updates": iteration + 1,
+            "control_rmse_s": previous_rmse,
+            "insufficient_steps": insufficient_steps,
+        })
         print(f"[TomographyLogger] Run saved to: {logger.run_dir}")
     return logger
 

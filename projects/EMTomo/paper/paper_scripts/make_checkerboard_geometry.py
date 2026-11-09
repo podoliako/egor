@@ -12,9 +12,9 @@ from matplotlib.patches import Rectangle, Polygon
 
 import numpy as np
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42"
-OUTPUT = Path(__file__).resolve().parent / "figures"
+OUTPUT = Path(__file__).resolve().parents[1] / "figures"
 STEM = "checkerboard_nx6_geometry"
 
 
@@ -99,11 +99,11 @@ def main():
     assert initial_model.shape == (24, 12, 12) and np.all(initial_model == 5.0)
     with np.load(dd_path, allow_pickle=False) as state:
         assert np.all(state["initial_vp"] == 5.0)
-    fig = plt.figure(figsize=(17.0, 3.5), layout="constrained")
-    grid = fig.add_gridspec(1, 5, width_ratios=(2, 2, 1, 2, .07), wspace=.08)
-    axes = [fig.add_subplot(grid[0, i]) for i in range(4)]
-    top, side, cross, initial_ax = axes
-    color_ax = fig.add_subplot(grid[0, 4])
+    fig = plt.figure(figsize=(12.5, 3.5), layout="constrained")
+    grid = fig.add_gridspec(1, 4, width_ratios=(2, 2, 1, .07), wspace=.08)
+    axes = [fig.add_subplot(grid[0, i]) for i in range(3)]
+    top, side, cross = axes
+    color_ax = fig.add_subplot(grid[0, 3])
     top.imshow(velocity[:, :, 0].T, origin="lower", extent=(0, extent[0], 0, extent[1]),
                cmap=cmap, norm=norm, interpolation="nearest", aspect="equal")
     side.imshow(velocity[:, section_index, :].T, origin="upper",
@@ -147,10 +147,7 @@ def main():
         ax.set_axisbelow(True)
     cross.set(title="(c)  $X = 6$ km", xlabel="$Y$ (km)", ylabel="Depth (km)",
               xlim=(0, extent[1]), ylim=(extent[2], 0), xticks=np.arange(0, 13, 4))
-    initial_ax.imshow(initial_model[:, int(section_y), :].T, origin="upper",
-                      extent=(0, extent[0], extent[2], 0), cmap=cmap, norm=norm,
-                      interpolation="nearest", aspect="equal")
-    initial_ax.set(title="(d)  Initial model · EM & DD", ylabel="Depth (km)", ylim=(extent[2], 0))
+
     for ax in axes:
         map_frame(ax)
     colorbar = fig.colorbar(image, cax=color_ax, ticks=[4.75, 5.0, 5.25])

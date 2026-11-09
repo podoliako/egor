@@ -1,0 +1,20 @@
+{
+  "status": "completed",
+  "case_id": "x2-soft",
+  "pid": 1392644,
+  "started_at": "2026-11-07T22:55:14.986155+00:00",
+  "actual_noise": {
+    "relative_sigma": 0.02,
+    "absolute_sigma_s": 0.1,
+    "seed": 42
+  },
+  "assumed_noise": {
+    "relative_sigma": 0.01,
+    "absolute_sigma_s": 0.05,
+    "model_sigma_s": 0.02
+  },
+  "run_id": "run_geysers-crop800-noise-x2-soft_v1.4_level-x2_mode-soft_ncand-50_topn-50_dmin-7_20261107_225515_a4e7056b2203486ab341dc040227d884",
+  "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x2-soft_v1.4_level-x2_mode-soft_ncand-50_topn-50_dmin-7_20261107_225515_a4e7056b2203486ab341dc040227d884",
+  "final_model_sha256": "836a1625494567606012f36d3066e369c9532a993fa48abe6ad57632c5fe9115",
+  "finished_at": "2026-11-08T03:45:42.797805+00:00"
+}

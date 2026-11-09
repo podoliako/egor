@@ -1,0 +1,310 @@
+{
+  "columns": [
+    "EMTomo oracle",
+    "EMTomo hard",
+    "EMTomo soft",
+    "tomoDD",
+    "tomoDD oracle"
+  ],
+  "rows": [
+    {
+      "geometry": "synthetic",
+      "section_axis": "Y",
+      "section_coordinate_km": 2.4,
+      "emtomo_updates": 12,
+      "soft_top_n": 10,
+      "n_candidates": 15,
+      "weights_min_distance": 1,
+      "em_runs": [
+        "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553",
+        "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a"
+      ],
+      "dd_run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5",
+      "dd_iterations": 3,
+      "slice_ranges_km_s": {
+        "EMTomo oracle": [
+          3.9999999999999996,
+          5.940338352185393
+        ],
+        "EMTomo hard": [
+          3.7520558531470147,
+          6.025922884628654
+        ],
+        "EMTomo soft": [
+          3.7503680750035366,
+          6.024415460045138
+        ],
+        "tomoDD": [
+          4.3678960351562495,
+          6.41269684375
+        ],
+        "tomoDD oracle": [
+          3.853450445696517,
+          6.57105403337428
+        ]
+      }
+    },
+    {
+      "geometry": "synthetic",
+      "section_axis": "Y",
+      "section_coordinate_km": 4.8,
+      "emtomo_updates": 12,
+      "soft_top_n": 10,
+      "n_candidates": 15,
+      "weights_min_distance": 1,
+      "em_runs": [
+        "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553",
+        "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a"
+      ],
+      "dd_run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5",
+      "dd_iterations": 3,
+      "slice_ranges_km_s": {
+        "EMTomo oracle": [
+          3.9552491283626847,
+          5.699999999999994
+        ],
+        "EMTomo hard": [
+          3.762931604321011,
+          5.826763691151569
+        ],
+        "EMTomo soft": [
+          3.7625565763971154,
+          5.821954472839897
+        ],
+        "tomoDD": [
+          4.357935156249999,
+          5.798552640625
+        ],
+        "tomoDD oracle": [
+          3.8570241421978317,
+          5.815764771081256
+        ]
+      }
+    },
+    {
+      "geometry": "synthetic",
+      "section_axis": "Z",
+      "section_coordinate_km": 2.5,
+      "emtomo_updates": 12,
+      "soft_top_n": 10,
+      "n_candidates": 15,
+      "weights_min_distance": 1,
+      "em_runs": [
+        "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553",
+        "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a"
+      ],
+      "dd_run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5",
+      "dd_iterations": 3,
+      "slice_ranges_km_s": {
+        "EMTomo oracle": [
+          4.931586255539215,
+          5.888395358203148
+        ],
+        "EMTomo hard": [
+          4.752104007459345,
+          6.0143556419497015
+        ],
+        "EMTomo soft": [
+          4.7537487422066205,
+          6.014640778421098
+        ],
+        "tomoDD": [
+          4.910177213541666,
+          6.382804218750001
+        ],
+        "tomoDD oracle": [
+          4.657028703183005,
+          6.6822526095373185
+        ]
+      }
+    },
+    {
+      "geometry": "geysers",
+      "section_axis": "Y",
+      "section_coordinate_km": 2.4,
+      "emtomo_updates": 12,
+      "soft_top_n": 10,
+      "n_candidates": 15,
+      "weights_min_distance": 1,
+      "em_runs": [
+        "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e",
+        "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8"
+      ],
+      "dd_run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5",
+      "dd_iterations": 3,
+      "slice_ranges_km_s": {
+        "EMTomo oracle": [
+          3.9999999999999996,
+          5.940338352185393
+        ],
+        "EMTomo hard": [
+          3.6922922350670833,
+          6.075171255025581
+        ],
+        "EMTomo soft": [
+          3.691348073061728,
+          6.080100915597818
+        ],
+        "tomoDD": [
+          3.992731841796875,
+          6.6194898124999995
+        ],
+        "tomoDD oracle": [
+          3.853450445696517,
+          6.57105403337428
+        ]
+      }
+    },
+    {
+      "geometry": "geysers",
+      "section_axis": "Y",
+      "section_coordinate_km": 4.8,
+      "emtomo_updates": 12,
+      "soft_top_n": 10,
+      "n_candidates": 15,
+      "weights_min_distance": 1,
+      "em_runs": [
+        "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e",
+        "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8"
+      ],
+      "dd_run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5",
+      "dd_iterations": 3,
+      "slice_ranges_km_s": {
+        "EMTomo oracle": [
+          3.9552491283626847,
+          5.699999999999994
+        ],
+        "EMTomo hard": [
+          3.737482679498355,
+          5.791323525051543
+        ],
+        "EMTomo soft": [
+          3.752939735880841,
+          5.7885350782615355
+        ],
+        "tomoDD": [
+          3.836539895507813,
+          5.890078999999999
+        ],
+        "tomoDD oracle": [
+          3.8570241421978317,
+          5.815764771081256
+        ]
+      }
+    },
+    {
+      "geometry": "geysers",
+      "section_axis": "Z",
+      "section_coordinate_km": 2.5,
+      "emtomo_updates": 12,
+      "soft_top_n": 10,
+      "n_candidates": 15,
+      "weights_min_distance": 1,
+      "em_runs": [
+        "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e",
+        "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8"
+      ],
+      "dd_run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5",
+      "dd_iterations": 3,
+      "slice_ranges_km_s": {
+        "EMTomo oracle": [
+          4.931586255539215,
+          5.888395358203148
+        ],
+        "EMTomo hard": [
+          4.8104848507554445,
+          6.002500090391878
+        ],
+        "EMTomo soft": [
+          4.803036745283731,
+          6.024016930739034
+        ],
+        "tomoDD": [
+          4.534388859592013,
+          6.2537396875
+        ],
+        "tomoDD oracle": [
+          4.657028703183005,
+          6.6822526095373185
+        ]
+      }
+    }
+  ],
+  "sampling_spacing_km": 0.025,
+  "sampling": "Exact Y=2.4/4.8 and Z=2.5 km planes; 25-m pixel centers; no added smoothing",
+  "em_representation": "Native 1-km constant velocity cells",
+  "em_oracle": "Arithmetic velocity mean of 8x8x8 native truth cells per 1-km cell",
+  "dd_representation": "Native trilinear Vp, including fixed exterior nodes",
+  "dd_oracle": "Saved whole-volume least-squares trilinear truth fit; not a slice fit",
+  "color_limits_km_s": [
+    3.5,
+    7.0
+  ],
+  "color_anchors_km_s": {
+    "3.5": "#454545",
+    "4.0": "#7a7a7a",
+    "4.75": "#ffffff",
+    "5.25": "#e32400",
+    "6.0": "#61177c",
+    "6.5": "#351041",
+    "7.0": "#190820"
+  },
+  "colorbar_height_fraction": 0.3333333333333333,
+  "colorbar_vertical_alignment": "center",
+  "sha256": {
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/manifest.json": "624464cd4a25b1be963f183e3ec55348cab0ce943f83b9dcee1c1bad73a6edb7",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/manifest.json": "ab118e22d4da095ccc96709f13d72cece388861594c9ae84cc37940ea5b6cc15",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/manifest.json": "91acdc3c648099be7d6d77fd79d75ecf700116f01293737f82ee2f921aad9f8f",
+    "/mnt/disk01/egor/projects/EMTomo/paper/make_spherical_anomalies_comparison.py": "1bf4fe841364c43f27854faca199c55668d495a54c574e97ab940222a0cfc08d",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/model.npz": "77b4e7669cf0420668ead0e80a9ee5f6fb3fd2837da8024bdd1220b99d844766",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/model.npz": "77b4e7669cf0420668ead0e80a9ee5f6fb3fd2837da8024bdd1220b99d844766",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/cases/synthetic-em-hard-k15-top1-dmin1/result.json": "70b207b410aad3a17d9f0f9408c42a227af956e938ef999c10fb0092a6c89afd",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/meta.json": "efc5abc7e7b51e920ad44e53d73a0fa08d5c3281092fdea3524350ea35085018",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/final_model.npy": "6ae6147623b590f46c4f036fe9ec87514f76d6f228f0f48f59f70c3478364e77",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/output/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/arrivals.csv": "652a480b23bd4b141e6c64fed0b638a49c9f371ecfffa8c4b91332c9caf50b0e",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/output/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/metadata.json": "b793eb96e20386c7604329270f31633ff33d9867022e0da4933b21f0ddfba998",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/cases/synthetic-em-soft-k15-top10-dmin1/result.json": "2b18ac1ccbab8061d62dee49e56ee0c0d15c73b969ee49317779f597039c737a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/meta.json": "4ed192fd50be767bfbb39655f0e076ae32378fa021a37b8e048469d4671461af",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/final_model.npy": "e135982149b87455fc2e87e980254cef0e3ecf48b8dcb03ef09f5525f39bf997",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/worker_info.json": "a886d4d922929376ec91a29402971f5eb88070ed85385daab138d0b1ce518338",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/config.json": "046aeff53e96beaeb0d8932164290f0f6709a8b22937fc8b0c6d1831c8845a1f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/stations.csv": "23d640a6a9ea0515d92374af3f05edf7641cee9810db808af7e261760e86fc6e",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/events.csv": "4c155970f99002099af5faed665bbc77ac16da7b49807c393dbba048b7358318",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/generation.json": "f49fc83b2d782cc83977d07b9920650a38c736a6f9f91bb3e1abf619b126bc87",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/MOD": "d9a1b9c548d338bef940012b0e03ec8875c655569861394938d598ac3fa432df",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/grid.dat": "fef416857ac0b0b75808fd0a0d8f8081dbc182b4958f6f5ae699d22195df19a6",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/event.dat": "1b05fe2455d659c7456b6a2037746fd597e6fc695bbd126348c0644786a699d3",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/station.dat": "b7fe80026f7aabba0e2b5dc2e93d17920aca03015eb07c1b5762ace112042467",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/dt.ct": "53f64b91f07d7a8c619675bdedcf8796458d0d546138be202d282643a09500fa",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/absolute.dat": "66197912eb49f567a0acaf6d23a426b383d8130847266710f29edc43fece5ae7",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/dt.cc": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/ak135.15.SKS": "7744c108e13cb385762da76ded76c9444924dd48ceeab4ba719d3050fd3559fd",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/layer-16.dat": "8921e57b6caea421d0ca3d45dce8f015688f489d2370deda38b286523a92abf4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/tomoDD-SE.inp": "0ae8f5b024c56c065f98e977b688dd3d5ade3fc5da3475a280530107202af7a6",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/state.npz": "b7b7754f4ac474b6f0930a6bd50868c2b596212dcdc85fcaa980e356b87d6965",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/cases/geysers-em-hard-k15-top1-dmin1/result.json": "e989c918f02c65ec55786d5a12ebef8ad4fe05805498b8aa4bcd6188122c26ce",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/meta.json": "08bce7c75d2ee63ce13c081ac076dffe3b3c14d72b7df584f1781785aeb39b2f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/final_model.npy": "6d654db61023988d2f2ef6b8dcb9cb1292cbfc0f86a1fec0a3381ed18d7b7c99",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/output/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/arrivals.csv": "4d90767bf521948a621f4fc80857268e20c5e30b4ab547269b849b95b937f2c4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/output/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/metadata.json": "9aeb4ecc2ed847b0de81c8a64d8d12e106c6c38349d4abd6420364bc39bf99b0",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/cases/geysers-em-soft-k15-top10-dmin1/result.json": "eed2b2e3b2fed04421cf4ce223e64e416405b04cf1869b344cf2dc425d7e90ac",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/meta.json": "4fc15705ff1226f74088da9104d969ae18fb1ebd985b180613eb5aa52f616759",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/final_model.npy": "e60905ed1f19b5462c4963da16aa422555a664e72b8a1adb26164f9dff82f8d4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/worker_info.json": "8e253b0df702c218f3d3dca3ca004de03875ee51b27f6bbdd3570e0b7167b50f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/config.json": "7e037a20f9e87a1fe97a527d67a031fbf59fb65a26bba3e635407b2fe5e4eb33",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/stations.csv": "59895d722cff63e2f087438704631ae6740f2f76dd7065ce64bad8e6b69be4e3",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/events.csv": "d7f6af385a08edf1b4f622e35c08d6f40bbc06d2d60e3ab9e42a730e3dedd786",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/generation.json": "0c13e861818a7901bc734f66ccdb08fde011c5e2a829a1742e874c78c445aaaf",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/MOD": "d9a1b9c548d338bef940012b0e03ec8875c655569861394938d598ac3fa432df",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/grid.dat": "fef416857ac0b0b75808fd0a0d8f8081dbc182b4958f6f5ae699d22195df19a6",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/event.dat": "67aa7891d25ce7c9dadec53803ce438f114c61afa23fba96a51ad0f10faf1cc5",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/station.dat": "4b13acb8fdd1fcd68a29f5b8ffef1d8c7354a74b8b2cf25de45ab87b317026a4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/dt.ct": "39ebdf0db16b8546829d0fcebd8b707af903dfa67c1d06327c3d8933267b636b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/absolute.dat": "6d0054e0490edde33291195228c95098aa20c3172ff7208a63912c7b1b7d02cc",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/dt.cc": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/ak135.15.SKS": "7744c108e13cb385762da76ded76c9444924dd48ceeab4ba719d3050fd3559fd",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/layer-16.dat": "8921e57b6caea421d0ca3d45dce8f015688f489d2370deda38b286523a92abf4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/tomoDD-SE.inp": "c38f8df740d9d9c71f1bbae8e5f8fe7196f7aea3f2d677954e21581ec3f50bf1",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/state.npz": "232bcb7ab81065cc3a841e014a27cb4505d78d6c297bfc9d49d3833a563aa34c"
+  }
+}

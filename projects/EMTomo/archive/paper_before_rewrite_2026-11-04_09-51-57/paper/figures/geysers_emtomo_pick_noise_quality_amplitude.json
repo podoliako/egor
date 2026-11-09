@@ -1,0 +1,691 @@
+{
+  "records": [
+    {
+      "case_id": "x0p5-hard-k15-top1-dmin1",
+      "multiplier": 0.5,
+      "relative_sigma": 0.005,
+      "absolute_sigma_s": 0.005,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x0p5-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_143617_5fece417c1e24e37a6bd3fdd8f8e5488",
+      "baseline": false,
+      "variant": "hard-k15-top1-dmin1",
+      "volume_rmse_m_s": 208.100769831953,
+      "mean_anomaly_rmse_m_s": 338.0432778436293,
+      "sphere_rmse_m_s": [
+        442.5385228904036,
+        307.1213499707888,
+        289.984583534817,
+        333.72122567804286,
+        331.82560225941046,
+        323.06838272831317
+      ],
+      "pooled_anomaly_rmse_m_s": 330.18836986888743,
+      "mean_anomaly_amplitude": 0.5303674092066712,
+      "sphere_amplitudes": [
+        0.44886626043387723,
+        0.5187827787556647,
+        0.8306297752315874,
+        0.5331590843587557,
+        0.5990389541012036,
+        0.25172760235893876
+      ]
+    },
+    {
+      "case_id": "geysers-em-hard-k15-top1-dmin1",
+      "multiplier": 1.0,
+      "relative_sigma": 0.01,
+      "absolute_sigma_s": 0.01,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e",
+      "baseline": true,
+      "variant": "hard-k15-top1-dmin1",
+      "volume_rmse_m_s": 208.36997854749367,
+      "mean_anomaly_rmse_m_s": 337.6266911268087,
+      "sphere_rmse_m_s": [
+        445.57454161929,
+        305.7104951408693,
+        290.16670396597976,
+        331.5916697292579,
+        331.9548770254385,
+        320.76185928001684
+      ],
+      "pooled_anomaly_rmse_m_s": 329.8050050189515,
+      "mean_anomaly_amplitude": 0.5382119076996316,
+      "sphere_amplitudes": [
+        0.4468583032198416,
+        0.5309420098052098,
+        0.8311628008417159,
+        0.5462015383371056,
+        0.6049052079570469,
+        0.26920158603686967
+      ]
+    },
+    {
+      "case_id": "x2-hard-k15-top1-dmin1",
+      "multiplier": 2.0,
+      "relative_sigma": 0.02,
+      "absolute_sigma_s": 0.02,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x2-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_150609_2b07c73e809d434fb167b6fb44388445",
+      "baseline": false,
+      "variant": "hard-k15-top1-dmin1",
+      "volume_rmse_m_s": 210.17966581968378,
+      "mean_anomaly_rmse_m_s": 340.66486991305095,
+      "sphere_rmse_m_s": [
+        456.5630526220156,
+        305.32485092092696,
+        292.59830450048594,
+        328.59331155462445,
+        330.2799276285662,
+        330.6297722516866
+      ],
+      "pooled_anomaly_rmse_m_s": 332.44125974091264,
+      "mean_anomaly_amplitude": 0.5472803471372153,
+      "sphere_amplitudes": [
+        0.40362087552308445,
+        0.5769552302531682,
+        0.8156481514531635,
+        0.5632082300389845,
+        0.6331872344325221,
+        0.2910623611223688
+      ]
+    },
+    {
+      "case_id": "x3-hard-k15-top1-dmin1",
+      "multiplier": 3.0,
+      "relative_sigma": 0.03,
+      "absolute_sigma_s": 0.03,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x3-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_153544_c44a79d9e1f34b768d98e069f4fe3eaa",
+      "baseline": false,
+      "variant": "hard-k15-top1-dmin1",
+      "volume_rmse_m_s": 217.50285982047797,
+      "mean_anomaly_rmse_m_s": 349.1660687752648,
+      "sphere_rmse_m_s": [
+        471.10022267843243,
+        306.40879088675257,
+        308.6225048902691,
+        325.5467571523078,
+        343.9556854447278,
+        339.36245159909913
+      ],
+      "pooled_anomaly_rmse_m_s": 341.5043924512447,
+      "mean_anomaly_amplitude": 0.5374920309038509,
+      "sphere_amplitudes": [
+        0.30572750158049805,
+        0.6112205787630549,
+        0.7879235491621949,
+        0.5931641830378254,
+        0.6078347393317973,
+        0.31908163354773506
+      ]
+    },
+    {
+      "case_id": "x5-hard-k15-top1-dmin1",
+      "multiplier": 5.0,
+      "relative_sigma": 0.05,
+      "absolute_sigma_s": 0.05,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x5-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_160544_8fd1d3e04e134c6bba2b442f0df78cc2",
+      "baseline": false,
+      "variant": "hard-k15-top1-dmin1",
+      "volume_rmse_m_s": 287.4287044205682,
+      "mean_anomaly_rmse_m_s": 400.1229718767222,
+      "sphere_rmse_m_s": [
+        529.5800901326382,
+        310.60689559805803,
+        373.82068009211895,
+        367.8336293870822,
+        468.74760649626455,
+        350.14892955417156
+      ],
+      "pooled_anomaly_rmse_m_s": 397.40784374182937,
+      "mean_anomaly_amplitude": 0.5624221817704063,
+      "sphere_amplitudes": [
+        0.18798307990658428,
+        0.635068216812292,
+        0.8519687969826283,
+        0.5081216471036664,
+        0.7927679542519034,
+        0.39862339556536314
+      ]
+    },
+    {
+      "case_id": "x10-hard-k15-top1-dmin1",
+      "multiplier": 10.0,
+      "relative_sigma": 0.1,
+      "absolute_sigma_s": 0.1,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x10-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_163739_6e2e419957a94240afdb61b4648d2027",
+      "baseline": false,
+      "variant": "hard-k15-top1-dmin1",
+      "volume_rmse_m_s": 459.55805963724976,
+      "mean_anomaly_rmse_m_s": 551.5246780806498,
+      "sphere_rmse_m_s": [
+        766.1013610486527,
+        366.46723173302155,
+        492.10956270006744,
+        452.2187002114808,
+        802.3483698234396,
+        429.90284296723604
+      ],
+      "pooled_anomaly_rmse_m_s": 564.5208117487556,
+      "mean_anomaly_amplitude": 0.5810606781436379,
+      "sphere_amplitudes": [
+        0.021914642725473516,
+        0.6962546624989747,
+        0.7909504040840314,
+        0.38089205757870187,
+        0.988385845083235,
+        0.607966456891411
+      ]
+    },
+    {
+      "case_id": "x0p5-soft-k15-top10-dmin1",
+      "multiplier": 0.5,
+      "relative_sigma": 0.005,
+      "absolute_sigma_s": 0.005,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x0p5-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_143617_06aa080f49154edc8a4e319fd218aed3",
+      "baseline": false,
+      "variant": "soft-k15-top10-dmin1",
+      "volume_rmse_m_s": 207.95254786917909,
+      "mean_anomaly_rmse_m_s": 338.1400315873463,
+      "sphere_rmse_m_s": [
+        444.852447865817,
+        306.731011403405,
+        289.90936568375787,
+        332.0615938957152,
+        332.6249956539415,
+        322.6607750214414
+      ],
+      "pooled_anomaly_rmse_m_s": 330.28168865287887,
+      "mean_anomaly_amplitude": 0.5325301761372631,
+      "sphere_amplitudes": [
+        0.43908478347340624,
+        0.5201860547227093,
+        0.8337452091546722,
+        0.544515104785024,
+        0.6048537410515666,
+        0.2527961636362003
+      ]
+    },
+    {
+      "case_id": "geysers-em-soft-k15-top10-dmin1",
+      "multiplier": 1.0,
+      "relative_sigma": 0.01,
+      "absolute_sigma_s": 0.01,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8",
+      "baseline": true,
+      "variant": "soft-k15-top10-dmin1",
+      "volume_rmse_m_s": 208.3311851798868,
+      "mean_anomaly_rmse_m_s": 338.33459610716335,
+      "sphere_rmse_m_s": [
+        448.5871353413406,
+        305.52550896818445,
+        291.27264260460964,
+        330.75899175139153,
+        332.17948122789056,
+        321.6838167495633
+      ],
+      "pooled_anomaly_rmse_m_s": 330.4798844757649,
+      "mean_anomaly_amplitude": 0.5401489291259597,
+      "sphere_amplitudes": [
+        0.43914906224107764,
+        0.5312439230895823,
+        0.8374198085864973,
+        0.5524199416242266,
+        0.6150010355485371,
+        0.2656598036658367
+      ]
+    },
+    {
+      "case_id": "x2-soft-k15-top10-dmin1",
+      "multiplier": 2.0,
+      "relative_sigma": 0.02,
+      "absolute_sigma_s": 0.02,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x2-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_150827_82e4e538ccab4d498d725f0bf94b23ab",
+      "baseline": false,
+      "variant": "soft-k15-top10-dmin1",
+      "volume_rmse_m_s": 210.19224098070845,
+      "mean_anomaly_rmse_m_s": 340.839312920657,
+      "sphere_rmse_m_s": [
+        459.0818438785104,
+        306.85119326063256,
+        293.300087782941,
+        325.9020189502123,
+        329.58110377483695,
+        330.3196298768088
+      ],
+      "pooled_anomaly_rmse_m_s": 332.664092537097,
+      "mean_anomaly_amplitude": 0.5473831630982401,
+      "sphere_amplitudes": [
+        0.39649146974943955,
+        0.568263909134675,
+        0.8169292041637604,
+        0.5776407888068278,
+        0.6360581090512626,
+        0.2889154976834752
+      ]
+    },
+    {
+      "case_id": "x3-soft-k15-top10-dmin1",
+      "multiplier": 3.0,
+      "relative_sigma": 0.03,
+      "absolute_sigma_s": 0.03,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x3-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_154042_462a1bfcfb894b6f89a7d6275a182d3f",
+      "baseline": false,
+      "variant": "soft-k15-top10-dmin1",
+      "volume_rmse_m_s": 217.6557900768794,
+      "mean_anomaly_rmse_m_s": 348.46859799408986,
+      "sphere_rmse_m_s": [
+        471.330768647708,
+        308.0440773565465,
+        307.27998669324995,
+        324.4658914383273,
+        338.83800328712704,
+        340.85286054158047
+      ],
+      "pooled_anomaly_rmse_m_s": 340.63191407605495,
+      "mean_anomaly_amplitude": 0.5364984784742605,
+      "sphere_amplitudes": [
+        0.3026494004230999,
+        0.6069790756166855,
+        0.7894880128669347,
+        0.5920582107919969,
+        0.6179148731328192,
+        0.30990129801402694
+      ]
+    },
+    {
+      "case_id": "x5-soft-k15-top10-dmin1",
+      "multiplier": 5.0,
+      "relative_sigma": 0.05,
+      "absolute_sigma_s": 0.05,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x5-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_161439_fa0747a12e554523aa35792e062bbf06",
+      "baseline": false,
+      "variant": "soft-k15-top10-dmin1",
+      "volume_rmse_m_s": 288.8316011718099,
+      "mean_anomaly_rmse_m_s": 407.44598478676335,
+      "sphere_rmse_m_s": [
+        530.9505607826776,
+        313.11215867632325,
+        378.666048633326,
+        370.76407779334403,
+        499.2587182407339,
+        351.92434459417535
+      ],
+      "pooled_anomaly_rmse_m_s": 406.48604082896327,
+      "mean_anomaly_amplitude": 0.5642115964150872,
+      "sphere_amplitudes": [
+        0.20468496505757258,
+        0.6532179171209641,
+        0.8536192028565255,
+        0.4981394026036581,
+        0.7872079651952172,
+        0.3884001256565859
+      ]
+    },
+    {
+      "case_id": "x10-soft-k15-top10-dmin1",
+      "multiplier": 10.0,
+      "relative_sigma": 0.1,
+      "absolute_sigma_s": 0.1,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x10-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_164903_31dc88ac2f4a454690be2cf909f251b9",
+      "baseline": false,
+      "variant": "soft-k15-top10-dmin1",
+      "volume_rmse_m_s": 457.2414006242274,
+      "mean_anomaly_rmse_m_s": 556.2342785526205,
+      "sphere_rmse_m_s": [
+        748.587701862245,
+        361.35246669338517,
+        492.37561418750977,
+        463.57105541413006,
+        801.8306761757258,
+        469.6881569827269
+      ],
+      "pooled_anomaly_rmse_m_s": 567.2053403268873,
+      "mean_anomaly_amplitude": 0.5974403267341665,
+      "sphere_amplitudes": [
+        0.12039830411418133,
+        0.6861548699930357,
+        0.8329163976736305,
+        0.3491529981806846,
+        1.0130182370668317,
+        0.5830011533766346
+      ]
+    },
+    {
+      "case_id": "x0p5-soft-k15-top10-dmin2",
+      "multiplier": 0.5,
+      "relative_sigma": 0.005,
+      "absolute_sigma_s": 0.005,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x0p5-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_143617_2eef933d4cc5405aad49760f305bbc98",
+      "baseline": false,
+      "variant": "soft-k15-top10-dmin2",
+      "volume_rmse_m_s": 208.50154067638593,
+      "mean_anomaly_rmse_m_s": 338.65410193651644,
+      "sphere_rmse_m_s": [
+        449.49816116542496,
+        308.9132343136189,
+        288.812368874685,
+        330.60637556198986,
+        336.9810174451171,
+        317.1134542582629
+      ],
+      "pooled_anomaly_rmse_m_s": 330.9258211806497,
+      "mean_anomaly_amplitude": 0.5344581618425738,
+      "sphere_amplitudes": [
+        0.42819712216473205,
+        0.5041395600282406,
+        0.8247555945239219,
+        0.5587727224496756,
+        0.618978200543304,
+        0.2719057713455691
+      ]
+    },
+    {
+      "case_id": "geysers-em-soft-k15-top10-dmin2",
+      "multiplier": 1.0,
+      "relative_sigma": 0.01,
+      "absolute_sigma_s": 0.01,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261021_114240_13ff9dcf060f49079384f7e78c810046",
+      "baseline": true,
+      "variant": "soft-k15-top10-dmin2",
+      "volume_rmse_m_s": 208.9514149477348,
+      "mean_anomaly_rmse_m_s": 338.3708134405269,
+      "sphere_rmse_m_s": [
+        452.58317492330013,
+        308.0538104555317,
+        289.7523223619303,
+        329.03035737999204,
+        335.7808624209586,
+        315.0243531014486
+      ],
+      "pooled_anomaly_rmse_m_s": 330.6758778388458,
+      "mean_anomaly_amplitude": 0.5408119765799303,
+      "sphere_amplitudes": [
+        0.42465609478250366,
+        0.5147821570257273,
+        0.8284388331650618,
+        0.5670781198377559,
+        0.6234831358190005,
+        0.2864335188495321
+      ]
+    },
+    {
+      "case_id": "x2-soft-k15-top10-dmin2",
+      "multiplier": 2.0,
+      "relative_sigma": 0.02,
+      "absolute_sigma_s": 0.02,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x2-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_150841_0561ac770692449f8f6aee55170672c5",
+      "baseline": false,
+      "variant": "soft-k15-top10-dmin2",
+      "volume_rmse_m_s": 211.45800491094505,
+      "mean_anomaly_rmse_m_s": 340.81116659003357,
+      "sphere_rmse_m_s": [
+        463.63450604315466,
+        307.1291049856599,
+        293.8712765036745,
+        327.09847973332444,
+        330.5584516079897,
+        322.5751806663985
+      ],
+      "pooled_anomaly_rmse_m_s": 332.74766192252184,
+      "mean_anomaly_amplitude": 0.5479334962974206,
+      "sphere_amplitudes": [
+        0.38458941261193214,
+        0.551853887221117,
+        0.8248835508522675,
+        0.5784360654525516,
+        0.6438912312834831,
+        0.30394683036317266
+      ]
+    },
+    {
+      "case_id": "x3-soft-k15-top10-dmin2",
+      "multiplier": 3.0,
+      "relative_sigma": 0.03,
+      "absolute_sigma_s": 0.03,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x3-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_154157_33017253527d4e88b443bac43e6be22b",
+      "baseline": false,
+      "variant": "soft-k15-top10-dmin2",
+      "volume_rmse_m_s": 219.73120616196874,
+      "mean_anomaly_rmse_m_s": 347.1285747285881,
+      "sphere_rmse_m_s": [
+        473.77766996236113,
+        307.5470104262216,
+        311.5002880882064,
+        328.1499055768274,
+        335.8686934755615,
+        325.92788084235065
+      ],
+      "pooled_anomaly_rmse_m_s": 339.6973571238935,
+      "mean_anomaly_amplitude": 0.541188251272786,
+      "sphere_amplitudes": [
+        0.2986743198406615,
+        0.5914733557563342,
+        0.797176269907966,
+        0.5684344497914177,
+        0.6598428067113835,
+        0.3315283056289533
+      ]
+    },
+    {
+      "case_id": "x5-soft-k15-top10-dmin2",
+      "multiplier": 5.0,
+      "relative_sigma": 0.05,
+      "absolute_sigma_s": 0.05,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x5-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_161517_3e8fdda121f44a8ca66fae80be156a83",
+      "baseline": false,
+      "variant": "soft-k15-top10-dmin2",
+      "volume_rmse_m_s": 284.85437422947564,
+      "mean_anomaly_rmse_m_s": 398.95963042595037,
+      "sphere_rmse_m_s": [
+        539.730702197652,
+        312.0993750401527,
+        382.10659204318324,
+        363.51967426188565,
+        466.8366795093725,
+        329.4647595034563
+      ],
+      "pooled_anomaly_rmse_m_s": 397.4476769482204,
+      "mean_anomaly_amplitude": 0.5811809651800887,
+      "sphere_amplitudes": [
+        0.2080933824946766,
+        0.633032122170784,
+        0.8639363508687733,
+        0.5024866010164485,
+        0.8748857378030188,
+        0.40465159672683076
+      ]
+    },
+    {
+      "case_id": "x10-soft-k15-top10-dmin2",
+      "multiplier": 10.0,
+      "relative_sigma": 0.1,
+      "absolute_sigma_s": 0.1,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x10-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_164924_f319ccbe7a2340f892e0e2ef14c99f1c",
+      "baseline": false,
+      "variant": "soft-k15-top10-dmin2",
+      "volume_rmse_m_s": 459.2227166799014,
+      "mean_anomaly_rmse_m_s": 554.515831216634,
+      "sphere_rmse_m_s": [
+        753.9103116522454,
+        367.6542279135764,
+        493.8456069868199,
+        452.68180361258777,
+        801.7010363698934,
+        457.3020007646808
+      ],
+      "pooled_anomaly_rmse_m_s": 566.2849129821346,
+      "mean_anomaly_amplitude": 0.6098757506055665,
+      "sphere_amplitudes": [
+        0.0849997584426376,
+        0.6392839123722077,
+        0.8786474430175796,
+        0.35442646626686997,
+        1.1181901688634912,
+        0.5837067546706131
+      ]
+    }
+  ],
+  "sphere_order": [
+    "sphere_1_fast",
+    "sphere_2_slow",
+    "sphere_3_fast",
+    "sphere_4_slow",
+    "sphere_5_fast",
+    "sphere_6_slow"
+  ],
+  "sphere_cells": [
+    1572,
+    2856,
+    3710,
+    2152,
+    2848,
+    2176
+  ],
+  "sphere_parameters": [
+    {
+      "center_km": [
+        3.5,
+        2.5,
+        1.2
+      ],
+      "radius_km": 0.9,
+      "peak_delta_m_s": 600.0,
+      "plateau_fraction": 0.5
+    },
+    {
+      "center_km": [
+        8.0,
+        4.8,
+        2.0
+      ],
+      "radius_km": 1.1,
+      "peak_delta_m_s": -650.0,
+      "plateau_fraction": 0.5
+    },
+    {
+      "center_km": [
+        12.5,
+        2.4,
+        2.6
+      ],
+      "radius_km": 1.2,
+      "peak_delta_m_s": 700.0,
+      "plateau_fraction": 0.5
+    },
+    {
+      "center_km": [
+        16.5,
+        4.5,
+        1.6
+      ],
+      "radius_km": 1.0,
+      "peak_delta_m_s": -600.0,
+      "plateau_fraction": 0.5
+    },
+    {
+      "center_km": [
+        6.0,
+        2.2,
+        3.6
+      ],
+      "radius_km": 1.1,
+      "peak_delta_m_s": 700.0,
+      "plateau_fraction": 0.5
+    },
+    {
+      "center_km": [
+        11.0,
+        5.0,
+        4.0
+      ],
+      "radius_km": 1.0,
+      "peak_delta_m_s": -650.0,
+      "plateau_fraction": 0.5
+    }
+  ],
+  "checkpoint": "final_model.npy after update 12",
+  "volume_metric": "sqrt(mean over all physical 125-m cells of squared Vp error)",
+  "anomaly_metric": "arithmetic mean of six within-sphere RMSEs; equal weight per anomaly",
+  "mask": "Native region_masks: distance <= radius AND nonzero truth-background contrast",
+  "uncertainty": "One paired seed (42); no independent replicates or confidence intervals",
+  "noise_policy": "Both actual sigmas scale together; inversion likelihood/configs remain fixed",
+  "source_sha256": {
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/manifest.json": "f13842381ad759e1df17947ae40df5c92b1f141819a19188cb02082f18c7655b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/status.json": "ab35bc045956817941d23fff9bb4e8f8b94d744c959e29f0c411906883ae4d6e",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/summary.json": "cce9cbd501c479a0ed4f59bd52373403a2a757536132446d9df17e8b18eaaf42",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/forward_complete.json": "588aade25c4d7e5394903da2da37e0a2f8e0073e6fcbab6816337fddb01126fa",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/model.npz": "77b4e7669cf0420668ead0e80a9ee5f6fb3fd2837da8024bdd1220b99d844766",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/model.npz": "77b4e7669cf0420668ead0e80a9ee5f6fb3fd2837da8024bdd1220b99d844766",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/generation.json": "f49fc83b2d782cc83977d07b9920650a38c736a6f9f91bb3e1abf619b126bc87",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/benchmark/tomodd_benchmark/compare_emtomo_flat4.py": "69070bb9f82d0052a422d1faa0e8e0a703e4839167100c5c60278ed4183298c5",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x0p5-hard-k15-top1-dmin1/result.json": "c13a9013ca902fdc0962333621f41dfaad353f4f086894f512761f3adebf883b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x2-hard-k15-top1-dmin1/result.json": "7382e970efb6af90108ea6b7c4c6cf1266566ab426d20232cc9b515780ce4269",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x3-hard-k15-top1-dmin1/result.json": "dd186d9816a371af7717f1f4ce14ca4bd4478f70f9b4009d1ddb576b4b48bdb1",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x5-hard-k15-top1-dmin1/result.json": "45dfdd902a58245da6fe298ac0dcf8ff2336f190e4534f6b05d57bd8ad2ae759",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x10-hard-k15-top1-dmin1/result.json": "1254d6546aa14fef19d3dc4ae7537b0551c92f618f80ce2c075c79ce6cd0e3e0",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x0p5-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_143617_5fece417c1e24e37a6bd3fdd8f8e5488/final_model.npy": "ebc19fc1bae17db192a880d4d208a7441a19476d50a045821e7d10d3006824dd",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x0p5-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_143617_5fece417c1e24e37a6bd3fdd8f8e5488/meta.json": "6481634cdc871e0476d9d5670d62c555b80fbcb5a112066216648be5fd82f226",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x0p5-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_143617_5fece417c1e24e37a6bd3fdd8f8e5488/quality.jsonl": "d3fe1fc9345c2b67dfff0636dab833f8b4078b00d914800cc2c3524bccf85058",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/final_model.npy": "6d654db61023988d2f2ef6b8dcb9cb1292cbfc0f86a1fec0a3381ed18d7b7c99",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/meta.json": "08bce7c75d2ee63ce13c081ac076dffe3b3c14d72b7df584f1781785aeb39b2f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/quality.jsonl": "3111987efee92568b99f71b3b18e1ab1be61fdc9bd6ccba3e9f533873ea364a3",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x2-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_150609_2b07c73e809d434fb167b6fb44388445/final_model.npy": "84118ce1410349fe8030c3c25d7e4c735feb4cb8547c40b13fd712bbb19a3483",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x2-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_150609_2b07c73e809d434fb167b6fb44388445/meta.json": "e5d1715956c3e1ac971b9c692085d2ed851e7590250ab8b008beaedb4a8069d2",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x2-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_150609_2b07c73e809d434fb167b6fb44388445/quality.jsonl": "8e6b4bdf8f76b3e15a16161bf3c542ae23a37f3aea6e374c4a73dd6e08fa92b0",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x3-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_153544_c44a79d9e1f34b768d98e069f4fe3eaa/final_model.npy": "04f0f74632d5b315b1d15f7ddfbeb126dafe8d3f7d3d462e4950713c17339107",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x3-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_153544_c44a79d9e1f34b768d98e069f4fe3eaa/meta.json": "ec7788cb299870d8cac9e4f5e88ec92f3f00be91ad8409b8db4b4701c6893466",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x3-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_153544_c44a79d9e1f34b768d98e069f4fe3eaa/quality.jsonl": "a45473d51185b6a0e87846f626f1f75033314b11b087dffb1dd0b37ed1cbb855",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x5-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_160544_8fd1d3e04e134c6bba2b442f0df78cc2/final_model.npy": "440422464ed8252f9f91ff1922b8fc7ccebcc042ccaacc0ea49b4aacd4157bf9",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x5-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_160544_8fd1d3e04e134c6bba2b442f0df78cc2/meta.json": "746bb440a7a4369feb356410069c87eeb570ed618fa37c716e11f082692ea1ee",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x5-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_160544_8fd1d3e04e134c6bba2b442f0df78cc2/quality.jsonl": "ad5b74569710aeb30c8c9ab42931bb2c13919651d19b179b2e2728e03bc972bc",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x10-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_163739_6e2e419957a94240afdb61b4648d2027/final_model.npy": "00a5667e22703189a4b68fa7ec85d6374dcc9c96ea7da5414e69932a27812c15",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x10-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_163739_6e2e419957a94240afdb61b4648d2027/meta.json": "63d3d7b6c1a4dc37db4ba30cdcc16fc722ab14abd153f923d3d65db329c44112",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x10-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261027_163739_6e2e419957a94240afdb61b4648d2027/quality.jsonl": "5a572afe8d21fb5232a4d022ce75f9c55073a88998e890cab5d820d9291960ad",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x0p5-soft-k15-top10-dmin1/result.json": "24b47694088f869052d05a3e24c58eb0fddc1bdb425f20aa220a7adec4c24362",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x2-soft-k15-top10-dmin1/result.json": "252e2e3cd99640f1f49bd1f8402a0f62ac950ea6d77fd32cb596308477293de2",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x3-soft-k15-top10-dmin1/result.json": "891405a312beb2bf4dffcac8c2ba9a0ec4b11dc314e7aedb7c25109cc760bf25",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x5-soft-k15-top10-dmin1/result.json": "8acdb4be7b34a463ce8207474d0c2218b9fc37ffff952d23249481d5db511b9b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x10-soft-k15-top10-dmin1/result.json": "2c7aa997a2b319ed002f7eb09acd1b9e0faf542af3ac2c02682fe034615ae267",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x0p5-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_143617_06aa080f49154edc8a4e319fd218aed3/final_model.npy": "d63afa0c56f6d9d6ab0540de12e9a75fe57645b934a682bc4ffb18a4d6e2ffac",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x0p5-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_143617_06aa080f49154edc8a4e319fd218aed3/meta.json": "f0ec407d9957eb81005a9a74c39cd6519b52da57548b176bc3de7228d1175db4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x0p5-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_143617_06aa080f49154edc8a4e319fd218aed3/quality.jsonl": "f0f17691412e28221ac271534afa745a0e515f016bd52281d9ae60edcf5ee964",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/final_model.npy": "e60905ed1f19b5462c4963da16aa422555a664e72b8a1adb26164f9dff82f8d4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/meta.json": "4fc15705ff1226f74088da9104d969ae18fb1ebd985b180613eb5aa52f616759",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/quality.jsonl": "ee4073f3c3c8df71fa59da46b86067fa85a079b4a058f83ce2d576b74f1983f7",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x2-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_150827_82e4e538ccab4d498d725f0bf94b23ab/final_model.npy": "431197666efb9564a6ecbc50ed79ca9800a027c9f89d056892b864e4d51638a2",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x2-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_150827_82e4e538ccab4d498d725f0bf94b23ab/meta.json": "5f4d88475268cc7aaf70ba6619a43b491546fcf5ccabf0deb56710d234391276",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x2-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_150827_82e4e538ccab4d498d725f0bf94b23ab/quality.jsonl": "a49c4e1db11566bafc9ab4274bd463ab68e1b1b7f252b670949e88de0675cf32",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x3-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_154042_462a1bfcfb894b6f89a7d6275a182d3f/final_model.npy": "ab7e4352ea966636be1ab012ab85b288dc8c2600184d622e8a3e5a80c63f79ba",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x3-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_154042_462a1bfcfb894b6f89a7d6275a182d3f/meta.json": "2099376cd9044d58c7911bab30dd3513251efbbf7984f95ed85bb5c35f6508f4",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x3-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_154042_462a1bfcfb894b6f89a7d6275a182d3f/quality.jsonl": "78edffd2b103746978435a431502a682f887cb4b16c4ec6e290cf7d8c98dc77f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x5-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_161439_fa0747a12e554523aa35792e062bbf06/final_model.npy": "ed1bedfac51cb429e1c50b84ed711c275bdf71fd25e2cf8f9278c31c73e19521",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x5-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_161439_fa0747a12e554523aa35792e062bbf06/meta.json": "1fedd8a743c47b849308abc0dd60c28a474d1e3bbee0800bab95d89b5328f51b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x5-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_161439_fa0747a12e554523aa35792e062bbf06/quality.jsonl": "3433b0888d30662ebd3b9ebc14d0f703aa707631f872ec2c503de57ba4b9a26c",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x10-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_164903_31dc88ac2f4a454690be2cf909f251b9/final_model.npy": "0023c38416802487d456a59df9727e7deeac9bd6d4a261df847453f018428495",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x10-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_164903_31dc88ac2f4a454690be2cf909f251b9/meta.json": "ef119b5ddaa41295a26ac71a63b694eca9902007013db1d7212f9ab30505eeeb",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x10-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261027_164903_31dc88ac2f4a454690be2cf909f251b9/quality.jsonl": "90e271d16a1c59b802a18b827650b653995c32d2fbe32b5d92a0a73cbbd6f04f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x0p5-soft-k15-top10-dmin2/result.json": "d20f1a55961c7dbe18584a816893190fd828c7eeea9c2711bc3bc276d9d47d02",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x2-soft-k15-top10-dmin2/result.json": "61f3d52ceaf745f02c27fc857ac41460b23aed1c17b161b5519a8b3b518e73c5",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x3-soft-k15-top10-dmin2/result.json": "134051fb812e1130da8f9842aa98fbc998d601b681f141b1f342b52e2a0a2f18",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x5-soft-k15-top10-dmin2/result.json": "34ac5e8a81df9d2c0a44b279f4ba1074dc6a01c9b5efaab9c0cb886e0d35ed78",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_pick_noise_20261027/cases/x10-soft-k15-top10-dmin2/result.json": "956364afa3605fe005f9e086c836d3f8f6ad17672184e2e3e667427f79f4d91b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x0p5-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_143617_2eef933d4cc5405aad49760f305bbc98/final_model.npy": "e6433c45d4d448c9d2810dff67e993a9a00809e2b389c6ce85d571c34986c9a7",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x0p5-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_143617_2eef933d4cc5405aad49760f305bbc98/meta.json": "c5b30349aa8c220d5b9d57a333be8230663274a5cdb3f4d8018a5f47352de860",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x0p5-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_143617_2eef933d4cc5405aad49760f305bbc98/quality.jsonl": "67deb4e13ed0e830d7fd0bb14c334c5ddac747360448df676ba50f68073616c3",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261021_114240_13ff9dcf060f49079384f7e78c810046/final_model.npy": "7bf088d2d7e4e371e376528d6cbd67779319cd663f1eb0cf7c0322c6661e01ae",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261021_114240_13ff9dcf060f49079384f7e78c810046/meta.json": "3d23e7e7e509118802c4f659bef4e68e3212311562b00b515f1540a8e08bab97",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_mg21-geysers-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261021_114240_13ff9dcf060f49079384f7e78c810046/quality.jsonl": "b981311b191b62ea025f18ad62025439970b4d82f137d2b6be05d31a6f3a7afd",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x2-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_150841_0561ac770692449f8f6aee55170672c5/final_model.npy": "348e1749386c9ad3f7cb6a19d7090d368765700475d5465f3dbfab615dd358d2",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x2-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_150841_0561ac770692449f8f6aee55170672c5/meta.json": "f67fc364d19d2bf0e00860af304c43c88afd0c8e7d2a4129f45906963891813f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x2-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_150841_0561ac770692449f8f6aee55170672c5/quality.jsonl": "cff662480638358166831408655be9af9f686ed947129f9a12d119fc209d3d83",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x3-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_154157_33017253527d4e88b443bac43e6be22b/final_model.npy": "629ecc5c63a7a1b271109a4cb8d71a3f2f5ccb78da733f25251f1f5647ae20ec",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x3-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_154157_33017253527d4e88b443bac43e6be22b/meta.json": "ec11bfc98e93b2023f581d7b69e999347dee02ae6912dee37831c1927519970c",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x3-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_154157_33017253527d4e88b443bac43e6be22b/quality.jsonl": "01a1bedf8f0b86a8a975561ebc98c841ef9efb44c214f512111de3bd2b42b992",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x5-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_161517_3e8fdda121f44a8ca66fae80be156a83/final_model.npy": "591e8448265ade1e667214a2dbc98fc1200046d16bf5e173d285ecfd6b607d3f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x5-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_161517_3e8fdda121f44a8ca66fae80be156a83/meta.json": "a96970b95bd8dfe46af3711541602a1dd78d2f30428732ca96a5525eecfdbb19",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x5-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_161517_3e8fdda121f44a8ca66fae80be156a83/quality.jsonl": "c89b185a624c6a03fd908e4c7a0217a74db9be8e715e643498482b84baaf5b2e",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x10-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_164924_f319ccbe7a2340f892e0e2ef14c99f1c/final_model.npy": "abfcfff2bd81993dd1c630376e2ce67686434060ecd8ab0b897b1feddc2d1312",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x10-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_164924_f319ccbe7a2340f892e0e2ef14c99f1c/meta.json": "792c36f8a6dfd77449d1ab517d2a0851a235713f9909677b4de6ad63d5180bf9",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_gpnoise27-x10-soft-k15-top10-dmin2_v1.4_ncand-15_topn-10_mode-soft_dmin-2_20261027_164924_f319ccbe7a2340f892e0e2ef14c99f1c/quality.jsonl": "07c9e92d0fe8c011cbd25ef5fede4bca7ac702d343bffa7022bafed7cc02a1f2"
+  },
+  "script_sha256": "49ab65024aacb95b28a685cc05b56cd62d50d2930d9d9d887f2468a0b04d4a24",
+  "amplitude_metric": "For each sphere: sum[(Vp_est-background)*(Vp_true-background)] / sum[(Vp_true-background)^2]; arithmetic mean of six signed coefficients. 1=correct amplitude, 0=no template projection, negative=opposite contrast; not clipped and not a complete reconstruction-error metric."
+}

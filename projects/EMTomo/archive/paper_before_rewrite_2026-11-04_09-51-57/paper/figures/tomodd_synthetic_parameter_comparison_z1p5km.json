@@ -1,0 +1,158 @@
+{
+  "study": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry",
+  "depth_km": 1.5,
+  "iteration": 3,
+  "hypocentres_fixed": false,
+  "initial_sigma_km_per_coordinate": 1.0,
+  "seed": 42,
+  "sampling": "Exact depth, 125-m XY pixel centres, native trilinear Vp; deeper truth cell at cell boundary",
+  "oracle_note": "Full-volume velocity-L2 fit, not a slice-specific optimum",
+  "color_limits_km_s": [
+    3.6,
+    5.8
+  ],
+  "panels": [
+    {
+      "kind": "oracle",
+      "id": "oracle",
+      "slice_rmse_m_s": 183.99345263414904,
+      "volume_rmse_m_s": 142.85930378323886
+    },
+    {
+      "kind": "inversion",
+      "id": "baseline",
+      "run": "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/synthetic-tomodd-sigma1",
+      "absolute_weight": 1.0,
+      "dd_weight": 0.1,
+      "damping": 40.0,
+      "smoothing": [
+        5.0,
+        5.0,
+        5.0
+      ],
+      "slice_rmse_m_s": 144.6219559721066,
+      "volume_rmse_m_s": 240.21919152159865,
+      "final_location_rms_m": 207.95116997699012,
+      "vp_range_km_s": [
+        4.095796875,
+        5.3703242187499995
+      ]
+    },
+    {
+      "kind": "inversion",
+      "id": "dd03-d40-s5",
+      "run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d40-s5",
+      "absolute_weight": 1.0,
+      "dd_weight": 0.3,
+      "damping": 40.0,
+      "smoothing": [
+        5.0,
+        5.0,
+        5.0
+      ],
+      "slice_rmse_m_s": 159.17333232179195,
+      "volume_rmse_m_s": 264.63974077541627,
+      "final_location_rms_m": 205.43107968192464,
+      "vp_range_km_s": [
+        4.090140625,
+        5.38797265625
+      ]
+    },
+    {
+      "kind": "inversion",
+      "id": "dd1-d40-s5",
+      "run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5",
+      "absolute_weight": 1.0,
+      "dd_weight": 1.0,
+      "damping": 40.0,
+      "smoothing": [
+        5.0,
+        5.0,
+        5.0
+      ],
+      "slice_rmse_m_s": 250.33684117007581,
+      "volume_rmse_m_s": 404.07193732329523,
+      "final_location_rms_m": 277.8779473253042,
+      "vp_range_km_s": [
+        4.056906250000001,
+        5.40648046875
+      ]
+    },
+    {
+      "kind": "inversion",
+      "id": "dd03-d80-s10",
+      "run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d80-s10",
+      "absolute_weight": 1.0,
+      "dd_weight": 0.3,
+      "damping": 80.0,
+      "smoothing": [
+        10.0,
+        10.0,
+        10.0
+      ],
+      "slice_rmse_m_s": 209.7053707894267,
+      "volume_rmse_m_s": 257.527673843402,
+      "final_location_rms_m": 276.61749749470175,
+      "vp_range_km_s": [
+        4.256921223958334,
+        5.32021875
+      ]
+    },
+    {
+      "kind": "inversion",
+      "id": "dd03-d20-s2",
+      "run": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d20-s2",
+      "absolute_weight": 1.0,
+      "dd_weight": 0.3,
+      "damping": 20.0,
+      "smoothing": [
+        2.0,
+        2.0,
+        2.0
+      ],
+      "slice_rmse_m_s": 169.2262309112248,
+      "volume_rmse_m_s": 296.3355507172686,
+      "final_location_rms_m": 216.23252112076463,
+      "vp_range_km_s": [
+        3.7716960449218746,
+        5.426078124999999
+      ]
+    }
+  ],
+  "source_sha256": {
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/manifest.json": "c263dd5ae952ff4d0309b67a9b583f7f0b9e7ab8f2e23c77161827e40c8eaa0e",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/status.json": "29e9dbe657df06b202e869be8771feb83034b160a5b26300a6e175eb9821359b",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/benchmark/tomodd_benchmark/compare_emtomo_flat4.py": "69070bb9f82d0052a422d1faa0e8e0a703e4839167100c5c60278ed4183298c5",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/synthetic-tomodd-sigma1/state.npz": "3db861df7b3cd42bdba25cca100a645dda54d2cae70001f08852f9352ad61ef9",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/synthetic-tomodd-sigma1/config.json": "7e2a0b786b16b6f7826fd2b6ddfb235860080234de870674dc2f5dab33f92bbf",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/synthetic-tomodd-sigma1/results.json": "639779c8621ab39d01c40b8fd1a838bdd09d8aff3a49aeeba74b92fc9119462a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/synthetic-tomodd-sigma1/worker_info.json": "2b5bf3651a11363b1b01a6831a321dd6aef5d0ac0b4bfed4eff1dc87824532b7",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/synthetic-tomodd-sigma1/work/inversion/tomoDD.vel": "0ec8998258da6d439e19fcb2bf96376b3a9eb0d1c76ad8962e4be95c3beb1409",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/synthetic-tomodd-sigma1/work/inversion/tomoDD-SE.inp": "f5e300833421bbb9aac2c4807052d8561d6fb483f56094b422c904277ffb5f75",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d40-s5/state.npz": "b9e6ffa875c312a5cbf27eff6910c12783b25976dc3e83fc27e742f704f493d5",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d40-s5/config.json": "2bfd77b33f507f467e248e13ab5875424929888068b9630527bad2ba2e848fcf",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d40-s5/results.json": "c343d27df290fe672710722c8aed6cf4c269d5bbdb745d7f239948ca21c9f4e3",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d40-s5/worker_info.json": "49560408c424e57858b427a1c42a724ce3ac6d265046c1f5a38683a5366dad86",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d40-s5/work/inversion/tomoDD.vel": "1f6b48d5fe0785981cb50728eb005527be23aa87a5a18a23901ab7ae41e2419d",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d40-s5/work/inversion/tomoDD-SE.inp": "328232f2be582d87ad1204e979df9bae45354922c49eef6afc602387ba09f114",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5/state.npz": "b1f73fa6877a85316f24d67a90b2c8036fe2bc4c821bc937da5ee8c544a77f48",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5/config.json": "f965bf4155f54e94bac998bc7c74b6bd45e7b2171310ae9ebac35254f1f4b150",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5/results.json": "6d7c877bcc73dbbcd0d5b3052e32f3adfc43b088def85611ef228022590ff1b3",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5/worker_info.json": "0211e28e6c14ccd6406dbd25911065e23b53b58fae23396e7c6d4161e0bc6581",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5/work/inversion/tomoDD.vel": "9c5f3f6a2da752941cd68debb3ba8efb95c2e062eebc497267f29bfd0168d545",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026/outputs/dd1-d40-s5/work/inversion/tomoDD-SE.inp": "0ae8f5b024c56c065f98e977b688dd3d5ade3fc5da3475a280530107202af7a6",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d80-s10/state.npz": "715433fa6b201f6617c6905b009ac737f520c550ccd6c5f10e210926fe6aa661",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d80-s10/config.json": "41e085377d5ac47082df4cd7c3acacb03478cda879b69524804cf6041efdeebe",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d80-s10/results.json": "d70bb87a182fd6b330d734534f398fc4aace3d0f28034cb16ef05b6f42b896c8",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d80-s10/worker_info.json": "9a68e1175e409f3c1c5e2ec44aa345379d8f477137b23827a149c5ad3b89d6ee",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d80-s10/work/inversion/tomoDD.vel": "6d052234c7e39eea496bbf0883d13a4b742a9859e964299cc5228196d51ee5e7",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d80-s10/work/inversion/tomoDD-SE.inp": "3a97acf6a1f8583c85617d2fa3fe53b6d14d667983ca788ef3240ae0958c1e0f",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d20-s2/state.npz": "dc4ffcd98849f28ae0f155f4ee41d2371126e8b721bdf832522bcb1bf83c3c18",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d20-s2/config.json": "8606268ec62d9e6f5b1a6d7bb254525534b64d6e1db005a73fc374573695a583",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d20-s2/results.json": "e3e18e771f8baa6dcfa383041ca07f37944ce6b6b4f77e208cc82c3cfab9ddd8",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d20-s2/worker_info.json": "f940e3665095dd6c096461cf200b9fa5e1c8e37fcdc1300d0777142179556aee",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d20-s2/work/inversion/tomoDD.vel": "61f39c55fd154c452fa98d5003abf3659bc2185a33d6c031e1dd3661ac970443",
+    "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_sensitivity_20261026_retry/outputs/dd03-d20-s2/work/inversion/tomoDD-SE.inp": "444807a3b5f8a54d70162a5958988f2899a98c0dd41fd3d431bed5e799cf8f97"
+  },
+  "script_sha256": "e6ea811e02318a9606e8107dacc1b841b85fc8c7633d4f288f365954616f110b"
+}

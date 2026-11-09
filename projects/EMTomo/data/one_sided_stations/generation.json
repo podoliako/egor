@@ -1,0 +1,23 @@
+{
+  "generator": "one_sided_stations",
+  "seed": 42,
+  "domain_xy_km": [
+    24.0,
+    12.0
+  ],
+  "x_range_km": [
+    1.0,
+    5.0
+  ],
+  "y_range_km": [
+    1.0,
+    11.0
+  ],
+  "grid_shape": [
+    3,
+    6
+  ],
+  "jitter_fraction": 0.25,
+  "surface_z_m": 0.0,
+  "coordinate_units": "m"
+}

@@ -1,0 +1,149 @@
+{
+  "section_x_km": 10.0,
+  "section_y_km": 3.5,
+  "display": "All coordinates orthogonally projected; exact duplicate projections drawn once; no filtering/jitter",
+  "background": "Uniform neutral grey; not a velocity field",
+  "depth": "Positive downward; station elevations retained as saved depths",
+  "frame_interval_km": 2,
+  "geometries": [
+    {
+      "geometry": "Artificial",
+      "source": "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001",
+      "events": 1920,
+      "stations": 52,
+      "projections": [
+        {
+          "components": [
+            0,
+            1
+          ],
+          "event_markers": 192,
+          "station_markers": 52,
+          "events_per_marker_range": [
+            10,
+            10
+          ],
+          "stations_per_marker_range": [
+            1,
+            1
+          ]
+        },
+        {
+          "components": [
+            0,
+            2
+          ],
+          "event_markers": 240,
+          "station_markers": 13,
+          "events_per_marker_range": [
+            8,
+            8
+          ],
+          "stations_per_marker_range": [
+            4,
+            4
+          ]
+        },
+        {
+          "components": [
+            1,
+            2
+          ],
+          "event_markers": 80,
+          "station_markers": 4,
+          "events_per_marker_range": [
+            24,
+            24
+          ],
+          "stations_per_marker_range": [
+            13,
+            13
+          ]
+        }
+      ],
+      "event_alpha": 1.0,
+      "station_depth_range_km": [
+        0.0,
+        0.0
+      ],
+      "event_depth_range_km": [
+        0.75,
+        5.25
+      ],
+      "sha256": {
+        "events.csv": "4c155970f99002099af5faed665bbc77ac16da7b49807c393dbba048b7358318",
+        "stations.csv": "23d640a6a9ea0515d92374af3f05edf7641cee9810db808af7e261760e86fc6e"
+      }
+    },
+    {
+      "geometry": "Geysers",
+      "source": "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001",
+      "events": 3776,
+      "stations": 26,
+      "projections": [
+        {
+          "components": [
+            0,
+            1
+          ],
+          "event_markers": 3774,
+          "station_markers": 26,
+          "events_per_marker_range": [
+            1,
+            2
+          ],
+          "stations_per_marker_range": [
+            1,
+            1
+          ]
+        },
+        {
+          "components": [
+            0,
+            2
+          ],
+          "event_markers": 3776,
+          "station_markers": 26,
+          "events_per_marker_range": [
+            1,
+            1
+          ],
+          "stations_per_marker_range": [
+            1,
+            1
+          ]
+        },
+        {
+          "components": [
+            1,
+            2
+          ],
+          "event_markers": 3776,
+          "station_markers": 26,
+          "events_per_marker_range": [
+            1,
+            1
+          ],
+          "stations_per_marker_range": [
+            1,
+            1
+          ]
+        }
+      ],
+      "event_alpha": 0.4,
+      "station_depth_range_km": [
+        0.0,
+        0.839
+      ],
+      "event_depth_range_km": [
+        1.166,
+        6.877
+      ],
+      "sha256": {
+        "events.csv": "d7f6af385a08edf1b4f622e35c08d6f40bbc06d2d60e3ab9e42a730e3dedd786",
+        "stations.csv": "59895d722cff63e2f087438704631ae6740f2f76dd7065ce64bad8e6b69be4e3"
+      }
+    }
+  ],
+  "script_sha256": "aec973fda658e9f85d97578a69a12d5b8f36643e0d7bdab6ba3befe11e43e63f"
+}

@@ -1,0 +1,1138 @@
+{
+  "schema_version": 1,
+  "selection": "paper/figures/spherical_anomalies_comparison.json",
+  "versions": {
+    "numpy": "2.4.0",
+    "scipy": "1.16.3"
+  },
+  "definitions": {
+    "velocity": "Equal-volume RMSE of Vp in m/s on all 501760 native 125-m truth centers; no smoothing",
+    "sphere": "Each declared geometric sphere intersected with abs(truth-flat4 background)>1e-7 m/s, matching frozen region_masks",
+    "EM": "Native 1-km constant Vp cells (nearest slowness), not trilinear cells",
+    "DD": "Native padded trilinear Vp including fixed exterior nodes, NOT interpolated slowness",
+    "location": "P90 Euclidean 3D error in metres, full catalog, equal event weights; NumPy linear quantile",
+    "EM_checkpoint": "iter_11 saved E-step on pre-update velocity; final_model after 12 M-steps; no final relocation",
+    "soft_location": "Primary table uses MAP; weighted-mean P90 supplied separately, never posterior expected distance",
+    "identity": "EM event_j = source CSV row j; DD EVT_ prefix removed or original integer catalog ID, aligned explicitly",
+    "oracles": "Velocity-only whole-volume L2 references, not inversions or per-sphere lower bounds"
+  },
+  "geometries": {
+    "synthetic": {
+      "events": 1920,
+      "stations": 52,
+      "event_xyz_range_m": [
+        [
+          416.66666666666663,
+          437.5,
+          750.0
+        ],
+        [
+          19583.333333333332,
+          6562.5,
+          5250.0
+        ]
+      ],
+      "station_xyz_range_m": [
+        [
+          769.2307692307693,
+          875.0,
+          0.0
+        ],
+        [
+          19230.76923076923,
+          6125.0,
+          0.0
+        ]
+      ],
+      "source": "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001",
+      "noise": {
+        "enabled": true,
+        "model": "independent_gaussian_relative_plus_absolute",
+        "config": {
+          "relative_sigma": 0.01,
+          "absolute_sigma_s": 0.01,
+          "seed": 42
+        },
+        "sigma_reference": "noiseless_absolute_travel_time_s",
+        "application": "before_subtracting_earliest_noisy_arrival_per_event",
+        "negative_picks": "not_clipped_before_normalization",
+        "rng": "PCG64_pair_sha256_v1",
+        "numpy_version": "2.4.0",
+        "convergence": "noiseless"
+      },
+      "forward": {
+        "solver_name": "pykonal.EikonalSolver",
+        "pykonal_version": "0.4.1",
+        "config": {
+          "refinement": 2,
+          "source_radius_cells": 2
+        },
+        "receiver_interpolation": {
+          "method": "factored_trilinear",
+          "factor": "T/d",
+          "distance": "euclidean_distance_to_exact_source",
+          "zero_distance_factor": "source_voxel_slowness"
+        },
+        "time_reference": "earliest_station_arrival_per_event"
+      },
+      "dd_grid": {
+        "shape_xyz": [
+          22,
+          9,
+          9
+        ],
+        "x_km": [
+          -21.5,
+          -9.5,
+          -8.5,
+          -7.5,
+          -6.5,
+          -5.5,
+          -4.5,
+          -3.5,
+          -2.5,
+          -1.5,
+          -0.5,
+          0.5,
+          1.5,
+          2.5,
+          3.5,
+          4.5,
+          5.5,
+          6.5,
+          7.5,
+          8.5,
+          9.5,
+          21.5
+        ],
+        "y_km": [
+          -15.0,
+          -3.0,
+          -2.0,
+          -1.0,
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          15.0
+        ],
+        "depths_km": [
+          -11.5,
+          0.5,
+          1.5,
+          2.5,
+          3.5,
+          4.5,
+          5.5,
+          6.5,
+          18.5
+        ],
+        "main_nodes_collocated_with_inversion_cell_centers": true,
+        "main_node_spacing_km": 1.0,
+        "main_node_counts_xyz": [
+          20,
+          7,
+          7
+        ],
+        "free_buffer_layers": 0,
+        "free_parameter_count": 980,
+        "background_vp_km_s": 5.0,
+        "initial_velocity_model": {
+          "type": "horizontal_layers",
+          "boundaries_km": [
+            0.7,
+            1.9,
+            3.4
+          ],
+          "velocities_m_s": [
+            3800.0,
+            4600.0,
+            5200.0,
+            5700.0
+          ],
+          "fixed_exterior_depths": "top and bottom layer velocities"
+        }
+      },
+      "dd_solver": {
+        "binary": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/tomoDD-SE",
+        "binary_sha256": "0c686a17b8f519adaa52281d6950cb45782e5fd5996a334ae65d986e272fa7a4",
+        "ray_derivative_step_km": 0.05,
+        "timeout_s": 1200,
+        "build_manifest": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/manifest.json",
+        "profile": "tomodd-sensitivity-20261026-dd1-d40-s5",
+        "smoothing_lon_lat_depth": [
+          5.0,
+          5.0,
+          5.0
+        ],
+        "iteration_sets": [
+          [
+            3,
+            1.0,
+            0.08,
+            -9.0,
+            1.0,
+            40.0,
+            1,
+            0.0
+          ]
+        ]
+      },
+      "dd_observations": {
+        "absolute": 99840,
+        "event_pairs": 3827,
+        "differential": 199004,
+        "max_pair_distance_km": 3.0,
+        "max_pair_degree": 4,
+        "pair_graph_coordinates": "noisy initial event locations",
+        "origin_time_gauge": "minimum straight-line initial-source-to-station distance / 5.0 km/s",
+        "gauge_coordinates": "noisy initial event locations",
+        "gauge_min_s": 0.04793052705337729,
+        "gauge_max_s": 1.3924140604484676
+      },
+      "dd_initial_hypocenters": {
+        "distribution": "independent Gaussian N(0, sigma^2) in x, y, and z",
+        "coordinate_system": "Cartesian xyz km",
+        "sigma_km": 1.0,
+        "seed": 42,
+        "boundary_handling": "rejection-resampled inside physical volume",
+        "realized_coordinate_rms_km": [
+          0.9526898401156895,
+          0.9378413104841126,
+          0.952352761343989
+        ],
+        "realized_3d_rms_km": 1.6413835740465237
+      },
+      "dd_absolute_DD_amplitude_weights": [
+        1.0,
+        1.0
+      ],
+      "coordinate_mapping": {
+        "center_lat": 30.3,
+        "center_lon": 103.3,
+        "x": "east; source x=10 km maps to center longitude",
+        "y": "north; source y=3.5 km maps to center latitude",
+        "z": "positive depth in both systems"
+      },
+      "geometry_generation": {
+        "generator": "dipping_layers"
+      }
+    },
+    "geysers": {
+      "events": 3776,
+      "stations": 26,
+      "event_xyz_range_m": [
+        [
+          220.9376201212443,
+          64.40113271299364,
+          1166.0
+        ],
+        [
+          19971.436515303398,
+          6999.6715614915975,
+          6877.0
+        ]
+      ],
+      "station_xyz_range_m": [
+        [
+          1080.963190711751,
+          79.400439498845,
+          0.0
+        ],
+        [
+          19094.869506749987,
+          6847.4756934484285,
+          839.0
+        ]
+      ],
+      "source": "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001",
+      "noise": {
+        "enabled": true,
+        "model": "independent_gaussian_relative_plus_absolute",
+        "config": {
+          "relative_sigma": 0.01,
+          "absolute_sigma_s": 0.01,
+          "seed": 42
+        },
+        "sigma_reference": "noiseless_absolute_travel_time_s",
+        "application": "before_subtracting_earliest_noisy_arrival_per_event",
+        "negative_picks": "not_clipped_before_normalization",
+        "rng": "PCG64_pair_sha256_v1",
+        "numpy_version": "2.4.0",
+        "convergence": "noiseless"
+      },
+      "forward": {
+        "solver_name": "pykonal.EikonalSolver",
+        "pykonal_version": "0.4.1",
+        "config": {
+          "refinement": 2,
+          "source_radius_cells": 2
+        },
+        "receiver_interpolation": {
+          "method": "factored_trilinear",
+          "factor": "T/d",
+          "distance": "euclidean_distance_to_exact_source",
+          "zero_distance_factor": "source_voxel_slowness"
+        },
+        "time_reference": "earliest_station_arrival_per_event"
+      },
+      "dd_grid": {
+        "shape_xyz": [
+          22,
+          9,
+          9
+        ],
+        "x_km": [
+          -21.5,
+          -9.5,
+          -8.5,
+          -7.5,
+          -6.5,
+          -5.5,
+          -4.5,
+          -3.5,
+          -2.5,
+          -1.5,
+          -0.5,
+          0.5,
+          1.5,
+          2.5,
+          3.5,
+          4.5,
+          5.5,
+          6.5,
+          7.5,
+          8.5,
+          9.5,
+          21.5
+        ],
+        "y_km": [
+          -15.0,
+          -3.0,
+          -2.0,
+          -1.0,
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          15.0
+        ],
+        "depths_km": [
+          -11.5,
+          0.5,
+          1.5,
+          2.5,
+          3.5,
+          4.5,
+          5.5,
+          6.5,
+          18.5
+        ],
+        "main_nodes_collocated_with_inversion_cell_centers": true,
+        "main_node_spacing_km": 1.0,
+        "main_node_counts_xyz": [
+          20,
+          7,
+          7
+        ],
+        "free_buffer_layers": 0,
+        "free_parameter_count": 980,
+        "background_vp_km_s": 5.0,
+        "initial_velocity_model": {
+          "type": "horizontal_layers",
+          "boundaries_km": [
+            0.7,
+            1.9,
+            3.4
+          ],
+          "velocities_m_s": [
+            3800.0,
+            4600.0,
+            5200.0,
+            5700.0
+          ],
+          "fixed_exterior_depths": "top and bottom layer velocities"
+        }
+      },
+      "dd_solver": {
+        "binary": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/tomoDD-SE",
+        "binary_sha256": "0c686a17b8f519adaa52281d6950cb45782e5fd5996a334ae65d986e272fa7a4",
+        "ray_derivative_step_km": 0.05,
+        "timeout_s": 1200,
+        "build_manifest": "/mnt/disk01/egor/projects/EMTomo/runs/tomodd_guard_fix_20261027/build/manifest.json",
+        "profile": "tomodd-sensitivity-20261026-dd1-d40-s5",
+        "smoothing_lon_lat_depth": [
+          5.0,
+          5.0,
+          5.0
+        ],
+        "iteration_sets": [
+          [
+            3,
+            1.0,
+            0.08,
+            -9.0,
+            1.0,
+            40.0,
+            1,
+            0.0
+          ]
+        ]
+      },
+      "dd_observations": {
+        "absolute": 98176,
+        "event_pairs": 7532,
+        "differential": 195832,
+        "max_pair_distance_km": 3.0,
+        "max_pair_degree": 4,
+        "pair_graph_coordinates": "noisy initial event locations",
+        "origin_time_gauge": "minimum straight-line initial-source-to-station distance / 5.0 km/s",
+        "gauge_coordinates": "noisy initial event locations",
+        "gauge_min_s": 0.0619974153134308,
+        "gauge_max_s": 1.379547052247119
+      },
+      "dd_initial_hypocenters": {
+        "distribution": "independent Gaussian N(0, sigma^2) in x, y, and z",
+        "coordinate_system": "Cartesian xyz km",
+        "sigma_km": 1.0,
+        "seed": 42,
+        "boundary_handling": "rejection-resampled inside physical volume",
+        "realized_coordinate_rms_km": [
+          0.9973704763069258,
+          0.9630233988591773,
+          0.9778175339356452
+        ],
+        "realized_3d_rms_km": 1.696552110437807
+      },
+      "dd_absolute_DD_amplitude_weights": [
+        1.0,
+        1.0
+      ],
+      "coordinate_mapping": {
+        "center_lat": 30.3,
+        "center_lon": 103.3,
+        "x": "east; source x=10 km maps to center longitude",
+        "y": "north; source y=3.5 km maps to center latitude",
+        "z": "positive depth in both systems"
+      },
+      "geometry_generation": {
+        "generator": "geysers_elevated.prepare",
+        "selection": "reuse immutable native source selection/order; drop only transformed out-of-domain events; no clipping or resampling",
+        "top_elevation_m": 1166.0,
+        "vertical_coordinates": {
+          "positive_direction": "down",
+          "origin": "flat top at H=1166 m",
+          "station_z": "H - source station_metadata elevation_m",
+          "event_z": "H + source events.csv z_m (old catalogue depth)",
+          "xy": "unchanged for all retained IDs"
+        },
+        "shared_datum_assumption": {
+          "verified": false,
+          "statement": "Catalogue depth and station elevation are assumed to share a vertical datum; this has NOT been verified or corrected.",
+          "physical_station_height": "source elevation_m",
+          "physical_event_height": "negative old catalogue depth_m"
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "geometry": "synthetic",
+      "method": "EMTomo hard",
+      "run": "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553",
+      "velocity": {
+        "volume_rmse_m_s": 203.34290172708944,
+        "spheres_rmse_m_s": 333.3492801352496,
+        "sphere_1_fast_rmse_m_s": 480.0521916160829,
+        "sphere_2_slow_rmse_m_s": 282.3902009052489,
+        "sphere_3_fast_rmse_m_s": 307.2095408084888,
+        "sphere_4_slow_rmse_m_s": 311.46334875718566,
+        "sphere_5_fast_rmse_m_s": 342.19709658233603,
+        "sphere_6_slow_rmse_m_s": 317.45933596754094
+      },
+      "location": {
+        "events": 1920,
+        "p90_3d_error_m": 231.22699617933608,
+        "weighted_mean_p90_3d_error_m": 231.22699617933608,
+        "point_estimator": "maximum saved posterior mass; first saved atom on exact ties",
+        "e_step_cycle": 11,
+        "pre_last_M_step": true,
+        "row_index_source_event_id_weights_sha256": "59c15a70f75ad20cf0cd4b92e3cc74b6315f47adb639b9165e470e9c991287f4",
+        "saved_mass_range": [
+          1.0,
+          1.0
+        ],
+        "saved_atom_count_range": [
+          1,
+          1
+        ]
+      },
+      "parameters": {
+        "cell_size": 1000.0,
+        "subdivision": 8,
+        "slowness_interpolation": "nearest",
+        "initial_velocity_m_s": 5000.0,
+        "initial_gradient_m_s": null,
+        "initial_layer_boundaries_km": [
+          0.7,
+          1.9,
+          3.4
+        ],
+        "initial_layer_velocities_m_s": [
+          3800.0,
+          4600.0,
+          5200.0,
+          5700.0
+        ],
+        "n_cycles": 12,
+        "n_candidates": 15,
+        "weights_top_n": 1,
+        "weights_min_distance": 1,
+        "candidate_mode": "hard",
+        "temperature": 1.0,
+        "weight_noise_relative_sigma": 0.01,
+        "weight_noise_absolute_sigma_s": 0.01,
+        "weight_model_sigma_s": 0.02,
+        "lambda_reg": 1.0,
+        "coverage_damping_power": 2.0,
+        "coverage_floor": 0.05,
+        "coverage_reference_percentile": 75.0,
+        "max_velocity_step_fraction": 0.02,
+        "n_workers": 12,
+        "run_name": "mg21-synthetic-hard-k15-top1-dmin1",
+        "run_version": "1.4",
+        "log_g_per_weight": false,
+        "weight_likelihood": "gaussian_independent_absolute_picks_marginal_origin_uniform_candidates",
+        "normal_equations": "station_precision_weighted_profiled_origin",
+        "candidate_selection": "likelihood_shortlist_of_n_candidates_refined_then_best_top_n",
+        "travel_times": "skfmm_order2_exact_station_homogeneous_sphere_v2",
+        "n_events": 1920,
+        "coarse_side_m": 1000.0,
+        "fine_side_m": 125.0,
+        "viewer_quality_expected": true
+      },
+      "checks": {
+        "initial_layers_verified": true,
+        "native_cell_tiling_verified": true,
+        "source_inputs_and_arrivals_hash_matched": true
+      }
+    },
+    {
+      "geometry": "synthetic",
+      "method": "EMTomo soft",
+      "run": "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a",
+      "velocity": {
+        "volume_rmse_m_s": 203.2430579483778,
+        "spheres_rmse_m_s": 333.3434714862267,
+        "sphere_1_fast_rmse_m_s": 478.87871975994807,
+        "sphere_2_slow_rmse_m_s": 282.4246778539295,
+        "sphere_3_fast_rmse_m_s": 308.2374263003872,
+        "sphere_4_slow_rmse_m_s": 311.53124689911886,
+        "sphere_5_fast_rmse_m_s": 342.18223127555956,
+        "sphere_6_slow_rmse_m_s": 316.9123775745643
+      },
+      "location": {
+        "events": 1920,
+        "p90_3d_error_m": 231.51234416767113,
+        "weighted_mean_p90_3d_error_m": 237.95538031243416,
+        "point_estimator": "maximum saved posterior mass; first saved atom on exact ties",
+        "e_step_cycle": 11,
+        "pre_last_M_step": true,
+        "row_index_source_event_id_weights_sha256": "2501065ea58af1e4091dda9e98012fcebee932a79230cd187768500f24caecd4",
+        "saved_mass_range": [
+          0.9999999999999997,
+          1.0000000000000004
+        ],
+        "saved_atom_count_range": [
+          10,
+          10
+        ]
+      },
+      "parameters": {
+        "cell_size": 1000.0,
+        "subdivision": 8,
+        "slowness_interpolation": "nearest",
+        "initial_velocity_m_s": 5000.0,
+        "initial_gradient_m_s": null,
+        "initial_layer_boundaries_km": [
+          0.7,
+          1.9,
+          3.4
+        ],
+        "initial_layer_velocities_m_s": [
+          3800.0,
+          4600.0,
+          5200.0,
+          5700.0
+        ],
+        "n_cycles": 12,
+        "n_candidates": 15,
+        "weights_top_n": 10,
+        "weights_min_distance": 1,
+        "candidate_mode": "soft",
+        "temperature": 1.0,
+        "weight_noise_relative_sigma": 0.01,
+        "weight_noise_absolute_sigma_s": 0.01,
+        "weight_model_sigma_s": 0.02,
+        "lambda_reg": 1.0,
+        "coverage_damping_power": 2.0,
+        "coverage_floor": 0.05,
+        "coverage_reference_percentile": 75.0,
+        "max_velocity_step_fraction": 0.02,
+        "n_workers": 12,
+        "run_name": "mg21-synthetic-soft-k15-top10-dmin1",
+        "run_version": "1.4",
+        "log_g_per_weight": false,
+        "weight_likelihood": "gaussian_independent_absolute_picks_marginal_origin_uniform_candidates",
+        "normal_equations": "station_precision_weighted_profiled_origin",
+        "candidate_selection": "likelihood_shortlist_of_n_candidates_refined_then_best_top_n",
+        "travel_times": "skfmm_order2_exact_station_homogeneous_sphere_v2",
+        "n_events": 1920,
+        "coarse_side_m": 1000.0,
+        "fine_side_m": 125.0,
+        "viewer_quality_expected": true
+      },
+      "checks": {
+        "initial_layers_verified": true,
+        "native_cell_tiling_verified": true,
+        "source_inputs_and_arrivals_hash_matched": true
+      }
+    },
+    {
+      "geometry": "synthetic",
+      "method": "tomoDD",
+      "run": "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5",
+      "velocity": {
+        "volume_rmse_m_s": 506.3542105214941,
+        "spheres_rmse_m_s": 361.8589476550566,
+        "sphere_1_fast_rmse_m_s": 447.02795608390215,
+        "sphere_2_slow_rmse_m_s": 361.6260026977899,
+        "sphere_3_fast_rmse_m_s": 288.45015821363654,
+        "sphere_4_slow_rmse_m_s": 379.30556618254906,
+        "sphere_5_fast_rmse_m_s": 387.6648629355181,
+        "sphere_6_slow_rmse_m_s": 353.10365836496044
+      },
+      "location": {
+        "events": 1920,
+        "p90_3d_error_m": 445.753882655829
+      },
+      "checks": {
+        "all_saved_picks_matched": true,
+        "max_serialization_error_s": 4.999965996788092e-09,
+        "absolute_count": 99840,
+        "differential_count": 199004,
+        "event_pairs": 3827,
+        "degree_range": [
+          2,
+          4
+        ],
+        "pair_distance_range_km": [
+          0.06589423568658315,
+          2.991266062428205
+        ],
+        "native_trilinear_max_difference_m_s": 0.0,
+        "final_vp_matches_iteration_3": true,
+        "exterior_nodes_unchanged": true,
+        "all_events_retained_and_aligned": true,
+        "shared_truth_verified": true
+      }
+    },
+    {
+      "geometry": "geysers",
+      "method": "EMTomo hard",
+      "run": "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e",
+      "velocity": {
+        "volume_rmse_m_s": 208.36997854749367,
+        "spheres_rmse_m_s": 329.8050050189515,
+        "sphere_1_fast_rmse_m_s": 445.57454161929,
+        "sphere_2_slow_rmse_m_s": 305.7104951408693,
+        "sphere_3_fast_rmse_m_s": 290.16670396597976,
+        "sphere_4_slow_rmse_m_s": 331.5916697292579,
+        "sphere_5_fast_rmse_m_s": 331.9548770254385,
+        "sphere_6_slow_rmse_m_s": 320.76185928001684
+      },
+      "location": {
+        "events": 3776,
+        "p90_3d_error_m": 223.53927192958545,
+        "weighted_mean_p90_3d_error_m": 223.53927192958545,
+        "point_estimator": "maximum saved posterior mass; first saved atom on exact ties",
+        "e_step_cycle": 11,
+        "pre_last_M_step": true,
+        "row_index_source_event_id_weights_sha256": "98b5019e6e62a7d07a6db37f5f70ba71c17a57fb37c33326a8c9dd9a745a56f9",
+        "saved_mass_range": [
+          1.0,
+          1.0
+        ],
+        "saved_atom_count_range": [
+          1,
+          1
+        ]
+      },
+      "parameters": {
+        "cell_size": 1000.0,
+        "subdivision": 8,
+        "slowness_interpolation": "nearest",
+        "initial_velocity_m_s": 5000.0,
+        "initial_gradient_m_s": null,
+        "initial_layer_boundaries_km": [
+          0.7,
+          1.9,
+          3.4
+        ],
+        "initial_layer_velocities_m_s": [
+          3800.0,
+          4600.0,
+          5200.0,
+          5700.0
+        ],
+        "n_cycles": 12,
+        "n_candidates": 15,
+        "weights_top_n": 1,
+        "weights_min_distance": 1,
+        "candidate_mode": "hard",
+        "temperature": 1.0,
+        "weight_noise_relative_sigma": 0.01,
+        "weight_noise_absolute_sigma_s": 0.01,
+        "weight_model_sigma_s": 0.02,
+        "lambda_reg": 1.0,
+        "coverage_damping_power": 2.0,
+        "coverage_floor": 0.05,
+        "coverage_reference_percentile": 75.0,
+        "max_velocity_step_fraction": 0.02,
+        "n_workers": 12,
+        "run_name": "mg21-geysers-hard-k15-top1-dmin1",
+        "run_version": "1.4",
+        "log_g_per_weight": false,
+        "weight_likelihood": "gaussian_independent_absolute_picks_marginal_origin_uniform_candidates",
+        "normal_equations": "station_precision_weighted_profiled_origin",
+        "candidate_selection": "likelihood_shortlist_of_n_candidates_refined_then_best_top_n",
+        "travel_times": "skfmm_order2_exact_station_homogeneous_sphere_v2",
+        "n_events": 3776,
+        "coarse_side_m": 1000.0,
+        "fine_side_m": 125.0,
+        "viewer_quality_expected": true
+      },
+      "checks": {
+        "initial_layers_verified": true,
+        "native_cell_tiling_verified": true,
+        "source_inputs_and_arrivals_hash_matched": true
+      }
+    },
+    {
+      "geometry": "geysers",
+      "method": "EMTomo soft",
+      "run": "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8",
+      "velocity": {
+        "volume_rmse_m_s": 208.3311851798868,
+        "spheres_rmse_m_s": 330.4798844757649,
+        "sphere_1_fast_rmse_m_s": 448.5871353413406,
+        "sphere_2_slow_rmse_m_s": 305.52550896818445,
+        "sphere_3_fast_rmse_m_s": 291.27264260460964,
+        "sphere_4_slow_rmse_m_s": 330.75899175139153,
+        "sphere_5_fast_rmse_m_s": 332.17948122789056,
+        "sphere_6_slow_rmse_m_s": 321.6838167495633
+      },
+      "location": {
+        "events": 3776,
+        "p90_3d_error_m": 213.4901873856902,
+        "weighted_mean_p90_3d_error_m": 216.99472873714092,
+        "point_estimator": "maximum saved posterior mass; first saved atom on exact ties",
+        "e_step_cycle": 11,
+        "pre_last_M_step": true,
+        "row_index_source_event_id_weights_sha256": "73c10dbc7399ba8d0960a251e4f4346a6d587bf7a4f35bd00b18932fa5651f8a",
+        "saved_mass_range": [
+          0.9999999999999997,
+          1.0000000000000004
+        ],
+        "saved_atom_count_range": [
+          10,
+          10
+        ]
+      },
+      "parameters": {
+        "cell_size": 1000.0,
+        "subdivision": 8,
+        "slowness_interpolation": "nearest",
+        "initial_velocity_m_s": 5000.0,
+        "initial_gradient_m_s": null,
+        "initial_layer_boundaries_km": [
+          0.7,
+          1.9,
+          3.4
+        ],
+        "initial_layer_velocities_m_s": [
+          3800.0,
+          4600.0,
+          5200.0,
+          5700.0
+        ],
+        "n_cycles": 12,
+        "n_candidates": 15,
+        "weights_top_n": 10,
+        "weights_min_distance": 1,
+        "candidate_mode": "soft",
+        "temperature": 1.0,
+        "weight_noise_relative_sigma": 0.01,
+        "weight_noise_absolute_sigma_s": 0.01,
+        "weight_model_sigma_s": 0.02,
+        "lambda_reg": 1.0,
+        "coverage_damping_power": 2.0,
+        "coverage_floor": 0.05,
+        "coverage_reference_percentile": 75.0,
+        "max_velocity_step_fraction": 0.02,
+        "n_workers": 12,
+        "run_name": "mg21-geysers-soft-k15-top10-dmin1",
+        "run_version": "1.4",
+        "log_g_per_weight": false,
+        "weight_likelihood": "gaussian_independent_absolute_picks_marginal_origin_uniform_candidates",
+        "normal_equations": "station_precision_weighted_profiled_origin",
+        "candidate_selection": "likelihood_shortlist_of_n_candidates_refined_then_best_top_n",
+        "travel_times": "skfmm_order2_exact_station_homogeneous_sphere_v2",
+        "n_events": 3776,
+        "coarse_side_m": 1000.0,
+        "fine_side_m": 125.0,
+        "viewer_quality_expected": true
+      },
+      "checks": {
+        "initial_layers_verified": true,
+        "native_cell_tiling_verified": true,
+        "source_inputs_and_arrivals_hash_matched": true
+      }
+    },
+    {
+      "geometry": "geysers",
+      "method": "tomoDD",
+      "run": "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5",
+      "velocity": {
+        "volume_rmse_m_s": 500.9807168194558,
+        "spheres_rmse_m_s": 389.66718758074654,
+        "sphere_1_fast_rmse_m_s": 475.1422774936334,
+        "sphere_2_slow_rmse_m_s": 404.09073620956076,
+        "sphere_3_fast_rmse_m_s": 265.9869276072031,
+        "sphere_4_slow_rmse_m_s": 506.950295521419,
+        "sphere_5_fast_rmse_m_s": 390.96066660963487,
+        "sphere_6_slow_rmse_m_s": 341.10204720113313
+      },
+      "location": {
+        "events": 3776,
+        "p90_3d_error_m": 961.9296355068185
+      },
+      "checks": {
+        "all_saved_picks_matched": true,
+        "max_serialization_error_s": 4.99988839219867e-09,
+        "absolute_count": 98176,
+        "differential_count": 195832,
+        "event_pairs": 7532,
+        "degree_range": [
+          1,
+          4
+        ],
+        "pair_distance_range_km": [
+          0.015277707098392258,
+          2.799378706405147
+        ],
+        "native_trilinear_max_difference_m_s": 0.0,
+        "final_vp_matches_iteration_3": true,
+        "exterior_nodes_unchanged": true,
+        "all_events_retained_and_aligned": true,
+        "shared_truth_verified": true
+      }
+    }
+  ],
+  "oracles": {
+    "synthetic": {
+      "EMTomo": {
+        "volume_rmse_m_s": 181.49114253668031,
+        "spheres_rmse_m_s": 298.0562315647054,
+        "sphere_1_fast_rmse_m_s": 381.6071802491813,
+        "sphere_2_slow_rmse_m_s": 280.7496934682615,
+        "sphere_3_fast_rmse_m_s": 267.9983032388372,
+        "sphere_4_slow_rmse_m_s": 281.2294924779868,
+        "sphere_5_fast_rmse_m_s": 332.11892821636206,
+        "sphere_6_slow_rmse_m_s": 267.42355037298427
+      },
+      "tomoDD": {
+        "volume_rmse_m_s": 142.85930378323886,
+        "spheres_rmse_m_s": 233.90932824587298,
+        "sphere_1_fast_rmse_m_s": 319.5385649027784,
+        "sphere_2_slow_rmse_m_s": 244.05542579855725,
+        "sphere_3_fast_rmse_m_s": 196.0725905247434,
+        "sphere_4_slow_rmse_m_s": 248.07765848084208,
+        "sphere_5_fast_rmse_m_s": 217.8436087889913,
+        "sphere_6_slow_rmse_m_s": 211.17669032079257
+      }
+    },
+    "geysers": {
+      "EMTomo": {
+        "volume_rmse_m_s": 181.49114253668031,
+        "spheres_rmse_m_s": 298.0562315647054,
+        "sphere_1_fast_rmse_m_s": 381.6071802491813,
+        "sphere_2_slow_rmse_m_s": 280.7496934682615,
+        "sphere_3_fast_rmse_m_s": 267.9983032388372,
+        "sphere_4_slow_rmse_m_s": 281.2294924779868,
+        "sphere_5_fast_rmse_m_s": 332.11892821636206,
+        "sphere_6_slow_rmse_m_s": 267.42355037298427
+      },
+      "tomoDD": {
+        "volume_rmse_m_s": 142.85930378323886,
+        "spheres_rmse_m_s": 233.90932824587298,
+        "sphere_1_fast_rmse_m_s": 319.5385649027784,
+        "sphere_2_slow_rmse_m_s": 244.05542579855725,
+        "sphere_3_fast_rmse_m_s": 196.0725905247434,
+        "sphere_4_slow_rmse_m_s": 248.07765848084208,
+        "sphere_5_fast_rmse_m_s": 217.8436087889913,
+        "sphere_6_slow_rmse_m_s": 211.17669032079257
+      }
+    }
+  },
+  "truth": {
+    "shape_xyz": [
+      160,
+      56,
+      56
+    ],
+    "cell_size_m": 125,
+    "extent_km": [
+      20,
+      7,
+      7
+    ],
+    "parameters": {
+      "lengths_km": [
+        20.0,
+        7.0,
+        7.0
+      ],
+      "cell_size_km": 0.125,
+      "horizontal_boundaries_km": [
+        0.7,
+        1.9
+      ],
+      "dipping_boundary_km": [
+        3.4,
+        3.4
+      ],
+      "layer_velocities_m_s": [
+        3800.0,
+        4600.0,
+        5200.0,
+        5700.0
+      ],
+      "anomalies": [
+        {
+          "center_km": [
+            3.5,
+            2.5,
+            1.2
+          ],
+          "radius_km": 0.9,
+          "peak_delta_m_s": 600.0,
+          "plateau_fraction": 0.5
+        },
+        {
+          "center_km": [
+            8.0,
+            4.8,
+            2.0
+          ],
+          "radius_km": 1.1,
+          "peak_delta_m_s": -650.0,
+          "plateau_fraction": 0.5
+        },
+        {
+          "center_km": [
+            12.5,
+            2.4,
+            2.6
+          ],
+          "radius_km": 1.2,
+          "peak_delta_m_s": 700.0,
+          "plateau_fraction": 0.5
+        },
+        {
+          "center_km": [
+            16.5,
+            4.5,
+            1.6
+          ],
+          "radius_km": 1.0,
+          "peak_delta_m_s": -600.0,
+          "plateau_fraction": 0.5
+        },
+        {
+          "center_km": [
+            6.0,
+            2.2,
+            3.6
+          ],
+          "radius_km": 1.1,
+          "peak_delta_m_s": 700.0,
+          "plateau_fraction": 0.5
+        },
+        {
+          "center_km": [
+            11.0,
+            5.0,
+            4.0
+          ],
+          "radius_km": 1.0,
+          "peak_delta_m_s": -650.0,
+          "plateau_fraction": 0.5
+        }
+      ],
+      "surface_stations": [
+        13,
+        4
+      ],
+      "n_events": 1920,
+      "event_depth_km": [
+        0.5,
+        5.5
+      ],
+      "seed": 42,
+      "event_grid_shape": [
+        24,
+        8,
+        10
+      ]
+    },
+    "region_cells": {
+      "volume": 501760,
+      "spheres": 15314,
+      "sphere_1_fast": 1572,
+      "sphere_2_slow": 2856,
+      "sphere_3_fast": 3710,
+      "sphere_4_slow": 2152,
+      "sphere_5_fast": 2848,
+      "sphere_6_slow": 2176
+    }
+  },
+  "sha256": {
+    "paper/evaluate_metrics.py": "0b0e2968f9759ba39b066816abd262112a8ed985e3cd001cabf46c890e3dcb16",
+    "paper/evaluate_spherical_anomalies.py": "878cae54657a9fed5890bac2aa6139c1a8f6af42ada60f53be675da26e26531b",
+    "paper/figures/spherical_anomalies_comparison.json": "121a239be53b24d4911750f17c31b96f87687261bd4bfc0a051eef62e5c714e9",
+    "paper/make_checkerboard_location_ecdf.py": "11fc348e4451cb232996f47b8ae54b942782d480d28381cd7dec72ed066fcea4",
+    "paper/make_spherical_anomalies_comparison.py": "1bf4fe841364c43f27854faca199c55668d495a54c574e97ab940222a0cfc08d",
+    "runs/matched_geometry_20261021/cases/geysers-em-hard-k15-top1-dmin1/result.json": "e989c918f02c65ec55786d5a12ebef8ad4fe05805498b8aa4bcd6188122c26ce",
+    "runs/matched_geometry_20261021/cases/geysers-em-soft-k15-top10-dmin1/result.json": "eed2b2e3b2fed04421cf4ce223e64e416405b04cf1869b344cf2dc425d7e90ac",
+    "runs/matched_geometry_20261021/cases/synthetic-em-hard-k15-top1-dmin1/result.json": "70b207b410aad3a17d9f0f9408c42a227af956e938ef999c10fb0092a6c89afd",
+    "runs/matched_geometry_20261021/cases/synthetic-em-soft-k15-top10-dmin1/result.json": "2b18ac1ccbab8061d62dee49e56ee0c0d15c73b969ee49317779f597039c737a",
+    "runs/matched_geometry_20261021/manifest.json": "624464cd4a25b1be963f183e3ec55348cab0ce943f83b9dcee1c1bad73a6edb7",
+    "runs/matched_geometry_20261021/snapshot/benchmark/tomodd_benchmark/compare_emtomo_flat4.py": "69070bb9f82d0052a422d1faa0e8e0a703e4839167100c5c60278ed4183298c5",
+    "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/events.csv": "4c155970f99002099af5faed665bbc77ac16da7b49807c393dbba048b7358318",
+    "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/generation.json": "f49fc83b2d782cc83977d07b9920650a38c736a6f9f91bb3e1abf619b126bc87",
+    "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/model.npz": "77b4e7669cf0420668ead0e80a9ee5f6fb3fd2837da8024bdd1220b99d844766",
+    "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/stations.csv": "23d640a6a9ea0515d92374af3f05edf7641cee9810db808af7e261760e86fc6e",
+    "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/events.csv": "d7f6af385a08edf1b4f622e35c08d6f40bbc06d2d60e3ab9e42a730e3dedd786",
+    "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/generation.json": "0c13e861818a7901bc734f66ccdb08fde011c5e2a829a1742e874c78c445aaaf",
+    "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/model.npz": "77b4e7669cf0420668ead0e80a9ee5f6fb3fd2837da8024bdd1220b99d844766",
+    "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/stations.csv": "59895d722cff63e2f087438704631ae6740f2f76dd7065ce64bad8e6b69be4e3",
+    "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/output/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/arrivals.csv": "652a480b23bd4b141e6c64fed0b638a49c9f371ecfffa8c4b91332c9caf50b0e",
+    "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/output/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/metadata.json": "b793eb96e20386c7604329270f31633ff33d9867022e0da4933b21f0ddfba998",
+    "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/output/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/arrivals.csv": "4d90767bf521948a621f4fc80857268e20c5e30b4ab547269b849b95b937f2c4",
+    "runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/output/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/metadata.json": "9aeb4ecc2ed847b0de81c8a64d8d12e106c6c38349d4abd6420364bc39bf99b0",
+    "runs/matched_geometry_20261021/status.json": "3d2c5ad2a5d346f3382aa9585b05b34dab0e0aceea8818586e957326e87a903b",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/final_model.npy": "6d654db61023988d2f2ef6b8dcb9cb1292cbfc0f86a1fec0a3381ed18d7b7c99",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/initial_model.npy": "8c0b6ae7fcf0eaefcb6604a1fa66f90f1333256abf038421410a70dfd1ebb67e",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/iter_0/complete.json": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/iter_1/complete.json": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/iter_10/complete.json": "8a5c226eda5b5d1cd91b7d56060583e7d51679ce69db7cda22b714a49f6d60e1",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/iter_11/complete.json": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/iter_2/complete.json": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/iter_3/complete.json": "6cf8fd8fe3cf21998735ac795d39e9f89dc0a885ad236d9f3857776cd1adb110",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/iter_4/complete.json": "072deec4a878a55eb5cb7f456a306186f45fd3225341c9fd6f54324db9ef34ed",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/iter_5/complete.json": "4bc033e329ed02355bafd75ae77694d5bc61a0caa67e47eb2f3c156d912547b9",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/iter_6/complete.json": "5f90ae222dba2e5a9ab56f0e30717cf445168801e92e5917e4c08db4ca1be77a",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/iter_7/complete.json": "c1a041fce104543676af55b9dbc9a2ac1a149d6cc5773aa6aa9ac39cce188ab1",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/iter_8/complete.json": "722c37313d088726ea5288db4cd3917e52f6554034f29c7de0cba48fb822b5e9",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/iter_9/complete.json": "4bff94acedec71e460b69808d86e6ce75db5c72a932b99aac30c902b4ad187a8",
+    "runs/run_mg21-geysers-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_d28dfce4670d49fc8113b5cb8aaee55e/meta.json": "08bce7c75d2ee63ce13c081ac076dffe3b3c14d72b7df584f1781785aeb39b2f",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/final_model.npy": "e60905ed1f19b5462c4963da16aa422555a664e72b8a1adb26164f9dff82f8d4",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/initial_model.npy": "8c0b6ae7fcf0eaefcb6604a1fa66f90f1333256abf038421410a70dfd1ebb67e",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/iter_0/complete.json": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/iter_1/complete.json": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/iter_10/complete.json": "8a5c226eda5b5d1cd91b7d56060583e7d51679ce69db7cda22b714a49f6d60e1",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/iter_11/complete.json": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/iter_2/complete.json": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/iter_3/complete.json": "6cf8fd8fe3cf21998735ac795d39e9f89dc0a885ad236d9f3857776cd1adb110",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/iter_4/complete.json": "072deec4a878a55eb5cb7f456a306186f45fd3225341c9fd6f54324db9ef34ed",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/iter_5/complete.json": "4bc033e329ed02355bafd75ae77694d5bc61a0caa67e47eb2f3c156d912547b9",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/iter_6/complete.json": "5f90ae222dba2e5a9ab56f0e30717cf445168801e92e5917e4c08db4ca1be77a",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/iter_7/complete.json": "c1a041fce104543676af55b9dbc9a2ac1a149d6cc5773aa6aa9ac39cce188ab1",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/iter_8/complete.json": "722c37313d088726ea5288db4cd3917e52f6554034f29c7de0cba48fb822b5e9",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/iter_9/complete.json": "4bff94acedec71e460b69808d86e6ce75db5c72a932b99aac30c902b4ad187a8",
+    "runs/run_mg21-geysers-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_113415_528f65a7bdb542fcbe9e18c2986e90d8/meta.json": "4fc15705ff1226f74088da9104d969ae18fb1ebd985b180613eb5aa52f616759",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/final_model.npy": "6ae6147623b590f46c4f036fe9ec87514f76d6f228f0f48f59f70c3478364e77",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/initial_model.npy": "8c0b6ae7fcf0eaefcb6604a1fa66f90f1333256abf038421410a70dfd1ebb67e",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/iter_0/complete.json": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/iter_1/complete.json": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/iter_10/complete.json": "8a5c226eda5b5d1cd91b7d56060583e7d51679ce69db7cda22b714a49f6d60e1",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/iter_11/complete.json": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/iter_2/complete.json": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/iter_3/complete.json": "6cf8fd8fe3cf21998735ac795d39e9f89dc0a885ad236d9f3857776cd1adb110",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/iter_4/complete.json": "072deec4a878a55eb5cb7f456a306186f45fd3225341c9fd6f54324db9ef34ed",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/iter_5/complete.json": "4bc033e329ed02355bafd75ae77694d5bc61a0caa67e47eb2f3c156d912547b9",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/iter_6/complete.json": "5f90ae222dba2e5a9ab56f0e30717cf445168801e92e5917e4c08db4ca1be77a",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/iter_7/complete.json": "c1a041fce104543676af55b9dbc9a2ac1a149d6cc5773aa6aa9ac39cce188ab1",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/iter_8/complete.json": "722c37313d088726ea5288db4cd3917e52f6554034f29c7de0cba48fb822b5e9",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/iter_9/complete.json": "4bff94acedec71e460b69808d86e6ce75db5c72a932b99aac30c902b4ad187a8",
+    "runs/run_mg21-synthetic-hard-k15-top1-dmin1_v1.4_ncand-15_topn-1_mode-hard_dmin-1_20261021_111349_8190fea3165b40f7b5ed8247cd49c553/meta.json": "efc5abc7e7b51e920ad44e53d73a0fa08d5c3281092fdea3524350ea35085018",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/final_model.npy": "e135982149b87455fc2e87e980254cef0e3ecf48b8dcb03ef09f5525f39bf997",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/initial_model.npy": "8c0b6ae7fcf0eaefcb6604a1fa66f90f1333256abf038421410a70dfd1ebb67e",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/iter_0/complete.json": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/iter_1/complete.json": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/iter_10/complete.json": "8a5c226eda5b5d1cd91b7d56060583e7d51679ce69db7cda22b714a49f6d60e1",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/iter_11/complete.json": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/iter_2/complete.json": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/iter_3/complete.json": "6cf8fd8fe3cf21998735ac795d39e9f89dc0a885ad236d9f3857776cd1adb110",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/iter_4/complete.json": "072deec4a878a55eb5cb7f456a306186f45fd3225341c9fd6f54324db9ef34ed",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/iter_5/complete.json": "4bc033e329ed02355bafd75ae77694d5bc61a0caa67e47eb2f3c156d912547b9",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/iter_6/complete.json": "5f90ae222dba2e5a9ab56f0e30717cf445168801e92e5917e4c08db4ca1be77a",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/iter_7/complete.json": "c1a041fce104543676af55b9dbc9a2ac1a149d6cc5773aa6aa9ac39cce188ab1",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/iter_8/complete.json": "722c37313d088726ea5288db4cd3917e52f6554034f29c7de0cba48fb822b5e9",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/iter_9/complete.json": "4bff94acedec71e460b69808d86e6ce75db5c72a932b99aac30c902b4ad187a8",
+    "runs/run_mg21-synthetic-soft-k15-top10-dmin1_v1.4_ncand-15_topn-10_mode-soft_dmin-1_20261021_111349_6e3bc0bf490e4c5098207f3c88356e7a/meta.json": "4ed192fd50be767bfbb39655f0e076ae32378fa021a37b8e048469d4671461af",
+    "runs/tomodd_guard_fix_20261027/build/manifest.json": "91acdc3c648099be7d6d77fd79d75ecf700116f01293737f82ee2f921aad9f8f",
+    "runs/tomodd_guard_fix_20261027/build/tomoDD-SE": "0c686a17b8f519adaa52281d6950cb45782e5fd5996a334ae65d986e272fa7a4",
+    "runs/tomodd_guard_fix_20261027/manifest.json": "ab118e22d4da095ccc96709f13d72cece388861594c9ae84cc37940ea5b6cc15",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/config.json": "7e037a20f9e87a1fe97a527d67a031fbf59fb65a26bba3e635407b2fe5e4eb33",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/state.npz": "232bcb7ab81065cc3a841e014a27cb4505d78d6c297bfc9d49d3833a563aa34c",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/MOD": "d9a1b9c548d338bef940012b0e03ec8875c655569861394938d598ac3fa432df",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/absolute.dat": "6d0054e0490edde33291195228c95098aa20c3172ff7208a63912c7b1b7d02cc",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/ak135.15.SKS": "7744c108e13cb385762da76ded76c9444924dd48ceeab4ba719d3050fd3559fd",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/dt.cc": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/dt.ct": "39ebdf0db16b8546829d0fcebd8b707af903dfa67c1d06327c3d8933267b636b",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/event.dat": "67aa7891d25ce7c9dadec53803ce438f114c61afa23fba96a51ad0f10faf1cc5",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/grid.dat": "fef416857ac0b0b75808fd0a0d8f8081dbc182b4958f6f5ae699d22195df19a6",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/layer-16.dat": "8921e57b6caea421d0ca3d45dce8f015688f489d2370deda38b286523a92abf4",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/station.dat": "4b13acb8fdd1fcd68a29f5b8ffef1d8c7354a74b8b2cf25de45ab87b317026a4",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/tomoDD-SE.inp": "c38f8df740d9d9c71f1bbae8e5f8fe7196f7aea3f2d677954e21581ec3f50bf1",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/tomoDD-SE.log": "bd9e6ebda63b324778990b20a1fbf9a35c88f7b58b635aa63a1b9c19362c18c7",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/tomoDD.reloc": "c6f8f3b19057d1f21805dba6eb74f67c8c2b3cfe96454b1796c91004e52d794c",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/tomoDD.reloc.001.001": "5252313653a1a1b97f6a4f20144038cb163070b1e66c393de0556cbe5aaa7d53",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/tomoDD.reloc.001.002": "403064a17bad0994de39f069f5a7d24e23c05a90bd6d12e9bee8c2f8492b2201",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/tomoDD.reloc.001.003": "802efb5377e205f28119a88047deeca81e732880c916de545be4ece0aa29814b",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/work/inversion/tomoDD.vel": "552a109f0f0ab7bb0054f2bbd15ab26938a36da6d33014dc499e49f7538dc6a3",
+    "runs/tomodd_guard_fix_20261027/outputs/geysers-dd1-d40-s5/worker_info.json": "8e253b0df702c218f3d3dca3ca004de03875ee51b27f6bbdd3570e0b7167b50f",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/config.json": "046aeff53e96beaeb0d8932164290f0f6709a8b22937fc8b0c6d1831c8845a1f",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/state.npz": "b7b7754f4ac474b6f0930a6bd50868c2b596212dcdc85fcaa980e356b87d6965",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/MOD": "d9a1b9c548d338bef940012b0e03ec8875c655569861394938d598ac3fa432df",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/absolute.dat": "66197912eb49f567a0acaf6d23a426b383d8130847266710f29edc43fece5ae7",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/ak135.15.SKS": "7744c108e13cb385762da76ded76c9444924dd48ceeab4ba719d3050fd3559fd",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/dt.cc": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/dt.ct": "53f64b91f07d7a8c619675bdedcf8796458d0d546138be202d282643a09500fa",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/event.dat": "1b05fe2455d659c7456b6a2037746fd597e6fc695bbd126348c0644786a699d3",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/grid.dat": "fef416857ac0b0b75808fd0a0d8f8081dbc182b4958f6f5ae699d22195df19a6",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/layer-16.dat": "8921e57b6caea421d0ca3d45dce8f015688f489d2370deda38b286523a92abf4",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/station.dat": "b7fe80026f7aabba0e2b5dc2e93d17920aca03015eb07c1b5762ace112042467",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/tomoDD-SE.inp": "0ae8f5b024c56c065f98e977b688dd3d5ade3fc5da3475a280530107202af7a6",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/tomoDD-SE.log": "60ed9e2ada5a259a57ef5d61aaed2c01a82d81ec0cf6a3f2dcfccbf6cd6dee0d",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/tomoDD.reloc": "6f42d29e2a1e09b17a833d10180c179c3597ea87cac90bd9e92994ee3e5c5402",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/tomoDD.reloc.001.001": "4aa17dc0c1be08aa6f17129fb97058f27981254a0a90a7f1d8e95a4da220deb8",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/tomoDD.reloc.001.002": "6d47534452c4f8fbe32af0dee901f0c06b58523d2fbb89db49ca1347b63d9ab5",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/tomoDD.reloc.001.003": "448a262c73f684352d66f85f9c723c6e31a7ddac632d014703b9b0941a61514c",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/work/inversion/tomoDD.vel": "b32c09d40f0a8acc6b4f9b6ee7a624d61c9d67c9773b72974db4a4fb3f89182a",
+    "runs/tomodd_guard_fix_20261027/outputs/synthetic-dd1-d40-s5/worker_info.json": "a886d4d922929376ec91a29402971f5eb88070ed85385daab138d0b1ce518338",
+    "runs/tomodd_guard_fix_20261027/status.json": "bc5430cd2a92efa30bda1a1e50558970bd88514d637ad95416e2e4533fc2177d"
+  }
+}

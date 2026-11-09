@@ -1,0 +1,32 @@
+{
+  "slices_km": {
+    "z": 1.5,
+    "y": 6.4
+  },
+  "selection": "Minimum post-update full-volume velocity RMS against truth",
+  "sampling": "Native piecewise-constant cells; no smoothing; zero-based quality iteration refers to post-update model",
+  "color_limits_km_s": [
+    4.75,
+    5.25
+  ],
+  "runs": [
+    {
+      "run": "run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76",
+      "mode": "hard",
+      "quality_iteration_zero_based": 0,
+      "update_number": 1,
+      "model": "runs/run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76/iter_1/model.npy",
+      "volume_rms_m_s": 248.53998782206085,
+      "source_model": "/mnt/disk01/egor/projects/forward_modeling/experiments/input/onesided_nx6_24x12x12_18st_1200ev_noise01_pick005_seed42/model.npz"
+    },
+    {
+      "run": "run_onesided-full-soft50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_094430_ee66281e11c44fc8aa6262245b4d3065",
+      "mode": "soft",
+      "quality_iteration_zero_based": 1,
+      "update_number": 2,
+      "model": "runs/run_onesided-full-soft50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_094430_ee66281e11c44fc8aa6262245b4d3065/iter_2/model.npy",
+      "volume_rms_m_s": 246.27613409084637,
+      "source_model": "/mnt/disk01/egor/projects/forward_modeling/experiments/input/onesided_nx6_24x12x12_18st_1200ev_noise01_pick005_seed42/model.npz"
+    }
+  ]
+}

@@ -1,0 +1,193 @@
+{
+  "baseline_experiment_id": "geysers_realgeom_nx6_24x12x12_31st_3471ev_noise01_pick005_seed42",
+  "experiments_root": "/mnt/disk01/egor/projects/forward_modeling/experiments",
+  "levels": [
+    {
+      "id": "x0p5",
+      "multiplier": 0.5,
+      "experiment_id": "geysers_nx6_real31_noisegrid_x0p5_seed42",
+      "actual_noise": {
+        "relative_sigma": 0.005,
+        "absolute_sigma_s": 0.025,
+        "seed": 42
+      },
+      "input_sha256": {
+        "model.npz": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7",
+        "stations.csv": "453b30e77f5652d44e4422680f7ad5cf2951ca68c0111d76513f6219471adeda",
+        "events.csv": "2cc325be5b395e5219412cf17ed9e6291f09155900e57ca134dd14eb23d8bbbe",
+        "generation.json": "0ed7bb15e5820293058ef731fed220bce2dc8889adf2ddd1333bbf175d8b0b52"
+      },
+      "output_sha256": {
+        "arrivals.csv": "476f41ddbbe2a47f37a6ef9fa5b3934a722e5f03c2d6192595a86d2dccee92d7",
+        "metadata.json": "c60ed0c002311f9a533f795c917ced0eeee6c0c99ac256f0662534d32db2e15f",
+        "clean_times.npz": "19cbee66d0aad86eb15208f0cda771cd3a77b4eaeba7fa2f9393fce4f55e1605"
+      }
+    },
+    {
+      "id": "x0p75",
+      "multiplier": 0.75,
+      "experiment_id": "geysers_nx6_real31_noisegrid_x0p75_seed42",
+      "actual_noise": {
+        "relative_sigma": 0.0075,
+        "absolute_sigma_s": 0.037500000000000006,
+        "seed": 42
+      },
+      "input_sha256": {
+        "model.npz": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7",
+        "stations.csv": "453b30e77f5652d44e4422680f7ad5cf2951ca68c0111d76513f6219471adeda",
+        "events.csv": "2cc325be5b395e5219412cf17ed9e6291f09155900e57ca134dd14eb23d8bbbe",
+        "generation.json": "0ed7bb15e5820293058ef731fed220bce2dc8889adf2ddd1333bbf175d8b0b52"
+      },
+      "output_sha256": {
+        "arrivals.csv": "5fe80b9922d93d26d00700ac0563e5b7f1db116e3c77d98794503fb92ea8fc6f",
+        "metadata.json": "364ec6b86931568e949e21f87645343e1cd91529fecb031d043194d9e1f8a9b0",
+        "clean_times.npz": "19cbee66d0aad86eb15208f0cda771cd3a77b4eaeba7fa2f9393fce4f55e1605"
+      }
+    },
+    {
+      "id": "x1",
+      "multiplier": 1.0,
+      "experiment_id": "geysers_realgeom_nx6_24x12x12_31st_3471ev_noise01_pick005_seed42",
+      "actual_noise": {
+        "relative_sigma": 0.01,
+        "absolute_sigma_s": 0.05,
+        "seed": 42
+      },
+      "input_sha256": {
+        "model.npz": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7",
+        "stations.csv": "453b30e77f5652d44e4422680f7ad5cf2951ca68c0111d76513f6219471adeda",
+        "events.csv": "2cc325be5b395e5219412cf17ed9e6291f09155900e57ca134dd14eb23d8bbbe",
+        "generation.json": "0ed7bb15e5820293058ef731fed220bce2dc8889adf2ddd1333bbf175d8b0b52"
+      },
+      "output_sha256": {
+        "arrivals.csv": "40004c40fbe5c41fc462493f97d5b443485e1dcefe2c43c05b83519b2eb7658b",
+        "metadata.json": "9eea57bdf2242e1e08346ea15d56c7c25454fee2506c88c34ae68e7d7d4bf8c2",
+        "clean_times.npz": "19cbee66d0aad86eb15208f0cda771cd3a77b4eaeba7fa2f9393fce4f55e1605"
+      }
+    },
+    {
+      "id": "x1p5",
+      "multiplier": 1.5,
+      "experiment_id": "geysers_nx6_real31_noisegrid_x1p5_seed42",
+      "actual_noise": {
+        "relative_sigma": 0.015,
+        "absolute_sigma_s": 0.07500000000000001,
+        "seed": 42
+      },
+      "input_sha256": {
+        "model.npz": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7",
+        "stations.csv": "453b30e77f5652d44e4422680f7ad5cf2951ca68c0111d76513f6219471adeda",
+        "events.csv": "2cc325be5b395e5219412cf17ed9e6291f09155900e57ca134dd14eb23d8bbbe",
+        "generation.json": "0ed7bb15e5820293058ef731fed220bce2dc8889adf2ddd1333bbf175d8b0b52"
+      },
+      "output_sha256": {
+        "arrivals.csv": "f2aefdd8c930e71f495a7e81ed707ce98042c0e50fc36ae3be743f735ff197b8",
+        "metadata.json": "de7840becb8c2b6d70dbff306c4cffdc7d8bacc8ae6ea0c1994a83a7be2f577d",
+        "clean_times.npz": "19cbee66d0aad86eb15208f0cda771cd3a77b4eaeba7fa2f9393fce4f55e1605"
+      }
+    },
+    {
+      "id": "x2",
+      "multiplier": 2.0,
+      "experiment_id": "geysers_nx6_real31_noisegrid_x2_seed42",
+      "actual_noise": {
+        "relative_sigma": 0.02,
+        "absolute_sigma_s": 0.1,
+        "seed": 42
+      },
+      "input_sha256": {
+        "model.npz": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7",
+        "stations.csv": "453b30e77f5652d44e4422680f7ad5cf2951ca68c0111d76513f6219471adeda",
+        "events.csv": "2cc325be5b395e5219412cf17ed9e6291f09155900e57ca134dd14eb23d8bbbe",
+        "generation.json": "0ed7bb15e5820293058ef731fed220bce2dc8889adf2ddd1333bbf175d8b0b52"
+      },
+      "output_sha256": {
+        "arrivals.csv": "f14f05c1b62cc8f3135d5394effad95c6e153e688d1942737cc8b8ddad4ace1d",
+        "metadata.json": "060e8b0d402408a498871779f33ec04923aa8e6d0f7d8cd60844096622a8864d",
+        "clean_times.npz": "19cbee66d0aad86eb15208f0cda771cd3a77b4eaeba7fa2f9393fce4f55e1605"
+      }
+    }
+  ],
+  "source_forward": {
+    "experiment_id": "geysers_realgeom_nx6_24x12x12_31st_3471ev_noise01_pick005_seed42",
+    "input_sha256": {
+      "model.npz": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7",
+      "stations.csv": "453b30e77f5652d44e4422680f7ad5cf2951ca68c0111d76513f6219471adeda",
+      "events.csv": "2cc325be5b395e5219412cf17ed9e6291f09155900e57ca134dd14eb23d8bbbe",
+      "generation.json": "0ed7bb15e5820293058ef731fed220bce2dc8889adf2ddd1333bbf175d8b0b52"
+    },
+    "output_sha256": {
+      "arrivals.csv": "40004c40fbe5c41fc462493f97d5b443485e1dcefe2c43c05b83519b2eb7658b",
+      "metadata.json": "9eea57bdf2242e1e08346ea15d56c7c25454fee2506c88c34ae68e7d7d4bf8c2",
+      "clean_times.npz": "19cbee66d0aad86eb15208f0cda771cd3a77b4eaeba7fa2f9393fce4f55e1605"
+    },
+    "metadata": {
+      "solver_name": "pykonal.EikonalSolver",
+      "pykonal_version": "0.4.1",
+      "solver_version": "1",
+      "config": {
+        "refinement": 32,
+        "source_radius_cells": 2
+      },
+      "source_seed": {
+        "method": "local_off_grid_straight_ray_slowness_integral",
+        "source_radius_cells": 2,
+        "radius_cell_size_m": 125.0,
+        "approximation": "local_straight_ray_upper_bounds_not_bent_rays"
+      },
+      "receiver_interpolation": {
+        "method": "factored_trilinear",
+        "factor": "T/d",
+        "distance": "euclidean_distance_to_exact_source",
+        "zero_distance_factor": "source_voxel_slowness"
+      },
+      "velocity_representation": {
+        "input": "cell_centered_piecewise_constant_voxels",
+        "origin": "lower_domain_corner",
+        "numerical_grid": "nodes_with_adjacent_slowness_averaging_at_interfaces"
+      },
+      "time_reference": "earliest_station_arrival_per_event",
+      "units": {
+        "coordinates": "m",
+        "cell_size": "m",
+        "velocity": "m/s",
+        "arrival_time": "s",
+        "elapsed_time": "s"
+      },
+      "input_sha256": {
+        "model.npz": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7",
+        "stations.csv": "453b30e77f5652d44e4422680f7ad5cf2951ca68c0111d76513f6219471adeda",
+        "events.csv": "2cc325be5b395e5219412cf17ed9e6291f09155900e57ca134dd14eb23d8bbbe",
+        "generation.json": "0ed7bb15e5820293058ef731fed220bce2dc8889adf2ddd1333bbf175d8b0b52"
+      },
+      "elapsed_seconds": 570.5765052624047,
+      "noise": {
+        "enabled": true,
+        "model": "independent_gaussian_relative_plus_absolute",
+        "config": {
+          "relative_sigma": 0.01,
+          "absolute_sigma_s": 0.05,
+          "seed": 42
+        },
+        "sigma_reference": "noiseless_absolute_travel_time_s",
+        "application": "before_subtracting_earliest_noisy_arrival_per_event",
+        "negative_picks": "not_clipped_before_normalization",
+        "rng": "PCG64_pair_sha256_v1",
+        "numpy_version": "2.4.0",
+        "convergence": "noiseless"
+      },
+      "absolute_times_cache": {
+        "file": "clean_times.npz",
+        "sha256": "19cbee66d0aad86eb15208f0cda771cd3a77b4eaeba7fa2f9393fce4f55e1605",
+        "array": "absolute_times_s",
+        "axes": [
+          "event",
+          "station"
+        ],
+        "time_reference": "event_origin",
+        "units": "s",
+        "noiseless": true
+      }
+    }
+  }
+}

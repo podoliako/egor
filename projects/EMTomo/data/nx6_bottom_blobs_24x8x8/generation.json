@@ -1,0 +1,88 @@
+{
+  "generator": "bottom_blobs",
+  "seed": 42,
+  "domain_km": [
+    24.0,
+    8.0,
+    8.0
+  ],
+  "blocks_xyz": [
+    6,
+    2,
+    2
+  ],
+  "cell_size_m": 4000,
+  "source_model": "/mnt/disk01/egor/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42/model.npz",
+  "source_model_sha256": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7",
+  "crop": "velocity[:, :2, :2]; origin unchanged",
+  "bottom": {
+    "count": 500,
+    "xy_range_km": [
+      [
+        0.5,
+        23.5
+      ],
+      [
+        0.5,
+        7.5
+      ]
+    ],
+    "depth_range_km": [
+      7.2,
+      7.8
+    ],
+    "xy_strata": [
+      50,
+      10
+    ],
+    "first_id": "EVT_0001",
+    "last_id": "EVT_0500"
+  },
+  "blobs": {
+    "count_each": 50,
+    "centers_km": [
+      [
+        6.0,
+        4.0,
+        4.0
+      ],
+      [
+        18.0,
+        4.0,
+        4.0
+      ]
+    ],
+    "isotropic_gaussian_sigma_km": 0.45,
+    "first_ids": [
+      "EVT_0501",
+      "EVT_0551"
+    ]
+  },
+  "stations": {
+    "left": 10,
+    "right": 10,
+    "middle": 2,
+    "left_x_km": [
+      0.5,
+      1.5
+    ],
+    "right_x_km": [
+      22.5,
+      23.5
+    ],
+    "middle_xy_km": [
+      [
+        12,
+        2
+      ],
+      [
+        12,
+        6
+      ]
+    ],
+    "z_m": 0
+  },
+  "coordinate_units": "m",
+  "z_positive": "down",
+  "figures": "Projections of all points, not thin slices; gray lines are block boundaries"
+}

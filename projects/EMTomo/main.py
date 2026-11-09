@@ -51,7 +51,16 @@ def _parser() -> argparse.ArgumentParser:
            help="Depths of horizontal starting-layer boundaries")
     option("initial-layer-velocities-m-s", type=float, nargs="+", metavar="V",
            help="Starting-layer velocities from top to bottom (one more than boundaries)")
-    option("cycles", type=int)
+    option("cycles", type=int, help="Maximum full velocity updates")
+    option("control-fraction", type=float,
+           help="Fraction of finite picks held out once for validation; 0 disables (default 0.1)")
+    option("control-seed", type=int, help="Seed for the fixed control-pick split")
+    option("control-min-training-picks", type=int,
+           help="Keep at least this many training picks per event when splitting (default 5)")
+    option("early-stopping-patience", type=int,
+           help="Consecutive insufficient control-RMSE improvements before stopping (default 2)")
+    option("early-stopping-min-relative-improvement", type=float,
+           help="Required relative control-RMSE decrease per update, strictly greater (default 0.01)")
     option("n-candidates", type=int,
            help="Cells per event refined within the cell before choosing hypotheses")
     option("weights-top-n", type=int,

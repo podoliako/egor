@@ -128,7 +128,7 @@ The plotter independently checks the iteration-3 history against saved final nod
 Reproduce the figure without launching a solver:
 
 ```sh
-python -B paper/make_tomodd_sensitivity_comparison.py
+python -B paper/paper_scripts/make_tomodd_sensitivity_comparison.py
 ```
 
 Outputs: `paper/figures/tomodd_synthetic_parameter_comparison_z1p5km.{png,pdf,json,md}`. The plotter defaults to the completed retry manifest, including its reference to the original successful `q=1` output.
@@ -152,7 +152,7 @@ Runner: `studies/tomodd_sensitivity_20261026/run_geysers_dd1.py` (supports `--va
 Reproduce the three-panel figure without rerunning inversions:
 
 ```sh
-python -B paper/make_tomodd_dd1_geometry_comparison.py
+python -B paper/paper_scripts/make_tomodd_dd1_geometry_comparison.py
 ```
 
 Outputs: `paper/figures/tomodd_dd1_artificial_geysers_z1p5km.{png,pdf,json}`. The plotter checks equality of truth, initial velocity fields and oracle fields; actual controls/input hashes; iteration-3 history against final nodes; and recomputed volume RMSE against saved metrics. Common color scale, exact depth, no outlines or extra smoothing. Preflight, actual inversion, plot checks, and 19 shared runner tests passed.

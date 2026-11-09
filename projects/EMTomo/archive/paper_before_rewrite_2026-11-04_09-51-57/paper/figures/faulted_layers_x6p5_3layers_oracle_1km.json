@@ -1,0 +1,15 @@
+{
+  "experiment_id": "geysers11_20110401-20110420_fault3_x6p5_elev1166_26st_3776ev_clean",
+  "section_y_km": 3.5,
+  "source_model_sha256": "efd85c919d739a3de36990d6c39cb0fbc8446219c2b03dd4bbcb9d59fc9d4ad4",
+  "oracle": "inverse of volume-averaged slowness; same function as EMTomo reference_model",
+  "oracle_shape_xyz": [
+    20,
+    7,
+    7
+  ],
+  "oracle_cell_size_m": 1000.0,
+  "velocity_volume_rmse_m_s_against_125m_truth": 146.1837711611514,
+  "not_a_velocity_L2_optimum": true,
+  "no_forward_or_inverse_solve": true
+}

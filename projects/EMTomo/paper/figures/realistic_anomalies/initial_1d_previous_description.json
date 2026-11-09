@@ -1,0 +1,26 @@
+{
+  "truth": "model_previous.npz",
+  "truth_sha256": "e10f096eca8228e84d6621622a50e44db23ac4b62f2aee2a0d3b76757d6d2c98",
+  "initial_model": "initial_1d_previous.npz",
+  "method": "Arithmetic horizontal mean Vp, then Gaussian smoothing in depth",
+  "smoothing_sigma_km": 0.4,
+  "boundary_mode": "reflect",
+  "velocity_range_km_s": [
+    3.4146602153778076,
+    6.094795227050781
+  ],
+  "cell_size_m": 100.0,
+  "shape_xyz": [
+    200,
+    80,
+    80
+  ],
+  "velocity_units": "m/s",
+  "sections_km": {
+    "y": 4,
+    "x": 10,
+    "z": 4
+  },
+  "horizontal_section_initial_sampling": "Linear interpolation of smooth depth profile at exactly Z=4 km",
+  "note": "Truth-derived synthetic starting model; not an independently estimated field-data prior"
+}

@@ -1,0 +1,20 @@
+Started x1-soft PID 1376913
+Started x1-hard PID 1376914
+Started x0p5-soft PID 1376915
+Started x0p5-hard PID 1376916
+Traceback (most recent call last):
+  File "/mnt/disk01/egor/projects/EMTomo/studies/geysers_nx6_noisegrid_20261107/run.py", line 290, in supervise
+    time.sleep(5)
+  File "/mnt/disk01/egor/projects/EMTomo/studies/geysers_nx6_noisegrid_20261107/run.py", line 251, in interrupt
+    raise KeyboardInterrupt(f"Queue received signal {signum}")
+KeyboardInterrupt: Queue received signal 15
+Traceback (most recent call last):
+  File "/mnt/disk01/egor/projects/EMTomo/studies/geysers_nx6_noisegrid_20261107/run.py", line 326, in <module>
+    main()
+  File "/mnt/disk01/egor/projects/EMTomo/studies/geysers_nx6_noisegrid_20261107/run.py", line 322, in main
+    supervise()
+  File "/mnt/disk01/egor/projects/EMTomo/studies/geysers_nx6_noisegrid_20261107/run.py", line 290, in supervise
+    time.sleep(5)
+  File "/mnt/disk01/egor/projects/EMTomo/studies/geysers_nx6_noisegrid_20261107/run.py", line 251, in interrupt
+    raise KeyboardInterrupt(f"Queue received signal {signum}")
+KeyboardInterrupt: Queue received signal 15

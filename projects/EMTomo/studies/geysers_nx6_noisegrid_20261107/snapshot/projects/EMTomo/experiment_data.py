@@ -1,0 +1,206 @@
+"""Read saved forward experiments for tomography without constructing event priors.
+
+``reference_event_coordinates_m`` and ``source_model`` are ground truth for
+assessment only. An inversion should use station geometry and relative arrivals,
+not the reference event coordinates as its initial event locations.
+"""
+
+from dataclasses import dataclass
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+import numpy as np
+
+try:
+    from projects.forward_modeling.experiments import load_arrivals, load_inputs
+    from projects.forward_modeling.model import VelocityGrid
+except ModuleNotFoundError as error:
+    if error.name != "projects":
+        raise
+    # Also support importing experiment_data directly from the EMTomo directory.
+    _repo_root = str(Path(__file__).resolve().parents[2])
+    sys.path.insert(0, _repo_root)
+    try:
+        from projects.forward_modeling.experiments import load_arrivals, load_inputs
+        from projects.forward_modeling.model import VelocityGrid
+    finally:
+        sys.path.remove(_repo_root)
+
+
+DEFAULT_EXPERIMENTS_ROOT = Path(__file__).resolve().parents[1] / "forward_modeling" / "experiments"
+_UNITS = {"coordinates": "m", "cell_size": "m", "velocity": "m/s",
+          "arrival_time": "s", "elapsed_time": "s"}
+
+
+@dataclass(frozen=True)
+class TomographyExperiment:
+    """Arrivals shape (n_events, n_stations), in event_ids/station_ids order.
+
+    source_model and reference_event_coordinates_m are truth for metrics only;
+    neither supplies event-location priors to an inversion.
+    """
+
+    source_model: VelocityGrid
+    station_ids: tuple[str, ...]
+    event_ids: tuple[str, ...]
+    station_coordinates_m: np.ndarray
+    reference_event_coordinates_m: np.ndarray
+    arrival_times_s: np.ndarray
+    noise_sigmas: tuple[float, float]  # relative, absolute seconds
+
+
+@dataclass(frozen=True)
+class RealPickExperiment:
+    """Training-only observations: NaN means absent, never a synthetic time.
+
+    There is no velocity truth, event location, or catalog-origin field here.
+    """
+
+    domain_extent_m: tuple[float, float, float]
+    station_ids: tuple[str, ...]
+    event_ids: tuple[str, ...]
+    station_coordinates_m: np.ndarray
+    arrival_times_s: np.ndarray
+
+
+def load_real_pick_experiment(directory) -> RealPickExperiment:
+    """Read a hashed sparse training archive without opening catalog/holdout files."""
+    directory = Path(directory)
+    metadata = json.loads((directory / "metadata.json").read_text())
+    if metadata.get("schema") != "emtomo.real_picks.v1":
+        raise ValueError("Unsupported real-pick schema")
+    if metadata.get("time_reference") != "earliest_training_pick_per_event":
+        raise ValueError("Real observations must use training-only time references")
+    if metadata.get("units") != {"coordinates": "m", "arrival_time": "s"}:
+        raise ValueError("Real observations require SI units")
+    extent = np.asarray(metadata.get("domain_extent_m"), dtype=float)
+    if extent.shape != (3,) or not np.all(np.isfinite(extent) & (extent > 0)):
+        raise ValueError("Invalid real-pick domain extent")
+    minimum = metadata.get("minimum_training_picks")
+    if type(minimum) is not int or minimum < 2:
+        raise ValueError("minimum_training_picks must be an integer >= 2")
+    archive = directory / "arrivals.npz"
+    if metadata.get("arrays_sha256") != _sha256(archive):
+        raise ValueError("Real-pick arrays SHA256 mismatch")
+    with np.load(archive, allow_pickle=False) as data:
+        if set(data.files) != {"event_ids", "station_ids", "station_coordinates_m", "arrival_times_s"}:
+            raise ValueError("Unexpected training archive fields (no catalog or truth allowed)")
+        ids = []
+        for name in ("station_ids", "event_ids"):
+            values = data[name]
+            if (values.ndim != 1 or values.dtype.kind != "U" or not len(values)
+                    or any(not v for v in values) or len(set(values)) != len(values)):
+                raise ValueError(f"Invalid or duplicate {name}")
+            ids.append(tuple(str(v) for v in values))
+        stations, events = ids
+        xyz = np.asarray(data["station_coordinates_m"], dtype=float)
+        times = np.asarray(data["arrival_times_s"], dtype=float)
+    if (xyz.shape != (len(stations), 3) or not np.isfinite(xyz).all()
+            or np.any(xyz < 0) or np.any(xyz > extent)):
+        raise ValueError("Invalid station coordinates or station outside domain")
+    if times.shape != (len(events), len(stations)):
+        raise ValueError("Arrival matrix does not match event/station IDs")
+    observed = np.isfinite(times)
+    if np.isinf(times).any() or np.any(times[observed] < 0):
+        raise ValueError("Observed arrivals must be finite and nonnegative; missing must be NaN")
+    if np.any(observed.sum(axis=1) < minimum):
+        raise ValueError("Event has fewer than minimum_training_picks")
+    if np.any(np.nanmin(times, axis=1) > 1e-8):
+        raise ValueError("Each event needs a zero earliest training arrival")
+    xyz.flags.writeable = times.flags.writeable = False
+    return RealPickExperiment(tuple(extent), stations, events, xyz, times)
+
+
+def _sha256(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def _noise_sigmas(metadata: dict) -> tuple[float, float]:
+    noise = metadata.get("noise")
+    if noise is None:
+        return (0.0, 0.0)
+    if not isinstance(noise, dict) or type(noise.get("enabled")) is not bool:
+        raise ValueError("Invalid metadata noise.enabled")
+    if not noise["enabled"]:
+        return (0.0, 0.0)
+    if noise.get("model") != "independent_gaussian_relative_plus_absolute":
+        raise ValueError("Unsupported metadata noise.model")
+    config = noise.get("config")
+    if not isinstance(config, dict):
+        raise ValueError("Missing metadata noise.config")
+    sigmas = []
+    for name in ("relative_sigma", "absolute_sigma_s"):
+        value = config.get(name)
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(f"metadata noise.config.{name} must be finite and nonnegative")
+        try:
+            sigma = float(value)
+        except OverflowError as error:
+            raise ValueError(f"metadata noise.config.{name} must be finite and nonnegative") from error
+        if not np.isfinite(sigma) or sigma < 0:
+            raise ValueError(f"metadata noise.config.{name} must be finite and nonnegative")
+        sigmas.append(sigma)
+    return (sigmas[0], sigmas[1])
+
+
+def load_tomography_experiment(experiment_id, experiments_root=DEFAULT_EXPERIMENTS_ROOT) -> TomographyExperiment:
+    """Load a complete SI-unit experiment with earliest-station-relative times.
+
+    Rejects stale inputs, unsupported conventions, missing/unknown arrival pairs,
+    and events whose first observed arrival is not zero (within 1e-8 s).
+    """
+    # The forward loader validates experiment_id before accessing any paths.
+    model, stations, events = load_inputs(experiments_root, experiment_id)
+    root = Path(experiments_root)
+    metadata_path = root / "output" / experiment_id / "metadata.json"
+    try:
+        metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
+    except FileNotFoundError as error:
+        raise FileNotFoundError(f"Missing experiment metadata: {metadata_path}") from error
+    except (UnicodeError, json.JSONDecodeError) as error:
+        raise ValueError(f"Malformed experiment metadata: {metadata_path}") from error
+    if not isinstance(metadata, dict):
+        raise ValueError(f"Malformed experiment metadata: {metadata_path} must be an object")
+    if metadata.get("time_reference") != "earliest_station_arrival_per_event":
+        raise ValueError("Unsupported metadata time_reference: expected earliest_station_arrival_per_event")
+    units = metadata.get("units")
+    if not isinstance(units, dict) or any(units.get(k) != v for k, v in _UNITS.items()):
+        raise ValueError("Unsupported or missing metadata units (expected SI units)")
+    noise_sigmas = _noise_sigmas(metadata)
+    input_dir = root / "input" / experiment_id
+    names = ("model.npz", "stations.csv", "events.csv")
+    if (input_dir / "generation.json").exists():
+        names += ("generation.json",)
+    hashes = metadata.get("input_sha256")
+    if not isinstance(hashes, dict) or set(hashes) != set(names):
+        raise ValueError("Missing or mismatched metadata input_sha256 file list")
+    for name in names:
+        if hashes[name] != _sha256(input_dir / name):
+            raise ValueError(f"Input SHA256 mismatch for {name}")
+    if model.origin_m != (0.0, 0.0, 0.0):
+        raise ValueError("Only zero-origin velocity grids are supported by EMTomo")
+    if len(stations.ids) < 2:
+        raise ValueError("Tomography requires at least two stations")
+
+    station_index = {identifier: i for i, identifier in enumerate(stations.ids)}
+    event_index = {identifier: i for i, identifier in enumerate(events.ids)}
+    times = np.full((len(events.ids), len(stations.ids)), np.nan, dtype=np.float64)
+    for arrival in load_arrivals(experiments_root, experiment_id):
+        if arrival.station_id not in station_index or arrival.event_id not in event_index:
+            raise ValueError(f"Unknown arrival ID pair: ({arrival.station_id!r}, {arrival.event_id!r})")
+        times[event_index[arrival.event_id], station_index[arrival.station_id]] = arrival.arrival_time_s
+    if np.isnan(times).any():
+        raise ValueError("Incomplete arrivals: expected exactly one row for every event/station ID pair")
+    if not np.all(np.isfinite(times)) or np.any(times < 0):
+        raise ValueError("Arrival times must be finite and nonnegative")
+    if np.any(np.min(times, axis=1) > 1e-8):
+        raise ValueError("Each event must have a zero earliest-station arrival (within 1e-8 s)")
+    times.flags.writeable = False
+    return TomographyExperiment(model, stations.ids, events.ids, stations.coordinates_m,
+                                events.coordinates_m, times, noise_sigmas)

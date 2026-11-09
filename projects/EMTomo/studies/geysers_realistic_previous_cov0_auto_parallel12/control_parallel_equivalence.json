@@ -1,0 +1,65 @@
+{
+  "validation_source_sha256": "65da5be2894340ba54892fa39eed41905bd3b6e9ff9d6ec22ffd83b3ff34575f",
+  "reference_snapshot": "/mnt/disk01/egor/projects/EMTomo/studies/geysers_realistic_previous_cov0_auto/snapshot",
+  "cases": [
+    {
+      "start": "homogeneous",
+      "event_rows": [
+        0,
+        487,
+        986,
+        1479,
+        1980,
+        2474,
+        2976,
+        3463
+      ],
+      "event_ids": [
+        "3156099",
+        "3156617",
+        "3157144",
+        "3157679",
+        "3158210",
+        "3158746",
+        "3259952",
+        "3312036"
+      ],
+      "control_picks": 20,
+      "serial_rmse_s": 0.13087699128773217,
+      "parallel_rmse_s": 0.13087699128773217,
+      "exact_match": true,
+      "serial_wall_s": 10.733105473220348,
+      "parallel_wall_s": 4.8911129385232925
+    },
+    {
+      "start": "1d",
+      "event_rows": [
+        0,
+        487,
+        986,
+        1479,
+        1980,
+        2474,
+        2976,
+        3463
+      ],
+      "event_ids": [
+        "3156099",
+        "3156617",
+        "3157144",
+        "3157679",
+        "3158210",
+        "3158746",
+        "3259952",
+        "3312036"
+      ],
+      "control_picks": 20,
+      "serial_rmse_s": 0.0930337393937545,
+      "parallel_rmse_s": 0.0930337393937545,
+      "exact_match": true,
+      "serial_wall_s": 10.616101078689098,
+      "parallel_wall_s": 3.842071745544672
+    }
+  ],
+  "note": "Same actual observations, initial fields, control split and event-order summation; subset benchmark includes FMM overhead, not a full-run speed estimate"
+}

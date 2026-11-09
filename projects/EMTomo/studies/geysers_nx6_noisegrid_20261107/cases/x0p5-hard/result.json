@@ -1,0 +1,18 @@
+{
+  "status": "running",
+  "case_id": "x0p5-hard",
+  "pid": 1376916,
+  "started_at": "2026-11-07T20:05:48.304694+00:00",
+  "actual_noise": {
+    "relative_sigma": 0.005,
+    "absolute_sigma_s": 0.025,
+    "seed": 42
+  },
+  "assumed_noise": {
+    "relative_sigma": 0.01,
+    "absolute_sigma_s": 0.05,
+    "model_sigma_s": 0.02
+  },
+  "run_id": "run_geysers-nx6-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_200601_0504b16a1acd4817927568f70c8202cd",
+  "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-nx6-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_200601_0504b16a1acd4817927568f70c8202cd"
+}

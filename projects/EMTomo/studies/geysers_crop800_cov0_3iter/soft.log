@@ -1,0 +1,56 @@
+{
+  "state": "running",
+  "pid": 1417274,
+  "mode": "soft",
+  "started_at": "2026-11-08T09:54:37.796045+00:00",
+  "reference_manifest": "/mnt/disk01/egor/projects/EMTomo/studies/geysers_cb5x2x2_noisegrid_20261107/manifest.json",
+  "reference_manifest_sha256": "7e752be69472d409c243c6198ae6e3fb2424fbad2f070391682ffe5cc8d6d858",
+  "reference_case": "x1-soft",
+  "experiment_id": "geysers_realgeom_cb5x2x2_20x8x8_26st_3465ev_noise01_pick005_seed42",
+  "coverage_floor_and_percentile": "diagnostic only; inactive in damping with power zero",
+  "config": {
+    "cell_size": 800.0,
+    "subdivision": 8,
+    "slowness_interpolation": "nearest",
+    "initial_velocity_m_s": 5000.0,
+    "initial_gradient_m_s": null,
+    "initial_layer_boundaries_km": null,
+    "initial_layer_velocities_m_s": null,
+    "n_cycles": 3,
+    "n_candidates": 50,
+    "weights_top_n": 50,
+    "weights_min_distance": 7,
+    "candidate_mode": "soft",
+    "temperature": 1.0,
+    "weight_noise_relative_sigma": 0.01,
+    "weight_noise_absolute_sigma_s": 0.05,
+    "weight_model_sigma_s": 0.02,
+    "lambda_reg": 1.0,
+    "coverage_damping_power": 0.0,
+    "coverage_floor": 0.05,
+    "coverage_reference_percentile": 75.0,
+    "max_velocity_step_fraction": 0.02,
+    "n_workers": 4,
+    "run_name": "geysers-crop800-cov0-soft-3iter",
+    "run_version": "1.4",
+    "runs_dir": "/mnt/disk01/egor/projects/EMTomo/runs",
+    "save_runs": true,
+    "log_g_per_weight": true,
+    "likelihood_batch_size": 8,
+    "likelihood_batch_memory_mb": 128,
+    "compact_rays": true,
+    "fast_refinement": true,
+    "linear_solver": "auto",
+    "matrix_free_min_voxels": 8192,
+    "solver_rtol": 1e-10,
+    "solver_maxiter": null,
+    "temperature_schedule": null
+  }
+}
+1/3
+[Rays] 4504500/4504500 reached, 0 failed, 4504500 used
+2/3
+[Rays] 4504500/4504500 reached, 0 failed, 4504500 used
+3/3
+[Rays] 4504500/4504500 reached, 0 failed, 4504500 used
+[TomographyLogger] Run saved to: /mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-cov0-soft-3iter_v1.4_mode-soft_ncand-50_topn-50_dmin-7_cov-0_cycles-3_20261108_095438_40b1656c931a460dac54f8ef000369be

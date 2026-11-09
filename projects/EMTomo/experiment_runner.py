@@ -1,7 +1,7 @@
 """EMTomo inversion setup for a saved, ID-validated forward experiment.
 
 Observed arrivals and station positions come from the experiment. The source
-velocity model is used only for quality metrics, never to initialize the
+velocity model is used only for quality metrics, never to initialize or stop the
 inversion. True event positions are not passed to the inversion.
 """
 from __future__ import annotations

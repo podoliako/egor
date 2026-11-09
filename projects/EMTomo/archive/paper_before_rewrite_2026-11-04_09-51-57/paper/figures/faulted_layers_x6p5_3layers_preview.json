@@ -1,0 +1,44 @@
+{
+  "status": "proposed_geometry_only_no_solves",
+  "extent_km": [
+    20.0,
+    7.0,
+    7.0
+  ],
+  "fault_x_km": 6.5,
+  "section_y_km": 3.5,
+  "left": {
+    "boundaries_km": [
+      0.7,
+      1.9
+    ],
+    "vp_km_s": [
+      3.6,
+      4.4,
+      5.0
+    ]
+  },
+  "right": {
+    "boundaries_km": [
+      1.1,
+      2.9
+    ],
+    "vp_km_s": [
+      4.0,
+      4.8,
+      5.5
+    ]
+  },
+  "initial": {
+    "boundaries_km": [
+      0.85,
+      2.3
+    ],
+    "vp_km_s": [
+      3.85,
+      4.55,
+      5.3
+    ]
+  },
+  "interpretation": "Two finite layers over a basal half-space; invariant along y; no spheres."
+}

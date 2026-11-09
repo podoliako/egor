@@ -1,0 +1,91 @@
+{
+  "depth_km": 1.5,
+  "iteration": 3,
+  "hypocentres_fixed": false,
+  "sampling": "Native trilinear Vp at exact depth; 125-m XY pixel centres; no extra smoothing",
+  "truth_sampling": "Piecewise-constant truth; deeper cell at a depth-cell boundary",
+  "oracle_note": "Full-volume velocity-L2 trilinear fit, not a travel-time inversion or a slice-specific optimum",
+  "color_limits_km_s": [
+    3.6,
+    5.8
+  ],
+  "runs": [
+    {
+      "kind": "oracle",
+      "geometry": "Geometry-independent",
+      "slice_rmse_m_s": 183.99345263414904,
+      "slice_vp_range_km_s": [
+        3.6745405683145056,
+        5.6384046502464304
+      ]
+    },
+    {
+      "kind": "inversion",
+      "geometry": "Artificial",
+      "run": "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/synthetic-tomodd-sigma1",
+      "initial_sigma_km_per_coordinate": 1.0,
+      "slice_rmse_m_s": 144.6219559721066,
+      "slice_vp_range_km_s": [
+        4.095796875,
+        5.3703242187499995
+      ],
+      "final_location_rms_m": 207.95116997699012
+    },
+    {
+      "kind": "inversion",
+      "geometry": "Geysers",
+      "run": "/home/egor/tomodd_benchmark/runs/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_tomodd-1km-layerstart-ray005-deg4-sigma0km-seed42-3it-coordfix-nolimit",
+      "initial_sigma_km_per_coordinate": 0.0,
+      "slice_rmse_m_s": 181.1253432645695,
+      "slice_vp_range_km_s": [
+        3.9019671223958334,
+        5.3467265625
+      ],
+      "final_location_rms_m": 141.89921486016178
+    },
+    {
+      "kind": "inversion",
+      "geometry": "Geysers",
+      "run": "/home/egor/tomodd_benchmark/runs/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_tomodd-1km-layerstart-ray005-deg4-sigma0p5km-seed42-3it-coordfix-nolimit",
+      "initial_sigma_km_per_coordinate": 0.5,
+      "slice_rmse_m_s": 210.95298702421982,
+      "slice_vp_range_km_s": [
+        3.9983997395833333,
+        5.37941796875
+      ],
+      "final_location_rms_m": 180.57665035398398
+    },
+    {
+      "kind": "inversion",
+      "geometry": "Geysers",
+      "run": "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/geysers-tomodd-sigma1",
+      "initial_sigma_km_per_coordinate": 1.0,
+      "slice_rmse_m_s": 338.9135388952569,
+      "slice_vp_range_km_s": [
+        3.883522026909722,
+        5.506261718749999
+      ],
+      "final_location_rms_m": 379.9972023990104
+    }
+  ],
+  "source_sha256": {
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/benchmark/tomodd_benchmark/compare_emtomo_flat4.py": "69070bb9f82d0052a422d1faa0e8e0a703e4839167100c5c60278ed4183298c5",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/synthetic-tomodd-sigma1/config.json": "7e2a0b786b16b6f7826fd2b6ddfb235860080234de870674dc2f5dab33f92bbf",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/synthetic-tomodd-sigma1/state.npz": "3db861df7b3cd42bdba25cca100a645dda54d2cae70001f08852f9352ad61ef9",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/synthetic-tomodd-sigma1/results.json": "639779c8621ab39d01c40b8fd1a838bdd09d8aff3a49aeeba74b92fc9119462a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/synthetic-tomodd-sigma1/work/inversion/tomoDD.vel": "0ec8998258da6d439e19fcb2bf96376b3a9eb0d1c76ad8962e4be95c3beb1409",
+    "/home/egor/tomodd_benchmark/runs/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_tomodd-1km-layerstart-ray005-deg4-sigma0km-seed42-3it-coordfix-nolimit/config.json": "160cb5523085296ed01ad89599117385d5b1daac232847266bd7c2010cf89592",
+    "/home/egor/tomodd_benchmark/runs/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_tomodd-1km-layerstart-ray005-deg4-sigma0km-seed42-3it-coordfix-nolimit/state.npz": "ed84d39736fcb996a0e1c40f660103d7660fa2f12f4ac44066c0fed1406b812a",
+    "/home/egor/tomodd_benchmark/runs/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_tomodd-1km-layerstart-ray005-deg4-sigma0km-seed42-3it-coordfix-nolimit/results.json": "f778f7f97a0c83404ed658b98eba2c4b5169c181ef7b0341e4a8821735ade18c",
+    "/home/egor/tomodd_benchmark/runs/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_tomodd-1km-layerstart-ray005-deg4-sigma0km-seed42-3it-coordfix-nolimit/work/inversion/tomoDD.vel": "93f2ec7679abf429cc6021b2ac97b9b01e7885a6d758234961d51cdf74af5c19",
+    "/home/egor/tomodd_benchmark/runs/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_tomodd-1km-layerstart-ray005-deg4-sigma0p5km-seed42-3it-coordfix-nolimit/config.json": "79d33c11a936cd4cb786b8869990b0eba5f2e5d329d505e8b6b3f168aa5f2996",
+    "/home/egor/tomodd_benchmark/runs/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_tomodd-1km-layerstart-ray005-deg4-sigma0p5km-seed42-3it-coordfix-nolimit/state.npz": "02cfc7fb040d601cfdff624354e33e43eac70179da939da275dc62887bdc345c",
+    "/home/egor/tomodd_benchmark/runs/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_tomodd-1km-layerstart-ray005-deg4-sigma0p5km-seed42-3it-coordfix-nolimit/results.json": "53fb85f2f2a74c4932ae511ceecf2abadb2f1fad9fcc7442aad820b5ce152d44",
+    "/home/egor/tomodd_benchmark/runs/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_tomodd-1km-layerstart-ray005-deg4-sigma0p5km-seed42-3it-coordfix-nolimit/work/inversion/tomoDD.vel": "101883234cfb5c71fab74534b46175d85feb37e3e178c17cdb8f937dd6e5a947",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/geysers-tomodd-sigma1/config.json": "5d3280da5374e3d512da6769c23b54b946876c5bd72d15b8c1b3eb9111b3aa79",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/geysers-tomodd-sigma1/state.npz": "2af5677dcb4282fd8b193bce4486040a8743e5e66680b74fd8ff8bbed5c2ded8",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/geysers-tomodd-sigma1/results.json": "9cc976d92c7c77f765b863f5fc8a8d70791263cae9c6bc85bf6f601c9c3bd2cf",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/outputs/geysers-tomodd-sigma1/work/inversion/tomoDD.vel": "908327ef7c2674b6325d6febeceda61ac218a9e3b79217133d879729aa7443cc"
+  },
+  "script_sha256": "c119f1e336126c1e0d371004cf37bfc519ce3c1b2be81544368e991322367176"
+}

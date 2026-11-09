@@ -1,0 +1,140 @@
+{
+  "checkpoint": "final_model.npy after 12 M-steps",
+  "domain_km": [
+    20,
+    8,
+    8
+  ],
+  "events": 3465,
+  "stations": 26,
+  "initial": {
+    "rmse_m_s": 250.0,
+    "mae_m_s": 250.0,
+    "mape_pct": 5.012531328320802
+  },
+  "assumed_noise": {
+    "relative_sigma": 0.01,
+    "absolute_sigma_s": 0.05,
+    "model_sigma_s": 0.02
+  },
+  "rows": [
+    {
+      "noise_multiplier": 0.5,
+      "mode": "hard",
+      "rmse_m_s": 229.60224288759244,
+      "mae_m_s": 216.7793501567362,
+      "mape_pct": 4.341276305484241,
+      "wall_time_h": 2.1624194444444447,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_604003c4a0004a8589c29a4d91f2ba18"
+    },
+    {
+      "noise_multiplier": 0.5,
+      "mode": "soft",
+      "rmse_m_s": 237.8279253019491,
+      "mae_m_s": 221.6430035118572,
+      "mape_pct": 4.42880537908997,
+      "wall_time_h": 4.7959024999999995,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p5-soft_v1.4_level-x0p5_mode-soft_ncand-50_topn-50_dmin-7_20261107_204526_f7d275af26d3435b90c61153e8879748"
+    },
+    {
+      "noise_multiplier": 0.75,
+      "mode": "hard",
+      "rmse_m_s": 233.281907358258,
+      "mae_m_s": 221.42025671255635,
+      "mape_pct": 4.4327507051614665,
+      "wall_time_h": 2.177605,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p75-hard_v1.4_level-x0p75_mode-hard_ncand-50_topn-50_dmin-7_20261108_013318_01a4730c3d0a4e3995435f048bb3e57c"
+    },
+    {
+      "noise_multiplier": 0.75,
+      "mode": "soft",
+      "rmse_m_s": 241.04024827745604,
+      "mae_m_s": 224.89985713110008,
+      "mape_pct": 4.494229115568341,
+      "wall_time_h": 4.758565833333333,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p75-soft_v1.4_level-x0p75_mode-soft_ncand-50_topn-50_dmin-7_20261108_011124_f3b5b65a40114ad98f01fadaaa04d8b8"
+    },
+    {
+      "noise_multiplier": 1.0,
+      "mode": "hard",
+      "rmse_m_s": 243.7463883273761,
+      "mae_m_s": 230.91260629044035,
+      "mape_pct": 4.619837779957537,
+      "wall_time_h": 2.178116111111111,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_6b62894a48ed4afdb0fd7d213b6eafa8"
+    },
+    {
+      "noise_multiplier": 1.0,
+      "mode": "soft",
+      "rmse_m_s": 249.70060010683855,
+      "mae_m_s": 231.47544021070084,
+      "mape_pct": 4.626499740276006,
+      "wall_time_h": 5.0504625,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889"
+    },
+    {
+      "noise_multiplier": 1.5,
+      "mode": "hard",
+      "rmse_m_s": 283.78059642820523,
+      "mae_m_s": 255.7487826441549,
+      "mape_pct": 5.11647167075477,
+      "wall_time_h": 2.219476111111111,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x1p5-hard_v1.4_level-x1p5_mode-hard_ncand-50_topn-50_dmin-7_20261108_034402_711ba93edc74495496f5035c761ec93f"
+    },
+    {
+      "noise_multiplier": 1.5,
+      "mode": "soft",
+      "rmse_m_s": 293.7490465741555,
+      "mae_m_s": 260.81991171448556,
+      "mape_pct": 5.2152982536226205,
+      "wall_time_h": 4.75604,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x1p5-soft_v1.4_level-x1p5_mode-soft_ncand-50_topn-50_dmin-7_20261108_014832_501405498a9442429c8b81e8cae9bc48"
+    },
+    {
+      "noise_multiplier": 2.0,
+      "mode": "hard",
+      "rmse_m_s": 325.96613995236834,
+      "mae_m_s": 282.37555148122374,
+      "mape_pct": 5.647662927634369,
+      "wall_time_h": 2.25262,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x2-hard_v1.4_level-x2_mode-hard_ncand-50_topn-50_dmin-7_20261107_225611_264076196ac24f2683e7950e9304c30b"
+    },
+    {
+      "noise_multiplier": 2.0,
+      "mode": "soft",
+      "rmse_m_s": 347.5888665625871,
+      "mae_m_s": 294.08549166684304,
+      "mape_pct": 5.879142781711062,
+      "wall_time_h": 4.841003611111112,
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x2-soft_v1.4_level-x2_mode-soft_ncand-50_topn-50_dmin-7_20261107_225515_a4e7056b2203486ab341dc040227d884"
+    }
+  ],
+  "pairs": [
+    {
+      "noise_multiplier": 0.5,
+      "soft_rmse_worse_pct": 3.5825792949173207,
+      "soft_time_ratio": 2.217840998572843
+    },
+    {
+      "noise_multiplier": 0.75,
+      "soft_rmse_worse_pct": 3.3257362334933704,
+      "soft_time_ratio": 2.1852291087379636
+    },
+    {
+      "noise_multiplier": 1.0,
+      "soft_rmse_worse_pct": 2.4427897456537284,
+      "soft_time_ratio": 2.3187296922493417
+    },
+    {
+      "noise_multiplier": 1.5,
+      "soft_rmse_worse_pct": 3.512731409905334,
+      "soft_time_ratio": 2.1428660467172307
+    },
+    {
+      "noise_multiplier": 2.0,
+      "soft_rmse_worse_pct": 6.633427206082931,
+      "soft_time_ratio": 2.14905470568099
+    }
+  ],
+  "location_metrics": "Not included: full sequential read of weights exceeded the 300 s evaluation timeout"
+}

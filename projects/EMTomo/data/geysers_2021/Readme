@@ -1,0 +1,17 @@
+Earthquake relocations and Vp and Qp models of The Geysers geothermal field developed by Guo and Thurber (2021)
+
+Files:
+1. Geysers_EQReloc_Guo-Thurber2021GJI.CSV:  Relocations of 2934 earthquakes of year 2011
+
+2. Geysers_Vpmodel_Guo-Thurber2021GJI.CSV:  3-D Vp model
+
+3. Geysers_Qpmodel_Guo-Thurber2021GJI.CSV:  3-D Qp model
+
+Notes:
+1. Depths are relative to sea level (positive below sea level and negative above sea level).
+
+2. In Vp and Qp model files, the last column shows scaled model resolvabilities calculated with the results of checkerboard tests using a modified method of Zelt (1998). The model resolvabilities represent the semblance values between the recovered and true checkerboard models. For calculating the resolvability of each node, the method of Zelt (1998) considers the semblance values of the surrounding nodes in a circular region centered on each node. We rescaled the resolvability values calculated with the original method of Zelt (1998) so that they range from 0 (worst) to 1 (best). The regions with scaled resolvabilities larger than 0.4 are well resolved.
+
+References:
+Hao Guo, Clifford Thurber, 2021. Double-difference seismic attenuation tomography method and its application to The Geysers geothermal field, California, Geophysical Journal International, ggab017, https://doi.org/10.1093/gji/ggab017
+Colin A. Zelt, 1998. Lateral velocity resolution from three-dimensional seismic refraction data, Geophysical Journal International, Volume 135, Issue 3, Pages 1101–1112, https://doi.org/10.1046/j.1365-246X.1998.00695.x

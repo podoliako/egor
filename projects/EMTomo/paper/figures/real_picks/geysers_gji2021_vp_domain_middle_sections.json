@@ -1,0 +1,120 @@
+{
+  "source_article_doi": "10.1093/gji/ggab017",
+  "truth_available": false,
+  "domain_extent_km": [
+    23.0,
+    11.0,
+    7.0
+  ],
+  "geometry": {
+    "catalog_z_formula_for_tomoDD_only": "1166 + 1000*depth_km",
+    "datum_caveat": "Station elevations and catalog depths are assumed to share a sea-level vertical datum; compatibility has not been independently established.",
+    "domain_bounds_in_old_coordinates_m": [
+      [
+        -3000,
+        20000
+      ],
+      [
+        0,
+        11000
+      ],
+      [
+        0,
+        7000
+      ]
+    ],
+    "domain_extent_m": [
+      23000,
+      11000,
+      7000
+    ],
+    "domain_origin_m": [
+      0,
+      0,
+      0
+    ],
+    "east_km_per_longitude_degree": "111.320*cos(radians(38.80275))",
+    "geographic_reference_in_new_xy_m": [
+      13000,
+      3500
+    ],
+    "local_xy_to_old_xy_offset_m": [
+      10000,
+      3500
+    ],
+    "north_km_per_latitude_degree": 110.574,
+    "old_to_new_translation_m": [
+      3000,
+      0,
+      0
+    ],
+    "projection": "prepare_geysers_geometry.local_xy_km",
+    "reference_latitude": 38.80275,
+    "reference_longitude": -122.7707,
+    "station_z_formula": "1166 - elevation_m",
+    "top_elevation_m": 1166,
+    "x_azimuth_degrees": 135.0,
+    "y_azimuth_degrees": 225.0,
+    "z_direction": "positive_down"
+  },
+  "plot_sampling_km": 0.1,
+  "interpolation": "Delaunay-linear in projected XY, linear between source depth levels",
+  "outside_policy": "NaN / white; no extrapolation, nearest fill or initial-model substitution",
+  "resolution_policy": "Interpolate published scaled resolvability with the same weights; hatch <= 0.4",
+  "color_limits_km_s": [
+    3.2,
+    6.2
+  ],
+  "sections": [
+    {
+      "plane": "XZ",
+      "fixed_axis": "Y",
+      "fixed_coordinate_km": 5.5,
+      "sample_count": 16100,
+      "covered_samples": 16100,
+      "blank_samples": 0,
+      "interpolated_resolvability_gt_0p4_samples": 5606,
+      "vp_range_km_s": [
+        3.2553320028338746,
+        6.113040006834161
+      ]
+    },
+    {
+      "plane": "YZ",
+      "fixed_axis": "X",
+      "fixed_coordinate_km": 11.5,
+      "sample_count": 7700,
+      "covered_samples": 7700,
+      "blank_samples": 0,
+      "interpolated_resolvability_gt_0p4_samples": 2580,
+      "vp_range_km_s": [
+        3.5365931026644537,
+        5.807967546979253
+      ]
+    },
+    {
+      "plane": "XY",
+      "fixed_axis": "Z",
+      "fixed_coordinate_km": 3.5,
+      "sample_count": 25300,
+      "covered_samples": 24205,
+      "blank_samples": 1095,
+      "interpolated_resolvability_gt_0p4_samples": 7481,
+      "vp_range_km_s": [
+        4.468077331238089,
+        6.003191294487246
+      ]
+    }
+  ],
+  "checks_passed": [
+    "all source Vp/resolvability nodes reproduced within 1e-10",
+    "outside horizontal/depth support returns NaN",
+    "vertical midpoint interpolation",
+    "geographic/sea-level reference mapping"
+  ],
+  "source_sha256": {
+    "data/geysers_2021/Geysers_Vpmodel_Guo-Thurber2021GJI.CSV": "11a56a7a433144bfafd05a5f944efde4509f72c2821cb4337951dd4e8ce626ad",
+    "data/geysers_2011/real_experiment_v1/geometry.json": "2fd23e5d4845a87194fff5291cef0fef3acb890eec2b040331247e68c52a0c99",
+    "paper/paper_scripts/make_geysers_published_vp_sections.py": "7e06eaeb42a839518dc7e7081aa40254575868af16f620f60cff20d36411bc6e"
+  }
+}

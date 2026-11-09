@@ -15,6 +15,6 @@ The linear horizontal axis spans 0–2250 m and includes every saved error. Quan
 | 8 | EMTomo | 137.0 | 402.5 | 504.2 | 254.1 |
 | 8 | tomoDD | 240.2 | 609.1 | 755.4 | 380.5 |
 
-Rebuild from the EMTomo directory with `python paper/make_checkerboard_location_ecdf.py`. PNG is 300 dpi; PDF and SVG are vector graphics. The CSV contains all 3,600 nx/event pairs with one EM and one DD error per row. JSON contains exact summary values, source/checkpoint hashes, CSV hash, and a row-index/event-ID/weights-file checksum for each EM run.
+Rebuild from the EMTomo directory with `python paper/paper_scripts/make_checkerboard_location_ecdf.py`. PNG is 300 dpi; PDF and SVG are vector graphics. The CSV contains all 3,600 nx/event pairs with one EM and one DD error per row. JSON contains exact summary values, source/checkpoint hashes, CSV hash, and a row-index/event-ID/weights-file checksum for each EM run.
 
 Validation checks all event identities and catalogue coordinates, all 12 EM completion markers per run, hard top-1 weights, saved grid dimensions, coordinate conversions, and finite values. DD catalogue RMS values are independently checked against the saved run results. ECDF tie handling and inclusive error thresholds were checked on small known arrays.

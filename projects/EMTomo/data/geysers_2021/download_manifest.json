@@ -1,0 +1,30 @@
+{
+  "record_url": "https://zenodo.org/records/4470253",
+  "article_doi": "10.1093/gji/ggab017",
+  "requested_article_doi": "10.1029/2021JB022938",
+  "requested_article_models_downloaded": false,
+  "note": "Downloaded GJI 2021 Vp model by the same authors; NOT the JGR 2022 temporal models.",
+  "files": [
+    {
+      "path": "Geysers_EQReloc_Guo-Thurber2021GJI.CSV",
+      "url": "https://zenodo.org/api/records/4470253/files/Geysers_EQReloc_Guo-Thurber2021GJI.CSV/content",
+      "size_bytes": 137961,
+      "md5": "751198a780067a6d06a932d65955062c",
+      "sha256": "38c25e24f7ab501460c86c9b9669a0034586d3d5226af6cb2eee5e97f9dc1dba"
+    },
+    {
+      "path": "Geysers_Vpmodel_Guo-Thurber2021GJI.CSV",
+      "url": "https://zenodo.org/api/records/4470253/files/Geysers_Vpmodel_Guo-Thurber2021GJI.CSV/content",
+      "size_bytes": 383783,
+      "md5": "773ff192309e22a041a4a843a52f76b3",
+      "sha256": "11a56a7a433144bfafd05a5f944efde4509f72c2821cb4337951dd4e8ce626ad"
+    },
+    {
+      "path": "Readme",
+      "url": "https://zenodo.org/api/records/4470253/files/Readme/content",
+      "size_bytes": 1557,
+      "md5": "8d75375f501d5c7347953e82aaf499d4",
+      "sha256": "ab53e3c11f3b344ac3f59897460145c64b5d1d8dee5af804efb53fb3ca3a3bc1"
+    }
+  ]
+}

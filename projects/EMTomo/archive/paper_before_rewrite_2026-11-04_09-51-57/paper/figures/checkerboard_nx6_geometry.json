@@ -1,0 +1,41 @@
+{
+  "source": "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42",
+  "section_y_km": 10.0,
+  "section_x_km": 6.0,
+  "model_section_cell_x_bounds_km": [
+    4.0,
+    8.0
+  ],
+  "frame_interval_km": 2.0,
+  "shared_initial_model": {
+    "velocity_km_s": 5.0,
+    "em_source": "/mnt/disk01/egor/projects/EMTomo/runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/initial_model.npy",
+    "dd_source": "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/outputs/nx6-tomodd/state.npz",
+    "em_sha256": "b7bfa47105d49faf565b8cdef99e97117b2095efb07b5e42ae04a962e4ba15bd",
+    "dd_sha256": "5e8b3c4641d7bc2215fbba91966279b8c7dd5688995e0b1e14573de0c2fce76d"
+  },
+  "vertical_station_symbols": "Triangle base anchored at true station depth; symbol extends above surface.",
+  "cross_event_markers": 60,
+  "events_per_cross_marker": 20,
+  "cross_station_markers": 7,
+  "stations_per_cross_marker": 14,
+  "model_section_cell_y_bounds_km": [
+    8.0,
+    12.0
+  ],
+  "stations": 98,
+  "events": 1200,
+  "top_event_markers": 200,
+  "events_per_top_marker": 6,
+  "section_event_markers": 120,
+  "events_per_section_marker": 10,
+  "section_station_markers": 14,
+  "stations_per_section_marker": 7,
+  "geometry": "All events/stations orthogonally projected; duplicate positions drawn once; no jitter or depth filtering.",
+  "sha256": {
+    "model.npz": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7",
+    "events.csv": "aeb02d32723b6bac51f05270c2ff00c525d25f9edb554ff91c5fa3c5131b8e56",
+    "stations.csv": "a591b34a0b1e3bcaca5d9ef3b9402ef3e0500d18fbde43bbaf1faa8594ee9102",
+    "generation.json": "f9141855aa6a906068a791a4a9aa2f06dd1a11ba4ecb8a6e719bfe8dc6ac2e55"
+  }
+}

@@ -1,0 +1,335 @@
+{
+  "selection": "Post-hoc oracle stopping using true full-domain velocity RMSE; last initial strictly decreasing checkpoint, including initialization",
+  "first_local_minimum_equals_global_minimum": true,
+  "initial_rmse_m_s": 250.0,
+  "rows": [
+    {
+      "case_id": "x0p5-hard",
+      "noise_multiplier": 0.5,
+      "mode": "hard",
+      "best_cycle": 7,
+      "first_decreasing_segment_last_cycle": 7,
+      "rmse_m_s": 229.12129776923155,
+      "mae_m_s": 216.8560232600111,
+      "mape_pct": 4.343376669922909,
+      "time_to_checkpoint_h": 1.258465,
+      "trajectory_rmse_m_s": [
+        250.0,
+        239.4309089627948,
+        233.24851034284276,
+        230.77170595966564,
+        229.85655359946793,
+        229.39532995067802,
+        229.1764866891366,
+        229.12129776923155,
+        229.13745341332535,
+        229.21429316504276,
+        229.31235195989328,
+        229.44967567344642,
+        229.60224288759244
+      ],
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_604003c4a0004a8589c29a4d91f2ba18"
+    },
+    {
+      "case_id": "x0p5-soft",
+      "noise_multiplier": 0.5,
+      "mode": "soft",
+      "best_cycle": 3,
+      "first_decreasing_segment_last_cycle": 3,
+      "rmse_m_s": 228.16711730232046,
+      "mae_m_s": 214.13694582382027,
+      "mape_pct": 4.28695395573509,
+      "time_to_checkpoint_h": 1.23369,
+      "trajectory_rmse_m_s": [
+        250.0,
+        237.1572739373883,
+        230.25336506492374,
+        228.16711730232046,
+        228.18691106886754,
+        228.87832791084645,
+        229.85560612166415,
+        231.06659390761524,
+        232.34180697295085,
+        233.64732398249245,
+        234.99748965398067,
+        236.40373840249418,
+        237.8279253019491
+      ],
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p5-soft_v1.4_level-x0p5_mode-soft_ncand-50_topn-50_dmin-7_20261107_204526_f7d275af26d3435b90c61153e8879748"
+    },
+    {
+      "case_id": "x0p75-hard",
+      "noise_multiplier": 0.75,
+      "mode": "hard",
+      "best_cycle": 5,
+      "first_decreasing_segment_last_cycle": 5,
+      "rmse_m_s": 230.49906999980905,
+      "mae_m_s": 218.88664974591205,
+      "mape_pct": 4.384057146138341,
+      "time_to_checkpoint_h": 0.9042511111111111,
+      "trajectory_rmse_m_s": [
+        250.0,
+        239.4248458762127,
+        233.3136600594001,
+        231.0858771528581,
+        230.52567894801456,
+        230.49906999980905,
+        230.6858430599746,
+        231.0309238702709,
+        231.4033653854276,
+        231.84045178205665,
+        232.28646991065304,
+        232.77586000667847,
+        233.281907358258
+      ],
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p75-hard_v1.4_level-x0p75_mode-hard_ncand-50_topn-50_dmin-7_20261108_013318_01a4730c3d0a4e3995435f048bb3e57c"
+    },
+    {
+      "case_id": "x0p75-soft",
+      "noise_multiplier": 0.75,
+      "mode": "soft",
+      "best_cycle": 3,
+      "first_decreasing_segment_last_cycle": 3,
+      "rmse_m_s": 228.66477317493315,
+      "mae_m_s": 214.5649122412945,
+      "mape_pct": 4.295101558723336,
+      "time_to_checkpoint_h": 1.2392172222222222,
+      "trajectory_rmse_m_s": [
+        250.0,
+        237.34941432386603,
+        230.5908769765869,
+        228.66477317493315,
+        228.86795963324082,
+        229.83100306526296,
+        231.11217223449367,
+        232.58401461702172,
+        234.18558735463787,
+        235.8781974448063,
+        237.55347752663954,
+        239.28838781471225,
+        241.04024827745604
+      ],
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p75-soft_v1.4_level-x0p75_mode-soft_ncand-50_topn-50_dmin-7_20261108_011124_f3b5b65a40114ad98f01fadaaa04d8b8"
+    },
+    {
+      "case_id": "x1-hard",
+      "noise_multiplier": 1.0,
+      "mode": "hard",
+      "best_cycle": 3,
+      "first_decreasing_segment_last_cycle": 3,
+      "rmse_m_s": 232.04515162861642,
+      "mae_m_s": 220.37820161257582,
+      "mape_pct": 4.414849940211578,
+      "time_to_checkpoint_h": 0.5400358333333333,
+      "trajectory_rmse_m_s": [
+        250.0,
+        239.51151439990755,
+        233.69449055354477,
+        232.04515162861642,
+        232.2504855934123,
+        233.10775595246758,
+        234.27701533579403,
+        235.66159848502306,
+        237.2737510321802,
+        238.9718147838693,
+        240.5642843358681,
+        242.2211689833225,
+        243.7463883273761
+      ],
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_6b62894a48ed4afdb0fd7d213b6eafa8"
+    },
+    {
+      "case_id": "x1-soft",
+      "noise_multiplier": 1.0,
+      "mode": "soft",
+      "best_cycle": 3,
+      "first_decreasing_segment_last_cycle": 3,
+      "rmse_m_s": 229.61817989050158,
+      "mae_m_s": 215.2396881263531,
+      "mape_pct": 4.3082293003549195,
+      "time_to_checkpoint_h": 1.2937033333333334,
+      "trajectory_rmse_m_s": [
+        250.0,
+        237.51639283365625,
+        231.13399217400556,
+        229.61817989050158,
+        230.3372793634676,
+        231.92858270119203,
+        234.00321133706797,
+        236.3874708497374,
+        238.9303998103451,
+        241.52712648274357,
+        244.19420132348327,
+        246.99690528920382,
+        249.70060010683855
+      ],
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889"
+    },
+    {
+      "case_id": "x1p5-hard",
+      "noise_multiplier": 1.5,
+      "mode": "hard",
+      "best_cycle": 2,
+      "first_decreasing_segment_last_cycle": 2,
+      "rmse_m_s": 234.86779310751103,
+      "mae_m_s": 225.46501940003586,
+      "mape_pct": 4.518128072904686,
+      "time_to_checkpoint_h": 0.35908666666666667,
+      "trajectory_rmse_m_s": [
+        250.0,
+        239.61027387335204,
+        234.86779310751103,
+        235.31970850417477,
+        238.61592911894303,
+        243.25824212365546,
+        248.67223822802978,
+        254.44315676544878,
+        260.29292763019805,
+        266.4330335221932,
+        272.5591382606658,
+        278.2963144913451,
+        283.78059642820523
+      ],
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x1p5-hard_v1.4_level-x1p5_mode-hard_ncand-50_topn-50_dmin-7_20261108_034402_711ba93edc74495496f5035c761ec93f"
+    },
+    {
+      "case_id": "x1p5-soft",
+      "noise_multiplier": 1.5,
+      "mode": "soft",
+      "best_cycle": 2,
+      "first_decreasing_segment_last_cycle": 2,
+      "rmse_m_s": 232.4098552445546,
+      "mae_m_s": 221.18878860054855,
+      "mape_pct": 4.430122024270132,
+      "time_to_checkpoint_h": 0.8313894444444444,
+      "trajectory_rmse_m_s": [
+        250.0,
+        237.87548670196085,
+        232.4098552445546,
+        232.66744130495357,
+        235.89331740502766,
+        240.70771733458153,
+        246.56524896698772,
+        253.57562982507835,
+        261.01004957628487,
+        269.01440106346416,
+        277.20693442146796,
+        285.7154751091829,
+        293.7490465741555
+      ],
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x1p5-soft_v1.4_level-x1p5_mode-soft_ncand-50_topn-50_dmin-7_20261108_014832_501405498a9442429c8b81e8cae9bc48"
+    },
+    {
+      "case_id": "x2-hard",
+      "noise_multiplier": 2.0,
+      "mode": "hard",
+      "best_cycle": 2,
+      "first_decreasing_segment_last_cycle": 2,
+      "rmse_m_s": 236.47446995688634,
+      "mae_m_s": 225.8989188886872,
+      "mape_pct": 4.526419737106117,
+      "time_to_checkpoint_h": 0.3634205555555555,
+      "trajectory_rmse_m_s": [
+        250.0,
+        239.91419958717736,
+        236.47446995688634,
+        239.29031105280055,
+        245.91896725564746,
+        254.3247034064799,
+        264.47040391884565,
+        274.8507944811181,
+        285.3599623912027,
+        295.691287637447,
+        305.98261769641374,
+        315.92651232490687,
+        325.96613995236834
+      ],
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x2-hard_v1.4_level-x2_mode-hard_ncand-50_topn-50_dmin-7_20261107_225611_264076196ac24f2683e7950e9304c30b"
+    },
+    {
+      "case_id": "x2-soft",
+      "noise_multiplier": 2.0,
+      "mode": "soft",
+      "best_cycle": 2,
+      "first_decreasing_segment_last_cycle": 2,
+      "rmse_m_s": 234.87912233636473,
+      "mae_m_s": 222.82701186851793,
+      "mape_pct": 4.462426600028532,
+      "time_to_checkpoint_h": 0.8364580555555555,
+      "trajectory_rmse_m_s": [
+        250.0,
+        238.68603989946914,
+        234.87912233636473,
+        237.8429607001335,
+        245.02835857902332,
+        255.46862562480658,
+        267.55129287957106,
+        280.6745039959448,
+        294.33571954654735,
+        307.8992047380935,
+        321.02164491568243,
+        334.6698513656755,
+        347.5888665625871
+      ],
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x2-soft_v1.4_level-x2_mode-soft_ncand-50_topn-50_dmin-7_20261107_225515_a4e7056b2203486ab341dc040227d884"
+    }
+  ],
+  "pairs": [
+    {
+      "noise_multiplier": 0.5,
+      "soft_best_rmse_gain_pct": 0.416452104715348,
+      "hard_best_cycle": 7,
+      "soft_best_cycle": 3,
+      "common_cycle_gain_pct": {
+        "1": 0.9495996299123566,
+        "2": 1.2841004958688007,
+        "3": 1.1286429792222497
+      }
+    },
+    {
+      "noise_multiplier": 0.75,
+      "soft_best_rmse_gain_pct": 0.7957935903504576,
+      "hard_best_cycle": 5,
+      "soft_best_cycle": 3,
+      "common_cycle_gain_pct": {
+        "1": 0.8668405088666953,
+        "2": 1.1670054304235622,
+        "3": 1.0477074617257776
+      }
+    },
+    {
+      "noise_multiplier": 1.0,
+      "soft_best_rmse_gain_pct": 1.0459049547387966,
+      "hard_best_cycle": 3,
+      "soft_best_cycle": 3,
+      "common_cycle_gain_pct": {
+        "1": 0.8329960967638828,
+        "2": 1.095660566697243,
+        "3": 1.0459049547387966
+      }
+    },
+    {
+      "noise_multiplier": 1.5,
+      "soft_best_rmse_gain_pct": 1.0465197592380515,
+      "hard_best_cycle": 2,
+      "soft_best_cycle": 2,
+      "common_cycle_gain_pct": {
+        "1": 0.7240036678511252,
+        "2": 1.0465197592380515,
+        "3": 1.1270909759664938
+      }
+    },
+    {
+      "noise_multiplier": 2.0,
+      "soft_best_rmse_gain_pct": 0.6746384169134534,
+      "hard_best_cycle": 2,
+      "soft_best_cycle": 2,
+      "common_cycle_gain_pct": {
+        "1": 0.5119162141388633,
+        "2": 0.6746384169134534,
+        "3": 0.6048512145348406
+      }
+    }
+  ],
+  "caveat": "Not a deployable stopping criterion: true-model RMSE is unavailable for real data, and the checkpoint was selected on these test truths."
+}

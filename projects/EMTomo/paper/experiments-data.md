@@ -31,11 +31,11 @@ Use each directory's `metrics.json` and `README.md`; the two layered comparisons
 
 Saved continuous location indices convert to metres as `(positions + 0.5) * fine_cell_size_m`; `weight_indices` are not refined event coordinates. Catalog order is checked against source event rows and hashed.
 
-From `projects/EMTomo/paper`, using the existing Python environment with NumPy/SciPy and access to the original artifact paths:
+From `projects/EMTomo`, using the existing Python environment with NumPy/SciPy and access to the original artifact paths:
 
 ```sh
-python3 -B -m unittest -v test_evaluate_metrics.py
-python3 -B evaluate_metrics.py --check
+python3 -B -m pytest paper/paper_scripts/test_evaluate_metrics.py
+python3 -B paper/paper_scripts/evaluate_metrics.py --check
 ```
 
 There are 17 unit tests. `--check` recomputes without writing; evaluation is limited to 120 seconds. Without `--check`, the script creates its report exclusively and refuses to overwrite an existing file. It does not import or call a forward/inverse solver. Native interpolation/history/mask helpers are loaded from the recorded benchmark analysis source; the source hash and helper names are saved in the report.

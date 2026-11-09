@@ -12,6 +12,6 @@ All four predeclared cases are shown; no checkpoint or case selection.
 | dd03-d80-s10 | 1/0.3 | 80 | 10/10/10 | 209.71 | 257.53 | 276.62 |
 | dd03-d20-s2 | 1/0.3 | 20 | 2/2/2 | 169.23 | 296.34 | 216.23 |
 
-Reproduce: `python -B paper/make_tomodd_sensitivity_comparison.py`
+Reproduce: `python -B paper/paper_scripts/make_tomodd_sensitivity_comparison.py`
 
 The 3D oracle is not a slice-specific error lower bound. No inverse/forward solver is run by this plotter.

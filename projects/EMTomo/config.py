@@ -43,7 +43,7 @@ class InversionConfig:
     # Runtime and output. Change run_version for every method release.
     n_workers: int = 25
     run_name: str = "em"
-    run_version: str = "1.4"
+    run_version: str = "1.5"
     runs_dir: str = "runs"
     save_runs: bool = True
     log_g_per_weight: bool = False
@@ -60,6 +60,13 @@ class InversionConfig:
 
     # Optional per-cycle temperatures; appended to preserve positional arguments.
     temperature_schedule: tuple[float, ...] | None = None
+
+    # Fixed held-out picks; zero fraction disables splitting and early stopping.
+    control_fraction: float = 0.1
+    control_seed: int = 42
+    control_min_training_picks: int = 5
+    early_stopping_patience: int = 2
+    early_stopping_min_relative_improvement: float = 0.01
 
     def __post_init__(self):
         def positive(name):
@@ -83,6 +90,18 @@ class InversionConfig:
             value = getattr(self, name)
             if isinstance(value, bool) or not isinstance(value, (int, np.integer)) or value < 1:
                 raise ValueError(f"{name} must be a positive integer")
+        for name in ("control_fraction", "early_stopping_min_relative_improvement"):
+            value = getattr(self, name)
+            if (isinstance(value, (bool, np.bool_))
+                    or not isinstance(value, (int, float, np.integer, np.floating))
+                    or not np.isfinite(value) or not 0 <= value < 1):
+                raise ValueError(f"{name} must be finite and in [0, 1)")
+        for name, minimum in (("control_seed", 0), ("control_min_training_picks", 2),
+                              ("early_stopping_patience", 1)):
+            value = getattr(self, name)
+            if (isinstance(value, (bool, np.bool_))
+                    or not isinstance(value, (int, np.integer)) or value < minimum):
+                raise ValueError(f"{name} must be an integer >= {minimum}")
         if self.temperature_schedule is not None:
             if len(self.temperature_schedule) != self.n_cycles:
                 raise ValueError("temperature_schedule must contain exactly n_cycles values")

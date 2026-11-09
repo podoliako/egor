@@ -37,7 +37,7 @@ def test_defaults_and_metadata_include_all_performance_controls():
     for name, value in DEFAULTS.items():
         assert getattr(config, name) == value
         assert metadata[name] == value
-    assert config.run_version == "1.4"
+    assert config.run_version == "1.5"
     assert config.n_workers == 25
     assert config.lambda_reg == 0.01
     assert config.cell_size == 10000.0

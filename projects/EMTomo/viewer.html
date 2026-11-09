@@ -529,6 +529,15 @@ button.active { border-color: var(--accent); color: var(--accent); background: #
           <span class="y-val" id="wt-y-v">0</span>
         </div>
 
+        <label class="dim-toggle" title="Show all hypotheses as black dots">
+          <input type="checkbox" id="cb-wt-points"> Points
+        </label>
+        <label class="dim-toggle" title="Show the hypothesis with the largest weight as a red circle">
+</label>          <input type="checkbox" id="cb-wt-best" checked> Most likely
+        </label>
+        <label class="dim-toggle" title="Show the weight-normalized mean of all hypotheses as a green diamond">
+          <input type="checkbox" id="cb-wt-mean"> Weighted mean
+        </label>
         <label class="dim-toggle">
           <input type="checkbox" id="cb-dim-wt" checked> Dim
         </label>
@@ -655,7 +664,7 @@ const ST = {
   topTruthEdges: null,
   rc:     { event: 0, weight: 0, y: 0, dim: true },
   G:      { event: 0, station: 0, weight: 0, y: 0, dim: true },
-  wt:     { event: 0, y: 0, dim: true },
+  wt:     { event: 0, y: 0, dim: true, showPoints: false, showBest: true, showMean: false },
   timing: { data: [], mode: 'per_iter' },
   quality:{ data: [] },
   rayStatus: null,
@@ -718,8 +727,16 @@ function trackPlotRender(plotId, traces, layout, config) {
   }
   const renderToken = Symbol('plot-render');
   PLOT_RENDER_TOKENS.set(plotId, renderToken);
-  const promise = Promise.resolve(Plotly.react(el, traces, layout, config)).then(() => {
+  const promise = Promise.resolve(Plotly.react(el, traces, layout, config)).then(async () => {
     if (PLOT_RENDER_TOKENS.get(plotId) !== renderToken) return;
+    if (plotId === 'plot-wt') {
+      if (!el._hypocenterSizeListener && el.on) {
+        el.on('plotly_afterplot', () => resizeHypocenterMarkers(el));
+        el._hypocenterSizeListener = true;
+      }
+      await resizeHypocenterMarkers(el);
+      if (PLOT_RENDER_TOKENS.get(plotId) !== renderToken) return;
+    }
     el.dataset.renderRun = renderedRun || 'plot';
     el.dataset.renderIter = String(renderedIter);
         el.dataset.renderField = context.field;
@@ -846,24 +863,92 @@ function eventTraces(hilite, coarse, panelY, dim, plane = 'xz') {
   return locationTrace(ST.meta?.event_locs, 'event', hilite, coarse, panelY, dim, ST.showEvents, plane);
 }
 
+function resizeHypocenterMarkers(plot) {
+  const x = plot._fullLayout?.xaxis, z = plot._fullLayout?.yaxis;
+  if (!x?._length || !z?._length) return;
+  const cellKm = (csz(false) || 1) / 1000;
+  // Marker sizes are pixels; keep the diameter inside a fine cell at any zoom.
+  const size = Math.min(5, 0.6 * cellKm * Math.min(
+    x._length / Math.abs(x.range[1] - x.range[0]),
+    z._length / Math.abs(z.range[1] - z.range[0])));
+  const indices = (plot.data || []).flatMap((trace, i) =>
+    trace.meta?.hypocenter && trace.marker.size !== size ? [i] : []);
+  if (indices.length) return Plotly.restyle(plot, {'marker.size': size}, indices);
+}
+
 function hypocenterTraces(hypocenters, panelY, dim) {
   if (!hypocenters?.length) return [];
   const cellSize = csz(false) || 1;
-  return hypocenters.map((hypo, i) => {
-    const coord = hypo.coord;
+  const x = [], y = [], opacity = [], customdata = [];
+  for (let i = 0; i < hypocenters.length; i++) {
+    const { coord, weight } = hypocenters[i];
+    const mx = (coord[0] + 0.5) * cellSize;
+    const my = (coord[1] + 0.5) * cellSize;
+    const mz = (coord[2] + 0.5) * cellSize;
+    x.push(mx / 1000); y.push(mz / 1000);
+    if (dim) opacity.push(sliceOpacity(my / 1000, panelY));
+    customdata.push([i, mx, my, mz, weight]);
+  }
+  // One batched trace avoids Plotly's per-trace layout/hover cost at 10k hypotheses.
+  return [{
+    type: hypocenters.length >= 1000 ? 'scattergl' : 'scatter',
+    mode: 'markers', x, y, customdata,
+    meta: { hypocenter: true },
+    marker: {
+      symbol: 'circle', size: 3, opacity: dim ? opacity : 1,
+      color: '#000000',
+      line: { width: 0 },
+    },
+    showlegend: false,
+    hovertemplate: 'Hypo %{customdata[0]}<br>x=%{customdata[1]:.2f}m<br>y=%{customdata[2]:.2f}m<br>z=%{customdata[3]:.2f}m<br>w=%{customdata[4]:.5g}<extra></extra>',
+  }];
+}
+
+function weightHypocenterTraces(hypocenters, panelY, dim) {
+  const { showPoints, showBest, showMean } = ST.wt;
+  const traces = showPoints ? hypocenterTraces(hypocenters, panelY, dim) : [];
+  if ((!showBest && !showMean) || !hypocenters?.length) return traces;
+  let best = -1;
+  const valid = [];
+  for (let i = 0; i < hypocenters.length; i++) {
+    const { coord, weight } = hypocenters[i];
+    if (!Number.isFinite(weight) || weight < 0 || coord?.length !== 3 || !coord.every(Number.isFinite)) continue;
+    valid.push(i);
+    if (best < 0 || weight > hypocenters[best].weight) best = i;
+  }
+  if (best < 0) return traces;
+  const cellSize = csz(false) || 1;
+  // Match the cloud renderer so summary markers stay above dense WebGL points.
+  const type = traces[0]?.type || 'scatter';
+  const summaryTrace = (kind, coord, title, color, symbol, extra = '') => {
     const metric = coord.map(v => (v + 0.5) * cellSize);
-    const opacity = dim ? sliceOpacity(metric[1] / 1000, panelY) : 1;
     return {
-      type: 'scatter', mode: 'markers', x: [metric[0] / 1000], y: [metric[2] / 1000],
-      marker: {
-        symbol: 'x', size: 13, opacity,
-        color: '#b82f2f',
-        line: { color: '#ffffff', width: 1 },
-      },
+      type, mode: 'markers', x: [metric[0] / 1000], y: [metric[2] / 1000],
+      meta: { weightSummary: kind }, customdata: [metric],
+      marker: { symbol, size: 12, color, line: { color: '#ffffff', width: 1.5 },
+        opacity: dim ? sliceOpacity(metric[1] / 1000, panelY) : 1 },
       showlegend: false,
-      hovertemplate: `Hypo ${i}<br>x=${metric[0].toFixed(2)}m<br>y=${metric[1].toFixed(2)}m<br>z=${metric[2].toFixed(2)}m<br>w=${hypo.weight.toPrecision(5)}<extra></extra>`,
+      hovertemplate: `${title}<br>x=%{customdata[0]:.2f}m<br>y=%{customdata[1]:.2f}m<br>z=%{customdata[2]:.2f}m${extra}<extra></extra>`,
     };
-  });
+  };
+  const maxWeight = hypocenters[best].weight;
+  if (showMean && maxWeight > 0) {
+    // Scale before summing: weights need not be normalized and may be very large.
+    let total = 0;
+    const mean = [0, 0, 0];
+    for (const i of valid) {
+      const { coord, weight } = hypocenters[i];
+      const scaled = weight / maxWeight;
+      total += scaled;
+      for (let axis = 0; axis < 3; axis++) mean[axis] += coord[axis] * scaled;
+    }
+    traces.push(summaryTrace('mean', mean.map(v => v / total), 'Weighted mean', '#169447', 'diamond'));
+  }
+  if (showBest) {
+    traces.push(summaryTrace('best', hypocenters[best].coord, `Most likely · Hypo ${best}`,
+      '#d62728', 'circle', `<br>w=${maxWeight.toPrecision(5)}`));
+  }
+  return traces;
 }
 
 function buildTraces(ht, nx, nz, hilSta, hilEv, coarse, panelY, dim, hypocenters = [], gridStep = [1, 1], fineGrid = false, plane = 'xz') {
@@ -1629,8 +1714,9 @@ async function renderWt() {
   syncWeightsY();
   shapeBadge('wt-shape-badge', d.full_shape);
   await trackPlotRender('plot-wt',
-    buildTraces(heatTrace(d.slice, [[0,'#f0f4ff'],[0.5,'#6699dd'],[1,'#0a2a7a']], d),
-      d.shape[0], d.shape[1], -1, event, false, y, dim, d.hypocenters, [1, 1], true),
+    [...buildTraces(heatTrace(d.slice, [[0,'#f0f4ff'],[0.5,'#6699dd'],[1,'#0a2a7a']], d),
+      d.shape[0], d.shape[1], -1, event, false, y, dim, [], [1, 1], true),
+      ...weightHypocenterTraces(d.hypocenters, y, dim)],
     mkLayout(d.shape[0], d.shape[1], 'w', null), PLY_CFG);
 }
 
@@ -2122,6 +2208,12 @@ document.getElementById('cb-dim-rc').addEventListener('change', e => { ST.rc.dim
 bindYControls('rc', ST.rc, renderRayCount);
 
 // Wt
+for (const [id, key] of [['cb-wt-points', 'showPoints'], ['cb-wt-best', 'showBest'], ['cb-wt-mean', 'showMean']]) {
+  document.getElementById(id).addEventListener('change', e => {
+    ST.wt[key] = e.target.checked;
+    renderWt();
+  });
+}
 
 document.getElementById('cb-dim-wt').addEventListener('change', e => { ST.wt.dim = e.target.checked; renderWt(); });
 document.getElementById('wt-ev').addEventListener('change', e => { ST.wt.event = +e.target.value; syncSelections(); syncWeightsY(); renderWt(); });

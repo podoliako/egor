@@ -1,0 +1,20 @@
+{
+  "status": "completed",
+  "case_id": "x0p75-soft",
+  "pid": 1397835,
+  "started_at": "2026-11-08T01:11:23.996316+00:00",
+  "actual_noise": {
+    "relative_sigma": 0.0075,
+    "absolute_sigma_s": 0.037500000000000006,
+    "seed": 42
+  },
+  "assumed_noise": {
+    "relative_sigma": 0.01,
+    "absolute_sigma_s": 0.05,
+    "model_sigma_s": 0.02
+  },
+  "run_id": "run_geysers-crop800-noise-x0p75-soft_v1.4_level-x0p75_mode-soft_ncand-50_topn-50_dmin-7_20261108_011124_f3b5b65a40114ad98f01fadaaa04d8b8",
+  "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p75-soft_v1.4_level-x0p75_mode-soft_ncand-50_topn-50_dmin-7_20261108_011124_f3b5b65a40114ad98f01fadaaa04d8b8",
+  "final_model_sha256": "f792b10ad7dc6a3158a26d8d74ee78bde893eb173481a4483a7976bd379e3275",
+  "finished_at": "2026-11-08T05:56:55.050764+00:00"
+}

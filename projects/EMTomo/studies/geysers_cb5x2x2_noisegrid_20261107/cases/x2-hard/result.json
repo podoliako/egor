@@ -1,0 +1,20 @@
+{
+  "status": "completed",
+  "case_id": "x2-hard",
+  "pid": 1392739,
+  "started_at": "2026-11-07T22:56:11.164876+00:00",
+  "actual_noise": {
+    "relative_sigma": 0.02,
+    "absolute_sigma_s": 0.1,
+    "seed": 42
+  },
+  "assumed_noise": {
+    "relative_sigma": 0.01,
+    "absolute_sigma_s": 0.05,
+    "model_sigma_s": 0.02
+  },
+  "run_id": "run_geysers-crop800-noise-x2-hard_v1.4_level-x2_mode-hard_ncand-50_topn-50_dmin-7_20261107_225611_264076196ac24f2683e7950e9304c30b",
+  "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x2-hard_v1.4_level-x2_mode-hard_ncand-50_topn-50_dmin-7_20261107_225611_264076196ac24f2683e7950e9304c30b",
+  "final_model_sha256": "68dd7e840be0f92f029eec2b2cbe77c16bcc9e525978b8f2cd23ef75860b02c1",
+  "finished_at": "2026-11-08T01:11:20.815366+00:00"
+}

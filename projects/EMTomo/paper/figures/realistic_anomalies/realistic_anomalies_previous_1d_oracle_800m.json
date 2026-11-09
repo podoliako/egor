@@ -1,0 +1,32 @@
+{
+  "truth": "model_previous.npz",
+  "cell_size_m": 800,
+  "shape_xyz": [
+    25,
+    10,
+    10
+  ],
+  "velocity_units": "m/s",
+  "domain_xyz_km": [
+    20,
+    8,
+    8
+  ],
+  "initial_method": "Average the previous smooth 1D Vp profile over each 800-m depth layer; constant within cells",
+  "oracle_method": "Arithmetic mean of truth Vp in each 800-m cube; full-volume Vp L2 optimum, not travel-time optimum",
+  "volume_rms_m_s": {
+    "initial_1d": 503.97596140558596,
+    "oracle": 129.50291806716115
+  },
+  "color_limits_km_s": [
+    3.0,
+    6.6000000000000005
+  ],
+  "sections_km": {
+    "y": 4,
+    "x": 10,
+    "z": 4
+  },
+  "boundary_convention": "Half-open cells: at Y=4 or Z=4 km use cell [4, 4.8) km; X=10 uses [9.6, 10.4) km",
+  "rendering": "Native constant cells without smoothing; truth evaluated analytically at exact planes"
+}

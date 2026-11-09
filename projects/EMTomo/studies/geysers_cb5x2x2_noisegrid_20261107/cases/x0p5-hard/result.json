@@ -1,0 +1,20 @@
+{
+  "status": "completed",
+  "case_id": "x0p5-hard",
+  "pid": 1382052,
+  "started_at": "2026-11-07T20:45:13.966422+00:00",
+  "actual_noise": {
+    "relative_sigma": 0.005,
+    "absolute_sigma_s": 0.025,
+    "seed": 42
+  },
+  "assumed_noise": {
+    "relative_sigma": 0.01,
+    "absolute_sigma_s": 0.05,
+    "model_sigma_s": 0.02
+  },
+  "run_id": "run_geysers-crop800-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_604003c4a0004a8589c29a4d91f2ba18",
+  "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-crop800-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_604003c4a0004a8589c29a4d91f2ba18",
+  "final_model_sha256": "dcd89426b6b5420bca910612c72c1d09300b67886b8294884dbe1058a16dcf56",
+  "finished_at": "2026-11-07T22:55:11.685641+00:00"
+}

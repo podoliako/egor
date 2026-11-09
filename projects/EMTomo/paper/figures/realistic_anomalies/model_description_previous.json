@@ -1,0 +1,64 @@
+{
+  "interpretation": "Illustrative synthetic upper crust, not an observed or calibrated site model",
+  "domain_xyz_km": [
+    20,
+    8,
+    8
+  ],
+  "depth_positive_down": true,
+  "grid_shape_xyz": [
+    200,
+    80,
+    80
+  ],
+  "cell_size_m": 100,
+  "origin_m": [
+    0,
+    0,
+    0
+  ],
+  "velocity_units_in_npz": "m/s",
+  "velocity_range_km_s": [
+    3.0011645596710115,
+    6.590096642417238
+  ],
+  "sections_km": {
+    "vertical_y": 4,
+    "vertical_x": 10,
+    "horizontal_z": 4
+  },
+  "section_sampling": "Analytic field at exact central planes, 100-m in-plane pixel centres",
+  "seed": 42,
+  "color_limits_km_s": [
+    3.0,
+    6.6
+  ],
+  "linear_size_scale": 2.0,
+  "anomaly_amplitude_scale": 1.5,
+  "background_unchanged": true,
+  "fault_thickness_scale_relative_to_previous": 1.0,
+  "surface_layer_thickness_scale_relative_to_previous": 1.0,
+  "intrusion_center_xyz_km": [
+    15.0,
+    3.8,
+    4.8
+  ],
+  "scaling_note": "Fixed-centre spatial dilation; basin/fault/fabric anchored at surface; features clipped by unchanged domain",
+  "intrusion_semiaxes_km": [
+    5.0,
+    3.6,
+    4.0
+  ],
+  "alteration_scales_km": [
+    2.7,
+    4.0,
+    1.7
+  ],
+  "features": {
+    "basin": "Undulating sediment/basement contact; deepest near (7, 4.4) km; additional thickness factor 1",
+    "fault": "Oblique curved corridor dipping about 65 degrees; additional thickness factor 1; up to -0.72 km/s",
+    "alteration": "Tilted low-Vp lens centred at (10.216, 4.8, 3.8) km; -0.54 km/s peak",
+    "intrusion": "Tilted mafic body centred at (15.0, 3.8, 4.8) km; unchanged size and +0.72 km/s peak",
+    "fabric": "18 deterministic sinusoidal modes; wavelengths doubled; nominal RMS 0.0525 km/s"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "generator": "one_sided_events",
+  "seed": 42,
+  "domain_km": [
+    24.0,
+    12.0,
+    12.0
+  ],
+  "coordinate_units": "m",
+  "z_positive": "down",
+  "sampling": "one independent uniform point per 3D stratum",
+  "groups": [
+    {
+      "name": "far",
+      "lower_km": [
+        10.0,
+        1.5,
+        3.0
+      ],
+      "upper_km": [
+        21.0,
+        10.5,
+        10.5
+      ],
+      "grid_shape": [
+        10,
+        10,
+        9
+      ],
+      "count": 900,
+      "first_event_id": "EVT_0001",
+      "last_event_id": "EVT_0900"
+    },
+    {
+      "name": "near",
+      "lower_km": [
+        3.0,
+        1.5,
+        2.0
+      ],
+      "upper_km": [
+        9.0,
+        10.5,
+        8.0
+      ],
+      "grid_shape": [
+        6,
+        10,
+        5
+      ],
+      "count": 300,
+      "first_event_id": "EVT_0901",
+      "last_event_id": "EVT_1200"
+    }
+  ],
+  "stations_source": "projects/EMTomo/data/one_sided_stations/stations.csv",
+  "stations_sha256": "da7b83e9820932d972d74b1d71879f6db087e923a10d07bbc4b40d0cd43c8e60",
+  "figures": "Orthographic projections of all points, not thin slices"
+}

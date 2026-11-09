@@ -87,6 +87,171 @@ def _wait_iteration(page, iteration):
     }""", arg=iteration)
 
 
+def test_hypocenter_dots_fit_fine_cells_after_zoom_and_resize(browser_viewer):
+    page, *_ = browser_viewer
+    page.wait_for_function("document.getElementById('plot-wt').dataset.renderRun === ST.run")
+    page.locator('#cb-wt-points').check()
+    page.wait_for_function("document.getElementById('plot-wt').data.some(t => t.meta?.hypocenter)")
+
+    def assert_dots_fit():
+        result = page.evaluate("""() => {
+          const plot = document.getElementById('plot-wt');
+          const {xaxis: x, yaxis: z} = plot._fullLayout;
+          const cellKm = csz(false) / 1000;
+          return {
+            cellPixels: cellKm * Math.min(
+              x._length / Math.abs(x.range[1] - x.range[0]),
+              z._length / Math.abs(z.range[1] - z.range[0])),
+            markers: plot.data.filter(t => t.meta?.hypocenter).map(t => t.marker)
+          };
+        }""")
+        assert result["markers"]
+        for marker in result["markers"]:
+            assert marker["symbol"] == "circle"
+            assert marker["color"] == "#000000"
+            assert marker["line"]["width"] == 0
+            assert marker["size"] == pytest.approx(min(5, 0.6 * result["cellPixels"]))
+
+    assert_dots_fit()
+    page.evaluate("""async () => {
+      const plot = document.getElementById('plot-wt');
+      await Plotly.relayout(plot, {'xaxis.range': [0, 480], 'yaxis.range': [240, 0]});
+    }""")
+    assert_dots_fit()
+    page.evaluate("""async () => {
+      const plot = document.getElementById('plot-wt');
+      await Plotly.relayout(plot, {width: 360, height: 260});
+    }""")
+    assert_dots_fit()
+
+
+def test_ten_thousand_weights_render_hover_zoom_and_export(browser_viewer):
+    page, rd, *_ = browser_viewer
+    count = 10000
+    positions = np.random.default_rng(42).uniform([0, 0, 0], [23, 11, 11], (count, 3))
+    weights = np.arange(1, count + 1, dtype=float) / count
+    for iteration in (0, 1):
+        np.savez(rd / f"iter_{iteration}/event_0/weights.npz",
+                 weight_shape=[24, 12, 12], weight_indices=np.floor(positions).astype(int),
+                 positions=positions, weight_values=weights)
+    timings = page.evaluate("""async () => {
+      ST.wt.event = 0; ST.wt.dim = true; ST.wt.showPoints = true; ST.wt.showBest = false;
+      const start = performance.now();
+      await renderWt();
+      const renderMs = performance.now() - start;
+      const plot = document.getElementById('plot-wt');
+      const zoom = performance.now();
+      await Plotly.relayout(plot, {'xaxis.range': [0, 480], 'yaxis.range': [240, 0]});
+      return {renderMs, zoomMs: performance.now() - zoom};
+    }""")
+    print(f"10k weights (API + render): {timings}")
+    result = page.evaluate("""() => {
+      const plot = document.getElementById('plot-wt');
+      const traces = plot.data.filter(t => t.meta?.hypocenter);
+      const trace = traces[0];
+      const {xaxis: x, yaxis: z} = plot._fullLayout;
+      return {
+        traces: traces.length, type: trace.type, count: trace.x.length,
+        first: trace.customdata[0], last: trace.customdata[trace.x.length - 1],
+        opacityCount: trace.marker.opacity.length,
+        expectedSize: Math.min(5, 0.6 * csz(false) / 1000 * Math.min(
+          x._length / Math.abs(x.range[1] - x.range[0]),
+          z._length / Math.abs(z.range[1] - z.range[0]))),
+        size: trace.marker.size, svgPoints: plot.querySelectorAll('path.point').length,
+        webgl: !!plot._fullLayout._plots.xy._scene
+      };
+    }""")
+    assert result["traces"] == 1
+    assert result["type"] == "scattergl" and result["webgl"]
+    assert result["count"] == result["opacityCount"] == count
+    assert result["svgPoints"] < 100
+    assert result["size"] == pytest.approx(result["expectedSize"])
+    for key, index in (("first", 0), ("last", count - 1)):
+        assert result[key] == pytest.approx([index, *((positions[index] + 0.5) * 10000), weights[index]])
+    page.locator('#plot-wt').scroll_into_view_if_needed()
+    point = page.evaluate("""async () => {
+      const plot = document.getElementById('plot-wt');
+      const trace = plot.data.find(t => t.meta?.hypocenter);
+      const px = trace.x[9999], py = trace.y[9999];
+      await Plotly.relayout(plot, {'xaxis.range': [px - 1, px + 1], 'yaxis.range': [py + 1, py - 1]});
+      const {xaxis: x, yaxis: y} = plot._fullLayout;
+      const rect = plot.getBoundingClientRect();
+      return {x: rect.left + x._offset + x.l2p(px), y: rect.top + y._offset + y.l2p(py)};
+    }""")
+    page.mouse.move(point['x'], point['y'])
+    page.wait_for_function("document.querySelector('#plot-wt .hoverlayer').textContent.includes('Hypo 9999')")
+    assert "w=1.0000" in page.locator('#plot-wt .hoverlayer').text_content()
+    png = page.evaluate("Plotly.toImage('plot-wt', {format: 'png', width: 800, height: 450})")
+    assert png.startswith("data:image/png;base64,") and len(png) > 10000
+    page.evaluate("""async () => {
+      ST.wt.dim = false;
+      await renderWt();
+    }""")
+    assert page.evaluate("document.getElementById('plot-wt').data.find(t => t.meta?.hypocenter).marker.opacity") == 1
+    page.evaluate("""async () => {
+      ST.wt.showBest = true; ST.wt.showMean = true;
+      await renderWt();
+    }""")
+    summaries = page.evaluate("document.getElementById('plot-wt').data.filter(t => t.meta?.weightSummary)")
+    assert len(summaries) == 2
+    assert all(t['type'] == 'scattergl' and t['marker']['size'] == 12 for t in summaries)
+    assert summaries[0]['customdata'][0] == pytest.approx((np.average(positions, weights=weights, axis=0) + 0.5) * 10000)
+    assert summaries[1]['customdata'][0] == pytest.approx((positions[-1] + 0.5) * 10000)
+    page.evaluate("""async () => {
+      ST.wt.event = 1;
+      await renderWt();
+    }""")
+    assert page.evaluate("document.getElementById('plot-wt').data.find(t => t.meta?.hypocenter).type") == 'scatter'
+
+
+def test_weights_visibility_controls_and_weighted_summary(browser_viewer):
+    page, rd, *_ = browser_viewer
+    assert not page.locator('#cb-wt-points').is_checked()
+    assert page.locator('#cb-wt-best').is_checked()
+    assert not page.locator('#cb-wt-mean').is_checked()
+    for iteration in (0, 1):
+        np.savez(rd / f"iter_{iteration}/event_0/weights.npz",
+                 weight_shape=[24, 12, 12], weight_indices=[[1, 2, 3], [9, 6, 7]],
+                 positions=[[1., 2., 3.], [9., 6., 7.]], weight_values=[1., 3.])
+    page.evaluate("async () => { ST.wt.event = 0; await renderWt(); }")
+
+    def overlays():
+        return page.evaluate("document.getElementById('plot-wt').data.filter(t => t.meta?.hypocenter || t.meta?.weightSummary)")
+
+    best, = overlays()
+    assert best['meta'] == {'weightSummary': 'best'}
+    assert best['marker']['symbol'] == 'circle'
+    assert best['marker']['color'] == '#d62728'
+    assert best['marker']['size'] == 12
+    assert best['customdata'] == [[95000, 65000, 75000]]
+    page.locator('#cb-wt-mean').check()
+    page.wait_for_function("document.getElementById('plot-wt').data.some(t => t.meta?.weightSummary === 'mean')")
+    mean, best = overlays()
+    assert mean['meta'] == {'weightSummary': 'mean'}
+    assert mean['marker']['symbol'] == 'diamond'
+    assert mean['customdata'][0] == pytest.approx([75000, 55000, 65000])
+    page.locator('#cb-wt-points').check()
+    page.wait_for_function("document.getElementById('plot-wt').data.some(t => t.meta?.hypocenter)")
+    points, mean, best = overlays()
+    assert len(points['x']) == 2 and points['marker']['color'] == '#000000'
+    page.evaluate("Plotly.relayout('plot-wt', {'xaxis.range': [0, 480], 'yaxis.range': [240, 0]})")
+    points, mean, best = overlays()
+    assert points['marker']['size'] <= 5
+    assert best['marker']['size'] == mean['marker']['size'] == 12
+    page.locator('#cb-wt-best').uncheck()
+    page.wait_for_function("!document.getElementById('plot-wt').data.some(t => t.meta?.weightSummary === 'best')")
+    assert len(overlays()) == 2
+    page.locator('#cb-wt-mean').uncheck()
+    page.wait_for_function("!document.getElementById('plot-wt').data.some(t => t.meta?.weightSummary)")
+    assert len(overlays()) == 1
+    page.locator('#cb-wt-points').uncheck()
+    page.wait_for_function("!document.getElementById('plot-wt').data.some(t => t.meta?.hypocenter)")
+    assert overlays() == []
+    page.locator('#wt-ev').select_option('1')
+    page.wait_for_function("document.getElementById('plot-wt').dataset.renderContext.includes('Ev eA')")
+    assert overlays() == []
+
+
 def test_velocity_palette_is_shared_and_lightness_increases(browser_viewer):
     page, *_ = browser_viewer
     palettes = page.evaluate("""() => ['plot-vel','plot-tr'].map(id => {

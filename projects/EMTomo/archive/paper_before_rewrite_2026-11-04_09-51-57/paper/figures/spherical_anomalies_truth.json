@@ -1,0 +1,129 @@
+{
+  "shared_truth_verified": true,
+  "extent_km": [
+    20.0,
+    7.0,
+    7.0
+  ],
+  "native_cell_size_km": 0.125,
+  "sections": [
+    {
+      "requested_y_km": 2.4,
+      "native_cell_index": 19,
+      "native_cell_y_bounds_km": [
+        2.375,
+        2.5
+      ],
+      "native_cell_center_y_km": 2.4375,
+      "visible_spheres": [
+        1,
+        3,
+        5
+      ]
+    },
+    {
+      "requested_y_km": 4.8,
+      "native_cell_index": 38,
+      "native_cell_y_bounds_km": [
+        4.75,
+        4.875
+      ],
+      "native_cell_center_y_km": 4.8125,
+      "visible_spheres": [
+        2,
+        4,
+        6
+      ]
+    }
+  ],
+  "surface_sampling": "Native top cell, z in [0, 0.125) km; constant 3.8 km/s",
+  "sampling": "Native piecewise-constant truth; positive-coordinate cell at a boundary; no smoothing",
+  "sphere_parameters": [
+    {
+      "center_km": [
+        3.5,
+        2.5,
+        1.2
+      ],
+      "radius_km": 0.9,
+      "peak_delta_m_s": 600.0,
+      "plateau_fraction": 0.5
+    },
+    {
+      "center_km": [
+        8.0,
+        4.8,
+        2.0
+      ],
+      "radius_km": 1.1,
+      "peak_delta_m_s": -650.0,
+      "plateau_fraction": 0.5
+    },
+    {
+      "center_km": [
+        12.5,
+        2.4,
+        2.6
+      ],
+      "radius_km": 1.2,
+      "peak_delta_m_s": 700.0,
+      "plateau_fraction": 0.5
+    },
+    {
+      "center_km": [
+        16.5,
+        4.5,
+        1.6
+      ],
+      "radius_km": 1.0,
+      "peak_delta_m_s": -600.0,
+      "plateau_fraction": 0.5
+    },
+    {
+      "center_km": [
+        6.0,
+        2.2,
+        3.6
+      ],
+      "radius_km": 1.1,
+      "peak_delta_m_s": 700.0,
+      "plateau_fraction": 0.5
+    },
+    {
+      "center_km": [
+        11.0,
+        5.0,
+        4.0
+      ],
+      "radius_km": 1.0,
+      "peak_delta_m_s": -650.0,
+      "plateau_fraction": 0.5
+    }
+  ],
+  "color_anchors_km_s": {
+    "3.5": "#454545",
+    "4.0": "#7a7a7a",
+    "4.75": "#ffffff",
+    "5.25": "#e32400",
+    "6.0": "#61177c",
+    "6.5": "#351041"
+  },
+  "color_limits_km_s": [
+    3.5,
+    6.5
+  ],
+  "colorbar_orientation": "vertical",
+  "velocity_range_km_s": [
+    3.759905734680927,
+    6.4
+  ],
+  "frame_interval_km": 2,
+  "stations_or_events": false,
+  "sha256": {
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/model.npz": "77b4e7669cf0420668ead0e80a9ee5f6fb3fd2837da8024bdd1220b99d844766",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/flat4_20x7x7km_52st_1920ev_grid24x8x10_z0.5-5.5_noise01_pick001/generation.json": "f49fc83b2d782cc83977d07b9920650a38c736a6f9f91bb3e1abf619b126bc87",
+    "/mnt/disk01/egor/projects/EMTomo/runs/matched_geometry_20261021/snapshot/projects/forward_modeling/experiments/input/geysers11_20110401-20110420_flat4_elev1166_26st_3776ev_noise01_pick001/model.npz": "77b4e7669cf0420668ead0e80a9ee5f6fb3fd2837da8024bdd1220b99d844766",
+    "/mnt/disk01/egor/projects/EMTomo/paper/make_spherical_anomalies_truth.py": "41eaf91683becdb1a52a17326efb4c991b94a98576c6d6a236c949759f7b2286",
+    "/mnt/disk01/egor/projects/EMTomo/paper/make_checkerboard_geometry.py": "4fd1c1f5ec47f9b29740cbb8282dacbb1b71e18d21a10e03cd676b5841cb0beb"
+  }
+}

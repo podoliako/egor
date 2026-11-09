@@ -1,0 +1,72 @@
+{
+  "state": "stopped",
+  "pid": 1376912,
+  "started_at": "2026-11-07T20:05:47.310437+00:00",
+  "cases": {
+    "x1-soft": {
+      "state": "cancelled",
+      "pid": 1376913,
+      "started_at": "2026-11-07T20:05:47.312125+00:00",
+      "run_id": "run_geysers-nx6-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_200601_f7d64a4c28a14e27b0a45d90e21ee2a7",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-nx6-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_200601_f7d64a4c28a14e27b0a45d90e21ee2a7",
+      "completed_iterations": 0,
+      "stop_reason": "requested_by_user"
+    },
+    "x1-hard": {
+      "state": "cancelled",
+      "pid": 1376914,
+      "started_at": "2026-11-07T20:05:47.313183+00:00",
+      "run_id": "run_geysers-nx6-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_200600_85c18101731445c88b42a49448e2f6b3",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-nx6-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_200600_85c18101731445c88b42a49448e2f6b3",
+      "completed_iterations": 1,
+      "stop_reason": "requested_by_user"
+    },
+    "x0p5-soft": {
+      "state": "cancelled",
+      "pid": 1376915,
+      "started_at": "2026-11-07T20:05:47.314326+00:00",
+      "run_id": "run_geysers-nx6-noise-x0p5-soft_v1.4_level-x0p5_mode-soft_ncand-50_topn-50_dmin-7_20261107_200600_406a6e71d1834994a7a05eba6f327d87",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-nx6-noise-x0p5-soft_v1.4_level-x0p5_mode-soft_ncand-50_topn-50_dmin-7_20261107_200600_406a6e71d1834994a7a05eba6f327d87",
+      "completed_iterations": 0,
+      "stop_reason": "requested_by_user"
+    },
+    "x0p5-hard": {
+      "state": "cancelled",
+      "pid": 1376916,
+      "started_at": "2026-11-07T20:05:47.315413+00:00",
+      "run_id": "run_geysers-nx6-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_200601_0504b16a1acd4817927568f70c8202cd",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-nx6-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_200601_0504b16a1acd4817927568f70c8202cd",
+      "completed_iterations": 1,
+      "stop_reason": "requested_by_user"
+    },
+    "x2-soft": {
+      "state": "cancelled",
+      "stop_reason": "requested_by_user"
+    },
+    "x2-hard": {
+      "state": "cancelled",
+      "stop_reason": "requested_by_user"
+    },
+    "x0p75-soft": {
+      "state": "cancelled",
+      "stop_reason": "requested_by_user"
+    },
+    "x0p75-hard": {
+      "state": "cancelled",
+      "stop_reason": "requested_by_user"
+    },
+    "x1p5-soft": {
+      "state": "cancelled",
+      "stop_reason": "requested_by_user"
+    },
+    "x1p5-hard": {
+      "state": "cancelled",
+      "stop_reason": "requested_by_user"
+    }
+  },
+  "updated_at": "2026-11-07T20:27:55.037891+00:00",
+  "finished_at": "2026-11-07T20:27:55.037860+00:00",
+  "stop_reason": "requested_by_user",
+  "stopped_at": "2026-11-07T20:27:55.370077+00:00",
+  "termination_detail": "KeyboardInterrupt: Queue received signal 15"
+}

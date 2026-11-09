@@ -57,8 +57,8 @@ Figures (PNG/PDF/JSON, shared colour scale, no outlines or added smoothing):
 Rebuild the figures without running any solver:
 
 ```sh
-python -B paper/make_tomodd_dd1_geometry_comparison.py --guard-fixed
-python -B paper/make_tomodd_dd1_geometry_comparison.py --guard-fixed --with-before
+python -B paper/paper_scripts/make_tomodd_dd1_geometry_comparison.py --guard-fixed
+python -B paper/paper_scripts/make_tomodd_dd1_geometry_comparison.py --guard-fixed --with-before
 ```
 
 The original no-flag figure path and old run artifacts remain intact. The plotting script validates the corrected build ledger and matched-input provenance before plotting, and recomputes volume RMSE against saved results.
