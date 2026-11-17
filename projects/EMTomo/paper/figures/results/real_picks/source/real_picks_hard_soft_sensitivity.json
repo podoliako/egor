@@ -1,0 +1,164 @@
+{
+  "models": {
+    "hard": {
+      "final_model": "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/final_model.npy",
+      "diagnostic_model": "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/iter_2/model.npy",
+      "diagnostic_iteration": 2,
+      "sensitivity": "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/iter_2/sensitivity_diagonal.npy",
+      "damping": 1979398844.7551079,
+      "diagnostic_timing": "Before last update, NOT recomputed in final model",
+      "max_final_relative_change": 0.02000000000000013,
+      "cell_size_m": 500.0,
+      "completed_updates": 3
+    },
+    "soft": {
+      "final_model": "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/final_model.npy",
+      "diagnostic_model": "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/iter_2/model.npy",
+      "diagnostic_iteration": 2,
+      "sensitivity": "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/iter_2/sensitivity_diagonal.npy",
+      "damping": 2032782445.8254523,
+      "diagnostic_timing": "Before last update, NOT recomputed in final model",
+      "max_final_relative_change": 0.02000000000000013,
+      "cell_size_m": 500.0,
+      "completed_updates": 3
+    }
+  },
+  "geometry": {
+    "catalog_z_formula_for_tomoDD_only": "1166 + 1000*depth_km",
+    "datum_caveat": "Station elevations and catalog depths are assumed to share a sea-level vertical datum; compatibility has not been independently established.",
+    "domain_bounds_in_old_coordinates_m": [
+      [
+        -3000,
+        20000
+      ],
+      [
+        0,
+        11000
+      ],
+      [
+        0,
+        7000
+      ]
+    ],
+    "domain_extent_m": [
+      23000,
+      11000,
+      7000
+    ],
+    "domain_origin_m": [
+      0,
+      0,
+      0
+    ],
+    "east_km_per_longitude_degree": "111.320*cos(radians(38.80275))",
+    "geographic_reference_in_new_xy_m": [
+      13000,
+      3500
+    ],
+    "local_xy_to_old_xy_offset_m": [
+      10000,
+      3500
+    ],
+    "north_km_per_latitude_degree": 110.574,
+    "old_to_new_translation_m": [
+      3000,
+      0,
+      0
+    ],
+    "projection": "prepare_geysers_geometry.local_xy_km",
+    "reference_latitude": 38.80275,
+    "reference_longitude": -122.7707,
+    "station_z_formula": "1166 - elevation_m",
+    "top_elevation_m": 1166,
+    "x_azimuth_degrees": 135.0,
+    "y_azimuth_degrees": 225.0,
+    "z_direction": "positive_down"
+  },
+  "sections": [
+    {
+      "plane": "XY",
+      "fixed_axis": "Z",
+      "fixed_coordinate_km": 2.766,
+      "shared_area_km2": 57.750000000000014,
+      "shared_pixel_count": 5775,
+      "shared_mask_is_exact_intersection": true,
+      "threshold_sensitivity_shared_area_km2": {
+        "0.5": 75.00000000000001,
+        "1.0": 57.750000000000014,
+        "2.0": 40.00000000000001
+      }
+    },
+    {
+      "plane": "XZ",
+      "fixed_axis": "Y",
+      "fixed_coordinate_km": 5.5,
+      "shared_area_km2": 39.25000000000001,
+      "shared_pixel_count": 3925,
+      "shared_mask_is_exact_intersection": true,
+      "threshold_sensitivity_shared_area_km2": {
+        "0.5": 46.75000000000001,
+        "1.0": 39.25000000000001,
+        "2.0": 28.250000000000007
+      }
+    }
+  ],
+  "threshold": 1.0,
+  "mask_policy": "Raw intersection: Hjj / actual scalar damping >= 1 in BOTH runs; no hull, padding, hole filling or component removal",
+  "mask_array_roles": {
+    "shared_mask": "Exact raw intersection: hard_mask AND soft_mask; same mask drawn for Hard and Soft",
+    "hard_mask": "Hard-only raw threshold selection",
+    "soft_mask": "Soft-only raw threshold selection"
+  },
+  "interpretation": "Heuristic diagonal data-sensitivity selection, NOT spatial resolution, recovery or probability",
+  "sensitivity_limitations": "Diagonal Hjj does not capture inter-cell correlations, velocity-hypocentre trade-offs or the nonlinear EM trajectory",
+  "diagnostic_timing": "Last pre-update state; not final-model diagnostics",
+  "horizontal_sea_depth_km": 1.6,
+  "section_policy": "Keep existing XY/XZ coordinates for comparability; no new depth optimization",
+  "reference_used": false,
+  "events_plotted": false,
+  "smoothing": false,
+  "mask_convex_hull": false,
+  "mask_padding": false,
+  "mask_hole_filling": false,
+  "color_limits_km_s": [
+    3.0,
+    7.0
+  ],
+  "plot_spacing_km": 0.1,
+  "data_sha256": "0b573c30c77d1035f80a8db2cd105d4484d8e25d66c921b1469c9904aff232fa",
+  "source_sha256": {
+    "data/geysers_2011/real_experiment_v1/geometry.json": "2fd23e5d4845a87194fff5291cef0fef3acb890eec2b040331247e68c52a0c99",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/manifest.json": "6d1433b80ab5d97c2c906d86d59d50e52bf71d41657b388044260fd900a912ac",
+    "paper/figures/results/real_picks/source/make_hard_soft.py": "ea976394e7f813f2199f5e90f3e34649c3326a6fbb6a4e432be006116ce80a53",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/cases/hard/result.json": "6519945ae33147e5924b1f7708db9712473a2effd9d33744b6e0da1140f30ef8",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/meta.json": "972ef095809c353805b7d28c14e9cd95b010f14cb27ba870fa06e6e9694ddbf9",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/initial_model.npy": "55c8828a38daa6ab3872d0c4e91e91e8f3e0b4b83f1075b0de0449ff95f2c07c",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/final_model.npy": "8ae860b50d649900f75be2c5613fd74178af55261a06c5f35096ef071d5ef949",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/stopping.json": "5abd297bb7054fbcf498a499c43776e454bfd8d18a355d47bc9e5d92de60fbdb",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/control_mask.npy": "989d0d3a17a7947c5c60ce9d5e18c2945d49e24f4acbbc03a423d21e38bb1c67",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/control_split.json": "fe410f3eb4b4b0223de7c0e84eca7025b56ae419bb56669edb0e40b63b48b47a",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/iter_0/complete.json": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/iter_1/complete.json": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/iter_2/complete.json": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/iter_2/sensitivity_diagonal.npy": "6a92cac940a477326cc38b7595a44094cc3facd6ef4706d53faeda9becff55d1",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/iter_2/coverage_confidence.npy": "1d6ba115fe31047832b5a6843e3666bbbc157167356c0c4a025072ed953d154b",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/iter_2/model.npy": "3e9b5154cf12e197332d2c83f58a0414f5c89b95613c69e159a1e79fbbeac471",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/inputs/hard/initial_velocity_m_s.npy": "55c8828a38daa6ab3872d0c4e91e91e8f3e0b4b83f1075b0de0449ff95f2c07c",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/inputs/hard/parent_final_model.npy": "37c29125dad6f97b3f73def578784b811d29cfc79cedfab8a0d36aebbe59c06d",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/cases/soft/result.json": "7e9c40fd6551fcfc36dbf28dd5d53f0613cfa8c960185b56a6e8040bcde6a90e",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/meta.json": "fa2f28c8f5067df3aabb31cd0796728863d2561dabfc1091d5cf315c4dc188d9",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/initial_model.npy": "eaea47da724da3eae2370b5cb0718024d695e2923a16827f6efd2f4cf48ad0ce",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/final_model.npy": "ae035884c17fd1434b2318dd9cf344df5dc44b7a3926429518b911926cfe5c14",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/stopping.json": "9d7450b5cfbf11bb9a5a4e393c07597ed903b867882a73ac321e85688ddd85b6",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/control_mask.npy": "989d0d3a17a7947c5c60ce9d5e18c2945d49e24f4acbbc03a423d21e38bb1c67",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/control_split.json": "fe410f3eb4b4b0223de7c0e84eca7025b56ae419bb56669edb0e40b63b48b47a",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/iter_0/complete.json": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/iter_1/complete.json": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/iter_2/complete.json": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/iter_2/sensitivity_diagonal.npy": "3cabc677ee5b1af770d56f5866c13d7ddc73bdc765e45342517915d33f27d750",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/iter_2/coverage_confidence.npy": "f6d0d614c2a180daf9636d45e74c8a00d744a088a70848feb3966b1bfeb8959f",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/iter_2/model.npy": "ce75feae3e364b0921bf54de0e7eed12bdb1a47b0921dbac2795c8ce8b9e427c",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/inputs/soft/initial_velocity_m_s.npy": "eaea47da724da3eae2370b5cb0718024d695e2923a16827f6efd2f4cf48ad0ce",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/inputs/soft/parent_final_model.npy": "bd08baec8e13f107d6b574e376f11855c8bb42105863243e26ac79a0c31ef83f"
+  }
+}

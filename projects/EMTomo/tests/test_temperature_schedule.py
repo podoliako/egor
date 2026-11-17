@@ -91,7 +91,7 @@ def mocked_problem(monkeypatch):
     calls = []
 
     def step(current_model, current_arrivals, current_stations, current_noise, config,
-             *, iteration, logger):
+             *, iteration, logger, localization_cache=None):
         assert current_arrivals is arrivals
         assert current_stations is stations
         assert current_noise is noise

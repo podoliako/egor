@@ -361,9 +361,9 @@ def test_fine_grid_ray_logging_for_viewer(small_experiment, tmp_path):
     config = replace(CONFIG, cell_size=1000., n_cycles=1, subdivision=2, n_workers=1,
                      weights_top_n=1, log_g_per_weight=True, runs_dir=str(tmp_path / "runs"))
     logger = main(config, experiment_id="small", experiments_root=small_experiment[0])
-    with np.load(logger.run_dir / "iter_0" / "event_0" / "weight_0" / "G_stations_sparse.npz") as G:
-        np.testing.assert_array_equal(G["shape"], [4, 4, 4])
-        assert len(G["offsets"]) == 4 and G["values"].size > 0
+    with np.load(logger.run_dir / "iter_0" / "event_0" / "rays.npz") as G:
+        np.testing.assert_array_equal(G["g_0_shape"], [4, 4, 4])
+        assert len(G["g_0_offsets"]) == 4 and G["g_0_values"].size > 0
     assert (logger.run_dir / "final_model.npy").is_file()
     quality = json.loads((logger.run_dir / "quality.jsonl").read_text().splitlines()[0])
     assert set(quality) == {"iter", "avg_abs_pct_dev", "rms_m_s"}

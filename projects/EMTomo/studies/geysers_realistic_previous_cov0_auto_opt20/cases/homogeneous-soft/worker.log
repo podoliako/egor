@@ -1,0 +1,1072 @@
+[Control] Held out 9009/90090 picks (10.00%), seed=42
+1/20
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 5.6s
+[Control] Events 71/3244 (2.2%); elapsed=12.2s; ETA~544s
+[Control] Events 136/3244 (4.2%); elapsed=22.3s; ETA~510s
+[Control] Events 163/3244 (5.0%); elapsed=28.5s; ETA~539s
+[Control] Events 220/3244 (6.8%); elapsed=38.6s; ETA~530s
+[Control] Events 275/3244 (8.5%); elapsed=49.2s; ETA~531s
+[Control] Events 326/3244 (10.0%); elapsed=58.4s; ETA~523s
+[Control] Events 384/3244 (11.8%); elapsed=68.6s; ETA~511s
+[Control] Events 435/3244 (13.4%); elapsed=78.8s; ETA~509s
+[Control] Events 489/3244 (15.1%); elapsed=88.1s; ETA~497s
+[Control] Events 543/3244 (16.7%); elapsed=98.2s; ETA~488s
+[Control] Events 599/3244 (18.5%); elapsed=108.4s; ETA~479s
+[Control] Events 652/3244 (20.1%); elapsed=118.1s; ETA~469s
+[Control] Events 707/3244 (21.8%); elapsed=128.4s; ETA~461s
+[Control] Events 764/3244 (23.6%); elapsed=138.4s; ETA~449s
+[Control] Events 815/3244 (25.1%); elapsed=147.9s; ETA~441s
+[Control] Events 867/3244 (26.7%); elapsed=157.9s; ETA~433s
+[Control] Events 921/3244 (28.4%); elapsed=168.0s; ETA~424s
+[Control] Events 978/3244 (30.1%); elapsed=177.8s; ETA~412s
+[Control] Events 1029/3244 (31.7%); elapsed=187.8s; ETA~404s
+[Control] Events 1086/3244 (33.5%); elapsed=197.9s; ETA~393s
+[Control] Events 1140/3244 (35.1%); elapsed=207.9s; ETA~384s
+[Control] Events 1141/3244 (35.2%); elapsed=207.9s; ETA~383s
+[Control] Events 1198/3244 (36.9%); elapsed=218.2s; ETA~373s
+[Control] Events 1256/3244 (38.7%); elapsed=228.4s; ETA~362s
+[Control] Events 1304/3244 (40.2%); elapsed=236.9s; ETA~352s
+[Control] Events 1355/3244 (41.8%); elapsed=246.9s; ETA~344s
+[Control] Events 1413/3244 (43.6%); elapsed=257.3s; ETA~333s
+[Control] Events 1467/3244 (45.2%); elapsed=266.7s; ETA~323s
+[Control] Events 1521/3244 (46.9%); elapsed=276.7s; ETA~313s
+[Control] Events 1574/3244 (48.5%); elapsed=287.1s; ETA~305s
+[Control] Events 1630/3244 (50.2%); elapsed=296.9s; ETA~294s
+[Control] Events 1686/3244 (52.0%); elapsed=307.2s; ETA~284s
+[Control] Events 1741/3244 (53.7%); elapsed=317.5s; ETA~274s
+[Control] Events 1793/3244 (55.3%); elapsed=326.7s; ETA~264s
+[Control] Events 1847/3244 (56.9%); elapsed=337.4s; ETA~255s
+[Control] Events 1906/3244 (58.8%); elapsed=347.6s; ETA~244s
+[Control] Events 1956/3244 (60.3%); elapsed=356.5s; ETA~235s
+[Control] Events 2010/3244 (62.0%); elapsed=366.6s; ETA~225s
+[Control] Events 2065/3244 (63.7%); elapsed=376.7s; ETA~215s
+[Control] Events 2119/3244 (65.3%); elapsed=386.7s; ETA~205s
+[Control] Events 2175/3244 (67.0%); elapsed=396.7s; ETA~195s
+[Control] Events 2229/3244 (68.7%); elapsed=406.9s; ETA~185s
+[Control] Events 2282/3244 (70.3%); elapsed=416.4s; ETA~176s
+[Control] Events 2339/3244 (72.1%); elapsed=426.9s; ETA~165s
+[Control] Events 2397/3244 (73.9%); elapsed=437.4s; ETA~155s
+[Control] Events 2445/3244 (75.4%); elapsed=446.0s; ETA~146s
+[Control] Events 2499/3244 (77.0%); elapsed=456.1s; ETA~136s
+[Control] Events 2555/3244 (78.8%); elapsed=466.1s; ETA~126s
+[Control] Events 2608/3244 (80.4%); elapsed=475.5s; ETA~116s
+[Control] Events 2663/3244 (82.1%); elapsed=485.7s; ETA~106s
+[Control] Events 2717/3244 (83.8%); elapsed=495.7s; ETA~96s
+[Control] Events 2771/3244 (85.4%); elapsed=505.3s; ETA~86s
+[Control] Events 2821/3244 (87.0%); elapsed=515.4s; ETA~77s
+[Control] Events 2880/3244 (88.8%); elapsed=525.7s; ETA~66s
+[Control] Events 2934/3244 (90.4%); elapsed=535.9s; ETA~57s
+[Control] Events 2991/3244 (92.2%); elapsed=546.3s; ETA~46s
+[Control] Events 3047/3244 (93.9%); elapsed=556.7s; ETA~36s
+[Control] Events 3097/3244 (95.5%); elapsed=565.2s; ETA~27s
+[Control] Events 3156/3244 (97.3%); elapsed=575.5s; ETA~16s
+[Control] Events 3212/3244 (99.0%); elapsed=585.7s; ETA~6s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.145016s; elapsed=597.0s
+[Control] RMSE=0.145016 s; insufficient improvements 0/2
+2/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 15.5s
+[Control] Events 48/3244 (1.5%); elapsed=19.5s; ETA~1295s
+[Control] Events 102/3244 (3.1%); elapsed=29.5s; ETA~910s
+[Control] Events 155/3244 (4.8%); elapsed=39.9s; ETA~796s
+[Control] Events 163/3244 (5.0%); elapsed=41.1s; ETA~778s
+[Control] Events 216/3244 (6.7%); elapsed=51.3s; ETA~719s
+[Control] Events 272/3244 (8.4%); elapsed=61.6s; ETA~673s
+[Control] Events 326/3244 (10.0%); elapsed=71.1s; ETA~636s
+[Control] Events 379/3244 (11.7%); elapsed=81.3s; ETA~615s
+[Control] Events 438/3244 (13.5%); elapsed=91.5s; ETA~586s
+[Control] Events 489/3244 (15.1%); elapsed=101.5s; ETA~572s
+[Control] Events 544/3244 (16.8%); elapsed=111.6s; ETA~554s
+[Control] Events 597/3244 (18.4%); elapsed=121.7s; ETA~540s
+[Control] Events 652/3244 (20.1%); elapsed=131.3s; ETA~522s
+[Control] Events 704/3244 (21.7%); elapsed=141.3s; ETA~510s
+[Control] Events 759/3244 (23.4%); elapsed=151.6s; ETA~497s
+[Control] Events 812/3244 (25.0%); elapsed=161.7s; ETA~484s
+[Control] Events 815/3244 (25.1%); elapsed=162.0s; ETA~483s
+[Control] Events 871/3244 (26.8%); elapsed=172.0s; ETA~469s
+[Control] Events 921/3244 (28.4%); elapsed=182.3s; ETA~460s
+[Control] Events 978/3244 (30.1%); elapsed=191.7s; ETA~444s
+[Control] Events 1029/3244 (31.7%); elapsed=201.9s; ETA~435s
+[Control] Events 1086/3244 (33.5%); elapsed=212.3s; ETA~422s
+[Control] Events 1141/3244 (35.2%); elapsed=222.4s; ETA~410s
+[Control] Events 1197/3244 (36.9%); elapsed=232.6s; ETA~398s
+[Control] Events 1253/3244 (38.6%); elapsed=242.8s; ETA~386s
+[Control] Events 1304/3244 (40.2%); elapsed=252.0s; ETA~375s
+[Control] Events 1357/3244 (41.8%); elapsed=262.1s; ETA~364s
+[Control] Events 1413/3244 (43.6%); elapsed=272.2s; ETA~353s
+[Control] Events 1467/3244 (45.2%); elapsed=282.2s; ETA~342s
+[Control] Events 1523/3244 (46.9%); elapsed=292.4s; ETA~330s
+[Control] Events 1577/3244 (48.6%); elapsed=302.6s; ETA~320s
+[Control] Events 1630/3244 (50.2%); elapsed=312.3s; ETA~309s
+[Control] Events 1682/3244 (51.8%); elapsed=322.3s; ETA~299s
+[Control] Events 1739/3244 (53.6%); elapsed=332.6s; ETA~288s
+[Control] Events 1791/3244 (55.2%); elapsed=342.9s; ETA~278s
+[Control] Events 1793/3244 (55.3%); elapsed=343.0s; ETA~278s
+[Control] Events 1846/3244 (56.9%); elapsed=353.5s; ETA~268s
+[Control] Events 1901/3244 (58.6%); elapsed=363.8s; ETA~257s
+[Control] Events 1956/3244 (60.3%); elapsed=373.2s; ETA~246s
+[Control] Events 2009/3244 (61.9%); elapsed=383.3s; ETA~236s
+[Control] Events 2061/3244 (63.5%); elapsed=393.4s; ETA~226s
+[Control] Events 2117/3244 (65.3%); elapsed=403.6s; ETA~215s
+[Control] Events 2119/3244 (65.3%); elapsed=403.8s; ETA~214s
+[Control] Events 2170/3244 (66.9%); elapsed=413.8s; ETA~205s
+[Control] Events 2227/3244 (68.6%); elapsed=424.0s; ETA~194s
+[Control] Events 2282/3244 (70.3%); elapsed=433.9s; ETA~183s
+[Control] Events 2340/3244 (72.1%); elapsed=444.0s; ETA~172s
+[Control] Events 2397/3244 (73.9%); elapsed=454.6s; ETA~161s
+[Control] Events 2445/3244 (75.4%); elapsed=463.3s; ETA~151s
+[Control] Events 2511/3244 (77.4%); elapsed=474.0s; ETA~138s
+[Control] Events 2583/3244 (79.6%); elapsed=485.0s; ETA~124s
+[Control] Events 2608/3244 (80.4%); elapsed=487.8s; ETA~119s
+[Control] Events 2676/3244 (82.5%); elapsed=497.9s; ETA~106s
+[Control] Events 2757/3244 (85.0%); elapsed=508.1s; ETA~90s
+[Control] Events 2771/3244 (85.4%); elapsed=510.0s; ETA~87s
+[Control] Events 2837/3244 (87.5%); elapsed=520.3s; ETA~75s
+[Control] Events 2908/3244 (89.6%); elapsed=530.6s; ETA~61s
+[Control] Events 2934/3244 (90.4%); elapsed=534.2s; ETA~56s
+[Control] Events 3007/3244 (92.7%); elapsed=544.3s; ETA~43s
+[Control] Events 3067/3244 (94.5%); elapsed=554.4s; ETA~32s
+[Control] Events 3097/3244 (95.5%); elapsed=560.5s; ETA~27s
+[Control] Events 3154/3244 (97.2%); elapsed=570.7s; ETA~16s
+[Control] Events 3223/3244 (99.4%); elapsed=580.9s; ETA~4s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.136412s; elapsed=600.8s
+[Control] RMSE=0.136412 s; insufficient improvements 0/2
+3/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 13.7s
+[Control] Events 50/3244 (1.5%); elapsed=21.9s; ETA~1399s
+[Control] Events 108/3244 (3.3%); elapsed=32.0s; ETA~929s
+[Control] Events 163/3244 (5.0%); elapsed=41.9s; ETA~792s
+[Control] Events 213/3244 (6.6%); elapsed=52.0s; ETA~739s
+[Control] Events 269/3244 (8.3%); elapsed=62.0s; ETA~685s
+[Control] Events 320/3244 (9.9%); elapsed=72.1s; ETA~659s
+[Control] Events 326/3244 (10.0%); elapsed=73.3s; ETA~656s
+[Control] Events 381/3244 (11.7%); elapsed=83.6s; ETA~628s
+[Control] Events 435/3244 (13.4%); elapsed=93.9s; ETA~607s
+[Control] Events 489/3244 (15.1%); elapsed=104.3s; ETA~588s
+[Control] Events 543/3244 (16.7%); elapsed=114.4s; ETA~569s
+[Control] Events 597/3244 (18.4%); elapsed=124.8s; ETA~553s
+[Control] Events 648/3244 (20.0%); elapsed=134.9s; ETA~540s
+[Control] Events 652/3244 (20.1%); elapsed=135.2s; ETA~538s
+[Control] Events 705/3244 (21.7%); elapsed=146.0s; ETA~526s
+[Control] Events 759/3244 (23.4%); elapsed=156.1s; ETA~511s
+[Control] Events 813/3244 (25.1%); elapsed=166.3s; ETA~497s
+[Control] Events 815/3244 (25.1%); elapsed=166.3s; ETA~496s
+[Control] Events 866/3244 (26.7%); elapsed=176.5s; ETA~485s
+[Control] Events 920/3244 (28.4%); elapsed=186.9s; ETA~472s
+[Control] Events 975/3244 (30.1%); elapsed=197.0s; ETA~458s
+[Control] Events 978/3244 (30.1%); elapsed=197.1s; ETA~457s
+[Control] Events 1028/3244 (31.7%); elapsed=207.2s; ETA~447s
+[Control] Events 1081/3244 (33.3%); elapsed=217.4s; ETA~435s
+[Control] Events 1134/3244 (35.0%); elapsed=227.6s; ETA~424s
+[Control] Events 1141/3244 (35.2%); elapsed=229.1s; ETA~422s
+[Control] Events 1196/3244 (36.9%); elapsed=239.3s; ETA~410s
+[Control] Events 1249/3244 (38.5%); elapsed=249.5s; ETA~398s
+[Control] Events 1299/3244 (40.0%); elapsed=259.6s; ETA~389s
+[Control] Events 1304/3244 (40.2%); elapsed=260.2s; ETA~387s
+[Control] Events 1359/3244 (41.9%); elapsed=270.7s; ETA~375s
+[Control] Events 1418/3244 (43.7%); elapsed=280.8s; ETA~362s
+[Control] Events 1467/3244 (45.2%); elapsed=289.7s; ETA~351s
+[Control] Events 1521/3244 (46.9%); elapsed=299.8s; ETA~340s
+[Control] Events 1573/3244 (48.5%); elapsed=310.1s; ETA~329s
+[Control] Events 1630/3244 (50.2%); elapsed=319.7s; ETA~317s
+[Control] Events 1691/3244 (52.1%); elapsed=329.9s; ETA~303s
+[Control] Events 1766/3244 (54.4%); elapsed=340.2s; ETA~285s
+[Control] Events 1793/3244 (55.3%); elapsed=343.9s; ETA~278s
+[Control] Events 1865/3244 (57.5%); elapsed=353.9s; ETA~262s
+[Control] Events 1917/3244 (59.1%); elapsed=364.1s; ETA~252s
+[Control] Events 1956/3244 (60.3%); elapsed=371.1s; ETA~244s
+[Control] Events 2011/3244 (62.0%); elapsed=381.6s; ETA~234s
+[Control] Events 2081/3244 (64.1%); elapsed=391.8s; ETA~219s
+[Control] Events 2119/3244 (65.3%); elapsed=397.1s; ETA~211s
+[Control] Events 2183/3244 (67.3%); elapsed=407.3s; ETA~198s
+[Control] Events 2241/3244 (69.1%); elapsed=417.4s; ETA~187s
+[Control] Events 2282/3244 (70.3%); elapsed=425.3s; ETA~179s
+[Control] Events 2338/3244 (72.1%); elapsed=435.5s; ETA~169s
+[Control] Events 2395/3244 (73.8%); elapsed=445.8s; ETA~158s
+[Control] Events 2445/3244 (75.4%); elapsed=455.5s; ETA~149s
+[Control] Events 2498/3244 (77.0%); elapsed=465.8s; ETA~139s
+[Control] Events 2551/3244 (78.6%); elapsed=475.8s; ETA~129s
+[Control] Events 2607/3244 (80.4%); elapsed=486.0s; ETA~119s
+[Control] Events 2608/3244 (80.4%); elapsed=486.0s; ETA~119s
+[Control] Events 2660/3244 (82.0%); elapsed=496.3s; ETA~109s
+[Control] Events 2715/3244 (83.7%); elapsed=506.4s; ETA~99s
+[Control] Events 2768/3244 (85.3%); elapsed=516.4s; ETA~89s
+[Control] Events 2771/3244 (85.4%); elapsed=516.8s; ETA~88s
+[Control] Events 2822/3244 (87.0%); elapsed=527.1s; ETA~79s
+[Control] Events 2879/3244 (88.7%); elapsed=537.3s; ETA~68s
+[Control] Events 2931/3244 (90.4%); elapsed=547.8s; ETA~58s
+[Control] Events 2934/3244 (90.4%); elapsed=548.0s; ETA~58s
+[Control] Events 2986/3244 (92.0%); elapsed=558.3s; ETA~48s
+[Control] Events 3040/3244 (93.7%); elapsed=568.4s; ETA~38s
+[Control] Events 3092/3244 (95.3%); elapsed=578.8s; ETA~28s
+[Control] Events 3097/3244 (95.5%); elapsed=579.4s; ETA~28s
+[Control] Events 3152/3244 (97.2%); elapsed=589.7s; ETA~17s
+[Control] Events 3204/3244 (98.8%); elapsed=599.7s; ETA~7s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.127831s; elapsed=621.8s
+[Control] RMSE=0.127831 s; insufficient improvements 0/2
+4/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 14.6s
+[Control] Events 47/3244 (1.4%); elapsed=21.7s; ETA~1473s
+[Control] Events 107/3244 (3.3%); elapsed=32.3s; ETA~946s
+[Control] Events 161/3244 (5.0%); elapsed=42.4s; ETA~812s
+[Control] Events 163/3244 (5.0%); elapsed=42.7s; ETA~808s
+[Control] Events 217/3244 (6.7%); elapsed=53.0s; ETA~739s
+[Control] Events 271/3244 (8.4%); elapsed=63.2s; ETA~693s
+[Control] Events 326/3244 (10.0%); elapsed=72.5s; ETA~649s
+[Control] Events 396/3244 (12.2%); elapsed=82.9s; ETA~596s
+[Control] Events 471/3244 (14.5%); elapsed=93.6s; ETA~551s
+[Control] Events 489/3244 (15.1%); elapsed=96.6s; ETA~544s
+[Control] Events 548/3244 (16.9%); elapsed=106.7s; ETA~525s
+[Control] Events 609/3244 (18.8%); elapsed=117.0s; ETA~506s
+[Control] Events 652/3244 (20.1%); elapsed=125.1s; ETA~497s
+[Control] Events 707/3244 (21.8%); elapsed=135.3s; ETA~485s
+[Control] Events 760/3244 (23.4%); elapsed=145.8s; ETA~477s
+[Control] Events 815/3244 (25.1%); elapsed=154.8s; ETA~461s
+[Control] Events 875/3244 (27.0%); elapsed=165.3s; ETA~448s
+[Control] Events 949/3244 (29.3%); elapsed=175.5s; ETA~424s
+[Control] Events 978/3244 (30.1%); elapsed=180.3s; ETA~418s
+[Control] Events 1035/3244 (31.9%); elapsed=190.4s; ETA~406s
+[Control] Events 1090/3244 (33.6%); elapsed=200.5s; ETA~396s
+[Control] Events 1141/3244 (35.2%); elapsed=210.2s; ETA~387s
+[Control] Events 1195/3244 (36.8%); elapsed=220.3s; ETA~378s
+[Control] Events 1247/3244 (38.4%); elapsed=230.3s; ETA~369s
+[Control] Events 1303/3244 (40.2%); elapsed=240.4s; ETA~358s
+[Control] Events 1304/3244 (40.2%); elapsed=241.0s; ETA~359s
+[Control] Events 1357/3244 (41.8%); elapsed=251.0s; ETA~349s
+[Control] Events 1413/3244 (43.6%); elapsed=261.3s; ETA~339s
+[Control] Events 1467/3244 (45.2%); elapsed=271.6s; ETA~329s
+[Control] Events 1523/3244 (46.9%); elapsed=281.9s; ETA~319s
+[Control] Events 1574/3244 (48.5%); elapsed=292.0s; ETA~310s
+[Control] Events 1629/3244 (50.2%); elapsed=302.1s; ETA~300s
+[Control] Events 1630/3244 (50.2%); elapsed=302.1s; ETA~299s
+[Control] Events 1682/3244 (51.8%); elapsed=312.6s; ETA~290s
+[Control] Events 1737/3244 (53.5%); elapsed=322.8s; ETA~280s
+[Control] Events 1789/3244 (55.1%); elapsed=332.8s; ETA~271s
+[Control] Events 1793/3244 (55.3%); elapsed=332.9s; ETA~269s
+[Control] Events 1844/3244 (56.8%); elapsed=342.9s; ETA~260s
+[Control] Events 1898/3244 (58.5%); elapsed=353.3s; ETA~251s
+[Control] Events 1955/3244 (60.3%); elapsed=363.4s; ETA~240s
+[Control] Events 1956/3244 (60.3%); elapsed=363.4s; ETA~239s
+[Control] Events 2009/3244 (61.9%); elapsed=373.6s; ETA~230s
+[Control] Events 2063/3244 (63.6%); elapsed=383.7s; ETA~220s
+[Control] Events 2117/3244 (65.3%); elapsed=393.8s; ETA~210s
+[Control] Events 2119/3244 (65.3%); elapsed=394.1s; ETA~209s
+[Control] Events 2174/3244 (67.0%); elapsed=404.2s; ETA~199s
+[Control] Events 2228/3244 (68.7%); elapsed=414.2s; ETA~189s
+[Control] Events 2280/3244 (70.3%); elapsed=424.3s; ETA~179s
+[Control] Events 2282/3244 (70.3%); elapsed=424.5s; ETA~179s
+[Control] Events 2339/3244 (72.1%); elapsed=434.8s; ETA~168s
+[Control] Events 2395/3244 (73.8%); elapsed=445.0s; ETA~158s
+[Control] Events 2445/3244 (75.4%); elapsed=454.3s; ETA~148s
+[Control] Events 2498/3244 (77.0%); elapsed=464.7s; ETA~139s
+[Control] Events 2554/3244 (78.7%); elapsed=475.1s; ETA~128s
+[Control] Events 2608/3244 (80.4%); elapsed=484.9s; ETA~118s
+[Control] Events 2661/3244 (82.0%); elapsed=494.9s; ETA~108s
+[Control] Events 2716/3244 (83.7%); elapsed=504.9s; ETA~98s
+[Control] Events 2771/3244 (85.4%); elapsed=514.5s; ETA~88s
+[Control] Events 2821/3244 (87.0%); elapsed=524.8s; ETA~79s
+[Control] Events 2875/3244 (88.6%); elapsed=535.2s; ETA~69s
+[Control] Events 2932/3244 (90.4%); elapsed=545.6s; ETA~58s
+[Control] Events 2934/3244 (90.4%); elapsed=546.4s; ETA~58s
+[Control] Events 2991/3244 (92.2%); elapsed=556.7s; ETA~47s
+[Control] Events 3041/3244 (93.7%); elapsed=566.8s; ETA~38s
+[Control] Events 3097/3244 (95.5%); elapsed=577.2s; ETA~27s
+[Control] Events 3151/3244 (97.1%); elapsed=587.4s; ETA~17s
+[Control] Events 3217/3244 (99.2%); elapsed=597.9s; ETA~5s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.120012s; elapsed=616.8s
+[Control] RMSE=0.120012 s; insufficient improvements 0/2
+5/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 7.5s
+[Control] Events 86/3244 (2.7%); elapsed=14.1s; ETA~518s
+[Control] Events 163/3244 (5.0%); elapsed=21.0s; ETA~397s
+[Control] Events 241/3244 (7.4%); elapsed=31.2s; ETA~388s
+[Control] Events 321/3244 (9.9%); elapsed=41.3s; ETA~376s
+[Control] Events 326/3244 (10.0%); elapsed=41.3s; ETA~369s
+[Control] Events 403/3244 (12.4%); elapsed=51.6s; ETA~364s
+[Control] Events 480/3244 (14.8%); elapsed=61.6s; ETA~355s
+[Control] Events 489/3244 (15.1%); elapsed=62.1s; ETA~350s
+[Control] Events 573/3244 (17.7%); elapsed=72.5s; ETA~338s
+[Control] Events 649/3244 (20.0%); elapsed=82.9s; ETA~331s
+[Control] Events 652/3244 (20.1%); elapsed=82.9s; ETA~329s
+[Control] Events 732/3244 (22.6%); elapsed=93.0s; ETA~319s
+[Control] Events 814/3244 (25.1%); elapsed=103.4s; ETA~309s
+[Control] Events 815/3244 (25.1%); elapsed=103.4s; ETA~308s
+[Control] Events 893/3244 (27.5%); elapsed=113.6s; ETA~299s
+[Control] Events 978/3244 (30.1%); elapsed=123.3s; ETA~286s
+[Control] Events 1057/3244 (32.6%); elapsed=133.7s; ETA~277s
+[Control] Events 1137/3244 (35.0%); elapsed=143.9s; ETA~267s
+[Control] Events 1141/3244 (35.2%); elapsed=143.9s; ETA~265s
+[Control] Events 1221/3244 (37.6%); elapsed=154.3s; ETA~256s
+[Control] Events 1300/3244 (40.1%); elapsed=164.6s; ETA~246s
+[Control] Events 1304/3244 (40.2%); elapsed=165.0s; ETA~245s
+[Control] Events 1380/3244 (42.5%); elapsed=175.1s; ETA~236s
+[Control] Events 1467/3244 (45.2%); elapsed=185.3s; ETA~224s
+[Control] Events 1552/3244 (47.8%); elapsed=196.5s; ETA~214s
+[Control] Events 1630/3244 (50.2%); elapsed=206.0s; ETA~204s
+[Control] Events 1713/3244 (52.8%); elapsed=216.4s; ETA~193s
+[Control] Events 1791/3244 (55.2%); elapsed=226.6s; ETA~184s
+[Control] Events 1793/3244 (55.3%); elapsed=226.6s; ETA~183s
+[Control] Events 1875/3244 (57.8%); elapsed=236.7s; ETA~173s
+[Control] Events 1954/3244 (60.2%); elapsed=246.9s; ETA~163s
+[Control] Events 1956/3244 (60.3%); elapsed=246.9s; ETA~163s
+[Control] Events 2037/3244 (62.8%); elapsed=256.9s; ETA~152s
+[Control] Events 2114/3244 (65.2%); elapsed=267.0s; ETA~143s
+[Control] Events 2119/3244 (65.3%); elapsed=267.4s; ETA~142s
+[Control] Events 2202/3244 (67.9%); elapsed=277.7s; ETA~131s
+[Control] Events 2282/3244 (70.3%); elapsed=287.6s; ETA~121s
+[Control] Events 2362/3244 (72.8%); elapsed=297.9s; ETA~111s
+[Control] Events 2444/3244 (75.3%); elapsed=308.1s; ETA~101s
+[Control] Events 2445/3244 (75.4%); elapsed=308.1s; ETA~101s
+[Control] Events 2526/3244 (77.9%); elapsed=318.5s; ETA~91s
+[Control] Events 2608/3244 (80.4%); elapsed=328.3s; ETA~80s
+[Control] Events 2687/3244 (82.8%); elapsed=338.4s; ETA~70s
+[Control] Events 2770/3244 (85.4%); elapsed=349.0s; ETA~60s
+[Control] Events 2771/3244 (85.4%); elapsed=349.1s; ETA~60s
+[Control] Events 2853/3244 (87.9%); elapsed=359.8s; ETA~49s
+[Control] Events 2934/3244 (90.4%); elapsed=369.4s; ETA~39s
+[Control] Events 3023/3244 (93.2%); elapsed=380.6s; ETA~28s
+[Control] Events 3097/3244 (95.5%); elapsed=388.2s; ETA~18s
+[Control] Events 3183/3244 (98.1%); elapsed=399.0s; ETA~8s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.113134s; elapsed=414.5s
+[Control] RMSE=0.113134 s; insufficient improvements 0/2
+6/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 7.6s
+[Control] Events 93/3244 (2.9%); elapsed=13.7s; ETA~464s
+[Control] Events 163/3244 (5.0%); elapsed=20.1s; ETA~381s
+[Control] Events 272/3244 (8.4%); elapsed=30.5s; ETA~333s
+[Control] Events 326/3244 (10.0%); elapsed=35.1s; ETA~315s
+[Control] Events 434/3244 (13.4%); elapsed=46.1s; ETA~298s
+[Control] Events 489/3244 (15.1%); elapsed=50.8s; ETA~286s
+[Control] Events 601/3244 (18.5%); elapsed=60.8s; ETA~267s
+[Control] Events 652/3244 (20.1%); elapsed=66.7s; ETA~265s
+[Control] Events 767/3244 (23.6%); elapsed=77.4s; ETA~250s
+[Control] Events 815/3244 (25.1%); elapsed=81.6s; ETA~243s
+[Control] Events 909/3244 (28.0%); elapsed=92.0s; ETA~236s
+[Control] Events 978/3244 (30.1%); elapsed=98.9s; ETA~229s
+[Control] Events 1054/3244 (32.5%); elapsed=108.9s; ETA~226s
+[Control] Events 1127/3244 (34.7%); elapsed=119.2s; ETA~224s
+[Control] Events 1141/3244 (35.2%); elapsed=120.9s; ETA~223s
+[Control] Events 1213/3244 (37.4%); elapsed=131.0s; ETA~219s
+[Control] Events 1284/3244 (39.6%); elapsed=141.1s; ETA~215s
+[Control] Events 1304/3244 (40.2%); elapsed=143.8s; ETA~214s
+[Control] Events 1375/3244 (42.4%); elapsed=153.9s; ETA~209s
+[Control] Events 1450/3244 (44.7%); elapsed=164.1s; ETA~203s
+[Control] Events 1467/3244 (45.2%); elapsed=166.5s; ETA~202s
+[Control] Events 1547/3244 (47.7%); elapsed=177.2s; ETA~194s
+[Control] Events 1624/3244 (50.1%); elapsed=187.4s; ETA~187s
+[Control] Events 1630/3244 (50.2%); elapsed=188.1s; ETA~186s
+[Control] Events 1708/3244 (52.7%); elapsed=198.5s; ETA~179s
+[Control] Events 1786/3244 (55.1%); elapsed=208.7s; ETA~170s
+[Control] Events 1793/3244 (55.3%); elapsed=209.3s; ETA~169s
+[Control] Events 1875/3244 (57.8%); elapsed=219.5s; ETA~160s
+[Control] Events 1955/3244 (60.3%); elapsed=229.6s; ETA~151s
+[Control] Events 1956/3244 (60.3%); elapsed=230.0s; ETA~151s
+[Control] Events 2038/3244 (62.8%); elapsed=240.2s; ETA~142s
+[Control] Events 2117/3244 (65.3%); elapsed=250.5s; ETA~133s
+[Control] Events 2119/3244 (65.3%); elapsed=250.5s; ETA~133s
+[Control] Events 2224/3244 (68.6%); elapsed=260.6s; ETA~120s
+[Control] Events 2282/3244 (70.3%); elapsed=266.5s; ETA~112s
+[Control] Events 2391/3244 (73.7%); elapsed=276.9s; ETA~99s
+[Control] Events 2445/3244 (75.4%); elapsed=283.7s; ETA~93s
+[Control] Events 2521/3244 (77.7%); elapsed=293.8s; ETA~84s
+[Control] Events 2596/3244 (80.0%); elapsed=303.9s; ETA~76s
+[Control] Events 2608/3244 (80.4%); elapsed=305.1s; ETA~74s
+[Control] Events 2681/3244 (82.6%); elapsed=315.4s; ETA~66s
+[Control] Events 2758/3244 (85.0%); elapsed=325.5s; ETA~57s
+[Control] Events 2771/3244 (85.4%); elapsed=327.0s; ETA~56s
+[Control] Events 2842/3244 (87.6%); elapsed=337.1s; ETA~48s
+[Control] Events 2919/3244 (90.0%); elapsed=347.4s; ETA~39s
+[Control] Events 2934/3244 (90.4%); elapsed=349.2s; ETA~37s
+[Control] Events 3003/3244 (92.6%); elapsed=359.3s; ETA~29s
+[Control] Events 3083/3244 (95.0%); elapsed=369.4s; ETA~19s
+[Control] Events 3097/3244 (95.5%); elapsed=371.3s; ETA~18s
+[Control] Events 3171/3244 (97.7%); elapsed=381.5s; ETA~9s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.107168s; elapsed=399.0s
+[Control] RMSE=0.107168 s; insufficient improvements 0/2
+7/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 7.1s
+[Control] Events 87/3244 (2.7%); elapsed=13.2s; ETA~480s
+[Control] Events 163/3244 (5.0%); elapsed=20.5s; ETA~388s
+[Control] Events 273/3244 (8.4%); elapsed=31.5s; ETA~343s
+[Control] Events 326/3244 (10.0%); elapsed=35.8s; ETA~320s
+[Control] Events 435/3244 (13.4%); elapsed=45.9s; ETA~296s
+[Control] Events 489/3244 (15.1%); elapsed=52.1s; ETA~294s
+[Control] Events 605/3244 (18.6%); elapsed=63.4s; ETA~277s
+[Control] Events 652/3244 (20.1%); elapsed=66.5s; ETA~264s
+[Control] Events 757/3244 (23.3%); elapsed=77.2s; ETA~253s
+[Control] Events 815/3244 (25.1%); elapsed=81.7s; ETA~244s
+[Control] Events 929/3244 (28.6%); elapsed=91.7s; ETA~229s
+[Control] Events 978/3244 (30.1%); elapsed=95.8s; ETA~222s
+[Control] Events 1088/3244 (33.5%); elapsed=106.0s; ETA~210s
+[Control] Events 1141/3244 (35.2%); elapsed=112.0s; ETA~206s
+[Control] Events 1216/3244 (37.5%); elapsed=122.7s; ETA~205s
+[Control] Events 1299/3244 (40.0%); elapsed=133.1s; ETA~199s
+[Control] Events 1304/3244 (40.2%); elapsed=133.9s; ETA~199s
+[Control] Events 1381/3244 (42.6%); elapsed=144.2s; ETA~194s
+[Control] Events 1457/3244 (44.9%); elapsed=154.3s; ETA~189s
+[Control] Events 1467/3244 (45.2%); elapsed=155.4s; ETA~188s
+[Control] Events 1537/3244 (47.4%); elapsed=165.6s; ETA~184s
+[Control] Events 1611/3244 (49.7%); elapsed=175.7s; ETA~178s
+[Control] Events 1630/3244 (50.2%); elapsed=178.4s; ETA~177s
+[Control] Events 1704/3244 (52.5%); elapsed=188.5s; ETA~170s
+[Control] Events 1785/3244 (55.0%); elapsed=199.5s; ETA~163s
+[Control] Events 1793/3244 (55.3%); elapsed=200.0s; ETA~162s
+[Control] Events 1867/3244 (57.6%); elapsed=210.7s; ETA~155s
+[Control] Events 1950/3244 (60.1%); elapsed=220.7s; ETA~146s
+[Control] Events 1956/3244 (60.3%); elapsed=221.6s; ETA~146s
+[Control] Events 2029/3244 (62.5%); elapsed=231.9s; ETA~139s
+[Control] Events 2101/3244 (64.8%); elapsed=242.0s; ETA~132s
+[Control] Events 2119/3244 (65.3%); elapsed=243.0s; ETA~129s
+[Control] Events 2189/3244 (67.5%); elapsed=253.3s; ETA~122s
+[Control] Events 2266/3244 (69.9%); elapsed=263.3s; ETA~114s
+[Control] Events 2282/3244 (70.3%); elapsed=265.2s; ETA~112s
+[Control] Events 2361/3244 (72.8%); elapsed=276.2s; ETA~103s
+[Control] Events 2412/3244 (74.4%); elapsed=286.5s; ETA~99s
+[Control] Events 2445/3244 (75.4%); elapsed=290.9s; ETA~95s
+[Control] Events 2521/3244 (77.7%); elapsed=301.7s; ETA~87s
+[Control] Events 2608/3244 (80.4%); elapsed=311.0s; ETA~76s
+[Control] Events 2688/3244 (82.9%); elapsed=321.6s; ETA~67s
+[Control] Events 2757/3244 (85.0%); elapsed=331.6s; ETA~59s
+[Control] Events 2771/3244 (85.4%); elapsed=333.8s; ETA~57s
+[Control] Events 2830/3244 (87.2%); elapsed=344.2s; ETA~50s
+[Control] Events 2880/3244 (88.8%); elapsed=354.8s; ETA~45s
+[Control] Events 2922/3244 (90.1%); elapsed=365.0s; ETA~40s
+[Control] Events 2934/3244 (90.4%); elapsed=367.7s; ETA~39s
+[Control] Events 2968/3244 (91.5%); elapsed=377.9s; ETA~35s
+[Control] Events 3007/3244 (92.7%); elapsed=388.2s; ETA~31s
+[Control] Events 3067/3244 (94.5%); elapsed=398.6s; ETA~23s
+[Control] Events 3097/3244 (95.5%); elapsed=403.5s; ETA~19s
+[Control] Events 3144/3244 (96.9%); elapsed=414.1s; ETA~13s
+[Control] Events 3186/3244 (98.2%); elapsed=424.5s; ETA~8s
+[Control] Events 3231/3244 (99.6%); elapsed=434.8s; ETA~2s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.10147s; elapsed=446.3s
+[Control] RMSE=0.10147 s; insufficient improvements 0/2
+8/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 7.4s
+[Control] Events 92/3244 (2.8%); elapsed=13.4s; ETA~459s
+[Control] Events 163/3244 (5.0%); elapsed=19.7s; ETA~372s
+[Control] Events 269/3244 (8.3%); elapsed=29.7s; ETA~328s
+[Control] Events 326/3244 (10.0%); elapsed=35.0s; ETA~313s
+[Control] Events 446/3244 (13.7%); elapsed=45.2s; ETA~284s
+[Control] Events 489/3244 (15.1%); elapsed=49.0s; ETA~276s
+[Control] Events 598/3244 (18.4%); elapsed=59.0s; ETA~261s
+[Control] Events 652/3244 (20.1%); elapsed=63.6s; ETA~253s
+[Control] Events 758/3244 (23.4%); elapsed=73.7s; ETA~242s
+[Control] Events 815/3244 (25.1%); elapsed=78.8s; ETA~235s
+[Control] Events 921/3244 (28.4%); elapsed=88.8s; ETA~224s
+[Control] Events 978/3244 (30.1%); elapsed=93.6s; ETA~217s
+[Control] Events 1088/3244 (33.5%); elapsed=103.8s; ETA~206s
+[Control] Events 1141/3244 (35.2%); elapsed=108.7s; ETA~200s
+[Control] Events 1239/3244 (38.2%); elapsed=119.2s; ETA~193s
+[Control] Events 1304/3244 (40.2%); elapsed=125.0s; ETA~186s
+[Control] Events 1390/3244 (42.8%); elapsed=135.1s; ETA~180s
+[Control] Events 1467/3244 (45.2%); elapsed=144.1s; ETA~174s
+[Control] Events 1539/3244 (47.4%); elapsed=154.2s; ETA~171s
+[Control] Events 1623/3244 (50.0%); elapsed=164.3s; ETA~164s
+[Control] Events 1630/3244 (50.2%); elapsed=165.4s; ETA~164s
+[Control] Events 1708/3244 (52.7%); elapsed=175.8s; ETA~158s
+[Control] Events 1786/3244 (55.1%); elapsed=185.8s; ETA~152s
+[Control] Events 1793/3244 (55.3%); elapsed=186.8s; ETA~151s
+[Control] Events 1870/3244 (57.6%); elapsed=197.2s; ETA~145s
+[Control] Events 1951/3244 (60.1%); elapsed=207.8s; ETA~138s
+[Control] Events 1956/3244 (60.3%); elapsed=208.6s; ETA~137s
+[Control] Events 2031/3244 (62.6%); elapsed=218.8s; ETA~131s
+[Control] Events 2110/3244 (65.0%); elapsed=229.5s; ETA~123s
+[Control] Events 2119/3244 (65.3%); elapsed=229.9s; ETA~122s
+[Control] Events 2192/3244 (67.6%); elapsed=240.0s; ETA~115s
+[Control] Events 2267/3244 (69.9%); elapsed=250.3s; ETA~108s
+[Control] Events 2282/3244 (70.3%); elapsed=252.0s; ETA~106s
+[Control] Events 2362/3244 (72.8%); elapsed=262.2s; ETA~98s
+[Control] Events 2440/3244 (75.2%); elapsed=272.4s; ETA~90s
+[Control] Events 2445/3244 (75.4%); elapsed=272.4s; ETA~89s
+[Control] Events 2524/3244 (77.8%); elapsed=283.1s; ETA~81s
+[Control] Events 2608/3244 (80.4%); elapsed=292.9s; ETA~71s
+[Control] Events 2691/3244 (83.0%); elapsed=304.2s; ETA~63s
+[Control] Events 2771/3244 (85.4%); elapsed=314.0s; ETA~54s
+[Control] Events 2853/3244 (87.9%); elapsed=325.0s; ETA~45s
+[Control] Events 2932/3244 (90.4%); elapsed=335.2s; ETA~36s
+[Control] Events 2934/3244 (90.4%); elapsed=335.2s; ETA~35s
+[Control] Events 3010/3244 (92.8%); elapsed=345.5s; ETA~27s
+[Control] Events 3084/3244 (95.1%); elapsed=355.7s; ETA~18s
+[Control] Events 3097/3244 (95.5%); elapsed=357.7s; ETA~17s
+[Control] Events 3173/3244 (97.8%); elapsed=367.8s; ETA~8s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.0960864s; elapsed=384.8s
+[Control] RMSE=0.0960864 s; insufficient improvements 0/2
+9/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 7.7s
+[Control] Events 88/3244 (2.7%); elapsed=14.6s; ETA~523s
+[Control] Events 163/3244 (5.0%); elapsed=20.8s; ETA~393s
+[Control] Events 268/3244 (8.3%); elapsed=31.0s; ETA~344s
+[Control] Events 326/3244 (10.0%); elapsed=36.9s; ETA~330s
+[Control] Events 436/3244 (13.4%); elapsed=47.6s; ETA~307s
+[Control] Events 489/3244 (15.1%); elapsed=52.1s; ETA~293s
+[Control] Events 583/3244 (18.0%); elapsed=62.4s; ETA~285s
+[Control] Events 652/3244 (20.1%); elapsed=67.9s; ETA~270s
+[Control] Events 746/3244 (23.0%); elapsed=77.9s; ETA~261s
+[Control] Events 815/3244 (25.1%); elapsed=85.0s; ETA~253s
+[Control] Events 931/3244 (28.7%); elapsed=95.6s; ETA~238s
+[Control] Events 978/3244 (30.1%); elapsed=99.6s; ETA~231s
+[Control] Events 1083/3244 (33.4%); elapsed=110.0s; ETA~219s
+[Control] Events 1141/3244 (35.2%); elapsed=114.7s; ETA~211s
+[Control] Events 1246/3244 (38.4%); elapsed=125.8s; ETA~202s
+[Control] Events 1304/3244 (40.2%); elapsed=130.5s; ETA~194s
+[Control] Events 1412/3244 (43.5%); elapsed=140.5s; ETA~182s
+[Control] Events 1467/3244 (45.2%); elapsed=146.3s; ETA~177s
+[Control] Events 1577/3244 (48.6%); elapsed=156.6s; ETA~166s
+[Control] Events 1630/3244 (50.2%); elapsed=161.7s; ETA~160s
+[Control] Events 1733/3244 (53.4%); elapsed=172.2s; ETA~150s
+[Control] Events 1793/3244 (55.3%); elapsed=178.3s; ETA~144s
+[Control] Events 1889/3244 (58.2%); elapsed=188.5s; ETA~135s
+[Control] Events 1956/3244 (60.3%); elapsed=196.0s; ETA~129s
+[Control] Events 2035/3244 (62.7%); elapsed=206.2s; ETA~123s
+[Control] Events 2109/3244 (65.0%); elapsed=216.4s; ETA~116s
+[Control] Events 2119/3244 (65.3%); elapsed=216.7s; ETA~115s
+[Control] Events 2190/3244 (67.5%); elapsed=226.7s; ETA~109s
+[Control] Events 2263/3244 (69.8%); elapsed=236.8s; ETA~103s
+[Control] Events 2282/3244 (70.3%); elapsed=239.3s; ETA~101s
+[Control] Events 2365/3244 (72.9%); elapsed=250.2s; ETA~93s
+[Control] Events 2445/3244 (75.4%); elapsed=260.0s; ETA~85s
+[Control] Events 2517/3244 (77.6%); elapsed=270.7s; ETA~78s
+[Control] Events 2592/3244 (79.9%); elapsed=280.8s; ETA~71s
+[Control] Events 2608/3244 (80.4%); elapsed=282.4s; ETA~69s
+[Control] Events 2716/3244 (83.7%); elapsed=292.9s; ETA~57s
+[Control] Events 2771/3244 (85.4%); elapsed=297.1s; ETA~51s
+[Control] Events 2874/3244 (88.6%); elapsed=307.1s; ETA~40s
+[Control] Events 2934/3244 (90.4%); elapsed=312.9s; ETA~33s
+[Control] Events 3036/3244 (93.6%); elapsed=323.0s; ETA~22s
+[Control] Events 3097/3244 (95.5%); elapsed=329.0s; ETA~16s
+[Control] Events 3204/3244 (98.8%); elapsed=339.1s; ETA~4s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.0910349s; elapsed=350.7s
+[Control] RMSE=0.0910349 s; insufficient improvements 0/2
+10/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 7.2s
+[Control] Events 107/3244 (3.3%); elapsed=13.5s; ETA~395s
+[Control] Events 163/3244 (5.0%); elapsed=18.1s; ETA~343s
+[Control] Events 278/3244 (8.6%); elapsed=28.3s; ETA~301s
+[Control] Events 326/3244 (10.0%); elapsed=32.3s; ETA~289s
+[Control] Events 445/3244 (13.7%); elapsed=42.6s; ETA~268s
+[Control] Events 489/3244 (15.1%); elapsed=46.3s; ETA~261s
+[Control] Events 605/3244 (18.6%); elapsed=56.4s; ETA~246s
+[Control] Events 652/3244 (20.1%); elapsed=60.4s; ETA~240s
+[Control] Events 769/3244 (23.7%); elapsed=70.6s; ETA~227s
+[Control] Events 815/3244 (25.1%); elapsed=74.3s; ETA~221s
+[Control] Events 932/3244 (28.7%); elapsed=84.5s; ETA~210s
+[Control] Events 978/3244 (30.1%); elapsed=88.3s; ETA~205s
+[Control] Events 1095/3244 (33.8%); elapsed=98.4s; ETA~193s
+[Control] Events 1141/3244 (35.2%); elapsed=102.1s; ETA~188s
+[Control] Events 1259/3244 (38.8%); elapsed=112.3s; ETA~177s
+[Control] Events 1304/3244 (40.2%); elapsed=116.2s; ETA~173s
+[Control] Events 1421/3244 (43.8%); elapsed=126.5s; ETA~162s
+[Control] Events 1467/3244 (45.2%); elapsed=130.3s; ETA~158s
+[Control] Events 1586/3244 (48.9%); elapsed=140.5s; ETA~147s
+[Control] Events 1630/3244 (50.2%); elapsed=144.0s; ETA~143s
+[Control] Events 1746/3244 (53.8%); elapsed=154.1s; ETA~132s
+[Control] Events 1793/3244 (55.3%); elapsed=158.0s; ETA~128s
+[Control] Events 1910/3244 (58.9%); elapsed=168.1s; ETA~117s
+[Control] Events 1956/3244 (60.3%); elapsed=171.6s; ETA~113s
+[Control] Events 2071/3244 (63.8%); elapsed=181.7s; ETA~103s
+[Control] Events 2119/3244 (65.3%); elapsed=185.7s; ETA~99s
+[Control] Events 2233/3244 (68.8%); elapsed=195.9s; ETA~89s
+[Control] Events 2282/3244 (70.3%); elapsed=199.7s; ETA~84s
+[Control] Events 2400/3244 (74.0%); elapsed=209.7s; ETA~74s
+[Control] Events 2445/3244 (75.4%); elapsed=213.6s; ETA~70s
+[Control] Events 2562/3244 (79.0%); elapsed=223.7s; ETA~60s
+[Control] Events 2608/3244 (80.4%); elapsed=227.6s; ETA~55s
+[Control] Events 2727/3244 (84.1%); elapsed=237.7s; ETA~45s
+[Control] Events 2771/3244 (85.4%); elapsed=241.5s; ETA~41s
+[Control] Events 2887/3244 (89.0%); elapsed=251.6s; ETA~31s
+[Control] Events 2934/3244 (90.4%); elapsed=255.5s; ETA~27s
+[Control] Events 3047/3244 (93.9%); elapsed=265.6s; ETA~17s
+[Control] Events 3097/3244 (95.5%); elapsed=269.9s; ETA~13s
+[Control] Events 3214/3244 (99.1%); elapsed=280.1s; ETA~3s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.0868297s; elapsed=290.0s
+[Control] RMSE=0.0868297 s; insufficient improvements 0/2
+11/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 7.2s
+[Control] Events 107/3244 (3.3%); elapsed=14.1s; ETA~415s
+[Control] Events 163/3244 (5.0%); elapsed=18.7s; ETA~353s
+[Control] Events 278/3244 (8.6%); elapsed=28.7s; ETA~306s
+[Control] Events 326/3244 (10.0%); elapsed=32.7s; ETA~293s
+[Control] Events 445/3244 (13.7%); elapsed=43.3s; ETA~272s
+[Control] Events 489/3244 (15.1%); elapsed=46.8s; ETA~264s
+[Control] Events 604/3244 (18.6%); elapsed=56.8s; ETA~248s
+[Control] Events 652/3244 (20.1%); elapsed=61.0s; ETA~243s
+[Control] Events 769/3244 (23.7%); elapsed=71.1s; ETA~229s
+[Control] Events 815/3244 (25.1%); elapsed=75.0s; ETA~224s
+[Control] Events 932/3244 (28.7%); elapsed=85.1s; ETA~211s
+[Control] Events 978/3244 (30.1%); elapsed=89.0s; ETA~206s
+[Control] Events 1095/3244 (33.8%); elapsed=99.0s; ETA~194s
+[Control] Events 1141/3244 (35.2%); elapsed=103.0s; ETA~190s
+[Control] Events 1259/3244 (38.8%); elapsed=113.1s; ETA~178s
+[Control] Events 1304/3244 (40.2%); elapsed=117.0s; ETA~174s
+[Control] Events 1420/3244 (43.8%); elapsed=127.0s; ETA~163s
+[Control] Events 1467/3244 (45.2%); elapsed=130.9s; ETA~159s
+[Control] Events 1583/3244 (48.8%); elapsed=140.9s; ETA~148s
+[Control] Events 1630/3244 (50.2%); elapsed=145.1s; ETA~144s
+[Control] Events 1748/3244 (53.9%); elapsed=155.2s; ETA~133s
+[Control] Events 1793/3244 (55.3%); elapsed=158.9s; ETA~129s
+[Control] Events 1910/3244 (58.9%); elapsed=169.0s; ETA~118s
+[Control] Events 1956/3244 (60.3%); elapsed=172.8s; ETA~114s
+[Control] Events 2071/3244 (63.8%); elapsed=183.1s; ETA~104s
+[Control] Events 2119/3244 (65.3%); elapsed=186.8s; ETA~99s
+[Control] Events 2235/3244 (68.9%); elapsed=196.9s; ETA~89s
+[Control] Events 2282/3244 (70.3%); elapsed=200.9s; ETA~85s
+[Control] Events 2399/3244 (74.0%); elapsed=210.9s; ETA~74s
+[Control] Events 2445/3244 (75.4%); elapsed=214.7s; ETA~70s
+[Control] Events 2561/3244 (78.9%); elapsed=224.8s; ETA~60s
+[Control] Events 2608/3244 (80.4%); elapsed=228.8s; ETA~56s
+[Control] Events 2724/3244 (84.0%); elapsed=238.8s; ETA~46s
+[Control] Events 2771/3244 (85.4%); elapsed=242.8s; ETA~41s
+[Control] Events 2885/3244 (88.9%); elapsed=252.9s; ETA~31s
+[Control] Events 2934/3244 (90.4%); elapsed=256.8s; ETA~27s
+[Control] Events 3047/3244 (93.9%); elapsed=266.9s; ETA~17s
+[Control] Events 3097/3244 (95.5%); elapsed=271.3s; ETA~13s
+[Control] Events 3214/3244 (99.1%); elapsed=281.3s; ETA~3s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.0830634s; elapsed=291.9s
+[Control] RMSE=0.0830634 s; insufficient improvements 0/2
+12/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 7.0s
+[Control] Events 106/3244 (3.3%); elapsed=13.8s; ETA~410s
+[Control] Events 163/3244 (5.0%); elapsed=19.0s; ETA~359s
+[Control] Events 283/3244 (8.7%); elapsed=29.3s; ETA~306s
+[Control] Events 326/3244 (10.0%); elapsed=32.8s; ETA~294s
+[Control] Events 443/3244 (13.7%); elapsed=42.9s; ETA~271s
+[Control] Events 489/3244 (15.1%); elapsed=46.9s; ETA~264s
+[Control] Events 605/3244 (18.6%); elapsed=56.9s; ETA~248s
+[Control] Events 652/3244 (20.1%); elapsed=60.9s; ETA~242s
+[Control] Events 769/3244 (23.7%); elapsed=71.0s; ETA~229s
+[Control] Events 815/3244 (25.1%); elapsed=74.9s; ETA~223s
+[Control] Events 930/3244 (28.7%); elapsed=85.0s; ETA~212s
+[Control] Events 978/3244 (30.1%); elapsed=89.0s; ETA~206s
+[Control] Events 1095/3244 (33.8%); elapsed=99.0s; ETA~194s
+[Control] Events 1141/3244 (35.2%); elapsed=103.0s; ETA~190s
+[Control] Events 1259/3244 (38.8%); elapsed=113.1s; ETA~178s
+[Control] Events 1304/3244 (40.2%); elapsed=117.0s; ETA~174s
+[Control] Events 1420/3244 (43.8%); elapsed=127.1s; ETA~163s
+[Control] Events 1467/3244 (45.2%); elapsed=131.1s; ETA~159s
+[Control] Events 1587/3244 (48.9%); elapsed=141.4s; ETA~148s
+[Control] Events 1630/3244 (50.2%); elapsed=145.0s; ETA~144s
+[Control] Events 1747/3244 (53.9%); elapsed=155.1s; ETA~133s
+[Control] Events 1793/3244 (55.3%); elapsed=158.9s; ETA~129s
+[Control] Events 1911/3244 (58.9%); elapsed=169.2s; ETA~118s
+[Control] Events 1956/3244 (60.3%); elapsed=172.8s; ETA~114s
+[Control] Events 2071/3244 (63.8%); elapsed=183.1s; ETA~104s
+[Control] Events 2119/3244 (65.3%); elapsed=187.0s; ETA~99s
+[Control] Events 2238/3244 (69.0%); elapsed=197.1s; ETA~89s
+[Control] Events 2282/3244 (70.3%); elapsed=200.9s; ETA~85s
+[Control] Events 2399/3244 (74.0%); elapsed=211.0s; ETA~74s
+[Control] Events 2445/3244 (75.4%); elapsed=214.8s; ETA~70s
+[Control] Events 2560/3244 (78.9%); elapsed=224.8s; ETA~60s
+[Control] Events 2608/3244 (80.4%); elapsed=229.0s; ETA~56s
+[Control] Events 2728/3244 (84.1%); elapsed=239.3s; ETA~45s
+[Control] Events 2771/3244 (85.4%); elapsed=242.8s; ETA~41s
+[Control] Events 2886/3244 (89.0%); elapsed=252.9s; ETA~31s
+[Control] Events 2934/3244 (90.4%); elapsed=256.9s; ETA~27s
+[Control] Events 3050/3244 (94.0%); elapsed=267.2s; ETA~17s
+[Control] Events 3097/3244 (95.5%); elapsed=271.3s; ETA~13s
+[Control] Events 3215/3244 (99.1%); elapsed=281.4s; ETA~3s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.0800355s; elapsed=291.4s
+[Control] RMSE=0.0800355 s; insufficient improvements 0/2
+13/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 5.7s
+[Control] Events 105/3244 (3.2%); elapsed=12.8s; ETA~383s
+[Control] Events 163/3244 (5.0%); elapsed=17.8s; ETA~337s
+[Control] Events 280/3244 (8.6%); elapsed=28.0s; ETA~297s
+[Control] Events 326/3244 (10.0%); elapsed=31.7s; ETA~284s
+[Control] Events 442/3244 (13.6%); elapsed=41.9s; ETA~265s
+[Control] Events 489/3244 (15.1%); elapsed=45.8s; ETA~258s
+[Control] Events 603/3244 (18.6%); elapsed=56.0s; ETA~245s
+[Control] Events 652/3244 (20.1%); elapsed=60.2s; ETA~239s
+[Control] Events 770/3244 (23.7%); elapsed=70.5s; ETA~227s
+[Control] Events 815/3244 (25.1%); elapsed=74.2s; ETA~221s
+[Control] Events 931/3244 (28.7%); elapsed=84.2s; ETA~209s
+[Control] Events 978/3244 (30.1%); elapsed=88.3s; ETA~205s
+[Control] Events 1096/3244 (33.8%); elapsed=98.5s; ETA~193s
+[Control] Events 1141/3244 (35.2%); elapsed=102.3s; ETA~189s
+[Control] Events 1259/3244 (38.8%); elapsed=112.3s; ETA~177s
+[Control] Events 1304/3244 (40.2%); elapsed=116.1s; ETA~173s
+[Control] Events 1419/3244 (43.7%); elapsed=126.2s; ETA~162s
+[Control] Events 1467/3244 (45.2%); elapsed=130.3s; ETA~158s
+[Control] Events 1586/3244 (48.9%); elapsed=140.5s; ETA~147s
+[Control] Events 1630/3244 (50.2%); elapsed=144.2s; ETA~143s
+[Control] Events 1744/3244 (53.8%); elapsed=154.2s; ETA~133s
+[Control] Events 1793/3244 (55.3%); elapsed=158.2s; ETA~128s
+[Control] Events 1910/3244 (58.9%); elapsed=168.3s; ETA~118s
+[Control] Events 1956/3244 (60.3%); elapsed=172.3s; ETA~113s
+[Control] Events 2071/3244 (63.8%); elapsed=182.4s; ETA~103s
+[Control] Events 2119/3244 (65.3%); elapsed=186.3s; ETA~99s
+[Control] Events 2233/3244 (68.8%); elapsed=196.4s; ETA~89s
+[Control] Events 2282/3244 (70.3%); elapsed=200.4s; ETA~84s
+[Control] Events 2398/3244 (73.9%); elapsed=210.4s; ETA~74s
+[Control] Events 2445/3244 (75.4%); elapsed=214.3s; ETA~70s
+[Control] Events 2561/3244 (78.9%); elapsed=224.5s; ETA~60s
+[Control] Events 2608/3244 (80.4%); elapsed=228.5s; ETA~56s
+[Control] Events 2727/3244 (84.1%); elapsed=238.6s; ETA~45s
+[Control] Events 2771/3244 (85.4%); elapsed=242.5s; ETA~41s
+[Control] Events 2887/3244 (89.0%); elapsed=252.6s; ETA~31s
+[Control] Events 2934/3244 (90.4%); elapsed=256.5s; ETA~27s
+[Control] Events 3049/3244 (94.0%); elapsed=266.5s; ETA~17s
+[Control] Events 3097/3244 (95.5%); elapsed=270.8s; ETA~13s
+[Control] Events 3214/3244 (99.1%); elapsed=280.9s; ETA~3s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.077506s; elapsed=289.6s
+[Control] RMSE=0.077506 s; insufficient improvements 0/2
+14/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 6.0s
+[Control] Events 107/3244 (3.3%); elapsed=12.8s; ETA~374s
+[Control] Events 163/3244 (5.0%); elapsed=17.7s; ETA~335s
+[Control] Events 282/3244 (8.7%); elapsed=27.9s; ETA~293s
+[Control] Events 326/3244 (10.0%); elapsed=31.5s; ETA~282s
+[Control] Events 442/3244 (13.6%); elapsed=41.6s; ETA~264s
+[Control] Events 489/3244 (15.1%); elapsed=45.6s; ETA~257s
+[Control] Events 604/3244 (18.6%); elapsed=55.7s; ETA~243s
+[Control] Events 652/3244 (20.1%); elapsed=59.9s; ETA~238s
+[Control] Events 769/3244 (23.7%); elapsed=69.9s; ETA~225s
+[Control] Events 815/3244 (25.1%); elapsed=73.8s; ETA~220s
+[Control] Events 927/3244 (28.6%); elapsed=83.8s; ETA~210s
+[Control] Events 978/3244 (30.1%); elapsed=88.0s; ETA~204s
+[Control] Events 1096/3244 (33.8%); elapsed=98.2s; ETA~192s
+[Control] Events 1141/3244 (35.2%); elapsed=102.0s; ETA~188s
+[Control] Events 1259/3244 (38.8%); elapsed=112.0s; ETA~177s
+[Control] Events 1304/3244 (40.2%); elapsed=116.1s; ETA~173s
+[Control] Events 1423/3244 (43.9%); elapsed=126.2s; ETA~162s
+[Control] Events 1467/3244 (45.2%); elapsed=129.8s; ETA~157s
+[Control] Events 1586/3244 (48.9%); elapsed=140.1s; ETA~146s
+[Control] Events 1630/3244 (50.2%); elapsed=143.8s; ETA~142s
+[Control] Events 1743/3244 (53.7%); elapsed=153.8s; ETA~132s
+[Control] Events 1793/3244 (55.3%); elapsed=158.0s; ETA~128s
+[Control] Events 1911/3244 (58.9%); elapsed=168.5s; ETA~118s
+[Control] Events 1956/3244 (60.3%); elapsed=172.0s; ETA~113s
+[Control] Events 2072/3244 (63.9%); elapsed=182.1s; ETA~103s
+[Control] Events 2119/3244 (65.3%); elapsed=186.0s; ETA~99s
+[Control] Events 2233/3244 (68.8%); elapsed=196.0s; ETA~89s
+[Control] Events 2282/3244 (70.3%); elapsed=200.1s; ETA~84s
+[Control] Events 2403/3244 (74.1%); elapsed=210.2s; ETA~74s
+[Control] Events 2445/3244 (75.4%); elapsed=214.0s; ETA~70s
+[Control] Events 2562/3244 (79.0%); elapsed=224.2s; ETA~60s
+[Control] Events 2608/3244 (80.4%); elapsed=227.9s; ETA~56s
+[Control] Events 2727/3244 (84.1%); elapsed=238.2s; ETA~45s
+[Control] Events 2771/3244 (85.4%); elapsed=241.8s; ETA~41s
+[Control] Events 2886/3244 (89.0%); elapsed=252.0s; ETA~31s
+[Control] Events 2934/3244 (90.4%); elapsed=256.0s; ETA~27s
+[Control] Events 3049/3244 (94.0%); elapsed=266.1s; ETA~17s
+[Control] Events 3097/3244 (95.5%); elapsed=270.4s; ETA~13s
+[Control] Events 3215/3244 (99.1%); elapsed=280.5s; ETA~3s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.0752726s; elapsed=289.4s
+[Control] RMSE=0.0752726 s; insufficient improvements 0/2
+15/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 5.6s
+[Control] Events 104/3244 (3.2%); elapsed=12.6s; ETA~379s
+[Control] Events 163/3244 (5.0%); elapsed=17.6s; ETA~333s
+[Control] Events 281/3244 (8.7%); elapsed=27.7s; ETA~292s
+[Control] Events 326/3244 (10.0%); elapsed=31.6s; ETA~283s
+[Control] Events 445/3244 (13.7%); elapsed=41.9s; ETA~263s
+[Control] Events 489/3244 (15.1%); elapsed=45.6s; ETA~257s
+[Control] Events 603/3244 (18.6%); elapsed=55.8s; ETA~244s
+[Control] Events 652/3244 (20.1%); elapsed=60.0s; ETA~238s
+[Control] Events 769/3244 (23.7%); elapsed=70.2s; ETA~226s
+[Control] Events 815/3244 (25.1%); elapsed=73.9s; ETA~220s
+[Control] Events 927/3244 (28.6%); elapsed=84.2s; ETA~210s
+[Control] Events 978/3244 (30.1%); elapsed=88.1s; ETA~204s
+[Control] Events 1096/3244 (33.8%); elapsed=98.4s; ETA~193s
+[Control] Events 1141/3244 (35.2%); elapsed=102.2s; ETA~188s
+[Control] Events 1259/3244 (38.8%); elapsed=112.4s; ETA~177s
+[Control] Events 1304/3244 (40.2%); elapsed=116.3s; ETA~173s
+[Control] Events 1421/3244 (43.8%); elapsed=126.4s; ETA~162s
+[Control] Events 1467/3244 (45.2%); elapsed=130.1s; ETA~158s
+[Control] Events 1583/3244 (48.8%); elapsed=140.2s; ETA~147s
+[Control] Events 1630/3244 (50.2%); elapsed=144.1s; ETA~143s
+[Control] Events 1743/3244 (53.7%); elapsed=154.2s; ETA~133s
+[Control] Events 1793/3244 (55.3%); elapsed=158.4s; ETA~128s
+[Control] Events 1911/3244 (58.9%); elapsed=168.8s; ETA~118s
+[Control] Events 1956/3244 (60.3%); elapsed=172.4s; ETA~113s
+[Control] Events 2071/3244 (63.8%); elapsed=182.4s; ETA~103s
+[Control] Events 2119/3244 (65.3%); elapsed=186.4s; ETA~99s
+[Control] Events 2236/3244 (68.9%); elapsed=196.5s; ETA~89s
+[Control] Events 2282/3244 (70.3%); elapsed=200.6s; ETA~85s
+[Control] Events 2398/3244 (73.9%); elapsed=210.6s; ETA~74s
+[Control] Events 2445/3244 (75.4%); elapsed=214.4s; ETA~70s
+[Control] Events 2562/3244 (79.0%); elapsed=224.7s; ETA~60s
+[Control] Events 2608/3244 (80.4%); elapsed=228.4s; ETA~56s
+[Control] Events 2725/3244 (84.0%); elapsed=238.5s; ETA~45s
+[Control] Events 2771/3244 (85.4%); elapsed=242.5s; ETA~41s
+[Control] Events 2885/3244 (88.9%); elapsed=252.5s; ETA~31s
+[Control] Events 2934/3244 (90.4%); elapsed=256.6s; ETA~27s
+[Control] Events 3049/3244 (94.0%); elapsed=266.8s; ETA~17s
+[Control] Events 3097/3244 (95.5%); elapsed=271.0s; ETA~13s
+[Control] Events 3215/3244 (99.1%); elapsed=281.0s; ETA~3s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.0735065s; elapsed=289.5s
+[Control] RMSE=0.0735065 s; insufficient improvements 0/2
+16/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 5.7s
+[Control] Events 108/3244 (3.3%); elapsed=12.4s; ETA~359s
+[Control] Events 163/3244 (5.0%); elapsed=17.1s; ETA~323s
+[Control] Events 281/3244 (8.7%); elapsed=27.3s; ETA~287s
+[Control] Events 326/3244 (10.0%); elapsed=31.1s; ETA~278s
+[Control] Events 445/3244 (13.7%); elapsed=41.2s; ETA~259s
+[Control] Events 489/3244 (15.1%); elapsed=45.0s; ETA~253s
+[Control] Events 604/3244 (18.6%); elapsed=55.0s; ETA~241s
+[Control] Events 652/3244 (20.1%); elapsed=59.4s; ETA~236s
+[Control] Events 770/3244 (23.7%); elapsed=69.6s; ETA~224s
+[Control] Events 815/3244 (25.1%); elapsed=73.2s; ETA~218s
+[Control] Events 927/3244 (28.6%); elapsed=83.2s; ETA~208s
+[Control] Events 978/3244 (30.1%); elapsed=87.3s; ETA~202s
+[Control] Events 1092/3244 (33.7%); elapsed=97.3s; ETA~192s
+[Control] Events 1141/3244 (35.2%); elapsed=101.5s; ETA~187s
+[Control] Events 1259/3244 (38.8%); elapsed=111.7s; ETA~176s
+[Control] Events 1304/3244 (40.2%); elapsed=115.6s; ETA~172s
+[Control] Events 1421/3244 (43.8%); elapsed=125.6s; ETA~161s
+[Control] Events 1467/3244 (45.2%); elapsed=129.6s; ETA~157s
+[Control] Events 1586/3244 (48.9%); elapsed=139.8s; ETA~146s
+[Control] Events 1630/3244 (50.2%); elapsed=143.3s; ETA~142s
+[Control] Events 1745/3244 (53.8%); elapsed=153.4s; ETA~132s
+[Control] Events 1793/3244 (55.3%); elapsed=157.4s; ETA~127s
+[Control] Events 1911/3244 (58.9%); elapsed=167.9s; ETA~117s
+[Control] Events 1956/3244 (60.3%); elapsed=171.4s; ETA~113s
+[Control] Events 2071/3244 (63.8%); elapsed=181.5s; ETA~103s
+[Control] Events 2119/3244 (65.3%); elapsed=185.5s; ETA~98s
+[Control] Events 2235/3244 (68.9%); elapsed=195.5s; ETA~88s
+[Control] Events 2282/3244 (70.3%); elapsed=199.6s; ETA~84s
+[Control] Events 2400/3244 (74.0%); elapsed=209.6s; ETA~74s
+[Control] Events 2445/3244 (75.4%); elapsed=213.4s; ETA~70s
+[Control] Events 2562/3244 (79.0%); elapsed=223.6s; ETA~60s
+[Control] Events 2608/3244 (80.4%); elapsed=227.5s; ETA~55s
+[Control] Events 2725/3244 (84.0%); elapsed=237.5s; ETA~45s
+[Control] Events 2771/3244 (85.4%); elapsed=241.5s; ETA~41s
+[Control] Events 2885/3244 (88.9%); elapsed=251.6s; ETA~31s
+[Control] Events 2934/3244 (90.4%); elapsed=255.6s; ETA~27s
+[Control] Events 3049/3244 (94.0%); elapsed=265.7s; ETA~17s
+[Control] Events 3097/3244 (95.5%); elapsed=270.1s; ETA~13s
+[Control] Events 3215/3244 (99.1%); elapsed=280.1s; ETA~3s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.0720971s; elapsed=288.7s
+[Control] RMSE=0.0720971 s; insufficient improvements 0/2
+17/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 5.6s
+[Control] Events 106/3244 (3.3%); elapsed=14.0s; ETA~415s
+[Control] Events 163/3244 (5.0%); elapsed=19.0s; ETA~360s
+[Control] Events 281/3244 (8.7%); elapsed=29.1s; ETA~307s
+[Control] Events 326/3244 (10.0%); elapsed=32.8s; ETA~294s
+[Control] Events 442/3244 (13.6%); elapsed=42.9s; ETA~272s
+[Control] Events 489/3244 (15.1%); elapsed=46.9s; ETA~264s
+[Control] Events 604/3244 (18.6%); elapsed=57.0s; ETA~249s
+[Control] Events 652/3244 (20.1%); elapsed=61.2s; ETA~243s
+[Control] Events 769/3244 (23.7%); elapsed=71.4s; ETA~230s
+[Control] Events 815/3244 (25.1%); elapsed=75.3s; ETA~224s
+[Control] Events 930/3244 (28.7%); elapsed=85.4s; ETA~212s
+[Control] Events 978/3244 (30.1%); elapsed=89.5s; ETA~207s
+[Control] Events 1094/3244 (33.7%); elapsed=99.6s; ETA~196s
+[Control] Events 1141/3244 (35.2%); elapsed=103.7s; ETA~191s
+[Control] Events 1259/3244 (38.8%); elapsed=113.8s; ETA~179s
+[Control] Events 1304/3244 (40.2%); elapsed=117.9s; ETA~175s
+[Control] Events 1424/3244 (43.9%); elapsed=128.1s; ETA~164s
+[Control] Events 1467/3244 (45.2%); elapsed=131.7s; ETA~160s
+[Control] Events 1586/3244 (48.9%); elapsed=141.8s; ETA~148s
+[Control] Events 1630/3244 (50.2%); elapsed=145.7s; ETA~144s
+[Control] Events 1748/3244 (53.9%); elapsed=155.8s; ETA~133s
+[Control] Events 1793/3244 (55.3%); elapsed=159.6s; ETA~129s
+[Control] Events 1911/3244 (58.9%); elapsed=169.9s; ETA~118s
+[Control] Events 1956/3244 (60.3%); elapsed=173.7s; ETA~114s
+[Control] Events 2071/3244 (63.8%); elapsed=183.7s; ETA~104s
+[Control] Events 2119/3244 (65.3%); elapsed=187.8s; ETA~100s
+[Control] Events 2236/3244 (68.9%); elapsed=198.0s; ETA~89s
+[Control] Events 2282/3244 (70.3%); elapsed=201.8s; ETA~85s
+[Control] Events 2398/3244 (73.9%); elapsed=211.9s; ETA~75s
+[Control] Events 2445/3244 (75.4%); elapsed=215.7s; ETA~71s
+[Control] Events 2560/3244 (78.9%); elapsed=225.8s; ETA~60s
+[Control] Events 2608/3244 (80.4%); elapsed=229.8s; ETA~56s
+[Control] Events 2724/3244 (84.0%); elapsed=239.8s; ETA~46s
+[Control] Events 2771/3244 (85.4%); elapsed=243.8s; ETA~42s
+[Control] Events 2885/3244 (88.9%); elapsed=254.0s; ETA~32s
+[Control] Events 2934/3244 (90.4%); elapsed=258.1s; ETA~27s
+[Control] Events 3052/3244 (94.1%); elapsed=268.2s; ETA~17s
+[Control] Events 3097/3244 (95.5%); elapsed=272.4s; ETA~13s
+[Control] Events 3218/3244 (99.2%); elapsed=282.4s; ETA~2s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.0709272s; elapsed=290.7s
+[Control] RMSE=0.0709272 s; insufficient improvements 0/2
+18/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 5.3s
+[Control] Events 105/3244 (3.2%); elapsed=12.2s; ETA~365s
+[Control] Events 163/3244 (5.0%); elapsed=17.3s; ETA~326s
+[Control] Events 282/3244 (8.7%); elapsed=27.6s; ETA~290s
+[Control] Events 326/3244 (10.0%); elapsed=31.0s; ETA~278s
+[Control] Events 445/3244 (13.7%); elapsed=41.3s; ETA~259s
+[Control] Events 489/3244 (15.1%); elapsed=45.1s; ETA~254s
+[Control] Events 604/3244 (18.6%); elapsed=55.4s; ETA~242s
+[Control] Events 652/3244 (20.1%); elapsed=59.8s; ETA~238s
+[Control] Events 770/3244 (23.7%); elapsed=70.0s; ETA~225s
+[Control] Events 815/3244 (25.1%); elapsed=73.6s; ETA~219s
+[Control] Events 927/3244 (28.6%); elapsed=83.6s; ETA~209s
+[Control] Events 978/3244 (30.1%); elapsed=87.9s; ETA~204s
+[Control] Events 1095/3244 (33.8%); elapsed=97.9s; ETA~192s
+[Control] Events 1141/3244 (35.2%); elapsed=101.8s; ETA~188s
+[Control] Events 1259/3244 (38.8%); elapsed=112.0s; ETA~177s
+[Control] Events 1304/3244 (40.2%); elapsed=116.1s; ETA~173s
+[Control] Events 1424/3244 (43.9%); elapsed=126.2s; ETA~161s
+[Control] Events 1467/3244 (45.2%); elapsed=129.7s; ETA~157s
+[Control] Events 1584/3244 (48.8%); elapsed=139.7s; ETA~146s
+[Control] Events 1630/3244 (50.2%); elapsed=143.9s; ETA~142s
+[Control] Events 1746/3244 (53.8%); elapsed=153.9s; ETA~132s
+[Control] Events 1793/3244 (55.3%); elapsed=157.8s; ETA~128s
+[Control] Events 1911/3244 (58.9%); elapsed=168.0s; ETA~117s
+[Control] Events 1956/3244 (60.3%); elapsed=171.9s; ETA~113s
+[Control] Events 2071/3244 (63.8%); elapsed=182.0s; ETA~103s
+[Control] Events 2119/3244 (65.3%); elapsed=186.0s; ETA~99s
+[Control] Events 2233/3244 (68.8%); elapsed=196.1s; ETA~89s
+[Control] Events 2282/3244 (70.3%); elapsed=200.2s; ETA~84s
+[Control] Events 2402/3244 (74.0%); elapsed=210.3s; ETA~74s
+[Control] Events 2445/3244 (75.4%); elapsed=214.1s; ETA~70s
+[Control] Events 2562/3244 (79.0%); elapsed=224.3s; ETA~60s
+[Control] Events 2608/3244 (80.4%); elapsed=228.0s; ETA~56s
+[Control] Events 2727/3244 (84.1%); elapsed=238.2s; ETA~45s
+[Control] Events 2771/3244 (85.4%); elapsed=242.1s; ETA~41s
+[Control] Events 2885/3244 (88.9%); elapsed=252.2s; ETA~31s
+[Control] Events 2934/3244 (90.4%); elapsed=256.1s; ETA~27s
+[Control] Events 3048/3244 (94.0%); elapsed=266.2s; ETA~17s
+[Control] Events 3097/3244 (95.5%); elapsed=270.5s; ETA~13s
+[Control] Events 3212/3244 (99.0%); elapsed=280.6s; ETA~3s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.0699598s; elapsed=288.7s
+[Control] RMSE=0.0699598 s; insufficient improvements 0/2
+19/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 5.9s
+[Control] Events 107/3244 (3.3%); elapsed=12.4s; ETA~363s
+[Control] Events 163/3244 (5.0%); elapsed=17.4s; ETA~328s
+[Control] Events 278/3244 (8.6%); elapsed=27.4s; ETA~292s
+[Control] Events 326/3244 (10.0%); elapsed=31.3s; ETA~280s
+[Control] Events 445/3244 (13.7%); elapsed=41.8s; ETA~263s
+[Control] Events 489/3244 (15.1%); elapsed=45.3s; ETA~255s
+[Control] Events 605/3244 (18.6%); elapsed=55.6s; ETA~242s
+[Control] Events 652/3244 (20.1%); elapsed=59.6s; ETA~237s
+[Control] Events 767/3244 (23.6%); elapsed=69.6s; ETA~225s
+[Control] Events 815/3244 (25.1%); elapsed=73.9s; ETA~220s
+[Control] Events 933/3244 (28.8%); elapsed=84.2s; ETA~208s
+[Control] Events 978/3244 (30.1%); elapsed=88.1s; ETA~204s
+[Control] Events 1096/3244 (33.8%); elapsed=98.1s; ETA~192s
+[Control] Events 1141/3244 (35.2%); elapsed=102.0s; ETA~188s
+[Control] Events 1259/3244 (38.8%); elapsed=112.1s; ETA~177s
+[Control] Events 1304/3244 (40.2%); elapsed=116.2s; ETA~173s
+[Control] Events 1423/3244 (43.9%); elapsed=126.2s; ETA~162s
+[Control] Events 1467/3244 (45.2%); elapsed=129.9s; ETA~157s
+[Control] Events 1583/3244 (48.8%); elapsed=139.9s; ETA~147s
+[Control] Events 1630/3244 (50.2%); elapsed=144.2s; ETA~143s
+[Control] Events 1749/3244 (53.9%); elapsed=154.2s; ETA~132s
+[Control] Events 1793/3244 (55.3%); elapsed=157.9s; ETA~128s
+[Control] Events 1910/3244 (58.9%); elapsed=167.9s; ETA~117s
+[Control] Events 1956/3244 (60.3%); elapsed=172.1s; ETA~113s
+[Control] Events 2071/3244 (63.8%); elapsed=182.1s; ETA~103s
+[Control] Events 2119/3244 (65.3%); elapsed=186.1s; ETA~99s
+[Control] Events 2233/3244 (68.8%); elapsed=196.1s; ETA~89s
+[Control] Events 2282/3244 (70.3%); elapsed=200.2s; ETA~84s
+[Control] Events 2399/3244 (74.0%); elapsed=210.3s; ETA~74s
+[Control] Events 2445/3244 (75.4%); elapsed=214.1s; ETA~70s
+[Control] Events 2562/3244 (79.0%); elapsed=224.5s; ETA~60s
+[Control] Events 2608/3244 (80.4%); elapsed=228.1s; ETA~56s
+[Control] Events 2724/3244 (84.0%); elapsed=238.2s; ETA~45s
+[Control] Events 2771/3244 (85.4%); elapsed=242.2s; ETA~41s
+[Control] Events 2885/3244 (88.9%); elapsed=252.3s; ETA~31s
+[Control] Events 2934/3244 (90.4%); elapsed=256.3s; ETA~27s
+[Control] Events 3050/3244 (94.0%); elapsed=266.4s; ETA~17s
+[Control] Events 3097/3244 (95.5%); elapsed=270.8s; ETA~13s
+[Control] Events 3214/3244 (99.1%); elapsed=280.8s; ETA~3s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.0688528s; elapsed=289.6s
+[Control] RMSE=0.0688528 s; insufficient improvements 0/2
+20/20
+[Reuse] Fields and 3244/3465 training localizations from previous control
+[Rays] 4054050/4054050 reached, 0 failed, 4054050 used
+[Control] Building updated-model fields for 3244 control events
+[Control] Scoring 3244 events, 9009 held-out picks with 12 worker(s); fields ready in 5.8s
+[Control] Events 101/3244 (3.1%); elapsed=12.5s; ETA~388s
+[Control] Events 163/3244 (5.0%); elapsed=17.5s; ETA~331s
+[Control] Events 282/3244 (8.7%); elapsed=27.7s; ETA~291s
+[Control] Events 326/3244 (10.0%); elapsed=31.3s; ETA~280s
+[Control] Events 442/3244 (13.6%); elapsed=41.5s; ETA~263s
+[Control] Events 489/3244 (15.1%); elapsed=45.4s; ETA~256s
+[Control] Events 604/3244 (18.6%); elapsed=55.5s; ETA~242s
+[Control] Events 652/3244 (20.1%); elapsed=59.9s; ETA~238s
+[Control] Events 768/3244 (23.7%); elapsed=70.0s; ETA~226s
+[Control] Events 815/3244 (25.1%); elapsed=74.1s; ETA~221s
+[Control] Events 930/3244 (28.7%); elapsed=84.2s; ETA~209s
+[Control] Events 978/3244 (30.1%); elapsed=88.4s; ETA~205s
+[Control] Events 1096/3244 (33.8%); elapsed=98.5s; ETA~193s
+[Control] Events 1141/3244 (35.2%); elapsed=102.2s; ETA~188s
+[Control] Events 1257/3244 (38.7%); elapsed=112.3s; ETA~177s
+[Control] Events 1304/3244 (40.2%); elapsed=116.6s; ETA~174s
+[Control] Events 1421/3244 (43.8%); elapsed=126.7s; ETA~162s
+[Control] Events 1467/3244 (45.2%); elapsed=130.6s; ETA~158s
+[Control] Events 1586/3244 (48.9%); elapsed=140.8s; ETA~147s
+[Control] Events 1630/3244 (50.2%); elapsed=144.8s; ETA~143s
+[Control] Events 1747/3244 (53.9%); elapsed=154.9s; ETA~133s
+[Control] Events 1793/3244 (55.3%); elapsed=158.7s; ETA~128s
+[Control] Events 1910/3244 (58.9%); elapsed=168.8s; ETA~118s
+[Control] Events 1956/3244 (60.3%); elapsed=173.0s; ETA~114s
+[Control] Events 2073/3244 (63.9%); elapsed=183.1s; ETA~103s
+[Control] Events 2119/3244 (65.3%); elapsed=186.9s; ETA~99s
+[Control] Events 2233/3244 (68.8%); elapsed=197.1s; ETA~89s
+[Control] Events 2282/3244 (70.3%); elapsed=201.2s; ETA~85s
+[Control] Events 2398/3244 (73.9%); elapsed=211.2s; ETA~75s
+[Control] Events 2445/3244 (75.4%); elapsed=215.1s; ETA~70s
+[Control] Events 2562/3244 (79.0%); elapsed=225.3s; ETA~60s
+[Control] Events 2608/3244 (80.4%); elapsed=229.2s; ETA~56s
+[Control] Events 2726/3244 (84.0%); elapsed=239.3s; ETA~45s
+[Control] Events 2771/3244 (85.4%); elapsed=243.1s; ETA~41s
+[Control] Events 2884/3244 (88.9%); elapsed=253.1s; ETA~32s
+[Control] Events 2934/3244 (90.4%); elapsed=257.4s; ETA~27s
+[Control] Events 3050/3244 (94.0%); elapsed=267.4s; ETA~17s
+[Control] Events 3097/3244 (95.5%); elapsed=271.6s; ETA~13s
+[Control] Events 3215/3244 (99.1%); elapsed=282.0s; ETA~3s
+[Control] Complete: 3244/3244 events, 9009 held-out picks; RMSE=0.0679217s; elapsed=290.3s
+[Control] RMSE=0.0679217 s; insufficient improvements 0/2
+[TomographyLogger] Run saved to: /mnt/disk01/egor/projects/EMTomo/runs/run_geysers-realistic-prev-hom-cov0-auto-opt20-p12-soft_v1.5_20261109_183306_624315085857461d909905ce730e1ba8

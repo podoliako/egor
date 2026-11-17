@@ -1,0 +1,83 @@
+{
+  "section": "4.5",
+  "experiment_id": "gfsoftscreen28_26st_noise02_3776ev",
+  "pair_id": "section5_dminsweep_k128_top128_dmin7",
+  "n_events": 3776,
+  "n_stations": 26,
+  "relative_noise_sigma": 0.02,
+  "absolute_noise_sigma_s": 0.02,
+  "tested_candidates": 128,
+  "soft_retained_candidates": 128,
+  "min_distance_fine_cells": 7,
+  "source_events_sha256": "d7f6af385a08edf1b4f622e35c08d6f40bbc06d2d60e3ab9e42a730e3dedd786",
+  "mapping_sha256": "e09219a9ec4ccca6a3d1d731fdda283b7dce69ca7bde70fe8f1f0188fc1a5a38",
+  "estimator": "Largest saved candidate weight in both modes; first argmax on exact ties.",
+  "coordinate_conversion": "(positions+0.5)*fine_cell_size_m",
+  "event_order": "Original events.csv row order; all 3776 events equal weight.",
+  "checkpoints": "iter_0 E-step in the initial V0 model and iter_11 E-step in V11 before update 12; not a post-final relocation in V12.",
+  "density": {
+    "method": "Gaussian KDE with reflection at zero",
+    "bandwidth_m": 150.0,
+    "common_x_limits_m": [
+      0,
+      2500.0
+    ],
+    "normalization": "Each density integrates to one on nonnegative errors; numerical area checked."
+  },
+  "initial_estimates_identical": true,
+  "records": {
+    "initial_hard": {
+      "mode": "hard",
+      "stage": "initial",
+      "run_id": "run_faultdmin13-fault-hard-k128-top128-dmin7_v1.4_20261113_112541_f7305af7d020456aa214c42ea8d05743",
+      "location_iteration_index": 0,
+      "velocity_updates_before_location": 0,
+      "meta_sha256": "5b2e00ebb713edaa6c0a04335ac531a4ca0fed5d0e8d15f9cc0c19de4a2bcdcf",
+      "row_id_weights_sha256": "f8c712417763b8110b23162e636f0f58d709e5330963d93aa2368cd5daa727fa",
+      "median_m": 251.86756910131464,
+      "p90_m": 468.9880846313869,
+      "rmse_m": 312.8820942788706,
+      "max_m": 1207.6169749926587
+    },
+    "final_hard": {
+      "mode": "hard",
+      "stage": "final",
+      "run_id": "run_faultdmin13-fault-hard-k128-top128-dmin7_v1.4_20261113_112541_f7305af7d020456aa214c42ea8d05743",
+      "location_iteration_index": 11,
+      "velocity_updates_before_location": 11,
+      "meta_sha256": "5b2e00ebb713edaa6c0a04335ac531a4ca0fed5d0e8d15f9cc0c19de4a2bcdcf",
+      "row_id_weights_sha256": "2647690d812abf53fb78db6aba22bde4b6bbbafb5d7101f456a746d36e0811fd",
+      "median_m": 211.99945290842993,
+      "p90_m": 463.8176638606442,
+      "rmse_m": 292.4998416526714,
+      "max_m": 1400.2793935407833
+    },
+    "initial_soft": {
+      "mode": "soft",
+      "stage": "initial",
+      "run_id": "run_faultdmin13-fault-soft-k128-top128-dmin7_v1.4_20261113_112541_37407e2684b8421ead579122688890ed",
+      "location_iteration_index": 0,
+      "velocity_updates_before_location": 0,
+      "meta_sha256": "113bd862f1d32c77087ab89eed4f6be8b2952843694e30354f0bb9999c73323a",
+      "row_id_weights_sha256": "fdd66eadd40a28b6ea160ea16f48fd6ef8f9ac9212df2f0a0b7a654a31fdf4c1",
+      "median_m": 251.86756910131464,
+      "p90_m": 468.9880846313869,
+      "rmse_m": 312.8820942788706,
+      "max_m": 1207.6169749926587
+    },
+    "final_soft": {
+      "mode": "soft",
+      "stage": "final",
+      "run_id": "run_faultdmin13-fault-soft-k128-top128-dmin7_v1.4_20261113_112541_37407e2684b8421ead579122688890ed",
+      "location_iteration_index": 11,
+      "velocity_updates_before_location": 11,
+      "meta_sha256": "113bd862f1d32c77087ab89eed4f6be8b2952843694e30354f0bb9999c73323a",
+      "row_id_weights_sha256": "2cf4c550a0d5ab47f3699158d996e7cca3cdf95b9b335e044b499a41cc4f9d9a",
+      "median_m": 209.2978113732081,
+      "p90_m": 446.6241462082816,
+      "rmse_m": 283.7954925197561,
+      "max_m": 1192.1071144521284
+    }
+  },
+  "script_sha256": "36832eec32a389f4aac6c97179b2629cb2fdea7fda6780dca1d3651d1fd9687a"
+}

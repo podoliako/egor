@@ -7,14 +7,15 @@ import json
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap, Normalize
+from matplotlib.colors import Normalize
+from cmcrameri import cm
 from matplotlib.patches import Rectangle, Polygon
 
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42"
-OUTPUT = Path(__file__).resolve().parents[1] / "figures"
+OUTPUT = Path(__file__).resolve().parents[1] / "figures" / "used"
 STEM = "checkerboard_nx6_geometry"
 
 
@@ -90,8 +91,7 @@ def main():
         "xtick.color": "#262b30", "ytick.color": "#262b30",
         "savefig.facecolor": "white",
     })
-    colors = ["#ffffff", "#e32400"]
-    cmap = LinearSegmentedColormap.from_list("initial_and_truth", colors, N=1024)
+    cmap = cm.lajolla_r
     norm = Normalize(4.75, 5.25)
     initial_path = ROOT / "runs/run_cbscale21-nx6-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_084247_c78101a2744e4a4e9e15ee90c4a992d6/initial_model.npy"
     dd_path = ROOT / "runs/checkerboard_scaled_20261021/outputs/nx6-tomodd/state.npz"
@@ -132,29 +132,31 @@ def main():
                      arrowprops=dict(arrowstyle="->", color="#41464b", lw=.95,
                                      mutation_scale=9, shrinkA=0, shrinkB=0),
                      annotation_clip=False, zorder=7)
-    top.annotate("$X = 6$ km", xy=(section_x, extent[1]), xytext=(0, 17),
+    top.annotate("B", xy=(section_x, extent[1]), xytext=(0, 10),
                  textcoords="offset points", ha="center", va="bottom", fontsize=8,
                  annotation_clip=False)
-    top.annotate("$Y = 10$ km", xy=(extent[0], section_y), xytext=(15, 0),
-                 textcoords="offset points", ha="left", va="center", fontsize=7,
+    top.annotate("A", xy=(extent[0], section_y), xytext=(12, 0),
+                 textcoords="offset points", ha="left", va="center", fontsize=8,
                  annotation_clip=False)
-    top.set(title="(a)  Plan view · surface model", ylabel="$Y$ (km)", ylim=(0, extent[1]))
-    top.set_title("(a)  Plan view · surface model", pad=29)
-    side.set(title="(b)  Section · $Y = 10$ km", ylabel="Depth (km)", ylim=(extent[2], 0))
+    top.set(ylabel="$Y$, km", ylim=(0, extent[1]))
+    side.set(ylabel="Depth, km", ylim=(extent[2], 0))
+    for ax, label in zip(axes, ("(a)", "(b)", "(c)")):
+        ax.set_title(label, pad=20)
     for ax in axes:
-        ax.set(xlabel="$X$ (km)", xlim=(0, extent[0]), xticks=np.arange(0, 25, 4), yticks=np.arange(0, 13, 4))
+        ax.set(xlabel="$X$, km", xlim=(0, extent[0]), xticks=np.arange(0, 25, 4), yticks=np.arange(0, 13, 4))
         ax.tick_params(direction="out", pad=3)
         ax.set_axisbelow(True)
-    cross.set(title="(c)  $X = 6$ km", xlabel="$Y$ (km)", ylabel="Depth (km)",
+    cross.set(xlabel="$Y$, km", ylabel="Depth, km",
               xlim=(0, extent[1]), ylim=(extent[2], 0), xticks=np.arange(0, 13, 4))
 
     for ax in axes:
         map_frame(ax)
     colorbar = fig.colorbar(image, cax=color_ax, ticks=[4.75, 5.0, 5.25])
-    color_ax.set_title("$V$ (km/s)", fontsize=8, pad=8)
+    color_ax.set_title("$V$, km/s", fontsize=8, pad=8)
     colorbar.outline.set_linewidth(.45)
     color_ax.tick_params(labelsize=8, width=.45, length=2)
     color_ax.set_box_aspect(.65 / .07)
+    OUTPUT.mkdir(parents=True, exist_ok=True)
     for suffix in ("png", "pdf", "svg"):
         path = OUTPUT / f"{STEM}.{suffix}"
         fig.savefig(path, dpi=300)
@@ -165,6 +167,9 @@ def main():
         "source": str(SOURCE), "section_y_km": section_y, "section_x_km": section_x,
         "model_section_cell_x_bounds_km": [cross_index * cell, (cross_index + 1) * cell],
         "frame_interval_km": 2.0,
+        "colormap": cmap.name,
+        "section_labels": {"A": "Y section (panel b)", "B": "X section (panel c)"},
+        "script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "shared_initial_model": {"velocity_km_s": 5.0, "em_source": str(initial_path),
                                  "dd_source": str(dd_path), "em_sha256": hashlib.sha256(initial_path.read_bytes()).hexdigest(),
                                  "dd_sha256": hashlib.sha256(dd_path.read_bytes()).hexdigest()},

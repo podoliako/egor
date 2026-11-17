@@ -1,0 +1,248 @@
+{
+  "source": "EMTomo/paper/exp_data/hard_soft_min_residual_rmse.csv",
+  "source_sha256": "f77335239ba68bed9d910fd08180471263d5a76d6180860ce798309869a4182f",
+  "n_comparisons": 38,
+  "soft_better": 2,
+  "hard_better": 36,
+  "ties": 0,
+  "units": "ms",
+  "main_limits": [
+    0,
+    150.0
+  ],
+  "inset_limits": [
+    0,
+    25.0
+  ],
+  "points": [
+    {
+      "pair_id": "section2_pair01",
+      "section": "2",
+      "hard_min_residual_rmse_ms": 70.320544121825,
+      "soft_min_residual_rmse_ms": 71.34121005231604
+    },
+    {
+      "pair_id": "section3_pair01",
+      "section": "3",
+      "hard_min_residual_rmse_ms": 74.01988390772782,
+      "soft_min_residual_rmse_ms": 74.21382518659546
+    },
+    {
+      "pair_id": "section4_pair01",
+      "section": "4",
+      "hard_min_residual_rmse_ms": 34.80098143423017,
+      "soft_min_residual_rmse_ms": 35.002740789122775
+    },
+    {
+      "pair_id": "section4_pair02",
+      "section": "4",
+      "hard_min_residual_rmse_ms": 51.97919516187166,
+      "soft_min_residual_rmse_ms": 52.09725690118969
+    },
+    {
+      "pair_id": "section4_pair03",
+      "section": "4",
+      "hard_min_residual_rmse_ms": 103.07854668757867,
+      "soft_min_residual_rmse_ms": 102.9680481822876
+    },
+    {
+      "pair_id": "section4_pair04",
+      "section": "4",
+      "hard_min_residual_rmse_ms": 137.00753447176177,
+      "soft_min_residual_rmse_ms": 136.82438502065443
+    },
+    {
+      "pair_id": "section4_pair06",
+      "section": "4",
+      "hard_min_residual_rmse_ms": 70.36263239844904,
+      "soft_min_residual_rmse_ms": 70.42776179974065
+    },
+    {
+      "pair_id": "section4_pair07",
+      "section": "4",
+      "hard_min_residual_rmse_ms": 69.10555141021909,
+      "soft_min_residual_rmse_ms": 69.1590558547879
+    },
+    {
+      "pair_id": "section5_pair01",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.773088536773471,
+      "soft_min_residual_rmse_ms": 5.7782983418984495
+    },
+    {
+      "pair_id": "section5_pair02",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.773088536773471,
+      "soft_min_residual_rmse_ms": 7.826733058428553
+    },
+    {
+      "pair_id": "section5_pair03",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.779998437432304,
+      "soft_min_residual_rmse_ms": 6.064220133388106
+    },
+    {
+      "pair_id": "section5_pair04",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.779998437432304,
+      "soft_min_residual_rmse_ms": 6.511775920292238
+    },
+    {
+      "pair_id": "section5_pair05",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.779998437432304,
+      "soft_min_residual_rmse_ms": 6.0790213486121685
+    },
+    {
+      "pair_id": "section5_pair06",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.779998437432304,
+      "soft_min_residual_rmse_ms": 6.678697559328402
+    },
+    {
+      "pair_id": "section5_pair07",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.77393345172006,
+      "soft_min_residual_rmse_ms": 5.963391544930163
+    },
+    {
+      "pair_id": "section5_pair08",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.77393345172006,
+      "soft_min_residual_rmse_ms": 6.5601525055606755
+    },
+    {
+      "pair_id": "section5_pair09",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.779998437432304,
+      "soft_min_residual_rmse_ms": 6.054920808317974
+    },
+    {
+      "pair_id": "section5_pair10",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.779998437432304,
+      "soft_min_residual_rmse_ms": 6.101798513824299
+    },
+    {
+      "pair_id": "section5_pair11",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.77393345172006,
+      "soft_min_residual_rmse_ms": 6.029043915329746
+    },
+    {
+      "pair_id": "section5_pair12",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.779998437432304,
+      "soft_min_residual_rmse_ms": 6.18295375576206
+    },
+    {
+      "pair_id": "section5_pair13",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.779998437432304,
+      "soft_min_residual_rmse_ms": 6.307314839646034
+    },
+    {
+      "pair_id": "section5_pair14",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.77393345172006,
+      "soft_min_residual_rmse_ms": 6.352530800066901
+    },
+    {
+      "pair_id": "section5_pair15",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.453727321853433,
+      "soft_min_residual_rmse_ms": 5.799428982557086
+    },
+    {
+      "pair_id": "section5_pair16",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 6.567107601577518,
+      "soft_min_residual_rmse_ms": 6.797124114354059
+    },
+    {
+      "pair_id": "section5_pair17",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.967122466403146,
+      "soft_min_residual_rmse_ms": 6.214105382177468
+    },
+    {
+      "pair_id": "section5_pair18",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 4.855995413089502,
+      "soft_min_residual_rmse_ms": 5.016954484310243
+    },
+    {
+      "pair_id": "section5_pair19",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.341925606546221,
+      "soft_min_residual_rmse_ms": 5.986886052066091
+    },
+    {
+      "pair_id": "section5_pair20",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 5.341925606546221,
+      "soft_min_residual_rmse_ms": 6.816322228186457
+    },
+    {
+      "pair_id": "section5_pair21",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 48.966465230576,
+      "soft_min_residual_rmse_ms": 49.207270278871114
+    },
+    {
+      "pair_id": "section5_pair22",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 52.559075815964675,
+      "soft_min_residual_rmse_ms": 52.635143603979
+    },
+    {
+      "pair_id": "section5_pair23",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 78.6262496283664,
+      "soft_min_residual_rmse_ms": 78.76147864967987
+    },
+    {
+      "pair_id": "section5_pair24",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 6.82141141036296,
+      "soft_min_residual_rmse_ms": 7.960989848110032
+    },
+    {
+      "pair_id": "section5_pair25",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 6.82141141036296,
+      "soft_min_residual_rmse_ms": 8.331477070923821
+    },
+    {
+      "pair_id": "section5_pair26",
+      "section": "5",
+      "hard_min_residual_rmse_ms": 44.77691555448559,
+      "soft_min_residual_rmse_ms": 45.329038509677716
+    },
+    {
+      "pair_id": "section6_pair01",
+      "section": "6",
+      "hard_min_residual_rmse_ms": 71.4634804964958,
+      "soft_min_residual_rmse_ms": 71.55746625216001
+    },
+    {
+      "pair_id": "section6_pair02",
+      "section": "6",
+      "hard_min_residual_rmse_ms": 74.11309214560492,
+      "soft_min_residual_rmse_ms": 74.19099692739357
+    },
+    {
+      "pair_id": "section6_pair05",
+      "section": "6",
+      "hard_min_residual_rmse_ms": 79.19100486715114,
+      "soft_min_residual_rmse_ms": 80.45404383890617
+    },
+    {
+      "pair_id": "section6_pair06",
+      "section": "6",
+      "hard_min_residual_rmse_ms": 130.71598102298634,
+      "soft_min_residual_rmse_ms": 131.16071654233582
+    }
+  ],
+  "note": "Same comparison rows and series colors as the gain histogram; independent per-run minima; no jitter."
+}

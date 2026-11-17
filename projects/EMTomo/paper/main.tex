@@ -14,6 +14,9 @@
 \doublespacing
 \usepackage{amsmath, amssymb, amsfonts}
 \usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{placeins}
 \usepackage[
   colorlinks=true,
   linkcolor=black,
@@ -65,25 +68,189 @@
 
 Local-earthquake travel-time tomography uses picked seismic arrival times to estimate three-dimensional velocity structure and earthquake locations. Early work already formulated the inversion in terms of both source and medium parameters \parencite{aki1976}. An earthquake hypocenter is not an independently measured datum: its location is inferred from arrival times using an assumed velocity model, while velocity reconstruction in turn depends on the event locations \parencite{thurber1992,kissling1988}. This coupling motivates estimating earthquake locations and velocity structure together.
 
-Joint inversion of earthquake arrival times for three-dimensional velocity structure and hypocentral parameters has a long methodological history, with established implementations including the SIMUL family \parencite{thurber1983}, tomoDD \parencite{zhang2003}, and LOTOS \parencite{koulakov2009}. More recent developments include eikonal-equation-based adjoint-state methods for jointly updating velocity structure and earthquake locations \parencite{tong2024}. Within this broader class of coupled inverse problems, probabilistic approaches account for uncertainty in source parameters, either together with uncertainty in velocity structure or conditional on an updated point estimate of the velocity model.
+Joint inversion of earthquake arrival times for three-dimensional velocity structure and hypocentral parameters has a long methodological history, with established implementations including the SIMUL family \parencite{thurber1983}, tomoDD \parencite{zhang2003}, and LOTOS \parencite{koulakov2009}. More recent developments include eikonal-equation-based adjoint-state methods for jointly updating velocity structure and earthquake locations \parencite{tong2024}, including a discrete adjoint formulation that supports both deterministic and probabilistic inversion for velocity and source location \parencite{zunino2025}. Within this broader class of coupled inverse problems, probabilistic approaches account for uncertainty in source parameters, either together with uncertainty in velocity structure or conditional on an updated point estimate of the velocity model.
 
 Existing comparisons within this probabilistic class provide evidence that accounting for source uncertainty can improve velocity reconstruction, but differ in how directly they test the benefit of hypocenter distributions over point estimates. The closest comparison is DeepGEM: \textcite{gao2021} retain conditional source-location distributions while updating a point estimate of the velocity model through variational expectation--maximization, and obtain better velocity reconstructions than joint maximum a posteriori estimation in two-dimensional synthetic experiments. However, the optimization procedure also differs between the two formulations. In three-dimensional synthetic tests, \textcite{agata2026} reduce velocity artifacts by analytically marginalizing uncertain source locations and origin times under Gaussian and linearization assumptions, compared with treating erroneous source parameters as fixed; this demonstrates the importance of source uncertainty, but does not compare against iterative point-estimate relocation and also estimates a velocity posterior. \textcite{yang2025} jointly infer velocity and source parameters through variational double-difference tomography, reporting more accurate synthetic velocity models than tomoDD together with uncertainty estimates, although this comparison also changes the treatment of velocity uncertainty and regularization. Other comparisons show agreement with conventional inversions rather than clearly distinct velocity reconstructions: \textcite{pianaagostinetti2015} find that differences between their trans-dimensional three-dimensional Bayesian reconstruction and SimulPS are generally within posterior uncertainty, while \textcite{ryberg2019} obtain good agreement between Bayesian and conventional joint inversion of field data for one-dimensional velocity structure. These studies establish the potential value of probabilistic source treatment, but their comparisons do not by themselves isolate the effect of retaining hypocenter distributions rather than repeatedly updating point locations under otherwise matched three-dimensional inversion settings.
+
+In this study, we isolate this effect. We present EMTomo, an expectation--maximization formulation \parencite{dempster1977} of local-earthquake traveltime tomography that alternates between an event-location step and a velocity-update step. In the location step, each event is represented either by its single most likely candidate hypocenter (hard assignment) or by several retained candidates weighted by their likelihoods (soft assignment). The velocity update then combines the rays of all retained hypotheses according to these weights. Both modes share the data, starting model, candidate search, and inversion settings, so differences between them can be attributed to retaining hypocenter distributions rather than point estimates. We compare the two modes in synthetic tests of increasing realism: checkerboards with one-sided and two-cluster station coverage and with the station and event geometry of The Geysers geothermal field, a vertical fault, and a heterogeneous upper-crust model. For checkerboards with full coverage, we also compare EMTomo with tomoDD \parencite{zhang2003}. Finally, we apply both modes to P-wave arrival picks from The Geysers, score them on withheld picks, and compare the recovered velocity structure with the published model of \textcite{guo2021geysers}. Throughout, we evaluate velocity error, hypocenter error, and data fit together, because an improvement in one need not imply an improvement in the others.
 
 
 \section{Method}
 \label{sec:method}
 
+\subsection{Problem Formulation}
+\label{subsec:parameterization}
+
+We represent the velocity model as a rectangular box partitioned into $N_x \times N_y \times N_z$ homogeneous cubic cells of side length $h$, where the number of cells can be chosen independently along each axis. Each cell has a single positive isotropic velocity, so the velocity field is piecewise constant within a domain of dimensions $N_x h \times N_y h \times N_z h$. Such blockwise parameterizations have a long history in local-earthquake tomography \parencite{aki1976}. For a real region, the box is positioned using a local Cartesian approximation, without deforming the cells to follow the ground surface. Consequently, cells in the upper layers may lie partly or entirely above ground level. This choice retains a simple regular grid rather than a mesh fitted to topography. Station and hypocenter coordinates may lie anywhere within the domain and need not coincide with cell centers or grid nodes.
+
+For $E$ events and stations with known coordinates, let $t_{en}$ be the observed arrival time of a selected seismic phase from event $e$ at station $n$. Not every event needs to be recorded at every station: let $\mathcal O_e$ contain the stations with an available pick for event $e$, with at least two picks per event. Write $\mathbf v=(v_1,\ldots,v_L)$ for the cell velocities, where $L=N_xN_yN_z$, and $\mathbf h_e$ for the hypocenter. The predicted arrival is $o_e+T_n(\mathbf h_e;\mathbf v)$, where $o_e$ is the unknown origin time and $T_n$ is the traveltime to station $n$. Assuming independent Gaussian timing errors with standard deviations $\sigma_{en}$, we integrate out $o_e$ under a uniform prior, as in probabilistic earthquake location \parencite{lomax2000}. For given velocities and hypocenter, its conditional estimate is
+\begin{equation}
+\widehat o_e=\frac{\sum_{n\in\mathcal O_e}\sigma_{en}^{-2}\bigl[t_{en}-T_n(\mathbf h_e;\mathbf v)\bigr]}{\sum_{n\in\mathcal O_e}\sigma_{en}^{-2}}.
+\label{eq:origin_time_estimate}
+\end{equation}
+With centered residuals $r_{en}=t_{en}-\widehat o_e-T_n(\mathbf h_e;\mathbf v)$, the resulting event likelihood is
+\begin{equation}
+\mathcal L_e(\mathbf v,\mathbf h_e)\propto
+\frac{\exp\!\left[-\tfrac12\sum_{n\in\mathcal O_e}\left(\frac{r_{en}}{\sigma_{en}}\right)^2\right]}
+{\left(\prod_{n\in\mathcal O_e}\sigma_{en}\right)\sqrt{\sum_{n\in\mathcal O_e}\sigma_{en}^{-2}}}.
+\label{eq:marginal_origin_likelihood}
+\end{equation}
+The timing-error model is prescribed; its standard deviations may depend on the predicted traveltimes, in which case the normalization in Equation~\ref{eq:marginal_origin_likelihood} must be retained. In our experiments, they combine pick noise with an additional term for modeling error. This treats velocity-model error as independent Gaussian timing noise, which is a simplification: \textcite{gesret2015} show that velocity-model uncertainty should not be represented by the probability density used for picking uncertainty when it is propagated into event locations. After eliminating origin times, the remaining physical unknowns are $L$ cell velocities and $3E$ hypocenter coordinates. Their data misfit can be expressed as the negative log-likelihood $-\sum_e\log\mathcal L_e$. Although this expression is explicit in the traveltimes, their dependence on the cell velocities and hypocenters has no general closed form and is evaluated numerically. Section~\ref{subsec:forward} describes the numerical traveltime computation used to evaluate this misfit.
+
+\subsection{Traveltime Computation}
+\label{subsec:forward}
+
+We distinguish the inversion grid, which defines the velocity parameters, from the finer grid used for traveltime computation. An integer subdivision factor $q\geq1$ divides each inversion cell into $q^3$ cubic subcells of side length $h/q$. The computational grid therefore contains $qN_x\times qN_y\times qN_z$ cells and covers the same physical domain. To preserve the piecewise-constant model defined in Section~\ref{subsec:parameterization}, each subcell inherits the velocity of its parent inversion cell through nearest-neighbor assignment. Thus, increasing $q$ refines the forward calculation without adding independent velocity parameters.
+
+On this computational grid, we use the second-order fast-marching solver in \texttt{scikit-fmm} \parencite{scikitfmm} to compute one first-arrival traveltime field $T_n(\mathbf x;\mathbf v)$ per station for the current velocity model. By reciprocity, the traveltime from a station to an event equals that from the event to the station in the same isotropic medium. Each station field can therefore be reused for all event-location hypotheses, rather than solving a separate forward problem for every event. Station-based traveltime grids and their reuse during event location are established practices \parencite{lomax2000}. The fields are recomputed when the velocity model changes.
+
+Stations and events need not coincide with grid centers (Section~\ref{subsec:parameterization}). We initialize each field around the actual station position $\mathbf x_n$ using a sphere of prescribed radius $R$. Inside it, we approximate the medium by the velocity $v_{\mathrm{loc},n}$ of the station-containing cell and set traveltimes to $\lVert\mathbf x-\mathbf x_n\rVert/v_{\mathrm{loc},n}$. Fast marching continues from the sphere, adding $R/v_{\mathrm{loc},n}$ to obtain times relative to the station. This local homogeneous approximation avoids snapping stations to grid centers. We obtain traveltimes at continuous hypocenter coordinates by trilinear interpolation of the fields, not the velocities; coordinates in the outer half-cell strips are clipped to the nearest grid centers. Off-grid stations and interpolated traveltime grids for subgrid location refinement were also used by \textcite{wittlinger1993}.
+
+\subsection{Event-location Step}
+\label{subsec:estep}
+
+With the velocity model fixed, we evaluate the event likelihood from Equation~\ref{eq:marginal_origin_likelihood} at every computational cell center using the station fields from Section~\ref{subsec:forward}. The search is limited to the model box, not unbounded space. We rank cells by negative log-likelihood, so a lower cost means a higher likelihood, and select up to a prescribed number of low-cost cells. To avoid placing all candidates in a small neighborhood, we impose a minimum separation measured by the largest coordinate difference in grid-cell units (Chebyshev distance). Increasing this separation gives a sparser candidate set that can cover a wider region. It does not coarsen the grid on which likelihoods are evaluated, and no fixed likelihood threshold is used to truncate the search.
+
+Each selected cell provides a starting point for a derivative-free Powell search \parencite{powell1964}, using SciPy's modified implementation with bounds set by that cell. The search uses trilinearly interpolated traveltimes and the same likelihood; at domain edges, its bounds are restricted to the span of grid centers. The cell center is kept if refinement does not return a finite position with a cost no higher than the starting cost. The refined candidates are ranked again, and a chosen number are retained for the velocity update. The separation constraint applies to the selected cells, not to the final refined positions.
+
+Here, \emph{hard assignment} uses only the refined candidate with the lowest cost, assigning it weight one: it is the ``most likely'' among the tested candidates, not a guaranteed global optimum. In contrast, \emph{soft assignment} uses several retained candidates simultaneously. For $K$ retained positions $\mathbf h_{e1},\ldots,\mathbf h_{eK}$, their weights are
+\begin{equation}
+w_{ej}=\frac{\mathcal L_e(\mathbf v,\mathbf h_{ej})}
+{\sum_{k=1}^{K}\mathcal L_e(\mathbf v,\mathbf h_{ek})},
+\qquad j=1,\ldots,K,
+\label{eq:location_weights}
+\end{equation}
+using the likelihood from Equation~\ref{eq:marginal_origin_likelihood}. These weights sum to one and correspond to equal prior probabilities on the retained hypotheses. A sharper or flatter weighting is also possible. Spatially discretized representations of hypocenter probability distributions were used in earlier grid-based location methods \parencite{wittlinger1993,lomax2000}; here, the approximation is supported only on the selected and refined candidates, rather than the full grid. Many candidate locations can be tested, but only those retained after refinement contribute to the velocity update. With only one retained candidate, hard and soft assignment are identical. In the terminology of mixture estimation, hard assignment corresponds to the classification EM algorithm \parencite{celeux1992}, and soft assignment to standard EM \parencite{dempster1977}. In clustering, hard assignment is known to favor solutions whose components overlap less than those found by soft assignment \parencite{kearns1997}.
+
+\subsection{Velocity-update Step}
+\label{subsec:mstep}
+
+For each candidate with nonzero weight, we trace a ray to every station with an observed arrival: one candidate per event in hard mode and several in soft mode. Starting at the candidate, the ray follows the negative gradient of the station traveltime field, with the gradient interpolated along the path. The resulting ray is generally curved, not a straight source--station segment. Gradient-based tracing of rays from computed traveltime fields is also used in PyKonal \parencite{white2020pykonal}. Path lengths are accumulated on the fine grid and summed into inversion cells, using the same local station approximation as in Section~\ref{subsec:forward}. For a fixed ray, the traveltime is linear in cell slownesses $s_\ell=1/v_\ell$:
+\begin{equation}
+T_{en}^{\mathrm{ray},(j)}=\sum_{\ell=1}^{L}G_{en\ell}^{(j)}s_\ell,
+\label{eq:fixed_ray_time}
+\end{equation}
+where $G_{en\ell}^{(j)}$ is the path length assigned to cell $\ell$ for candidate $j$ of event $e$ and station $n$. This is a ray-integral approximation; predicted times used to form residuals still come from the fast-marching fields. Rays that fail to reach the station are excluded.
+
+The unknowns are the $L$ cell-slowness increments $\delta\mathbf s$. For each event--candidate pair $(e,j)$, we keep only stations with successful rays. Observed minus predicted times and each column of the path-length matrix are centered by their station means, weighted by inverse timing variance. This removes the origin-time increment, as in Equation~\ref{eq:origin_time_estimate}, but not spatial hypocenter corrections \parencite{pavlis1980}. Dividing each centered row and residual by its station uncertainty gives $\overline G_{ej}$ and $\overline{\mathbf d}_{ej}$, respectively. Uncertainties are evaluated at the candidate, and the first-order relation is
+\begin{equation}
+\overline{\mathbf d}_{ej}\simeq\overline G_{ej}\,\delta\mathbf s.
+\label{eq:linearized_data}
+\end{equation}
+Pairs with fewer than two successful rays are excluded from all sums below.
+
+Using the candidate weights from Equation~\ref{eq:location_weights}, we form the $L\times L$ data normal matrix
+\begin{equation}
+H=\sum_{e,j}w_{ej}\,\overline G_{ej}^{\mathsf T}\overline G_{ej}.
+\label{eq:data_normal_matrix}
+\end{equation}
+Its diagonal entry $H_{\ell\ell}$ measures sensitivity to slowness in cell $\ell$. We define an $L\times L$ diagonal damping matrix $D$, whose entry $D_{\ell\ell}$ penalizes the increment in that same cell; all off-diagonal entries are zero. For nonzero $H$,
+\begin{equation}
+D_{\ell\ell}=\lambda\,\frac{\operatorname{tr}H}{L}
+\left[\max\!\left\{f,\min\!\left(1,\frac{H_{\ell\ell}}{H_{\mathrm{ref}}}\right)\right\}\right]^{-\gamma}.
+\label{eq:adaptive_damping}
+\end{equation}
+Here, $\operatorname{tr}H/L$ is the mean diagonal sensitivity, and $H_{\mathrm{ref}}$ is a chosen percentile of positive $H_{\ell\ell}$ values. The parameter $\lambda$ controls overall damping, $\gamma$ increases it in weakly sensitive cells, and $f$ limits that increase; $\gamma=0$ gives uniform damping. This penalty limits increment size, not spatial roughness.
+
+We choose $\delta\mathbf s$ to minimize the damped least-squares objective \parencite{levenberg1944}
+\begin{equation}
+\mathcal J(\delta\mathbf s)=
+\frac12\sum_{e,j}w_{ej}\left\|\overline G_{ej}\,\delta\mathbf s-\overline{\mathbf d}_{ej}\right\|_2^2
++\frac12\delta\mathbf s^{\mathsf T}D\,\delta\mathbf s.
+\label{eq:weighted_update_objective}
+\end{equation}
+Soft assignment weights the squared linearized residuals of several candidates; hard assignment keeps only the best candidate with weight one. Candidate positions, weights, ray paths, and timing uncertainties remain fixed during the solve. Minimizing $\mathcal J$ gives
+\begin{equation}
+(H+D)\,\delta\mathbf s=\sum_{e,j}w_{ej}\,\overline G_{ej}^{\mathsf T}\overline{\mathbf d}_{ej}.
+\label{eq:slowness_update}
+\end{equation}
+If $H=0$, the update is zero. Dense systems use Cholesky factorization when possible; larger matrix-free systems use diagonally preconditioned conjugate gradients. We add the resulting $\delta\mathbf s$ to the current slowness, convert back to velocity, and optionally limit the fractional velocity change in each cell. Repeating the location and velocity steps for a prescribed number of cycles, or until an enabled early-stopping criterion is met, produces the final model.
+
 \section{Experimental Setup}
 \label{sec:experimental_setup}
 
+\subsection{Forward Modeling}
+\label{subsec:synthetic_data}
+
+Synthetic first arrivals are generated independently of EMTomo using PyKonal 0.4.1 \parencite{white2020pykonal}. It solves the Cartesian eikonal equation from the true event positions on a refined nodal grid. Off-grid sources are initialized by local straight-segment slowness integrals; receiver times are sampled by interpolating $T(\mathbf x)/\|\mathbf x-\mathbf h_e\|$. This differs from EMTomo's station-centered \texttt{scikit-fmm} fields, homogeneous source spheres, and direct traveltime interpolation. These differences reduce numerical inverse crime, but both solvers still describe isotropic first arrivals, not independent wave physics.
+
+Before referencing each event to its earliest noisy arrival, we add independent relative and absolute Gaussian errors:
+\begin{equation}
+ t^{\mathrm{noisy}}_{en}=T^{\mathrm{true}}_{en}
+ +\sigma_r T^{\mathrm{true}}_{en}Z^{(1)}_{en}+\sigma_a Z^{(2)}_{en},
+ \qquad Z^{(1)}_{en},Z^{(2)}_{en}\sim\mathcal N(0,1),
+\label{eq:synthetic_noise}
+\end{equation}
+where $\sigma_r$ and $\sigma_a$ are the relative and absolute noise levels specified for each experiment. Compared methods share the same noisy picks. TomoDD differential times are formed from these picks, without additional waveform cross-correlation data. Its initial hypocenters have independent Gaussian coordinate perturbations, resampled outside the domain; EMTomo requires no initial hypocenter catalog.
+
+\subsection{Evaluation}
+\label{subsec:metrics}
+
+The main comparisons are between hard and soft EMTomo, using the same data, starting velocity model, and numerical settings apart from the stated candidate choices. One synthetic series also includes tomoDD \parencite{zhang2003}, to check whether EMTomo achieves errors of a similar scale, not to establish that either method is superior. We also test both EMTomo modes on real arrival-time data.
+
+Velocity accuracy is summarized by whole-volume root-mean-square error (RMSE) and mean absolute percentage error (MAPE). For estimates $\widehat v_i$ and reference values $v_i^{\mathrm{ref}}$ at $M$ equally weighted samples,
+\begin{equation}
+\mathrm{RMSE}_v=\sqrt{\frac{1}{M}\sum_{i=1}^{M}(\widehat v_i-v_i^{\mathrm{ref}})^2}.
+\label{eq:velocity_metrics}
+\end{equation}
+\begin{equation}
+\mathrm{MAPE}_v=\frac{100}{M}\sum_{i=1}^{M}\frac{|\widehat v_i-v_i^{\mathrm{ref}}|}{v_i^{\mathrm{ref}}}.
+\label{eq:velocity_mape}
+\end{equation}
+The tables report RMSE and MAPE of native reconstructed fields against the original truth on a common uniform grid over the model volume, without smoothing the truth to inversion cells. Relative soft gain is $100(E_{\mathrm{hard}}-E_{\mathrm{soft}})/E_{\mathrm{hard}}$, using the same error measure and reference for both modes; positive values favor soft.
+
+
+Hypocenter accuracy is measured by the 90th percentile (P90) of the 3-D errors $\|\widehat{\mathbf h}_e-\mathbf h_e^{\mathrm{true}}\|$, in meters, with equal weight for every event. Unless stated otherwise, soft estimates use the largest-weight candidate. The tables also give the P90 of the weighted mean of the retained soft hypotheses, $\sum_h w_h\mathbf h_h$; for hard assignment it equals the largest-weight estimate. Data fit is summarized by the residual RMS, in seconds: arrival-time residuals of the largest-weight hypothesis, with each event's mean residual removed to account for the unknown origin time, pooled over all picks used for location. Residuals and locations come from the same location step.
+
+The reported checkpoint depends on the test. For the checkerboard comparisons of hard and soft assignment (Sections~\ref{subsec:onesided_results}--\ref{subsec:checkerboard_noise_results}), each run is evaluated at the corner of its own L-curve. For every saved model $V_k$, we take the logarithms of the pooled RMSE of inter-station residual differences and of the relative slowness change $\|\mathbf s_k-\mathbf s_0\|_2/\|\mathbf s_0\|_2$, and normalize each to $[0,1]$ along the run. The selected interior point has the largest perpendicular distance to the chord joining the first and last points. This retrospective rule does not use the true model. For the fault and heterogeneous tests (Sections~\ref{subsec:fault_results}--\ref{subsec:heterogeneous_results}), we report the final model of each run. Hypocenters come from the E-step in the reported model for L-curve selections. For final models, they come from the last E-step, which precedes the final velocity update.
+
+For real data, quantitative evaluation uses arrival-time RMSE on withheld picks. With each velocity model fixed, hypocenters and origin times are fitted only to training picks. Withheld picks are then predicted without refitting. This tests point predictions, not the full soft predictive distribution. We compare hypocenters with the catalog and velocity structure with published tomography qualitatively, without treating either as ground truth.
+
 \section{Results}
 \label{sec:results}
+\input{results}
 
 \section{Discussion}
 \label{sec:discussion}
 
+We assessed the candidate discretization by comparing sparse and dense weighted location distributions in the same fixed velocity model. Figure~\ref{fig:sparse_candidate_discretization} illustrates this check for event \texttt{EVT\_0905} from the one-sided checkerboard experiment (Section~\ref{subsec:onesided_results}), using 50 and 10\,000 candidates before the first velocity update. The sparse representation preserves the main elongated high-likelihood region and closely follows the dense weighted cumulative distributions in $X$ and depth: the three-dimensional weighted means differ by 129~m, and the corresponding one-dimensional Wasserstein distances are 132 and 213~m. This example supports the adequacy of the sparse representation for these projected distributions, but does not establish full three-dimensional equivalence or convergence for all events.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/used/dense_vs_sparse_EVT_0905_all_candidates_final.pdf}
+\begin{singlespace}
+\caption{Candidate-discretization check for event \texttt{EVT\_0905}. Left and middle: all 10\,000 dense and 50 sparse candidates projected onto the $X$--depth plane; darker points lie closer to the common section at $Y=2.4375$~km. The white-to-blue background shows likelihood on this fixed-$Y$ section, normalized to its maximum, rather than a marginal distribution. Burgundy stars mark the projected true hypocentre; green and red diamonds mark the full-set weighted mean and maximum-weight candidate, respectively. Right: weighted empirical cumulative distributions in $X$ and depth, computed from the full original candidate sets. Both representations use the same initial homogeneous velocity model and observations.}
+\label{fig:sparse_candidate_discretization}
+\end{singlespace}
+\end{figure}
+\FloatBarrier
+
+Across the synthetic tests, the soft gains in velocity and in location accuracy are anti-correlated (Figure~\ref{fig:velocity_location_gain}). In the checkerboard tests, soft assignment reduces velocity error but increases hypocenter P90. In the fault test, it locates events slightly better but recovers velocity worse. Both modes nevertheless explain the observations almost equally well. Across all 28 pairs, the residual RMS of hard and soft assignment differs by at most 1.6\%, and by less than 0.25\% in 24 of them (Tables~\ref{tab:onesided_comparison}--\ref{tab:heterogeneous_comparison}). Hard and soft assignment thus reach comparable data fits by partitioning the traveltime residuals slightly differently between velocity structure and source positions, an instance of hypocenter--velocity coupling \parencite{thurber1992}. Hard and soft assignment are also known to reach different solutions in mixture estimation \parencite{kearns1997}. Trade-offs between source parameters and velocities have likewise been reported to bias body-wave traveltime inversions of induced seismicity; adding surface-wave dispersion largely removed this bias \parencite{zhang2020induced}. In the realistic-geometry checkerboard, the soft P90 exceeds the hard value by a similar 70--130~m at every noise level. This points to a systematic location offset rather than additional random scatter. Whole-volume velocity error and location accuracy therefore emphasize different parts of the model, and an improvement in one does not imply an improvement in the other.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/used/soft_velocity_gain_vs_hypocenter_gain.pdf}
+\begin{singlespace}
+\caption{Relative soft gain in velocity MAPE, evaluated on the inversion cells, versus relative soft gain in hypocenter P90 for the 28 hard/soft pairs in Tables~\ref{tab:onesided_comparison}--\ref{tab:heterogeneous_comparison}. Both gains are $100(E_{\mathrm{hard}}-E_{\mathrm{soft}})/E_{\mathrm{hard}}$; positive values favor soft. Checkpoints follow the tables: L-curve-selected models for Sections~\ref{subsec:onesided_results}--\ref{subsec:checkerboard_noise_results} and final models for Sections~\ref{subsec:fault_results}--\ref{subsec:heterogeneous_results}, where locations precede the final velocity update. Coincident points are not offset.}
+\label{fig:velocity_location_gain}
+\end{singlespace}
+\end{figure}
+\FloatBarrier
+
+These results hold for a deliberately narrow setting: P arrivals only, a fixed candidate search, one noise realization per synthetic configuration, and one real-data window from a single geothermal field. On the real data, the final hard and soft relocations lie at median 3-D distances of 480 and 547~m from the catalog positions, with 90th percentiles of 1.49 and 1.71~km. The catalog is not ground truth. Its depths are given relative to mean sea level, as in earlier analyses of the same LBNL catalog \parencite{johnson2016}, and we shift them to our model frame, whose top lies 1166~m above sea level. Of the 3471 retained events, 52 (1.5\%) have a catalog depth of exactly 0~km and therefore lie on a single horizontal level at sea level; this probably reflects fixed or default depths rather than located ones, although we have not established the cause. Our relocations move these events farther than the others, with median 3-D distances of 766 and 901~m for hard and soft assignment versus 475 and 545~m for the remaining events. A selective review of events with the largest shifts, based on arrival time versus source--receiver distance, revealed both clear failures of our relocation and catalog positions that are inconsistent with the picks. These distances therefore describe the disagreement between two location sets rather than the error of either.
+
+Within the region resolved by \textcite{guo2021geysers}, agreement of the velocity models depends on position (Figure~\ref{fig:real_picks_sections_final}). In the part of the model with $X<12.6$~km, the hard and soft models differ from the published $V_P$ by 0.61--0.63~km/s RMS, with a mean offset of $-0.48$~km/s and a correlation of 0.74--0.77 between absolute velocities. For larger $X$, the RMS difference grows to 0.90--0.91~km/s, the offset to $-0.83$ to $-0.84$~km/s, and the correlation falls to 0.56--0.60. Most of this correlation comes from the common increase of velocity with depth. After removing the mean at each depth, lateral anomalies correlate only weakly on both sides, at about 0.2, and the linear starting model is closer to the published model than either inversion (0.46 and 0.84~km/s RMS for the two parts). The better agreement for smaller $X$ is therefore mainly in the absolute velocity level and its depth trend, not in individual anomalies. The lower EMTomo velocities may reflect the different data of the published study, which used repicked P arrivals and differential times, the assumed compatibility of station elevations with the sea-level reference of catalog depths, and the coarser 500-m parameterization. We have not separated these causes.
+
+Our synthetic results agree in sign with earlier evidence that accounting for source uncertainty can improve velocity reconstruction \parencite{gao2021,agata2026}: soft assignment lowered velocity RMSE in all 17 checkerboard comparisons. The gains, however, are small, 0.6--4.1\%, and they did not generalize. In the fault test, soft assignment improved velocity only at the widest seed separation, by 0.4\%, and for the heterogeneous model the change ranged from $-0.6$ to $+0.4$\%. The baselines differ: our hard assignment relocates every event at each iteration, whereas \textcite{agata2026} compared with fixed erroneous source parameters and DeepGEM also changes the optimization procedure. Much of the benefit attributed to source uncertainty may therefore already be captured by iterative point relocation, leaving an effect of a few percent from retaining hypothesis distributions. This is consistent with the small differences between probabilistic and conventional inversions reported by \textcite{pianaagostinetti2015} and \textcite{ryberg2019}, and with the nearly equal data fits of hard and soft assignment found here. The heterogeneous test also reproduces the dominant role of the starting model emphasized by \textcite{kissling1994}: changing from a homogeneous to a 1-D start reduced the velocity RMSE by about half, whereas switching between hard and soft assignment changed it by less than 1\%. Finally, the gains in velocity came with larger hypocenter P90 in most checkerboard tests. Comparisons of source-uncertainty treatments based only on velocity error can therefore miss a cost in location accuracy, which follows from hypocenter--velocity coupling \parencite{thurber1992}.
+
 \section{Conclusion}
 \label{sec:conclusion}
+
+We presented EMTomo, an expectation--maximization formulation of local-earthquake traveltime tomography in which each event enters the velocity update either through its most likely candidate hypocenter (hard assignment) or through several likelihood-weighted candidates (soft assignment). Because both modes share all other settings, the comparison isolates the effect of retaining hypocenter distributions instead of point estimates. On full-coverage checkerboards, hard EMTomo reached velocity and location errors of a similar or smaller scale than tomoDD, although the different parameterizations and settings do not allow the difference to be attributed to a single feature.
+
+The effect of soft assignment was small and depended on the configuration. Soft assignment lowered velocity RMSE in all 17 checkerboard comparisons, by 0.6--4.1\%, but increased hypocenter P90 in 15 of them. In the fault test, it improved velocity only at the widest seed separation, by 0.4\%, and for the heterogeneous model the change ranged from $-0.6$ to $+0.4$\%. Across all 28 synthetic pairs, the two modes fitted the data almost equally well, with residual RMS differing by at most 1.6\%. Hard and soft assignment therefore explain the observations with similar quality but partition the traveltime residuals differently between velocity structure and source positions. The starting model mattered more than the assignment mode: a 1-D instead of a homogeneous start halved the velocity RMSE of the heterogeneous model, whereas switching between hard and soft assignment changed it by less than 1\%. On real data from The Geysers, both modes reduced the held-out arrival-time RMSE by about 9\% relative to the starting model, and the 1.04\% advantage of soft over hard assignment was within the bootstrap uncertainty.
+
+Retaining hypocenter distributions is therefore not a general substitute for iterative point relocation, nor a reliable route to better velocity models on its own. Its effect should be judged with velocity error, hypocenter error, and data fit together, because an improvement in one of them can be offset in another. Further tests should include S arrivals, several noise realizations per configuration, and a systematic choice of candidate spacing, which had the largest influence on the soft results in the fault test.
 
 \section*{References}
 \printbibliography[heading=none]

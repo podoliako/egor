@@ -1,0 +1,258 @@
+{
+  "purpose": "Draft layout only; no article/PDF changes, inversions or forward solves.",
+  "projections": "All events/stations projected orthogonally; no slice filtering, jitter or subsampling. Exact duplicate 2D positions drawn once.",
+  "coordinate_policy": "Each geometry retains its native translated Cartesian frame, metric scale and full domain. Depth positive down; real-pick symbols use retained catalog positions, not relocated estimates.",
+  "shared_geometry": "Sections 4.4 and 4.6 have identical ordered station and event coordinates and identical domains. Only the smallest Geysers domain (fault test, section 4.5) is plotted as a geometry illustration, not as the exact acquisition geometry of all real-geometry tests.",
+  "plotted_geometry_keys": [
+    "one_sided",
+    "two_clusters",
+    "fault"
+  ],
+  "omitted_geometry_keys": [
+    "full_coverage",
+    "real_geometry_synthetic",
+    "real_picks"
+  ],
+  "datum_caveat": "Catalog depths and station elevations are treated as sharing a vertical datum; compatibility has not been independently established.",
+  "comparisons": [
+    {
+      "from_geometry": "real_geometry_synthetic",
+      "to_geometry": "heterogeneous",
+      "translation_m": [
+        0,
+        0,
+        0
+      ],
+      "stations": {
+        "common": 26,
+        "only_from": 0,
+        "only_to": 0,
+        "max_common_coordinate_difference_m": 0.0
+      },
+      "events": {
+        "common": 3465,
+        "only_from": 0,
+        "only_to": 0,
+        "max_common_coordinate_difference_m": 0.0
+      }
+    },
+    {
+      "from_geometry": "real_geometry_synthetic",
+      "to_geometry": "fault",
+      "translation_m": [
+        1000,
+        0,
+        0
+      ],
+      "stations": {
+        "common": 26,
+        "only_from": 0,
+        "only_to": 0,
+        "max_common_coordinate_difference_m": 1.8189894035458565e-12
+      },
+      "events": {
+        "common": 3465,
+        "only_from": 0,
+        "only_to": 311,
+        "max_common_coordinate_difference_m": 3.749942721349417e-12
+      }
+    },
+    {
+      "from_geometry": "real_geometry_synthetic",
+      "to_geometry": "real_picks",
+      "translation_m": [
+        4000,
+        0,
+        0
+      ],
+      "stations": {
+        "common": 26,
+        "only_from": 0,
+        "only_to": 5,
+        "max_common_coordinate_difference_m": 0.0
+      },
+      "events": {
+        "common": 3465,
+        "only_from": 0,
+        "only_to": 6,
+        "max_common_coordinate_difference_m": 3.749942721349417e-12
+      }
+    },
+    {
+      "from_geometry": "fault",
+      "to_geometry": "real_picks",
+      "translation_m": [
+        3000,
+        0,
+        0
+      ],
+      "stations": {
+        "common": 26,
+        "only_from": 0,
+        "only_to": 5,
+        "max_common_coordinate_difference_m": 0.0
+      },
+      "events": {
+        "common": 3471,
+        "only_from": 305,
+        "only_to": 0,
+        "max_common_coordinate_difference_m": 3.637978807091713e-12
+      }
+    }
+  ],
+  "geometries": [
+    {
+      "key": "full_coverage",
+      "title": "Full coverage",
+      "sections": "4.1",
+      "source": "/mnt/disk01/egor/projects/EMTomo/runs/checkerboard_scaled_20261021/snapshot/projects/forward_modeling/experiments/input/checkerboard_24x12x12_nx6_98st_1200ev_grid20x10x6_minz3_noise01_pick001_seed42",
+      "extent_m": [
+        24000.0,
+        12000.0,
+        12000.0
+      ],
+      "source_sha256": {
+        "stations.csv": "a591b34a0b1e3bcaca5d9ef3b9402ef3e0500d18fbde43bbaf1faa8594ee9102",
+        "events.csv": "aeb02d32723b6bac51f05270c2ff00c525d25f9edb554ff91c5fa3c5131b8e56",
+        "model.npz": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7"
+      }
+    },
+    {
+      "key": "one_sided",
+      "title": "One-sided stations",
+      "sections": "4.2",
+      "source": "/mnt/disk01/egor/projects/forward_modeling/experiments/input/onesided_nx6_24x12x12_18st_1200ev_noise01_pick005_seed42",
+      "extent_m": [
+        24000.0,
+        12000.0,
+        12000.0
+      ],
+      "source_sha256": {
+        "stations.csv": "da7b83e9820932d972d74b1d71879f6db087e923a10d07bbc4b40d0cd43c8e60",
+        "events.csv": "c2c84a2f8e180c4ef715e5b166cdc9466eb57755bc5ba3473cea88fe2540788a",
+        "model.npz": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7"
+      },
+      "section_y_km": 6.0,
+      "section_x_km": 12.0,
+      "projected_markers": {
+        "0": {
+          "events": 1200,
+          "stations": 18
+        },
+        "1": {
+          "events": 1200,
+          "stations": 18
+        },
+        "2": {
+          "events": 1200,
+          "stations": 18
+        }
+      }
+    },
+    {
+      "key": "two_clusters",
+      "title": "Two station clusters",
+      "sections": "4.3",
+      "source": "/mnt/disk01/egor/projects/forward_modeling/experiments/input/nx6_bottom_blobs_24x8x8_22st_600ev_noise01_pick005_seed42",
+      "extent_m": [
+        24000.0,
+        8000.0,
+        8000.0
+      ],
+      "source_sha256": {
+        "stations.csv": "588918c7a3f8da5777519988f0a9acdaf5469b791f1896d4107d2d8be570f21a",
+        "events.csv": "a9918d5730808e553e6dbbfeeacf8887bde439063a319b5006f0d1838a64857a",
+        "model.npz": "e5ade8b870babc6ff213dac34024f5f4a0a86d20884bd06a221de11229f11caa"
+      },
+      "section_y_km": 4.0,
+      "section_x_km": 12.0,
+      "projected_markers": {
+        "0": {
+          "events": 600,
+          "stations": 22
+        },
+        "1": {
+          "events": 600,
+          "stations": 5
+        },
+        "2": {
+          "events": 600,
+          "stations": 7
+        }
+      }
+    },
+    {
+      "key": "real_geometry_synthetic",
+      "title": "The Geysers: checkerboard / heterogeneous model",
+      "sections": "4.4, 4.6",
+      "source": "/mnt/disk01/egor/projects/forward_modeling/experiments/input/geysers_realgeom_cb5x2x2_20x8x8_26st_3465ev_noise01_pick005_seed42",
+      "extent_m": [
+        20000.0,
+        8000.0,
+        8000.0
+      ],
+      "source_sha256": {
+        "stations.csv": "d4371f7005d08ceb7d631ea3438ecbf1c59152deff188253157ec368e63c4512",
+        "events.csv": "9cfecb427bb17761a991d80f594f1e16eb4f93f48b895d503d2dcdd2f1ef1183",
+        "model.npz": "fd84c46f480accd3d08417c7aa105a2113d99d42663820c24efb3fb454ef0b26"
+      }
+    },
+    {
+      "key": "fault",
+      "title": "The Geysers: smallest domain (fault test)",
+      "sections": "4.5",
+      "source": "/mnt/disk01/egor/projects/forward_modeling/experiments/input/gfsoftscreen28_26st_noise02_3776ev",
+      "extent_m": [
+        20000.0,
+        7000.0,
+        7000.0
+      ],
+      "source_sha256": {
+        "stations.csv": "59895d722cff63e2f087438704631ae6740f2f76dd7065ce64bad8e6b69be4e3",
+        "events.csv": "d7f6af385a08edf1b4f622e35c08d6f40bbc06d2d60e3ab9e42a730e3dedd786",
+        "model.npz": "efd85c919d739a3de36990d6c39cb0fbc8446219c2b03dd4bbcb9d59fc9d4ad4"
+      },
+      "section_y_km": 3.5,
+      "section_x_km": 10.0,
+      "projected_markers": {
+        "0": {
+          "events": 3774,
+          "stations": 26
+        },
+        "1": {
+          "events": 3776,
+          "stations": 26
+        },
+        "2": {
+          "events": 3776,
+          "stations": 26
+        }
+      }
+    },
+    {
+      "key": "real_picks",
+      "title": "The Geysers: real picks",
+      "sections": "4.7",
+      "source": "/mnt/disk01/egor/projects/EMTomo/data/geysers_2011/real_experiment_v1",
+      "extent_m": [
+        23000,
+        11000,
+        7000
+      ],
+      "source_sha256": {
+        "geometry.json": "2fd23e5d4845a87194fff5291cef0fef3acb890eec2b040331247e68c52a0c99",
+        "catalog.csv": "90b2ead26ddc599accd611e5c9db269c92e327e31795a8fa101694b35f5bcdf4",
+        "emtomo/arrivals.npz": "41293e1624554fcdaab7513f8f2b83ac092048e8a1147fe8c24fae79e544b154"
+      }
+    }
+  ],
+  "heterogeneous_source": {
+    "source": "/mnt/disk01/egor/projects/forward_modeling/experiments/input/geysers_realistic_previous_20x8x8_26st_3465ev_noise01_pick005_seed42",
+    "source_sha256": {
+      "stations.csv": "d4371f7005d08ceb7d631ea3438ecbf1c59152deff188253157ec368e63c4512",
+      "events.csv": "9cfecb427bb17761a991d80f594f1e16eb4f93f48b895d503d2dcdd2f1ef1183",
+      "model.npz": "6ba027604301ac5516d330da0d78a67a179986b8cee777d9af6ade5717b14f1f"
+    }
+  },
+  "script_sha256": "00dd2cc08f4c3ad0666d6aa013eb3b7f94eca7b9c1afdde22bd9e834bd37d6ec"
+}

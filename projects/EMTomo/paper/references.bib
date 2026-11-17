@@ -152,6 +152,17 @@
 }
 
 
+@article{wittlinger1993,
+  author    = {Wittlinger, G. and Herquel, G. and Nakache, T.},
+  title     = {Earthquake location in strongly heterogeneous media},
+  journal   = {Geophysical Journal International},
+  year      = {1993},
+  volume    = {115},
+  number    = {3},
+  pages     = {759--777},
+  doi       = {10.1111/j.1365-246x.1993.tb01491.x}
+}
+
 @incollection{lomax2000,
   author    = {Lomax, A. and Virieux, J. and Volant, P. and Berge-Thierry, C.},
   title     = {Probabilistic earthquake location in {3D} and layered models},
@@ -177,6 +188,28 @@
 }
 
 % ─── Solvers ───────────────────────────────────────────────────────────────────
+
+@article{levenberg1944,
+  author    = {Levenberg, Kenneth},
+  title     = {A method for the solution of certain non-linear problems in least squares},
+  journal   = {Quarterly of Applied Mathematics},
+  year      = {1944},
+  volume    = {2},
+  number    = {2},
+  pages     = {164--168},
+  doi       = {10.1090/qam/10666}
+}
+
+@article{powell1964,
+  author    = {Powell, M. J. D.},
+  title     = {An efficient method for finding the minimum of a function of several variables without calculating derivatives},
+  journal   = {The Computer Journal},
+  year      = {1964},
+  volume    = {7},
+  number    = {2},
+  pages     = {155--162},
+  doi       = {10.1093/comjnl/7.2.155}
+}
 
 @online{scikitfmm,
   author    = {{The scikit-fmm team}},
@@ -284,6 +317,42 @@
   doi       = {10.1198/016214506000001437}
 }
 
+% ─── Regional data and comparison tomography ──────────────────────────────────
+
+% Archive citation prescribed by https://ncedc.org/egs/catalog-search.html.
+@misc{ncedc2014,
+  author    = {{NCEDC}},
+  title     = {Northern California Earthquake Data Center},
+  year      = {2014},
+  publisher = {UC Berkeley Seismological Laboratory},
+  howpublished = {Dataset},
+  doi       = {10.7932/NCEDC}
+}
+
+% Metadata verified with Crossref; data use checked in the NSF PAR manuscript.
+@article{guo2021geysers,
+  author    = {Guo, Hao and Thurber, Clifford},
+  title     = {Double-difference seismic attenuation tomography method and its application to {The Geysers} geothermal field, {California}},
+  journal   = {Geophysical Journal International},
+  year      = {2021},
+  volume    = {225},
+  number    = {2},
+  pages     = {926--949},
+  doi       = {10.1093/gji/ggab017}
+}
+
+% Zenodo 4470253 contains the Vp model used here; it is not the JGR 2022 dataset.
+% The record supplies the article DOI, not a separate Zenodo dataset DOI.
+@misc{guo2021geysersdata,
+  author    = {Guo, Hao and Thurber, Clifford},
+  title     = {Double-difference seismic attenuation tomography method and its application to {The Geysers} geothermal field, {California}},
+  year      = {2021},
+  howpublished = {Zenodo dataset: earthquake relocations and {Vp} and {Qp} models},
+  url       = {https://zenodo.org/records/4470253},
+  urldate   = {2026-11-14},
+  options   = {url=true}
+}
+
 % ─── Add your region-specific and method-specific references below ──────────────
 
 @inproceedings{gao2021,
@@ -344,4 +413,68 @@
   number    = {1},
   pages     = {378--404},
   doi       = {10.1093/gji/ggaf040}
+}
+
+@article{johnson2016,
+  author    = {Johnson, Christopher W. and Totten, Eoghan J. and B{\"u}rgmann, Roland},
+  title     = {Depth migration of seasonally induced seismicity at {The Geysers} geothermal field},
+  journal   = {Geophysical Research Letters},
+  volume    = {43},
+  number    = {12},
+  pages     = {6196--6204},
+  year      = {2016},
+  doi       = {10.1002/2016GL069546}
+}
+
+@article{celeux1992,
+  author    = {Celeux, Gilles and Govaert, G{\'e}rard},
+  title     = {A classification {EM} algorithm for clustering and two stochastic versions},
+  journal   = {Computational Statistics \& Data Analysis},
+  volume    = {14},
+  number    = {3},
+  pages     = {315--332},
+  year      = {1992},
+  doi       = {10.1016/0167-9473(92)90042-E}
+}
+
+@inproceedings{kearns1997,
+  author    = {Kearns, Michael and Mansour, Yishay and Ng, Andrew Y.},
+  title     = {An information-theoretic analysis of hard and soft assignment methods for clustering},
+  booktitle = {Proceedings of the Thirteenth Conference on Uncertainty in Artificial Intelligence},
+  pages     = {282--293},
+  publisher = {Morgan Kaufmann},
+  year      = {1997}
+}
+
+@article{gesret2015,
+  author    = {Gesret, A. and Desassis, N. and Noble, M. and Romary, T. and Maisons, C.},
+  title     = {Propagation of the velocity model uncertainties to the seismic event location},
+  journal   = {Geophysical Journal International},
+  volume    = {200},
+  number    = {1},
+  pages     = {52--66},
+  year      = {2015},
+  doi       = {10.1093/gji/ggu374}
+}
+
+@article{zhang2020induced,
+  author    = {Zhang, Xin and Roy, Corinna and Curtis, Andrew and Nowacki, Andy and Baptie, Brian},
+  title     = {Imaging the subsurface using induced seismicity and ambient noise: 3-{D} tomographic {Monte Carlo} joint inversion of earthquake body wave traveltimes and surface wave dispersion},
+  journal   = {Geophysical Journal International},
+  volume    = {222},
+  number    = {3},
+  pages     = {1639--1655},
+  year      = {2020},
+  doi       = {10.1093/gji/ggaa230}
+}
+
+@article{zunino2025,
+  author    = {Zunino, Andrea and Keating, Scott and Fichtner, Andreas},
+  title     = {A discrete adjoint method for deterministic and probabilistic eikonal-equation-based inversion of traveltime for velocity and source location},
+  journal   = {Geophysical Journal International},
+  volume    = {243},
+  number    = {1},
+  eid       = {ggaf283},
+  year      = {2025},
+  doi       = {10.1093/gji/ggaf283}
 }

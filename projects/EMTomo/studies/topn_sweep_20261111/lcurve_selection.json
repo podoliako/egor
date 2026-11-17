@@ -1,0 +1,2491 @@
+{
+  "selection_uses_truth": false,
+  "residual_timing": "residual/model V_k -> quality index k-1",
+  "runs": {
+    "run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76": {
+      "run_id": "run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.07258630906671988,
+        "relative_slowness_change": 0.017147339813350745,
+        "model_sha256": "f5e067a5168da20f2d2b2aa62086810d9dbbc8229feda9060d5be6b6edc04281",
+        "normalized_chord_distance": 0.07102071452381706
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "b7bfa47105d49faf565b8cdef99e97117b2095efb07b5e42ae04a962e4ba15bd",
+      "residual_cache_signature": "81641426e338890c6fbe1ac893082e4a43b91fb5ce12c56eb4f1af786d2a836d",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07665020490810573,
+          "relative_slowness_change": 0.00632540259024115,
+          "model_sha256": "65b56da76ee8601e74bbeec4db08150c316ede26360f2176b167d7a132a0f3cb",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.0739207792501599,
+          "relative_slowness_change": 0.01223141289983317,
+          "model_sha256": "831a2de5a8e795c47dbb688675ac7f11b38daaaedc4940cda68cbd01648fb8d7",
+          "normalized_chord_distance": 0.048903321229194795
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.07258630906671988,
+          "relative_slowness_change": 0.017147339813350745,
+          "model_sha256": "f5e067a5168da20f2d2b2aa62086810d9dbbc8229feda9060d5be6b6edc04281",
+          "normalized_chord_distance": 0.07102071452381706
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.07188645210148109,
+          "relative_slowness_change": 0.021186384659919323,
+          "model_sha256": "8d409861d4558ebd9970267b3058a54919d80472d43628b4c9dd407a2974ed0a",
+          "normalized_chord_distance": 0.07077835042113993
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.07142161144459555,
+          "relative_slowness_change": 0.024674803820576338,
+          "model_sha256": "3dcc25627b44cf5814955d7bbb92a180eadf7c95a02537ae4419de6ce35c9d9a",
+          "normalized_chord_distance": 0.06654687114316145
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.07111782158243332,
+          "relative_slowness_change": 0.02784900227107534,
+          "model_sha256": "36d5e6decbbd70c3f9ee031f199acf21ac12b0c4069f1162d903050266b1703b",
+          "normalized_chord_distance": 0.05590238205699574
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.07088353190399264,
+          "relative_slowness_change": 0.030729550379643845,
+          "model_sha256": "049986143129ae712530eafc8efb802750a0501af15dded708d1ee4cf36b90ae",
+          "normalized_chord_distance": 0.04587347498863187
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.07070592893665605,
+          "relative_slowness_change": 0.033517679655331846,
+          "model_sha256": "ddb94dd3a3e75fcd5a002705ac55afb204c94880cae7150cce39830877fd4dd4",
+          "normalized_chord_distance": 0.0337187492153602
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.07055798644128732,
+          "relative_slowness_change": 0.036182812079699735,
+          "model_sha256": "3a64a09b930e52004c54e1857d3f072794fb21014f54c0c1f802f0613f27e766",
+          "normalized_chord_distance": 0.022062751938249702
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.0704351132300153,
+          "relative_slowness_change": 0.038747694073231295,
+          "model_sha256": "32f3fab4b4da596eb4260aed3981b2b3d1f67aed26ac524e8c99c43c4b4518da",
+          "normalized_chord_distance": 0.010546871740057338
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.070320544121825,
+          "relative_slowness_change": 0.04128434674086114,
+          "model_sha256": "0a7dfb476cb27733c0b38b257d46e422b028e32305a361c9d32f7b16530f8c5f",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s2-soft-k50-top10_v1.4_20261111_185816_828820eb9962488083bf183507308514": {
+      "run_id": "run_topnsweep11-s2-soft-k50-top10_v1.4_20261111_185816_828820eb9962488083bf183507308514",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.07249096386659289,
+        "relative_slowness_change": 0.014954320299706907,
+        "model_sha256": "59049c7b86721821e6a7de7492cfe6bcbcadbbc3441d4d370b397b0003242be8",
+        "normalized_chord_distance": 0.08826208342148525
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "b7bfa47105d49faf565b8cdef99e97117b2095efb07b5e42ae04a962e4ba15bd",
+      "residual_cache_signature": "02e124554b41111cf9c292d1d306e3b6e4873c39affa39ee6295f8d078e345d9",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07678543551211879,
+          "relative_slowness_change": 0.005406215641085896,
+          "model_sha256": "e46986a3075f833427ed54b466db5c254270aae2701d46d996216f2a0e8dcc8c",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.0738645440650982,
+          "relative_slowness_change": 0.010468827402175062,
+          "model_sha256": "325a1cef358110482af0277f7c715773bfe7d322abc55e9d8a29f2417bd55d6d",
+          "normalized_chord_distance": 0.06857509262160122
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.07249096386659289,
+          "relative_slowness_change": 0.014954320299706907,
+          "model_sha256": "59049c7b86721821e6a7de7492cfe6bcbcadbbc3441d4d370b397b0003242be8",
+          "normalized_chord_distance": 0.08826208342148525
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.07182869615848768,
+          "relative_slowness_change": 0.01866598460445613,
+          "model_sha256": "5ecd3e74d3e74d4433caeffa0b213bd779ac77bd6b76384e21192de84dbd0d1e",
+          "normalized_chord_distance": 0.08048290354685204
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.07140979489341975,
+          "relative_slowness_change": 0.02187119703440825,
+          "model_sha256": "6ddb8953bd60b78fe9bea6b59c5c107dd586a42de925eaf53df7c1b9a40ddf37",
+          "normalized_chord_distance": 0.06921103353807642
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.07110560697604959,
+          "relative_slowness_change": 0.02490225824297179,
+          "model_sha256": "2d113d3a27b5ea2e0998aee658f7655a13a5580c0f3ac034dcb7a192253482f8",
+          "normalized_chord_distance": 0.05578960892694872
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.07087679251314276,
+          "relative_slowness_change": 0.027716225440914552,
+          "model_sha256": "3f6f73bafbaf4782a3aa5a26659e2beb912e383c9b63bb8dc21e603fa2289954",
+          "normalized_chord_distance": 0.04232379506706847
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.07069037782922269,
+          "relative_slowness_change": 0.030259610396883786,
+          "model_sha256": "a036581593b0a1f0c1c36f7de8a5d15822e6f2c51b08327fa64b7b9e495abc61",
+          "normalized_chord_distance": 0.03120383542528062
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.07053404507949784,
+          "relative_slowness_change": 0.0326616275652776,
+          "model_sha256": "a7d1e29ed576907aad5859114251209498d1c99eeb2c8465164288c7a741c7d5",
+          "normalized_chord_distance": 0.020907194072509256
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.07041128053506825,
+          "relative_slowness_change": 0.034931447920236045,
+          "model_sha256": "0702a0867a1dc485bdd9d6cddeaa04248faa85bcf33c3745791207759a4a3cca",
+          "normalized_chord_distance": 0.010201890597386666
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.0703145929132965,
+          "relative_slowness_change": 0.03700918276928951,
+          "model_sha256": "49da35b4278c825fb45271af31cec8add18494848c3ccb06e14c285c4ecc9219",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s2-soft-k50-top25_v1.4_20261111_185816_03bb18ee713743c7b82be394f09a4105": {
+      "run_id": "run_topnsweep11-s2-soft-k50-top25_v1.4_20261111_185816_03bb18ee713743c7b82be394f09a4105",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.07291950394772778,
+        "relative_slowness_change": 0.013171962290687457,
+        "model_sha256": "677e3f4700731a30391b1a6584c0fc184b74b82cd60035230a70698554b26acd",
+        "normalized_chord_distance": 0.09245608513900656
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "b7bfa47105d49faf565b8cdef99e97117b2095efb07b5e42ae04a962e4ba15bd",
+      "residual_cache_signature": "ceac98a296cd0167431882ebf332801fa875241ca8fe393c3d0c1b0169e47810",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.0769212934929106,
+          "relative_slowness_change": 0.004986319452830439,
+          "model_sha256": "4e9255048ba04656fb47ebf126c1b72ff7e0d15c194d5fe7f6ae11a5e6415650",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.0742047140122781,
+          "relative_slowness_change": 0.009347665354055089,
+          "model_sha256": "21707cf99daa1a14de967bbe034c9eda56ddd6e71f634779d7911aa98e8bd5c1",
+          "normalized_chord_distance": 0.07178674625373062
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.07291950394772778,
+          "relative_slowness_change": 0.013171962290687457,
+          "model_sha256": "677e3f4700731a30391b1a6584c0fc184b74b82cd60035230a70698554b26acd",
+          "normalized_chord_distance": 0.09245608513900656
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.07229699628202786,
+          "relative_slowness_change": 0.016295437055661798,
+          "model_sha256": "f88d950f69f2cc56354490f261073ddd27d5b638069ff61616f848af983d1175",
+          "normalized_chord_distance": 0.08577504556996335
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.07190496397180461,
+          "relative_slowness_change": 0.019108596650454595,
+          "model_sha256": "6fcb02c54d3b6a3073c0d9c82801ac3d3c8fe8f0f860aa1f2fc16e6a4f75ed8a",
+          "normalized_chord_distance": 0.07235011830806838
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.07162269003035783,
+          "relative_slowness_change": 0.02165775322681964,
+          "model_sha256": "b323df674bb6eb4c49a2127cee0356d10fc87581f8c74c5472783d53318b3544",
+          "normalized_chord_distance": 0.05884993639354804
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.0713922997467148,
+          "relative_slowness_change": 0.024026635073016455,
+          "model_sha256": "76d9fccc1047033b7362cda5e35086d7be8a644ff0724acb1c85506e0ff3bbab",
+          "normalized_chord_distance": 0.04732846726319085
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.07121260040593565,
+          "relative_slowness_change": 0.026296679398151265,
+          "model_sha256": "85cc9261c9712f90eff372437dc2a6ad3b32f01acc33f3f2d95a620729d4c071",
+          "normalized_chord_distance": 0.034880968844255046
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.0710521251343751,
+          "relative_slowness_change": 0.028399958642519568,
+          "model_sha256": "6bc0b4393d94cb88b39681a29a9499ea75297f1bd812587b33063c3effe88d97",
+          "normalized_chord_distance": 0.02520149352925547
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.07095301034147021,
+          "relative_slowness_change": 0.03042094495404633,
+          "model_sha256": "1dcfc1903393d6648600ebfa0447025ed8f0a62902bad5f981f97bcfbbb4a398",
+          "normalized_chord_distance": 0.011221986814638577
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.07085304744149161,
+          "relative_slowness_change": 0.03235920677552631,
+          "model_sha256": "38d05be04bdd00d58bc38901ede5b794dd92399e476b6e63cbcc95073ef3c3dc",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s2-hard-k100-top100_v1.4_20261111_185816_afd3e3edc15a406587c5e9fe15e83b8f": {
+      "run_id": "run_topnsweep11-s2-hard-k100-top100_v1.4_20261111_185816_afd3e3edc15a406587c5e9fe15e83b8f",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.07258630859570991,
+        "relative_slowness_change": 0.01714733981303511,
+        "model_sha256": "5015b4ba873e1d4fa7a519de5fc1c85855b8f760b6915b363bad29953003cfc1",
+        "normalized_chord_distance": 0.06776570437201748
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "b7bfa47105d49faf565b8cdef99e97117b2095efb07b5e42ae04a962e4ba15bd",
+      "residual_cache_signature": "fabf0363e4c437381af215405d780c093896155ad250a5eeb8331fb976f3caa1",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07665020490810573,
+          "relative_slowness_change": 0.006325402590241149,
+          "model_sha256": "6567d5fa0ce586720e2140058cecc4fb47566e2519ff00fe16736af8a74bf419",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.0739207792501599,
+          "relative_slowness_change": 0.012231412899833167,
+          "model_sha256": "8aba2063aeeb7fe8cd2a23d82da72eb8f422d419b5ad13c5ce4d468f9e69ff04",
+          "normalized_chord_distance": 0.046744919172840564
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.07258630859570991,
+          "relative_slowness_change": 0.01714733981303511,
+          "model_sha256": "5015b4ba873e1d4fa7a519de5fc1c85855b8f760b6915b363bad29953003cfc1",
+          "normalized_chord_distance": 0.06776570437201748
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.07188643771226402,
+          "relative_slowness_change": 0.021186442757085054,
+          "model_sha256": "12c8f864f130c37c9803ab9b1a7e7e316ec4846a02e6d89ae345b5e8c4c6ac06",
+          "normalized_chord_distance": 0.06688100547275977
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.07142082298954414,
+          "relative_slowness_change": 0.024677129551022924,
+          "model_sha256": "453898a2e7aa7b15081336828ca4dee3bec6e12682ff15f8586167009064876e",
+          "normalized_chord_distance": 0.06225282780800183
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.07111620951774461,
+          "relative_slowness_change": 0.027834760610836194,
+          "model_sha256": "1eb89715341aa073df60482f690a1d705929af7cb0785d916e00ff14a51fcc52",
+          "normalized_chord_distance": 0.05159771230706492
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.07089262000494113,
+          "relative_slowness_change": 0.030722912161556655,
+          "model_sha256": "b2c2b0bb93306a78e928b43d704fd6fab64581af024b596aa1ad418c08c4d515",
+          "normalized_chord_distance": 0.03995455206225503
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.07071314430381949,
+          "relative_slowness_change": 0.033484934433939385,
+          "model_sha256": "54e04bcdb6449f7d2f98bb12b5e0b70469536fa8f3e7f246b5fc1503baab2766",
+          "normalized_chord_distance": 0.028075664001631775
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.07056829566232706,
+          "relative_slowness_change": 0.03612753090789191,
+          "model_sha256": "f73df27d7a82234d62d2451f09f9a86c36dac601e5a14a44b1c307dea4b6d841",
+          "normalized_chord_distance": 0.01607163337530408
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.07043345571163992,
+          "relative_slowness_change": 0.03864379048722645,
+          "model_sha256": "8458ac4973da1be4c519fb79d1ff378656191cc474a6a1d76210197cb5954c17",
+          "normalized_chord_distance": 0.0062084329922125455
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.07030167778245175,
+          "relative_slowness_change": 0.04090317973121194,
+          "model_sha256": "4826aa79338ffcb05fe98edf9ec8ad8677c3bce8805194e5a1076b0515b05357",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s2-soft-k100-top100_v1.4_20261111_185816_0d44b3373e2c4a069b575f760b196695": {
+      "run_id": "run_topnsweep11-s2-soft-k100-top100_v1.4_20261111_185816_0d44b3373e2c4a069b575f760b196695",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.07370185407296102,
+        "relative_slowness_change": 0.011452934186819808,
+        "model_sha256": "01ede1fc3ecea3d2bba630d8a15339a49145a1be8ea62ef87af0c0bb525ed75c",
+        "normalized_chord_distance": 0.08510128250207279
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "b7bfa47105d49faf565b8cdef99e97117b2095efb07b5e42ae04a962e4ba15bd",
+      "residual_cache_signature": "0082cd48f5b01a5832e50a00166be8c6ecd8411228b7bd13333cc36b41f5afb3",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07703432378375438,
+          "relative_slowness_change": 0.004637766058246152,
+          "model_sha256": "db564befc1abc718e2ffea1485254632c4ddf601e0a4b2ef1616509f6c8a6855",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07465604570710235,
+          "relative_slowness_change": 0.00838904193097509,
+          "model_sha256": "361c0654434233e2fa570f3bf8df45790ddbc5aef3e76ed184224f782abcb1c1",
+          "normalized_chord_distance": 0.07947873366455803
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.07370185407296102,
+          "relative_slowness_change": 0.011452934186819808,
+          "model_sha256": "01ede1fc3ecea3d2bba630d8a15339a49145a1be8ea62ef87af0c0bb525ed75c",
+          "normalized_chord_distance": 0.08510128250207279
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.07320177245998319,
+          "relative_slowness_change": 0.013895082427575855,
+          "model_sha256": "2b30f7341d34cd0af56748bcda07ecf2ca6d9c6553f7867f39a46f226206be47",
+          "normalized_chord_distance": 0.0767963354916505
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.07286354136735071,
+          "relative_slowness_change": 0.01610330732721857,
+          "model_sha256": "9a9e4e3647da515ddbc08cdcd269465dd9a71aa65f27e7ba50ba40c7d05b1419",
+          "normalized_chord_distance": 0.06481428747855382
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.07257365715658552,
+          "relative_slowness_change": 0.018175724592881286,
+          "model_sha256": "17eab2150f135dd5d43bb330e542c0f48455d2a2060eb70e4d0a660f97bed6a4",
+          "normalized_chord_distance": 0.056831091062679286
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.0723415108706378,
+          "relative_slowness_change": 0.020205465664084935,
+          "model_sha256": "efcdec53b060af3cd983d7465b03cf44d5649acc6363e59f85b6d8e652f70f44",
+          "normalized_chord_distance": 0.04702568079013305
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.07215854864381412,
+          "relative_slowness_change": 0.022166823145581542,
+          "model_sha256": "fd4b7963edf14e97981414c4d54c78d9f0126402798ff875a46833068497ca5b",
+          "normalized_chord_distance": 0.035728156632917576
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.07200165101533282,
+          "relative_slowness_change": 0.024081072687084145,
+          "model_sha256": "47d462e9dc34f3ce5451e9ab31ff173d25fb4143e80c25b4439ffa3b4da8b984",
+          "normalized_chord_distance": 0.02475271628316453
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.07188763967146554,
+          "relative_slowness_change": 0.025922955300738338,
+          "model_sha256": "5069de517871732b3fcefaf64aef95758ee77f08358737774f49c2b48e732817",
+          "normalized_chord_distance": 0.011461136879244186
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.07178093232165814,
+          "relative_slowness_change": 0.027707218869470328,
+          "model_sha256": "04f712fd1c0ea96c334d0b7545087bd41545b605001da838b7f9280291d2ccab",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e": {
+      "run_id": "run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.07576577652730956,
+        "relative_slowness_change": 0.01883558890822165,
+        "model_sha256": "60df4fdba57a282fa5cc4d2fc26434c398f13f32093d777c90238e03e01cec88",
+        "normalized_chord_distance": 0.08820127145789321
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "295d8a227f1e4347d56e3aa7e5ad31d46b071b39dc5533546f5b38ae1def99a0",
+      "residual_cache_signature": "2ef6de889a6cc3fd592fa01b93d4b8fc00485872b905a9789a4de411c9a0c05f",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07947594321401853,
+          "relative_slowness_change": 0.008723635958842709,
+          "model_sha256": "f935ece920e948deb1d8b5664cf08d405182c87b84cf1a9ce5151e623a6d757a",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07698301774132607,
+          "relative_slowness_change": 0.01432244324788477,
+          "model_sha256": "54d42bd886ea8d3edf0c690b7d267bf2bd2820d852062fb7ab72a738ab8079fc",
+          "normalized_chord_distance": 0.06750423435264058
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.07576577652730956,
+          "relative_slowness_change": 0.01883558890822165,
+          "model_sha256": "60df4fdba57a282fa5cc4d2fc26434c398f13f32093d777c90238e03e01cec88",
+          "normalized_chord_distance": 0.08820127145789321
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.07518760707954784,
+          "relative_slowness_change": 0.0221585123456467,
+          "model_sha256": "f2f6101a212ad611c07ad260a2724ebb547ccf5505146ed8570daa6a144c8659",
+          "normalized_chord_distance": 0.08264780626144173
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.07485262752156592,
+          "relative_slowness_change": 0.024775142220033616,
+          "model_sha256": "e24feb69efcd3c4a0cf6b256c6856b9da6d100192a388619dd34bcff76f504a9",
+          "normalized_chord_distance": 0.07090462407633058
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.07461358056267817,
+          "relative_slowness_change": 0.0270265266388806,
+          "model_sha256": "f30e3848b9e4a81703c41e6eb5c981287d0ecbc1230570aebfe3c94c116c4a52",
+          "normalized_chord_distance": 0.05896219636250484
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.07443040543445036,
+          "relative_slowness_change": 0.029038525212319262,
+          "model_sha256": "2b3196c0a3e0a76e7e10b65c991f1187ba2489b945f64cf6bc55be8bd7ff3780",
+          "normalized_chord_distance": 0.04728706773230827
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.07429074407881985,
+          "relative_slowness_change": 0.03104876733300212,
+          "model_sha256": "e3af296d093d14c6363df61918387599384da8f3f0c9249ab703afc591ca6d07",
+          "normalized_chord_distance": 0.03229572932048624
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.074169862447845,
+          "relative_slowness_change": 0.03264311610264027,
+          "model_sha256": "eb35d831c4de57f25c1f81c871d2c922434e5a11e6be46c08ea4045b4a546c71",
+          "normalized_chord_distance": 0.02330181653474353
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.07407771183027172,
+          "relative_slowness_change": 0.034229968821530725,
+          "model_sha256": "0f84ee4e73250022de3bdfe3f7443680f128d5d87570043a0a005835cecead84",
+          "normalized_chord_distance": 0.011788762522361631
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.07401988390772782,
+          "relative_slowness_change": 0.03558695759875826,
+          "model_sha256": "b08f701478131d6aef6a8c5463269358eaf7cd5ecaef7ab1c87e60cbf65cd560",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s3-soft-k50-top10_v1.4_20261111_194336_241a6dcd8ce54188a944ec2f1ce5cf0b": {
+      "run_id": "run_topnsweep11-s3-soft-k50-top10_v1.4_20261111_194336_241a6dcd8ce54188a944ec2f1ce5cf0b",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.07591410228631344,
+        "relative_slowness_change": 0.018278787899856694,
+        "model_sha256": "cf3b44484495726ccafb1128d4abc8bd6c651bf379c7441778e8aafd6c9de1e9",
+        "normalized_chord_distance": 0.10226020002426664
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "295d8a227f1e4347d56e3aa7e5ad31d46b071b39dc5533546f5b38ae1def99a0",
+      "residual_cache_signature": "d5c4fe00ad25e166a4fed40da1c7b8466106fef035fef5ceaa016111b30934ef",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07954825742986019,
+          "relative_slowness_change": 0.008502267320530218,
+          "model_sha256": "f09eea18e623284efccdc564f64cdde1a9c090b7f54c1c4bce60bce1da50a67d",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07702039716289191,
+          "relative_slowness_change": 0.014088466390785032,
+          "model_sha256": "1c723ba5b0166b7cb0be27b0abbba3b7df1a69ad66431aeaa5e99e71638eff7f",
+          "normalized_chord_distance": 0.0821935775538727
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.07591410228631344,
+          "relative_slowness_change": 0.018278787899856694,
+          "model_sha256": "cf3b44484495726ccafb1128d4abc8bd6c651bf379c7441778e8aafd6c9de1e9",
+          "normalized_chord_distance": 0.10226020002426664
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.0753094170261892,
+          "relative_slowness_change": 0.021605503200834084,
+          "model_sha256": "2c999cfbefc8189af94a1a1f7d702ff4124b862c396efbb88bbe2110b9bb1a43",
+          "normalized_chord_distance": 0.10192446855401158
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.07494902947536201,
+          "relative_slowness_change": 0.024509101011123937,
+          "model_sha256": "3bc98464bd1bd9f9b39a6dd4f9d288188c4bbe1f1c531f949f406efdbc997cdd",
+          "normalized_chord_distance": 0.08905444556557282
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.07473127166579885,
+          "relative_slowness_change": 0.027012810498776248,
+          "model_sha256": "8f507ba77c0842f0cc904ea916c862cfbafd9a84de1542d9572adf1d4218256c",
+          "normalized_chord_distance": 0.07104493351564459
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.07458488427563584,
+          "relative_slowness_change": 0.029181704467786163,
+          "model_sha256": "a3a893adfc370151bbfad4ce3b9742ce9fd27e67f6565e705c300e28023ad652",
+          "normalized_chord_distance": 0.053171999069084507
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.07447073627451152,
+          "relative_slowness_change": 0.031060804147818602,
+          "model_sha256": "dfd1027880d8c7742b978965b32108231568f1909df099a7d278c52155d9fd3a",
+          "normalized_chord_distance": 0.03819089111222322
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.0743817739709011,
+          "relative_slowness_change": 0.03281212979946694,
+          "model_sha256": "b80be16b1df0ab21b31460bf7a97603823f42239d075d66e88a966d236fed4e7",
+          "normalized_chord_distance": 0.023480037644654835
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.0743047712008588,
+          "relative_slowness_change": 0.0343752506209207,
+          "model_sha256": "6b72913a371565a53b88ac1077b893f91d44a3282e583696a38f3d86e7958756",
+          "normalized_chord_distance": 0.011219685392702761
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.0742322138982596,
+          "relative_slowness_change": 0.03589260234562152,
+          "model_sha256": "d93326df4d7496b2cefa74ae4ac5b38300b75d10192f5964ebe78365759eea84",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s3-soft-k50-top25_v1.4_20261111_195434_477ff0d69389450da1ea72caf1af7ab9": {
+      "run_id": "run_topnsweep11-s3-soft-k50-top25_v1.4_20261111_195434_477ff0d69389450da1ea72caf1af7ab9",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.07590887839696475,
+        "relative_slowness_change": 0.018320494661833858,
+        "model_sha256": "52677daf837841fa6837e7756a156483abfd4958ab1f45c0f6a09525b4238bb8",
+        "normalized_chord_distance": 0.1026727093023049
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "295d8a227f1e4347d56e3aa7e5ad31d46b071b39dc5533546f5b38ae1def99a0",
+      "residual_cache_signature": "19a32480e810b2a48f0375245ad248b3951a4515435ff40471711d59f525246d",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07954293784775054,
+          "relative_slowness_change": 0.00852173393009578,
+          "model_sha256": "8d82a975b1d10452c3b87b16d2401a5787dde5b6e9e5d3e469fe3cca8669fdba",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07701828673712906,
+          "relative_slowness_change": 0.014107636739821539,
+          "model_sha256": "1087af284a89b4f7210f65a83d3c1cadfee494d1d688f5ded15582d6ce247874",
+          "normalized_chord_distance": 0.08248653282894296
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.07590887839696475,
+          "relative_slowness_change": 0.018320494661833858,
+          "model_sha256": "52677daf837841fa6837e7756a156483abfd4958ab1f45c0f6a09525b4238bb8",
+          "normalized_chord_distance": 0.1026727093023049
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.07530924130818542,
+          "relative_slowness_change": 0.021657122090133336,
+          "model_sha256": "9916a62b5ad603cb4c6278d2270eaaa56c2031614ea422ab392413603ef7d603",
+          "normalized_chord_distance": 0.10171294321181197
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.07493401361662078,
+          "relative_slowness_change": 0.02460586428315042,
+          "model_sha256": "90a97d571ef2034c485cec49748385a83126027af64d033fc99ad542c8e8a1c4",
+          "normalized_chord_distance": 0.09019786327116917
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.07472453368305192,
+          "relative_slowness_change": 0.027113915972796325,
+          "model_sha256": "4715b5daa4270356c092240a8ee2eb84837ff84028755f92f1dd4d96e7e92e32",
+          "normalized_chord_distance": 0.07124319310844676
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.07457093146565072,
+          "relative_slowness_change": 0.029320801393015676,
+          "model_sha256": "feec27d555671543ad02fcd51a5b0758a716be3e2b8d783bee60649906630b06",
+          "normalized_chord_distance": 0.05392806938623689
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.07446391083992508,
+          "relative_slowness_change": 0.031192447138560606,
+          "model_sha256": "8266349cdb429bf331817f381e486f775d11a965941986445e287d2830880113",
+          "normalized_chord_distance": 0.03828480112222834
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.07437271574334298,
+          "relative_slowness_change": 0.03298958678407441,
+          "model_sha256": "21549e1bc56452a03e3b5a7312cde4d2538231dcf51abdce82b6718d69c1ef05",
+          "normalized_chord_distance": 0.02336105450196611
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.07429071326782816,
+          "relative_slowness_change": 0.034502660453243524,
+          "model_sha256": "cd72e2d4b0d5e7a25e1b3666a5e0356282f73ca9392df06503efe195bcc184b4",
+          "normalized_chord_distance": 0.012661175567531114
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.07422214311284756,
+          "relative_slowness_change": 0.0360943585614156,
+          "model_sha256": "edaf3b3fbbf3ccdf3d86c20bac818269bd0bdf9cb32672b40b6d846cbe9b41ec",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s3-hard-k100-top100_v1.4_20261111_202434_e4ed63466a54414dbc343c8bdeab2303": {
+      "run_id": "run_topnsweep11-s3-hard-k100-top100_v1.4_20261111_202434_e4ed63466a54414dbc343c8bdeab2303",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.07576576938268502,
+        "relative_slowness_change": 0.018835440527227153,
+        "model_sha256": "ab9f44d98133de9a51b24750c96de209f3cc12a649566b9418b97cb506d2a79b",
+        "normalized_chord_distance": 0.09077485539316159
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "295d8a227f1e4347d56e3aa7e5ad31d46b071b39dc5533546f5b38ae1def99a0",
+      "residual_cache_signature": "9a7c178843b8a96c44b027a74e32509a60e0d66241103f6b79ead6339e423008",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07947595576930572,
+          "relative_slowness_change": 0.008723635958842707,
+          "model_sha256": "0765e6cb339eed87b45b3d69a9984a372bf5bfc85da8e25d4b7e49c3383619d5",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07698300678930484,
+          "relative_slowness_change": 0.014322563252960894,
+          "model_sha256": "da314d78f6e592ffb47ed9211749c4df13189285f9f79c688ef166eb87e55c17",
+          "normalized_chord_distance": 0.06922765382518567
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.07576576938268502,
+          "relative_slowness_change": 0.018835440527227153,
+          "model_sha256": "ab9f44d98133de9a51b24750c96de209f3cc12a649566b9418b97cb506d2a79b",
+          "normalized_chord_distance": 0.09077485539316159
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.07518574006575868,
+          "relative_slowness_change": 0.02216776538386756,
+          "model_sha256": "99d7416e294880d181eba41397538425392c67da29bf48832b614dce96b68c33",
+          "normalized_chord_distance": 0.08563582531077092
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.07485516212806248,
+          "relative_slowness_change": 0.02475317089062703,
+          "model_sha256": "a6ddfa92f7e0cf036eabcc6bf2d013fb9a8f4b74de729a3168bfb7f83a48567f",
+          "normalized_chord_distance": 0.07417152717596866
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.07461839007315833,
+          "relative_slowness_change": 0.027001707358336523,
+          "model_sha256": "aa3f9b4661806bfea579f4bbdaf3c0f0e393125612fc4445738effc4c04046e8",
+          "normalized_chord_distance": 0.06208313458418828
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.07443587664707753,
+          "relative_slowness_change": 0.029014130966197878,
+          "model_sha256": "0c12fc932a408f020bbc8f2a6234c5c9b5a7910012855eefebaa58af17474e1e",
+          "normalized_chord_distance": 0.05038509879895301
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.07431298532298374,
+          "relative_slowness_change": 0.030985288681160093,
+          "model_sha256": "9f7593292421ccfabd289cd04d7c47d12aa0ed8e616971a5197d04cd1cb5e9d9",
+          "normalized_chord_distance": 0.03381361696214265
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.07419038214160015,
+          "relative_slowness_change": 0.03263466215936096,
+          "model_sha256": "24a7cc3c55973957d18276e2e64dd9b42bf828400e52709e02b60ac3f1e71be1",
+          "normalized_chord_distance": 0.024215673833081763
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.07410157147846025,
+          "relative_slowness_change": 0.03412133482225171,
+          "model_sha256": "1e930febc3e6e02ffc34b27b1bdbd4dba4c4d52beb80aa14138a8419f21e6202",
+          "normalized_chord_distance": 0.01376430783383627
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.07405468335838848,
+          "relative_slowness_change": 0.03551037755490381,
+          "model_sha256": "a8e756427170c191719ce40ea807d2c2cae93a534aeee37c7e56d7b8019f4cce",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s3-soft-k100-top100_v1.4_20261111_200826_d7cd2a4f6d034f96a94437b8f328f807": {
+      "run_id": "run_topnsweep11-s3-soft-k100-top100_v1.4_20261111_200826_d7cd2a4f6d034f96a94437b8f328f807",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.07590845890150284,
+        "relative_slowness_change": 0.018322803537097015,
+        "model_sha256": "e1f841b2fe541ee786cd7135d0d463d654e2699cb037a5a6e2360a389b665ffb",
+        "normalized_chord_distance": 0.10197966030089178
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "295d8a227f1e4347d56e3aa7e5ad31d46b071b39dc5533546f5b38ae1def99a0",
+      "residual_cache_signature": "bd861cb60d561fdcc1ebe996f792fed6f92006d3406e2785d4b4f6c2c88b08b2",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07954293635639922,
+          "relative_slowness_change": 0.00852173410640285,
+          "model_sha256": "550e60acaee99cbc9600aa091eee64ff574cf5c8cc2df791f554f6bffeba05c1",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07701841164967348,
+          "relative_slowness_change": 0.014107286176395744,
+          "model_sha256": "c81dd6daed091f30ad6881b256880cc85e217c2459e5f0dd134ca4bc3d0b0cae",
+          "normalized_chord_distance": 0.08200565474039435
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.07590845890150284,
+          "relative_slowness_change": 0.018322803537097015,
+          "model_sha256": "e1f841b2fe541ee786cd7135d0d463d654e2699cb037a5a6e2360a389b665ffb",
+          "normalized_chord_distance": 0.10197966030089178
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.07531004304059079,
+          "relative_slowness_change": 0.021655913463034488,
+          "model_sha256": "9cc0317d2334366736884f205509b7e1a837e093bc97de0db9790340ca8d8395",
+          "normalized_chord_distance": 0.10083080902457504
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.07493928237222462,
+          "relative_slowness_change": 0.0245903005506076,
+          "model_sha256": "a099854f6b0ddcd235df2aa3379505509b125bcdd23beef329a179d17482596c",
+          "normalized_chord_distance": 0.08892057057664753
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.07472872275933129,
+          "relative_slowness_change": 0.027137164970830834,
+          "model_sha256": "0db3695a88d4cf1fc148182fe940c090f427e86a119c213d9613fa2a25c31a34",
+          "normalized_chord_distance": 0.06934501015483915
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.0745716692069459,
+          "relative_slowness_change": 0.02933777446979868,
+          "model_sha256": "e0aa2c82cf7b331fab61de1dc9b7fc5482132bdd0745106c341e4b9c812a0e74",
+          "normalized_chord_distance": 0.05261072911092135
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.07445355502907597,
+          "relative_slowness_change": 0.03123509587267139,
+          "model_sha256": "a764679321be5e15347acfd8c7b7e8e380eec21d68628d064066ab19ac69feb2",
+          "normalized_chord_distance": 0.03808313707190424
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.07437092299426215,
+          "relative_slowness_change": 0.03298711279182797,
+          "model_sha256": "71fd7224209d3d8ee64baaf15a3450d0eaa61334bfacfaa14a2d217d88e2d872",
+          "normalized_chord_distance": 0.02267809740923326
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.07429556140292294,
+          "relative_slowness_change": 0.03453738380288067,
+          "model_sha256": "99f697e446f1b91dccee3b3b9ed672dea99033ac057cd7cbf309087829b3596f",
+          "normalized_chord_distance": 0.010523799869634087
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.0742139928580841,
+          "relative_slowness_change": 0.036103911208454645,
+          "model_sha256": "de3c91f9ac65855f27fd7d1e3f2dd7ca45a568831aa7785fb702de55ede68feb",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s4-hard-k30-top30_v1.4_20261111_212301_8cf8b6b0c1194310878224508e4f9f74": {
+      "run_id": "run_topnsweep11-s4-hard-k30-top30_v1.4_20261111_212301_8cf8b6b0c1194310878224508e4f9f74",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.06961407113668305,
+        "relative_slowness_change": 0.01777704660855305,
+        "model_sha256": "fde11024d556cb3dac1c89a288d7fb4ea4de719e07e714685be38fd0b3949659",
+        "normalized_chord_distance": 0.15359174318847843
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "a50ab4d085dfcb3c4c02c5d3910930207eb78c92b2b37e92ce9e5b1df73aadfe",
+      "residual_cache_signature": "792e45e8063a8a55968054ae2f0dd1e1a1ed29b094c840ce144807bf721ac514",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07380316429635918,
+          "relative_slowness_change": 0.007386049866589995,
+          "model_sha256": "c468661541e8578126127b9daca3cc175ae29d17b96163234e6b7782e3fb2b00",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07061706887384808,
+          "relative_slowness_change": 0.013513124550819664,
+          "model_sha256": "f9f51868c81ca5d910056c246ec2490a397e2926499dcd0f6d3bb4865a43500e",
+          "normalized_chord_distance": 0.14799730145294
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.06961407113668305,
+          "relative_slowness_change": 0.01777704660855305,
+          "model_sha256": "fde11024d556cb3dac1c89a288d7fb4ea4de719e07e714685be38fd0b3949659",
+          "normalized_chord_distance": 0.15359174318847843
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.06938736242814232,
+          "relative_slowness_change": 0.020237570762666933,
+          "model_sha256": "e12106ea01a899a43ddaf2b60bd72defcf3f01065f9206dbc6447130b2b1e96a",
+          "normalized_chord_distance": 0.11861113588933471
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.06930014788897944,
+          "relative_slowness_change": 0.02174260586060099,
+          "model_sha256": "3e3617954dcb7df8da7db0f27c92e72fe021fc3d2ed6cc911b6e6cd7045a326f",
+          "normalized_chord_distance": 0.09337065000640282
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.06924528436719876,
+          "relative_slowness_change": 0.02293623802583176,
+          "model_sha256": "4133d578e40eba41beda7834be81190b56af864dc853da1751a13bfd933624ec",
+          "normalized_chord_distance": 0.07300585288481139
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.0692033275547756,
+          "relative_slowness_change": 0.023959716314666934,
+          "model_sha256": "ccf7642ee8b161fe00433d3664e9a289d30458ba97ff0b5fc931ff9ca7aaf95f",
+          "normalized_chord_distance": 0.055931932410086746
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.06916949747394842,
+          "relative_slowness_change": 0.024939164262049937,
+          "model_sha256": "cc10c100858e4fef140e0c7f51f5cbee72d12e2fd25f84596e5dc635679499ec",
+          "normalized_chord_distance": 0.03953888824407924
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.06914300804204883,
+          "relative_slowness_change": 0.025820519719682546,
+          "model_sha256": "575335243537ceae06511b91196aab8522621c449420aa38b765d317b7154634",
+          "normalized_chord_distance": 0.024890055788711927
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.06912302503304174,
+          "relative_slowness_change": 0.02660478703614604,
+          "model_sha256": "4f2f0cf7f2b20c297a23b67455c5c8a78d6de5ddb08f6159cfb54d2f134eb0da",
+          "normalized_chord_distance": 0.01182911127954758
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.06910494443282131,
+          "relative_slowness_change": 0.027335524130019547,
+          "model_sha256": "285fc9fb5770a4c8c61ede6e23c0edec235d0da2f1b4c198338c86d2c76cc15e",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s4-soft-k30-top30_v1.4_20261111_212104_95ef24d2ff494767adc5a67375e89596": {
+      "run_id": "run_topnsweep11-s4-soft-k30-top30_v1.4_20261111_212104_95ef24d2ff494767adc5a67375e89596",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.06960230479243841,
+        "relative_slowness_change": 0.019472295343513035,
+        "model_sha256": "d2c82662b78a7599a38715d2875f301b431568c16c35b865094f13324bb51e7b",
+        "normalized_chord_distance": 0.1910258612624441
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "a50ab4d085dfcb3c4c02c5d3910930207eb78c92b2b37e92ce9e5b1df73aadfe",
+      "residual_cache_signature": "d2d7d3c7f5f4b403cf05524f1bf9dbd68d407f1cfd702bc7f534d1de7f19f323",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07361841992402038,
+          "relative_slowness_change": 0.008234038414480765,
+          "model_sha256": "5a357af9ae86a08bd14bcab65902712f0fdc945716d4ab9c67c664c6ac00945e",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07050868304644159,
+          "relative_slowness_change": 0.014940043696466175,
+          "model_sha256": "0539039616ac15da443739a0b98482c37199e61b3f986af9009a546706fe9138",
+          "normalized_chord_distance": 0.18126434813743336
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.06960230479243841,
+          "relative_slowness_change": 0.019472295343513035,
+          "model_sha256": "d2c82662b78a7599a38715d2875f301b431568c16c35b865094f13324bb51e7b",
+          "normalized_chord_distance": 0.1910258612624441
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.06938446461916772,
+          "relative_slowness_change": 0.022165533314797443,
+          "model_sha256": "7430541ef0d949c5ba3a3b583dbc60e01dca09e847e0f3b0b9fa7897c33918c3",
+          "normalized_chord_distance": 0.15965270954965993
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.06930603985644478,
+          "relative_slowness_change": 0.02409280246855222,
+          "model_sha256": "493370f20f0e42a3c24ba54846733598e58cb433f59ba081403849efc8862edf",
+          "normalized_chord_distance": 0.12942036981240726
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.06926447996828664,
+          "relative_slowness_change": 0.02573789102877466,
+          "model_sha256": "bfd5011c8b15c33e50f53b9fbb5d95bb2c80b3c6ee63fcd41a498a33c9df6e17",
+          "normalized_chord_distance": 0.10211592148102575
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.06923535360655347,
+          "relative_slowness_change": 0.027245577813274684,
+          "model_sha256": "5b0dbf8c1978477b89a23a0a4af194250685493fa334e8c0fe7787edc74c9888",
+          "normalized_chord_distance": 0.07749165836948763
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.06921286819081372,
+          "relative_slowness_change": 0.028630057769244436,
+          "model_sha256": "2af52ec9a9302991392bfc3b9223d8a09447cb9eb71b71dd1601f960e1af6b8e",
+          "normalized_chord_distance": 0.055582687831114384
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.06919380262933755,
+          "relative_slowness_change": 0.029941172482242855,
+          "model_sha256": "3dc567ce23f21344121488b3b6e88fe62db5b0aad9fd558a399158da050ad0d1",
+          "normalized_chord_distance": 0.035587137243495305
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.06917689850256614,
+          "relative_slowness_change": 0.031198580413332528,
+          "model_sha256": "c280164ed71c8355e6c891389b5a4a82156d60537d5b9584d0e16a7be0f60e6e",
+          "normalized_chord_distance": 0.017117335130003505
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.06916279947918177,
+          "relative_slowness_change": 0.03239494133227225,
+          "model_sha256": "3a4ca548993227b2945bc38f3c4b56bbcdb6818f1dd026c57ea5d0df5ef59369",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s4-hard-k100-top100_v1.4_20261111_220930_faab40b5c2ef41b69d58861eaa023728": {
+      "run_id": "run_topnsweep11-s4-hard-k100-top100_v1.4_20261111_220930_faab40b5c2ef41b69d58861eaa023728",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.06961407113668305,
+        "relative_slowness_change": 0.01777704660855305,
+        "model_sha256": "fde11024d556cb3dac1c89a288d7fb4ea4de719e07e714685be38fd0b3949659",
+        "normalized_chord_distance": 0.15359174318847843
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "a50ab4d085dfcb3c4c02c5d3910930207eb78c92b2b37e92ce9e5b1df73aadfe",
+      "residual_cache_signature": "b3ab18ac2253064ea62f47b0dcfb5e28e2fea660b19efdef1ce1b0e641ae91f0",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07380316429635918,
+          "relative_slowness_change": 0.007386049866589995,
+          "model_sha256": "c468661541e8578126127b9daca3cc175ae29d17b96163234e6b7782e3fb2b00",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07061706887384808,
+          "relative_slowness_change": 0.013513124550819664,
+          "model_sha256": "f9f51868c81ca5d910056c246ec2490a397e2926499dcd0f6d3bb4865a43500e",
+          "normalized_chord_distance": 0.14799730145294
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.06961407113668305,
+          "relative_slowness_change": 0.01777704660855305,
+          "model_sha256": "fde11024d556cb3dac1c89a288d7fb4ea4de719e07e714685be38fd0b3949659",
+          "normalized_chord_distance": 0.15359174318847843
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.06938736242814232,
+          "relative_slowness_change": 0.020237570762666933,
+          "model_sha256": "e12106ea01a899a43ddaf2b60bd72defcf3f01065f9206dbc6447130b2b1e96a",
+          "normalized_chord_distance": 0.11861113588933471
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.06930014788897944,
+          "relative_slowness_change": 0.02174260586060099,
+          "model_sha256": "3e3617954dcb7df8da7db0f27c92e72fe021fc3d2ed6cc911b6e6cd7045a326f",
+          "normalized_chord_distance": 0.09337065000640282
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.06924528436719876,
+          "relative_slowness_change": 0.02293623802583176,
+          "model_sha256": "4133d578e40eba41beda7834be81190b56af864dc853da1751a13bfd933624ec",
+          "normalized_chord_distance": 0.07300585288481139
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.0692033275547756,
+          "relative_slowness_change": 0.023959716314666934,
+          "model_sha256": "ccf7642ee8b161fe00433d3664e9a289d30458ba97ff0b5fc931ff9ca7aaf95f",
+          "normalized_chord_distance": 0.055931932410086746
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.06916949747394842,
+          "relative_slowness_change": 0.024939164262049937,
+          "model_sha256": "cc10c100858e4fef140e0c7f51f5cbee72d12e2fd25f84596e5dc635679499ec",
+          "normalized_chord_distance": 0.03953888824407924
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.06914300804204883,
+          "relative_slowness_change": 0.025820519719682546,
+          "model_sha256": "575335243537ceae06511b91196aab8522621c449420aa38b765d317b7154634",
+          "normalized_chord_distance": 0.024890055788711927
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.06912302503304174,
+          "relative_slowness_change": 0.02660478703614604,
+          "model_sha256": "4f2f0cf7f2b20c297a23b67455c5c8a78d6de5ddb08f6159cfb54d2f134eb0da",
+          "normalized_chord_distance": 0.01182911127954758
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.06910494443282131,
+          "relative_slowness_change": 0.027335524130019547,
+          "model_sha256": "285fc9fb5770a4c8c61ede6e23c0edec235d0da2f1b4c198338c86d2c76cc15e",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s4-soft-k100-top100_v1.4_20261111_213138_55279cef4fe34d06aaf15b93a02c4a26": {
+      "run_id": "run_topnsweep11-s4-soft-k100-top100_v1.4_20261111_213138_55279cef4fe34d06aaf15b93a02c4a26",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.06958883968725901,
+        "relative_slowness_change": 0.01971666236847277,
+        "model_sha256": "ce94c23a50bf9c5f4f1648c237e00686bb156785571079bac7f5d31bb08d40f9",
+        "normalized_chord_distance": 0.19523078419857268
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "a50ab4d085dfcb3c4c02c5d3910930207eb78c92b2b37e92ce9e5b1df73aadfe",
+      "residual_cache_signature": "5325eb4a099f7494fa2fef3163d052b8ce70aace07615b932141b9e9413d0cc3",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07360396802459536,
+          "relative_slowness_change": 0.008358376112344409,
+          "model_sha256": "ad319eefd106dbe8f563879b7e2d3cf941c50cbb4cb83f8621115ff57a811a5a",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07049571892026882,
+          "relative_slowness_change": 0.015115108138865197,
+          "model_sha256": "da435330a92519a2e42754a64413eb292ee13009b6a02dc0e278b3c926842881",
+          "normalized_chord_distance": 0.1849460111067551
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.06958883968725901,
+          "relative_slowness_change": 0.01971666236847277,
+          "model_sha256": "ce94c23a50bf9c5f4f1648c237e00686bb156785571079bac7f5d31bb08d40f9",
+          "normalized_chord_distance": 0.19523078419857268
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.0693731354599499,
+          "relative_slowness_change": 0.02245236425033431,
+          "model_sha256": "403cddc7bb09e62c62a021ad25b0df5af78f05984b9a9b264f8b0c988d05a4b5",
+          "normalized_chord_distance": 0.16367472827413634
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.06929574306414935,
+          "relative_slowness_change": 0.024444775183419466,
+          "model_sha256": "6f20ecd82d18b6d87d448b5e41057a1ebee4b0b977f0dc541a3c388c9d49086c",
+          "normalized_chord_distance": 0.13264571405374947
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.06925352701553837,
+          "relative_slowness_change": 0.026135411871071428,
+          "model_sha256": "dd81a3f043618b1c3dc31580478a3f31ee45d0dd96b7a838d3ab215719cf9d52",
+          "normalized_chord_distance": 0.10519291269223509
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.06922602347318833,
+          "relative_slowness_change": 0.027690918921890545,
+          "model_sha256": "f6797022cff47e9c4c127c8ffc68c5ff609eb2700928a20b00d996e884609720",
+          "normalized_chord_distance": 0.07998986580697244
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.06920328886350546,
+          "relative_slowness_change": 0.029142108317396165,
+          "model_sha256": "1850c1843881db9f1c7e1970a84516f0d0e68253138a14a1504f1ab257f0532f",
+          "normalized_chord_distance": 0.05746721556023887
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.06918618525170502,
+          "relative_slowness_change": 0.0305304098900896,
+          "model_sha256": "db7567bed7d6d8d2e11364bfe171bb05673e0536b842364c167ea8af8b22d4a5",
+          "normalized_chord_distance": 0.03635586549433596
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.06917096837850464,
+          "relative_slowness_change": 0.0318278858217949,
+          "model_sha256": "ef5dec9de2da9e64e9d61c0489e055c7f1a29afc59c48f5cb5c446db657b39fd",
+          "normalized_chord_distance": 0.01746379953069919
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.06915534273352883,
+          "relative_slowness_change": 0.03309275875543468,
+          "model_sha256": "fa08e1be1e7e2096aba35f809dbba5874342989b121f35043eb31bd45d918c2a",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s4-hard-k150-top150_v1.4_20261111_230914_472d0848cbea478f91481854ae55246b": {
+      "run_id": "run_topnsweep11-s4-hard-k150-top150_v1.4_20261111_230914_472d0848cbea478f91481854ae55246b",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.06961407113668305,
+        "relative_slowness_change": 0.01777704660855305,
+        "model_sha256": "fde11024d556cb3dac1c89a288d7fb4ea4de719e07e714685be38fd0b3949659",
+        "normalized_chord_distance": 0.15359174318847843
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "a50ab4d085dfcb3c4c02c5d3910930207eb78c92b2b37e92ce9e5b1df73aadfe",
+      "residual_cache_signature": "c3c28db2a87da0e1af3f27b454e1a464dba1fdc997bb33cd3d530867de8df65d",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07380316429635918,
+          "relative_slowness_change": 0.007386049866589995,
+          "model_sha256": "c468661541e8578126127b9daca3cc175ae29d17b96163234e6b7782e3fb2b00",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07061706887384808,
+          "relative_slowness_change": 0.013513124550819664,
+          "model_sha256": "f9f51868c81ca5d910056c246ec2490a397e2926499dcd0f6d3bb4865a43500e",
+          "normalized_chord_distance": 0.14799730145294
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.06961407113668305,
+          "relative_slowness_change": 0.01777704660855305,
+          "model_sha256": "fde11024d556cb3dac1c89a288d7fb4ea4de719e07e714685be38fd0b3949659",
+          "normalized_chord_distance": 0.15359174318847843
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.06938736242814232,
+          "relative_slowness_change": 0.020237570762666933,
+          "model_sha256": "e12106ea01a899a43ddaf2b60bd72defcf3f01065f9206dbc6447130b2b1e96a",
+          "normalized_chord_distance": 0.11861113588933471
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.06930014788897944,
+          "relative_slowness_change": 0.02174260586060099,
+          "model_sha256": "3e3617954dcb7df8da7db0f27c92e72fe021fc3d2ed6cc911b6e6cd7045a326f",
+          "normalized_chord_distance": 0.09337065000640282
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.06924528436719876,
+          "relative_slowness_change": 0.02293623802583176,
+          "model_sha256": "4133d578e40eba41beda7834be81190b56af864dc853da1751a13bfd933624ec",
+          "normalized_chord_distance": 0.07300585288481139
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.0692033275547756,
+          "relative_slowness_change": 0.023959716314666934,
+          "model_sha256": "ccf7642ee8b161fe00433d3664e9a289d30458ba97ff0b5fc931ff9ca7aaf95f",
+          "normalized_chord_distance": 0.055931932410086746
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.06916949747394842,
+          "relative_slowness_change": 0.024939164262049937,
+          "model_sha256": "cc10c100858e4fef140e0c7f51f5cbee72d12e2fd25f84596e5dc635679499ec",
+          "normalized_chord_distance": 0.03953888824407924
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.06914300804204883,
+          "relative_slowness_change": 0.025820519719682546,
+          "model_sha256": "575335243537ceae06511b91196aab8522621c449420aa38b765d317b7154634",
+          "normalized_chord_distance": 0.024890055788711927
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.06912302503304174,
+          "relative_slowness_change": 0.02660478703614604,
+          "model_sha256": "4f2f0cf7f2b20c297a23b67455c5c8a78d6de5ddb08f6159cfb54d2f134eb0da",
+          "normalized_chord_distance": 0.01182911127954758
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.06910494443282131,
+          "relative_slowness_change": 0.027335524130019547,
+          "model_sha256": "285fc9fb5770a4c8c61ede6e23c0edec235d0da2f1b4c198338c86d2c76cc15e",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s4-soft-k150-top150_v1.4_20261111_222430_aad13d7b4ac24eed98f3cd38ad9b2f2c": {
+      "run_id": "run_topnsweep11-s4-soft-k150-top150_v1.4_20261111_222430_aad13d7b4ac24eed98f3cd38ad9b2f2c",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.06958738924803431,
+        "relative_slowness_change": 0.019748077084098196,
+        "model_sha256": "f78e06b7062847642da95520901af19a45e80ff94fd799f26aa1b9668b1e7106",
+        "normalized_chord_distance": 0.19628370489358926
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "a50ab4d085dfcb3c4c02c5d3910930207eb78c92b2b37e92ce9e5b1df73aadfe",
+      "residual_cache_signature": "2c259e90a08e1aab0464eb45d5bcbb7175967f26c81a020aa56a263edf3480b6",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.0736025291391218,
+          "relative_slowness_change": 0.008369673263641334,
+          "model_sha256": "2995030333e14692caebb14c225063c94657fd58040dca6219a95d81a3e78fd7",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07049376706392856,
+          "relative_slowness_change": 0.015139712124127515,
+          "model_sha256": "7c44946c6b0a43871bafeeb1b7691b4332b0ae88dde07e13560860374ecfb60f",
+          "normalized_chord_distance": 0.18569535314153107
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.06958738924803431,
+          "relative_slowness_change": 0.019748077084098196,
+          "model_sha256": "f78e06b7062847642da95520901af19a45e80ff94fd799f26aa1b9668b1e7106",
+          "normalized_chord_distance": 0.19628370489358926
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.06937132072794831,
+          "relative_slowness_change": 0.022499582381446184,
+          "model_sha256": "79d4b5290c1f77db50d7d6b40e2ee8a8f77db7ddb87fb01dbd8c0f4c14c00e72",
+          "normalized_chord_distance": 0.1647076848137904
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.06929302659563498,
+          "relative_slowness_change": 0.02453875068032297,
+          "model_sha256": "89f61a39c19a9dcf3f2ae15bddf5bb59235f1c7387a616894a748029cf1f2fe6",
+          "normalized_chord_distance": 0.1330557277480048
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.06925050824249894,
+          "relative_slowness_change": 0.026254998926549245,
+          "model_sha256": "5cf9abce5d6d8fe24ab9d7dbf8a4cacff85cfbd26759affcc327351ec17adb97",
+          "normalized_chord_distance": 0.10537325751019179
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.06922346767326322,
+          "relative_slowness_change": 0.027817031157098524,
+          "model_sha256": "2750503c8fc8ba5b85838023fe3a3b9e53b7b14c2fe6bab0acb06dc602532127",
+          "normalized_chord_distance": 0.08018660319818167
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.06920126320708912,
+          "relative_slowness_change": 0.02926858835162,
+          "model_sha256": "9238925811e9b0f281afdf5bc3700d2de1cb786ca71720fd55243302628ff0ec",
+          "normalized_chord_distance": 0.057758177449093055
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.06918372046664889,
+          "relative_slowness_change": 0.03065912262998938,
+          "model_sha256": "3cd2a4d5c2c89f5c9ae4ca3af189423d5175b3f5d067b63517938bdc7a8cdd88",
+          "normalized_chord_distance": 0.036847659821854166
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.06916778869518901,
+          "relative_slowness_change": 0.03198197959722702,
+          "model_sha256": "78a2a8bbff186912f5c9b810f81c06c97517fc82852e53f7ac9b66c306b4a7ae",
+          "normalized_chord_distance": 0.01781222704731682
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.06915366912571724,
+          "relative_slowness_change": 0.03326311842918169,
+          "model_sha256": "fab05d13b22acd01ebcc249cb1d63e5a88532a195c5a124502cab862840e92aa",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s4-hard-k200-top200_v1.4_20261112_054200_031a35b4e1334db593cd6f6f9a451bb4": {
+      "run_id": "run_topnsweep11-s4-hard-k200-top200_v1.4_20261112_054200_031a35b4e1334db593cd6f6f9a451bb4",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.06961407113668305,
+        "relative_slowness_change": 0.01777704660855305,
+        "model_sha256": "fde11024d556cb3dac1c89a288d7fb4ea4de719e07e714685be38fd0b3949659",
+        "normalized_chord_distance": 0.15359174318847843
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "a50ab4d085dfcb3c4c02c5d3910930207eb78c92b2b37e92ce9e5b1df73aadfe",
+      "residual_cache_signature": "4310450a932feb5ffa9c101b22fea1b285f2926d3ef8bb3cc5d03ac0e4f04d5a",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07380316429635918,
+          "relative_slowness_change": 0.007386049866589995,
+          "model_sha256": "c468661541e8578126127b9daca3cc175ae29d17b96163234e6b7782e3fb2b00",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07061706887384808,
+          "relative_slowness_change": 0.013513124550819664,
+          "model_sha256": "f9f51868c81ca5d910056c246ec2490a397e2926499dcd0f6d3bb4865a43500e",
+          "normalized_chord_distance": 0.14799730145294
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.06961407113668305,
+          "relative_slowness_change": 0.01777704660855305,
+          "model_sha256": "fde11024d556cb3dac1c89a288d7fb4ea4de719e07e714685be38fd0b3949659",
+          "normalized_chord_distance": 0.15359174318847843
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.06938736242814232,
+          "relative_slowness_change": 0.020237570762666933,
+          "model_sha256": "e12106ea01a899a43ddaf2b60bd72defcf3f01065f9206dbc6447130b2b1e96a",
+          "normalized_chord_distance": 0.11861113588933471
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.06930014788897944,
+          "relative_slowness_change": 0.02174260586060099,
+          "model_sha256": "3e3617954dcb7df8da7db0f27c92e72fe021fc3d2ed6cc911b6e6cd7045a326f",
+          "normalized_chord_distance": 0.09337065000640282
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.06924528436719876,
+          "relative_slowness_change": 0.02293623802583176,
+          "model_sha256": "4133d578e40eba41beda7834be81190b56af864dc853da1751a13bfd933624ec",
+          "normalized_chord_distance": 0.07300585288481139
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.0692033275547756,
+          "relative_slowness_change": 0.023959716314666934,
+          "model_sha256": "ccf7642ee8b161fe00433d3664e9a289d30458ba97ff0b5fc931ff9ca7aaf95f",
+          "normalized_chord_distance": 0.055931932410086746
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.06916949747394842,
+          "relative_slowness_change": 0.024939164262049937,
+          "model_sha256": "cc10c100858e4fef140e0c7f51f5cbee72d12e2fd25f84596e5dc635679499ec",
+          "normalized_chord_distance": 0.03953888824407924
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.06914300804204883,
+          "relative_slowness_change": 0.025820519719682546,
+          "model_sha256": "575335243537ceae06511b91196aab8522621c449420aa38b765d317b7154634",
+          "normalized_chord_distance": 0.024890055788711927
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.06912302503304174,
+          "relative_slowness_change": 0.02660478703614604,
+          "model_sha256": "4f2f0cf7f2b20c297a23b67455c5c8a78d6de5ddb08f6159cfb54d2f134eb0da",
+          "normalized_chord_distance": 0.01182911127954758
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.06910494443282131,
+          "relative_slowness_change": 0.027335524130019547,
+          "model_sha256": "285fc9fb5770a4c8c61ede6e23c0edec235d0da2f1b4c198338c86d2c76cc15e",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s4-soft-k200-top200_v1.4_20261112_034040_4b3fe4cf20914102b29e13dfce40f389": {
+      "run_id": "run_topnsweep11-s4-soft-k200-top200_v1.4_20261112_034040_4b3fe4cf20914102b29e13dfce40f389",
+      "selected": {
+        "residual_iteration_index": 3,
+        "completed_velocity_updates": 3,
+        "residual_rmse_s": 0.06958637691409986,
+        "relative_slowness_change": 0.0197621748526946,
+        "model_sha256": "3b2ab57f89ff28d53a5c07003372c4f096d807670b8364ff342c7f1f38744c0c",
+        "normalized_chord_distance": 0.19631858166277952
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "a50ab4d085dfcb3c4c02c5d3910930207eb78c92b2b37e92ce9e5b1df73aadfe",
+      "residual_cache_signature": "83908cade902f946089ec19e09a544c280a291fe76cca44ec871bbc0d91af644",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.07360222708252666,
+          "relative_slowness_change": 0.008372019393163718,
+          "model_sha256": "61f4d2636ba46c0381058259a57fc8ad29e62fb547b354ce789d7da033a5c14c",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.07049246587141474,
+          "relative_slowness_change": 0.015155591732223363,
+          "model_sha256": "0652b57870a466432567beaaa873be8cc821fd6080c26b1de9f176bd7388310f",
+          "normalized_chord_distance": 0.18554488635101174
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.06958637691409986,
+          "relative_slowness_change": 0.0197621748526946,
+          "model_sha256": "3b2ab57f89ff28d53a5c07003372c4f096d807670b8364ff342c7f1f38744c0c",
+          "normalized_chord_distance": 0.19631858166277952
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.06937046736584349,
+          "relative_slowness_change": 0.022519492673797156,
+          "model_sha256": "bcb45a8d003c0f33e7c795965225387031bc5daa145ae06ec46e945161a372da",
+          "normalized_chord_distance": 0.1646695271436597
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.0692923095313263,
+          "relative_slowness_change": 0.024565425932284144,
+          "model_sha256": "b0fca66a6b178377ddf318f542f32a4b61f851794a86d5c354796122d98a2e16",
+          "normalized_chord_distance": 0.13292186556402008
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.06924948858334982,
+          "relative_slowness_change": 0.02630107436488894,
+          "model_sha256": "639e6d306fa8ca6db01789e360d005c1f95881c0844c71c832d7ee2c9e4316d5",
+          "normalized_chord_distance": 0.10497169812111476
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.06922259594988457,
+          "relative_slowness_change": 0.02786582198368891,
+          "model_sha256": "3e8fffc6d8d53ae029e0674b1d6654abb9637cc29c490d8d2f6713858a3d3128",
+          "normalized_chord_distance": 0.07978250307335708
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.06920073684575424,
+          "relative_slowness_change": 0.02930659307977631,
+          "model_sha256": "3377c5d6674ab20a12c5dcd4f50385e1bfc0d04f99919a34c5703539592e7717",
+          "normalized_chord_distance": 0.05754913040461877
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.06918249629366201,
+          "relative_slowness_change": 0.03070070562136401,
+          "model_sha256": "9fea03b0ef255d7d176467f286bb06beebddaea2d96ff2f653d5fa5e138b0524",
+          "normalized_chord_distance": 0.03674062040298089
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.06916650250554977,
+          "relative_slowness_change": 0.03202166089389062,
+          "model_sha256": "d7bed25051a58a29118a9633b17eb9e1c29a94a74eaa37471b1cf963d2be4dd4",
+          "normalized_chord_distance": 0.017790149504794663
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.06915205629686662,
+          "relative_slowness_change": 0.0333073881380258,
+          "model_sha256": "c6a6474a04c38d8096da7b23b8e2311af676f048480930c2ac567a83bfa7ebb3",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122": {
+      "run_id": "run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122",
+      "selected": {
+        "residual_iteration_index": 5,
+        "completed_velocity_updates": 5,
+        "residual_rmse_s": 0.05275281214436581,
+        "relative_slowness_change": 0.017413624852618177,
+        "model_sha256": "00b526f3dfcd97482715727d53feef6e5e3adb5a61e2b3b042e0a87cb1c1e460",
+        "normalized_chord_distance": 0.05162999420440859
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "57bb74c4d643b6a069b260c5a61ac24378449cca9ffaa6ff1c58bc0c8b6091c1",
+      "residual_cache_signature": "e64b6e373cb907ecf69c6aea95af2e10c475cb38a0e84793ee9f8bce4a75a340",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.05395528936960487,
+          "relative_slowness_change": 0.006338202249088204,
+          "model_sha256": "45670904a40d1a8275bef43cb755b716af487db6febfa777c71fafccd1c31584",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.053319462041496554,
+          "relative_slowness_change": 0.010711300309407262,
+          "model_sha256": "09d3769c39d9097e050e611dcee50514add708afa583cfcd823d3251e3a3f1c0",
+          "normalized_chord_distance": 0.03092890339793135
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.05301493175152146,
+          "relative_slowness_change": 0.013731445065062086,
+          "model_sha256": "3e28a860f030c656b636b3fe7f9d0acc3538fccb2b22fc6dcf5dbda107b068c6",
+          "normalized_chord_distance": 0.0487014151578737
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.052856044501630874,
+          "relative_slowness_change": 0.015870950238669322,
+          "model_sha256": "835014549b35c4f9bf5c395ed2874f8a47d5a9013ea54438839e0944846c7502",
+          "normalized_chord_distance": 0.049957679781338346
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.05275281214436581,
+          "relative_slowness_change": 0.017413624852618177,
+          "model_sha256": "00b526f3dfcd97482715727d53feef6e5e3adb5a61e2b3b042e0a87cb1c1e460",
+          "normalized_chord_distance": 0.05162999420440859
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.052693088755501875,
+          "relative_slowness_change": 0.018641093105070176,
+          "model_sha256": "de7d706e3fc861261428dcbb86d935ba591c7384430cbb47c5d85ee85627cb8d",
+          "normalized_chord_distance": 0.044692039598841965
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.05264971196832679,
+          "relative_slowness_change": 0.019742035046455764,
+          "model_sha256": "80cd054199a4cc55246f904be9e7f187425bdfde4b32f0ce916cbb4756649a7c",
+          "normalized_chord_distance": 0.0353214054420763
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.05261783714380908,
+          "relative_slowness_change": 0.02067808176598295,
+          "model_sha256": "4cdd8acb337d9fff49d9194d2ca23332bc8da2f14f609a531bdce50a0c631253",
+          "normalized_chord_distance": 0.02615868942730717
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.052593610669726364,
+          "relative_slowness_change": 0.021494385156163472,
+          "model_sha256": "8a64199d3848647f5f91f8f57cb2210d3a1cbcc9d3c1d9c9d4f6b4543bb94d80",
+          "normalized_chord_distance": 0.01727003622896724
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.05257496627361129,
+          "relative_slowness_change": 0.022239498883832906,
+          "model_sha256": "27c5caf8b25601cdfdbc04d3ef9575b7c37468bf06feb16c24fdb400e92d44f4",
+          "normalized_chord_distance": 0.008076769030160484
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.052559075815964675,
+          "relative_slowness_change": 0.022905063613870544,
+          "model_sha256": "39687597511e23fc34abdbaf5bfe881e6a041fa42904ad3db4e50f15b082ee82",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s5-soft-k128-top50_v1.4_20261112_123747_ca58ebc4dae14204b210bdefa6281369": {
+      "run_id": "run_topnsweep11-s5-soft-k128-top50_v1.4_20261112_123747_ca58ebc4dae14204b210bdefa6281369",
+      "selected": {
+        "residual_iteration_index": 4,
+        "completed_velocity_updates": 4,
+        "residual_rmse_s": 0.052928798100281824,
+        "relative_slowness_change": 0.016594293963466046,
+        "model_sha256": "83364383377dcfdbf1b6f3d9fa02ff5893088bc74612ae2a8639f66d34644120",
+        "normalized_chord_distance": 0.05848528643511946
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "57bb74c4d643b6a069b260c5a61ac24378449cca9ffaa6ff1c58bc0c8b6091c1",
+      "residual_cache_signature": "e2f856c47fa83997cc6d922484a2afb4542510f83c8c6b97bd6dbc0fbfe02eb5",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.05398697060008181,
+          "relative_slowness_change": 0.006508879312757178,
+          "model_sha256": "83f20d92eff924aecf119a783339b2764272ff3cc7852c4e6ce73812445d4e19",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.053381050111947284,
+          "relative_slowness_change": 0.011030804864888102,
+          "model_sha256": "f91f36506e0443a1f3b295170a9990fc6e4caa48fc022d10fa212c53c78731c0",
+          "normalized_chord_distance": 0.03658237295403057
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.053081908240013916,
+          "relative_slowness_change": 0.01426621946052683,
+          "model_sha256": "8e61eb808573d30f8c5222ee7d086732a4fdfb6504b1c1dbd2e3d6724dd1d290",
+          "normalized_chord_distance": 0.057681514286334654
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.052928798100281824,
+          "relative_slowness_change": 0.016594293963466046,
+          "model_sha256": "83364383377dcfdbf1b6f3d9fa02ff5893088bc74612ae2a8639f66d34644120",
+          "normalized_chord_distance": 0.05848528643511946
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.052836417317526835,
+          "relative_slowness_change": 0.018329503195295877,
+          "model_sha256": "c460016535d5d492ce1567d46d381696d8ec687267ddc24d0b2cf3a7edea1848",
+          "normalized_chord_distance": 0.05471586803701102
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.05277349786803529,
+          "relative_slowness_change": 0.019734496226405527,
+          "model_sha256": "7a69856be1c9c88bae5b7276e207c2313be400efb297672fadc64efd841936ee",
+          "normalized_chord_distance": 0.048956123078150574
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.05272989522427831,
+          "relative_slowness_change": 0.020952841513449557,
+          "model_sha256": "7341de31ab5ef42e3a8fcbc26dd97aff1913dcfdd6422c6f3bd33bbf6e05d70d",
+          "normalized_chord_distance": 0.04036716202233828
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.052695642365308645,
+          "relative_slowness_change": 0.02203097738245043,
+          "model_sha256": "ce29bed0065e3ad50c42bded65ba8925e24e45d6f5d88d82a5c730ad2e68b016",
+          "normalized_chord_distance": 0.03198355218314634
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.052673777622773206,
+          "relative_slowness_change": 0.0229999381252249,
+          "model_sha256": "342537e37cf4a6c5b05502e80d9ffc1b6b833145aaeba3f7a82de0f7c2127af4",
+          "normalized_chord_distance": 0.02080492952933297
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.05265317064790581,
+          "relative_slowness_change": 0.02388985142762872,
+          "model_sha256": "b28efcbb56cdd7e7a04e3c3ca116c8382c52be3b42207430fcc0430b64c5dced",
+          "normalized_chord_distance": 0.011652869673675296
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.052640461252806955,
+          "relative_slowness_change": 0.024734895372164858,
+          "model_sha256": "56ad8e44f14555ea6c22aef01ff8b7d2faf47a1a83b4564c57384923f5114d1e",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s5-soft-k128-top75_v1.4_20261112_135522_27dd5e84bb0c4fd2bf8560165109f7f4": {
+      "run_id": "run_topnsweep11-s5-soft-k128-top75_v1.4_20261112_135522_27dd5e84bb0c4fd2bf8560165109f7f4",
+      "selected": {
+        "residual_iteration_index": 4,
+        "completed_velocity_updates": 4,
+        "residual_rmse_s": 0.052930527431300126,
+        "relative_slowness_change": 0.016634597401180222,
+        "model_sha256": "3e1a18beddc8ea44e4c6fdc461a1f7528a50b671aee26ce6f17fb8adeabfd35e",
+        "normalized_chord_distance": 0.060786416192806426
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "57bb74c4d643b6a069b260c5a61ac24378449cca9ffaa6ff1c58bc0c8b6091c1",
+      "residual_cache_signature": "1a02b0a6673f23a1f8113ae2444f1db3aef80ca6cce680c2928905b6eb74915b",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.053987649249296055,
+          "relative_slowness_change": 0.006516192182279023,
+          "model_sha256": "88ca5f0149a6caa460ca3f2d699028a8e14000edc3b80e03c551961088ee10c7",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.05338239322578208,
+          "relative_slowness_change": 0.011046284185271938,
+          "model_sha256": "19389f9d814abb9e590ff3d5e4479b24fc6c57a81a6194fc6c067fdb3add2de3",
+          "normalized_chord_distance": 0.03809086986522703
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.05308330210263675,
+          "relative_slowness_change": 0.014292677924449427,
+          "model_sha256": "05311d9cf7300b509cd77102dd8c9f764f4bdeba1727b85bbdecbf88952267d4",
+          "normalized_chord_distance": 0.05990751915584188
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.052930527431300126,
+          "relative_slowness_change": 0.016634597401180222,
+          "model_sha256": "3e1a18beddc8ea44e4c6fdc461a1f7528a50b671aee26ce6f17fb8adeabfd35e",
+          "normalized_chord_distance": 0.060786416192806426
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.05283912000820624,
+          "relative_slowness_change": 0.018385197901533725,
+          "model_sha256": "c2f2fddfe37bd0b2ded2be911ba0b2c124331a4ac067344595f56351a4d887c7",
+          "normalized_chord_distance": 0.05653632467530776
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.0527754584028859,
+          "relative_slowness_change": 0.019808956656175523,
+          "model_sha256": "a9bcbb9c609fb61bc3d1cc904b90165a3b13919d0223c1b9cbe0e7f985337489",
+          "normalized_chord_distance": 0.05104373451360375
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.05273222117838888,
+          "relative_slowness_change": 0.021045457873840868,
+          "model_sha256": "612a5234955b5dc8a1c70839998b936d6903a48a9f2286d3ee994468fe01a16b",
+          "normalized_chord_distance": 0.0421233994693972
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.05269905887290223,
+          "relative_slowness_change": 0.022144901003174396,
+          "model_sha256": "b05abaa9b07e54281c07c27f03f0e66222f5f38b5665ab75388070ea9aa5edf2",
+          "normalized_chord_distance": 0.03293286535064169
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.0526762491702495,
+          "relative_slowness_change": 0.023138151916792173,
+          "model_sha256": "6fdc9e2f445820c8d6170f0c2376cbca119586c85778e8d9b4c5268834f9fb42",
+          "normalized_chord_distance": 0.02195391001132134
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.052656964356125435,
+          "relative_slowness_change": 0.02405875414985289,
+          "model_sha256": "b822e6dd9bd6f37c655b60a6effd274ce6d4a9a72b2852636513c45d7963929a",
+          "normalized_chord_distance": 0.01166343522059577
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.05264368752211849,
+          "relative_slowness_change": 0.02492952015314726,
+          "model_sha256": "90669718fc30842bfd3c6328737d75c94931bd7e766d8a4a750fd6857b1b78de",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s5-soft-k128-top100_v1.4_20261112_152834_49aa5892dc3e46e6be97bd1b307a3555": {
+      "run_id": "run_topnsweep11-s5-soft-k128-top100_v1.4_20261112_152834_49aa5892dc3e46e6be97bd1b307a3555",
+      "selected": {
+        "residual_iteration_index": 4,
+        "completed_velocity_updates": 4,
+        "residual_rmse_s": 0.05293087798289175,
+        "relative_slowness_change": 0.016641958471393735,
+        "model_sha256": "2cfcae1afb9ccc9434cac0aca7d389869c350197781d64fbf9d31836efd8bb14",
+        "normalized_chord_distance": 0.06104668668586448
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "57bb74c4d643b6a069b260c5a61ac24378449cca9ffaa6ff1c58bc0c8b6091c1",
+      "residual_cache_signature": "c1ff8da4109c159a51bcd78715c04ca36fe2b833ceeb43c437c8ad317b7394fb",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.05398741461419536,
+          "relative_slowness_change": 0.006517232000793582,
+          "model_sha256": "987cbab191deee0dcd2139718c1776a179b06de2120f400b807893297ab8e309",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.05338239588262844,
+          "relative_slowness_change": 0.011051943187969931,
+          "model_sha256": "24b2979cd9e9ef2b54da3522d20e5f6f7d8df2595a95b9665dc0cb90c875b3dd",
+          "normalized_chord_distance": 0.03818763560302074
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.05308349489847029,
+          "relative_slowness_change": 0.014299063658471209,
+          "model_sha256": "ddf950af3122c15dbabc700fa05d4856b2c251b58843b0a07fd44b7c855cafda",
+          "normalized_chord_distance": 0.06013797507075479
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.05293087798289175,
+          "relative_slowness_change": 0.016641958471393735,
+          "model_sha256": "2cfcae1afb9ccc9434cac0aca7d389869c350197781d64fbf9d31836efd8bb14",
+          "normalized_chord_distance": 0.06104668668586448
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.052839826722996315,
+          "relative_slowness_change": 0.018394849299848217,
+          "model_sha256": "4325dd21a259aad2caa892967d8e60c2c061823194a8f538554e9a52e2640b79",
+          "normalized_chord_distance": 0.056634781048152005
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.05277618666763862,
+          "relative_slowness_change": 0.019819139905750988,
+          "model_sha256": "6cee4be86712b0c064586cbbdd32c19164f35ff7b1b7dfb5d0143fb9fbaf1396",
+          "normalized_chord_distance": 0.05118778493605953
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.05273320774573982,
+          "relative_slowness_change": 0.02106016631673289,
+          "model_sha256": "a1a0321e8da45fcd16ba5b868af62dd81fb5230e8d4097f4db4aa7b3dc736ed6",
+          "normalized_chord_distance": 0.04207216305867279
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.05269981208381933,
+          "relative_slowness_change": 0.022163016342802228,
+          "model_sha256": "413fd5fb0352dfc3fc17564d2a7b128c81eb4669cecfb7348e682c3fbda3214b",
+          "normalized_chord_distance": 0.0329754453442524
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.05267714123027462,
+          "relative_slowness_change": 0.023161017827589874,
+          "model_sha256": "4daeb5b57c7639cee26bdd20e29febaed0ed68e95f1bf1bf95d86e83c92d568d",
+          "normalized_chord_distance": 0.021859301941658117
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.05265798840414617,
+          "relative_slowness_change": 0.02408613908572074,
+          "model_sha256": "0cb274de27e4bbaad2a138fcdfceee56451bc2a72320e5f5e6e2b85483135638",
+          "normalized_chord_distance": 0.011442692289592675
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.052644137616980266,
+          "relative_slowness_change": 0.02496288036740356,
+          "model_sha256": "34ebb0e3b93d47f0dfa5dc8566b603a51639c742db31074a21c0846ca2d50e8b",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_topnsweep11-s5-soft-k128-top128_v1.4_20261112_161656_1b81e7950f064deabef93fe1526c2b4a": {
+      "run_id": "run_topnsweep11-s5-soft-k128-top128_v1.4_20261112_161656_1b81e7950f064deabef93fe1526c2b4a",
+      "selected": {
+        "residual_iteration_index": 4,
+        "completed_velocity_updates": 4,
+        "residual_rmse_s": 0.05293130948762918,
+        "relative_slowness_change": 0.016643389528906333,
+        "model_sha256": "717ba3aa047264d924c249abf66b1b43161b3e3042177600188d0664eff85895",
+        "normalized_chord_distance": 0.06105939854417358
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "57bb74c4d643b6a069b260c5a61ac24378449cca9ffaa6ff1c58bc0c8b6091c1",
+      "residual_cache_signature": "6ff462bd09e43cd61fd96fa1090998beedf68e2a4eb1a787fd3408a2ef78bd93",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.05398743119630322,
+          "relative_slowness_change": 0.006517478952157786,
+          "model_sha256": "3081aa38270c17afb1deb0f79ef092f075c977b395d7d26ce998c01fc1d0524f",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.05338246364699725,
+          "relative_slowness_change": 0.011052396309020414,
+          "model_sha256": "2908ddc9a46fc6715ad41df76a4e7dce1e278b28e09e2133591ff9f5248fb0e0",
+          "normalized_chord_distance": 0.038305255629652965
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.05308400713082062,
+          "relative_slowness_change": 0.01429993033175424,
+          "model_sha256": "5440c3ce943de1ab585915869985725339bce4d8b4bcecc8e238c64af2a42268",
+          "normalized_chord_distance": 0.06008206259421567
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.05293130948762918,
+          "relative_slowness_change": 0.016643389528906333,
+          "model_sha256": "717ba3aa047264d924c249abf66b1b43161b3e3042177600188d0664eff85895",
+          "normalized_chord_distance": 0.06105939854417358
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.05283995717818296,
+          "relative_slowness_change": 0.01839719511220804,
+          "model_sha256": "04e1a8e91b3f5f80b535815ed36d121346147b8897aae7d2bc62aac9135b0f32",
+          "normalized_chord_distance": 0.056810502466130966
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.052775993333974376,
+          "relative_slowness_change": 0.01982221133800681,
+          "model_sha256": "4a8dd17cf51bbd31fd61e129fba00c186481ee0737533c4dac637e866c8b0bd1",
+          "normalized_chord_distance": 0.051539616498629794
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.05273342843396039,
+          "relative_slowness_change": 0.02106430594571219,
+          "model_sha256": "703a55ff050d5d49b43534a9ee99ab39ef96cd67e45d38c35b94d0193950a174",
+          "normalized_chord_distance": 0.04219585171183442
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.05270039193644569,
+          "relative_slowness_change": 0.02216807353210349,
+          "model_sha256": "97a898a323729c288e3451e0f4338764762eeae34708f254dd24e3b804a04f76",
+          "normalized_chord_distance": 0.032902624565908874
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.052677373247980365,
+          "relative_slowness_change": 0.023167998900730093,
+          "model_sha256": "be9c920f78e324e6921e0a7cf6d7a674150c3acdbf7cdf3a556bad69bd9e553f",
+          "normalized_chord_distance": 0.02194241845974566
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.05265832203346092,
+          "relative_slowness_change": 0.024095338831543803,
+          "model_sha256": "b4d644c500e87147f28f1362423c680f6a78eefec0a8c3f63c9b2059d084f5de",
+          "normalized_chord_distance": 0.01143734516231635
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.052644426200031055,
+          "relative_slowness_change": 0.02497363163617704,
+          "model_sha256": "45c47fbff6ccebf966043980c5c59b79e7f9bddac0d72eab94d4737ecb7ff1e4",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    }
+  },
+  "errors": {}
+}

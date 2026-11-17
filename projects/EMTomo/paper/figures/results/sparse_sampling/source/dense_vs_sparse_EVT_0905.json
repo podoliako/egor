@@ -1,0 +1,207 @@
+{
+  "experiment_id": "onesided_nx6_24x12x12_18st_10ev_noise01_pick005_seed42",
+  "event_index": 8,
+  "event_id": "EVT_0905",
+  "iteration": 0,
+  "event_selection": "Explicit user-selected saved event",
+  "view_bounds_xz_km": [
+    [
+      0.0,
+      7.0
+    ],
+    [
+      0.0,
+      12.0
+    ]
+  ],
+  "common_model": "Identical saved iter_0/model.npy; homogeneous 5000 m/s, coarse 1000 m, q=8, fine 125 m.",
+  "sampling": "Deterministic likelihood-ranked cell selection and continuous refinement, not random iid Monte Carlo samples.",
+  "visualization": "Compact three columns: all dense/sparse candidates projected onto XZ; CDFs stacked at right; one vertical likelihood colorbar at left",
+  "plane_selection": "Nearest fine-grid cell centre to the dense full-set weighted mean Y; same plane for both methods",
+  "plane_y_m": 2437.5,
+  "slab_thickness_fine_cells": 2,
+  "slab_half_width_m": 125.0,
+  "slab_selection_tolerance_m": 1e-06,
+  "slab_counts": {
+    "dense": 1001,
+    "sparse": 3
+  },
+  "displayed_candidate_counts": {
+    "dense": 10000,
+    "sparse": 50
+  },
+  "candidate_Y_filter_applied": false,
+  "slab_probability_mass": {
+    "dense": 0.16351690255818513,
+    "sparse": 0.18760345414019
+  },
+  "background": "exp(-(cost(X,Y_plane,Z)-min_XZ cost_on_plane)); actual fixed-Y grid slice, not a profile or marginal",
+  "background_rendering": "White to blue, opaque; 0 is white and 1 is dark blue",
+  "candidate_colors": "Opaque grayscale: gray=0.8*abs(Y-Yplane)/global_max_distance; nearer=blacker; farthest=light gray",
+  "candidate_opacity_policy": "Opaque points; distance encoded by grayscale, not alpha",
+  "candidate_distance_normalization_m": 2187.500000007943,
+  "candidate_distance_style": true,
+  "background_vs_candidates": "Background shows likelihood; point grayscale shows geometric distance to plane, not probability or weight",
+  "candidate_color_limits": null,
+  "candidate_marker": ".",
+  "candidate_opacity": 1.0,
+  "candidate_weights_modified": false,
+  "true_hypocentre_m": [
+    3249.6703789338267,
+    1625.548963165971,
+    7832.67626632836
+  ],
+  "truth_marker": "Filled burgundy star, no outline",
+  "truth_y_offset_from_plane_m": -811.9510368340291,
+  "truth_in_candidate_slab": false,
+  "truth_usage": "Display only; no effect on candidates, weights, likelihood or plane selection; plot bounds expanded to include star",
+  "cdf_policy": "Full original saved candidate sets, not conditioned or renormalized on the displayed slab; exact weighted empirical CDFs",
+  "mean_markers_plotted": true,
+  "summary_markers": "Green diamond: sum(w_i * XYZ_i), all saved normalized weights; red diamond: saved argmax-weight candidate. Both projected onto XZ without displacement or jitter.",
+  "map_tie_policy": "numpy argmax: first saved candidate on equal maximum weights",
+  "mean_location_separation_m": 129.29204985697905,
+  "wasserstein_1d_m": {
+    "X": 132.3005381719266,
+    "Y": 80.26720301250725,
+    "Z": 212.912251379871
+  },
+  "caveat": "Sparse X/depth marginals and ridge coverage are similar for this event. Full 3-D distributions differ, especially the much narrower sparse Y spread; no claim of general equivalence or posterior calibration.",
+  "runs": {
+    "dense": {
+      "run": "runs/run_onesided-pilot-soft10000-onesided-nx6-24x12x12-18st-10ev-noise01-pick005-seed42_v1.4_ncand-10000_topn-10000_mode-soft_dmin-1_lam-1.0_temp-1.0_sub-8_cov-2.0_20261104_195853_e74a5c08587944238e7f9d1cdbd940b6",
+      "weighted_mean_m": [
+        3898.61035460517,
+        2388.1980145954344,
+        7485.825624938815
+      ],
+      "weighted_std_m": [
+        477.677689194261,
+        599.8103497491678,
+        1515.4203486352949
+      ],
+      "map_candidate_index": 0,
+      "map_position_m": [
+        3816.4843471711,
+        2780.57578193291,
+        6475.944086005878
+      ],
+      "covariance_m2": [
+        [
+          228175.97475396903,
+          -60879.28566738282,
+          155067.7376589163
+        ],
+        [
+          -60879.285667382814,
+          359772.455666219,
+          -864151.737295355
+        ],
+        [
+          155067.73765891633,
+          -864151.7372953551,
+          2296498.8330579186
+        ]
+      ],
+      "effective_candidate_count": 4459.015384025032,
+      "min_seed_distance_fine_cells": 1.0,
+      "weights_file_sha256": "94522933c3df8ed9f46bf8d9c7da0f360c7b160003aa8e6a138235388cb490cb",
+      "meta_sha256": "613c7256bba84bc6fef23ccc907a5b46724dfc62b22fb1cf27df9bae52a7a144"
+    },
+    "sparse": {
+      "run": "runs/run_onesided-pilot-soft50-dmin7-onesided-nx6-24x12x12-18st-10ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_085454_997a4a83de644557ae84ddca846e0deb",
+      "weighted_mean_m": [
+        3914.2820444817644,
+        2435.0218571502055,
+        7366.333532894875
+      ],
+      "weighted_std_m": [
+        513.3000724131105,
+        599.917394274393,
+        1582.8398930233243
+      ],
+      "map_candidate_index": 0,
+      "map_position_m": [
+        3816.4843471711,
+        2780.57578193291,
+        6475.944086005878
+      ],
+      "covariance_m2": [
+        [
+          263476.9643393045,
+          -69256.08047247544,
+          170254.4946332811
+        ],
+        [
+          -69256.08047247543,
+          359900.8799529775,
+          -939213.2167704796
+        ],
+        [
+          170254.4946332811,
+          -939213.2167704797,
+          2505382.1269460884
+        ]
+      ],
+      "effective_candidate_count": 12.101073468036374,
+      "min_seed_distance_fine_cells": 7.0,
+      "weights_file_sha256": "190d72c40394d5a2fdb1bef321cfa3791ce23c1ff658c288f0023cf302c6b2de",
+      "meta_sha256": "a81a592a0de981d671203710a0a590050d40814ecd8441ad5cbd5df2695a9fc7"
+    }
+  },
+  "field_reproduction": {
+    "fingerprint": {
+      "model_sha256": "b7bfa47105d49faf565b8cdef99e97117b2095efb07b5e42ae04a962e4ba15bd",
+      "event_id": "EVT_0905",
+      "arrivals_sha256": "91e86dde05b48876af6805298cfa2fbcd78f0564404ca11bbcc2955e2beea9cc",
+      "stations_sha256": "584cb5953e32460b5b414a1008836d5977abde258ca3352aa84107c6660e7862",
+      "code_sha256": {
+        "eikonal.py": "a9e9dd9910c4796268a6577fb1193908eb044562beb6da8fbe02775b8090b1c5",
+        "instruments/likelihood.py": "da8cc70d42893495412593e9d7581e510530f371d07d3edc6de155c62c17ad1e"
+      },
+      "noise": {
+        "relative": 0.01,
+        "absolute": 0.05,
+        "model": 0.02
+      },
+      "grid": {
+        "coarse_cell_size": 1000.0,
+        "coarse_shape": [
+          24,
+          12,
+          12
+        ],
+        "coarse_side_m": [
+          24000.0,
+          12000.0,
+          12000.0
+        ],
+        "fine_cell_size": 125.0,
+        "fine_shape": [
+          192,
+          96,
+          96
+        ],
+        "fine_side_m": [
+          24000.0,
+          12000.0,
+          12000.0
+        ]
+      }
+    },
+    "verification": {
+      "dense": {
+        "max_weight_difference": 3.1927583494769166e-09,
+        "candidate_cost_min": -42.9576104316735,
+        "candidate_cost_max": -39.02456529530452
+      },
+      "sparse": {
+        "max_weight_difference": 4.0575121254549096e-07,
+        "candidate_cost_min": -42.9576104316735,
+        "candidate_cost_max": -37.361209299336835
+      }
+    },
+    "cache_sha256": "9514cc943e5ca9afa2d37a69b6ea6bdf29e105a70cc774b74be3219219ed19f5",
+    "reconstruction": "Current production scikit-fmm station fields and marginalized-origin Gaussian likelihood; saved candidate probabilities reproduced numerically."
+  },
+  "script_sha256": "6c4ddf49d336de9ac074379a2e7cf6ce5cd71bed9a56e001d011a4116121273e"
+}

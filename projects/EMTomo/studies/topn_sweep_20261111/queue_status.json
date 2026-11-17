@@ -1,0 +1,69 @@
+{
+  "status": "completed",
+  "pid": 1681985,
+  "started_at": "2026-11-11T18:58:02.264072+00:00",
+  "cases": {
+    "s2-soft-k50-top10": {
+      "returncode": 0
+    },
+    "s2-soft-k50-top25": {
+      "returncode": 0
+    },
+    "s3-soft-k50-top10": {
+      "returncode": 0
+    },
+    "s3-soft-k50-top25": {
+      "returncode": 0
+    },
+    "s2-hard-k100-top100": {
+      "returncode": 0
+    },
+    "s3-hard-k100-top100": {
+      "returncode": 0
+    },
+    "s3-soft-k100-top100": {
+      "returncode": 0
+    },
+    "s4-hard-k30-top30": {
+      "returncode": 0
+    },
+    "s2-soft-k100-top100": {
+      "returncode": 0
+    },
+    "s4-soft-k30-top30": {
+      "returncode": 0
+    },
+    "s4-hard-k100-top100": {
+      "returncode": 0
+    },
+    "s4-soft-k100-top100": {
+      "returncode": 0
+    },
+    "s4-hard-k150-top150": {
+      "returncode": 0
+    },
+    "s5-soft-k128-top50": {
+      "returncode": 0
+    },
+    "s5-soft-k128-top75": {
+      "returncode": 0
+    },
+    "s4-soft-k150-top150": {
+      "returncode": 0
+    },
+    "s5-soft-k128-top100": {
+      "returncode": 0
+    },
+    "s5-soft-k128-top128": {
+      "returncode": 0
+    },
+    "s4-hard-k200-top200": {
+      "returncode": 0
+    },
+    "s4-soft-k200-top200": {
+      "returncode": 0
+    }
+  },
+  "export_returncode": 0,
+  "finished_at": "2026-11-13T06:49:14.150596+00:00"
+}

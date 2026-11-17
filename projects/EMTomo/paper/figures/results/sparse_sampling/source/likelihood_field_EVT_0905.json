@@ -1,0 +1,55 @@
+{
+  "fingerprint": {
+    "model_sha256": "b7bfa47105d49faf565b8cdef99e97117b2095efb07b5e42ae04a962e4ba15bd",
+    "event_id": "EVT_0905",
+    "arrivals_sha256": "91e86dde05b48876af6805298cfa2fbcd78f0564404ca11bbcc2955e2beea9cc",
+    "stations_sha256": "584cb5953e32460b5b414a1008836d5977abde258ca3352aa84107c6660e7862",
+    "code_sha256": {
+      "eikonal.py": "a9e9dd9910c4796268a6577fb1193908eb044562beb6da8fbe02775b8090b1c5",
+      "instruments/likelihood.py": "da8cc70d42893495412593e9d7581e510530f371d07d3edc6de155c62c17ad1e"
+    },
+    "noise": {
+      "relative": 0.01,
+      "absolute": 0.05,
+      "model": 0.02
+    },
+    "grid": {
+      "coarse_cell_size": 1000.0,
+      "coarse_shape": [
+        24,
+        12,
+        12
+      ],
+      "coarse_side_m": [
+        24000.0,
+        12000.0,
+        12000.0
+      ],
+      "fine_cell_size": 125.0,
+      "fine_shape": [
+        192,
+        96,
+        96
+      ],
+      "fine_side_m": [
+        24000.0,
+        12000.0,
+        12000.0
+      ]
+    }
+  },
+  "verification": {
+    "dense": {
+      "max_weight_difference": 3.1927583494769166e-09,
+      "candidate_cost_min": -42.9576104316735,
+      "candidate_cost_max": -39.02456529530452
+    },
+    "sparse": {
+      "max_weight_difference": 4.0575121254549096e-07,
+      "candidate_cost_min": -42.9576104316735,
+      "candidate_cost_max": -37.361209299336835
+    }
+  },
+  "cache_sha256": "9514cc943e5ca9afa2d37a69b6ea6bdf29e105a70cc774b74be3219219ed19f5",
+  "reconstruction": "Current production scikit-fmm station fields and marginalized-origin Gaussian likelihood; saved candidate probabilities reproduced numerically."
+}

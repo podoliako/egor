@@ -1,0 +1,340 @@
+{
+  "schema_version": 1,
+  "comparison": "Descriptive Vp differences from Guo\u2013Thurber GJI 2021",
+  "source_article_doi": "10.1093/gji/ggab017",
+  "truth_available": false,
+  "accuracy_evaluated": false,
+  "no_solver_calls": true,
+  "queue": "runs/geysers_real_refine500_fmm125_20261110_110138",
+  "parent_queue": "runs/geysers_real_linear35_60_latest_20261110_063859",
+  "figure_provenance": "paper/figures/real_picks/geysers_real_refine500_fmm125_with_emtomo_oracle.json",
+  "geometry": {
+    "catalog_z_formula_for_tomoDD_only": "1166 + 1000*depth_km",
+    "datum_caveat": "Station elevations and catalog depths are assumed to share a sea-level vertical datum; compatibility has not been independently established.",
+    "domain_bounds_in_old_coordinates_m": [
+      [
+        -3000,
+        20000
+      ],
+      [
+        0,
+        11000
+      ],
+      [
+        0,
+        7000
+      ]
+    ],
+    "domain_extent_m": [
+      23000,
+      11000,
+      7000
+    ],
+    "domain_origin_m": [
+      0,
+      0,
+      0
+    ],
+    "east_km_per_longitude_degree": "111.320*cos(radians(38.80275))",
+    "geographic_reference_in_new_xy_m": [
+      13000,
+      3500
+    ],
+    "local_xy_to_old_xy_offset_m": [
+      10000,
+      3500
+    ],
+    "north_km_per_latitude_degree": 110.574,
+    "old_to_new_translation_m": [
+      3000,
+      0,
+      0
+    ],
+    "projection": "prepare_geysers_geometry.local_xy_km",
+    "reference_latitude": 38.80275,
+    "reference_longitude": -122.7707,
+    "station_z_formula": "1166 - elevation_m",
+    "top_elevation_m": 1166,
+    "x_azimuth_degrees": 135.0,
+    "y_azimuth_degrees": 225.0,
+    "z_direction": "positive_down"
+  },
+  "models": {
+    "initial": {
+      "array": "data/geysers_2011/initial_models/linear_vp_3p5_6p0/initial_velocity_m_s.npy",
+      "metadata": "data/geysers_2011/initial_models/linear_vp_3p5_6p0/model.json",
+      "sha256": "c7035fe75e2b1736c7d765b2e0cffa3ffda7176bf7ce929286ec6c0d4a12a300",
+      "cell_size_m": 1000.0,
+      "shape_xyz": [
+        23,
+        11,
+        7
+      ],
+      "role": "Original baseline, not continuation start"
+    },
+    "hard": {
+      "array": "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/final_model.npy",
+      "sha256": "8ae860b50d649900f75be2c5613fd74178af55261a06c5f35096ef071d5ef949",
+      "result": "runs/geysers_real_refine500_fmm125_20261110_110138/cases/hard/result.json",
+      "cell_size_m": 500.0,
+      "shape_xyz": [
+        46,
+        22,
+        14
+      ],
+      "completed_updates": 3,
+      "stopping": {
+        "reason": "control_rmse_plateau",
+        "completed_updates": 3,
+        "control_rmse_s": 0.10011451422095109,
+        "insufficient_steps": 2
+      },
+      "parent_result": "runs/geysers_real_linear35_60_latest_20261110_063859/cases/hard/result.json",
+      "parent_run": "runs/run_geysers-real-linear35-60-cov0-auto-p12-hard_v1.5_20261110_072122_7681679e024a41ae9cee35929de13c79",
+      "parent_completed_updates": 4,
+      "continuation_start": "runs/geysers_real_refine500_fmm125_20261110_110138/inputs/hard/initial_velocity_m_s.npy",
+      "continuation_policy": "Own verified parent final split into 2x2x2 identical cells"
+    },
+    "soft": {
+      "array": "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/final_model.npy",
+      "sha256": "ae035884c17fd1434b2318dd9cf344df5dc44b7a3926429518b911926cfe5c14",
+      "result": "runs/geysers_real_refine500_fmm125_20261110_110138/cases/soft/result.json",
+      "cell_size_m": 500.0,
+      "shape_xyz": [
+        46,
+        22,
+        14
+      ],
+      "completed_updates": 3,
+      "stopping": {
+        "reason": "control_rmse_plateau",
+        "completed_updates": 3,
+        "control_rmse_s": 0.0997834101776153,
+        "insufficient_steps": 2
+      },
+      "parent_result": "runs/geysers_real_linear35_60_latest_20261110_063859/cases/soft/result.json",
+      "parent_run": "runs/run_geysers-real-linear35-60-cov0-auto-p12-soft_v1.5_20261110_063942_e8532001930a4f91a3fd0d3bac1feb8e",
+      "parent_completed_updates": 5,
+      "continuation_start": "runs/geysers_real_refine500_fmm125_20261110_110138/inputs/soft/initial_velocity_m_s.npy",
+      "continuation_policy": "Own verified parent final split into 2x2x2 identical cells"
+    }
+  },
+  "difference_convention": "EMTomo model Vp minus published Vp, m/s",
+  "metric_definitions": {
+    "rms_difference_m_s": "sqrt(mean((model - published)^2))",
+    "mean_signed_difference_m_s": "mean(model - published)",
+    "mae_m_s": "mean(abs(model - published)); descriptive, not truth error",
+    "pearson_vp": "Pearson correlation of absolute Vp; null if either vector is constant"
+  },
+  "sampling": {
+    "primary_spacing_m": 125,
+    "convergence_spacing_m": 250,
+    "grid": "Uniform XYZ cell midpoints over the full zero-origin real domain; C-order, Z fastest",
+    "weighting": "Equal volume per midpoint; volume = selected count * spacing^3",
+    "emtomo": "Containing piecewise-constant cells via sample_cells; no smoothing",
+    "published": "LayeredModel: Delaunay-linear XY and linear depth, Vp and scaled resolvability",
+    "outside_policy": "No extrapolation, background substitution or oracle projection",
+    "mask": "finite(published Vp) AND finite(interpolated scaled resolvability) AND resolvability > 0.4",
+    "resolvability_threshold": 0.4,
+    "shared_mask_for_all_models": true,
+    "nonfinite_emtomo_policy": "Fail, never silently change mask per model",
+    "mask_hash_encoding": "SHA256 of numpy.packbits(flat mask, bitorder=little); grid shape/order above"
+  },
+  "grids": [
+    {
+      "spacing_m": 125.0,
+      "shape_xyz": [
+        184,
+        88,
+        56
+      ],
+      "total_samples": 906752,
+      "finite_published_vp_samples": 867776,
+      "outside_finite_published_vp_samples": 38976,
+      "finite_vp_nonfinite_resolvability_samples": 0,
+      "finite_published_resolvability_le_threshold_samples": 723061,
+      "shared_mask_samples": 144715,
+      "excluded_samples": 762037,
+      "sample_volume_m3": 1953125.0,
+      "domain_volume_km3": 1771.0,
+      "finite_published_vp_volume_km3": 1694.875,
+      "shared_mask_volume_m3": 282646484375.0,
+      "shared_mask_volume_km3": 282.646484375,
+      "shared_mask_fraction_of_domain": 0.15959711144833427,
+      "shared_mask_fraction_of_finite_published_vp": 0.1667653864591784,
+      "mask_sha256": "b9aa8e6346340b8a00344a682b8677fc511ca06577fdf981d8cc9622a4054b1e",
+      "metrics": {
+        "initial": {
+          "rms_difference_m_s": 616.8518023218753,
+          "mean_signed_difference_m_s": -523.8569803498667,
+          "mae_m_s": 533.6358787875957,
+          "pearson_vp": 0.7816610321194188
+        },
+        "hard": {
+          "rms_difference_m_s": 730.0599580974662,
+          "mean_signed_difference_m_s": -606.2920470938801,
+          "mae_m_s": 637.0566659721354,
+          "pearson_vp": 0.6946082577229141
+        },
+        "soft": {
+          "rms_difference_m_s": 735.1041140162275,
+          "mean_signed_difference_m_s": -601.2704469557222,
+          "mae_m_s": 638.6274047448842,
+          "pearson_vp": 0.6680023486514106
+        }
+      }
+    },
+    {
+      "spacing_m": 250.0,
+      "shape_xyz": [
+        92,
+        44,
+        28
+      ],
+      "total_samples": 113344,
+      "finite_published_vp_samples": 108640,
+      "outside_finite_published_vp_samples": 4704,
+      "finite_vp_nonfinite_resolvability_samples": 0,
+      "finite_published_resolvability_le_threshold_samples": 90563,
+      "shared_mask_samples": 18077,
+      "excluded_samples": 95267,
+      "sample_volume_m3": 15625000.0,
+      "domain_volume_km3": 1771.0,
+      "finite_published_vp_volume_km3": 1697.5,
+      "shared_mask_volume_m3": 282453125000.0,
+      "shared_mask_volume_km3": 282.453125,
+      "shared_mask_fraction_of_domain": 0.15948793054771315,
+      "shared_mask_fraction_of_finite_published_vp": 0.16639359351988217,
+      "mask_sha256": "11baa8e2cd9d07d3c5012bc5cc0ee35771588260d528b5f941ed74a1d0728252",
+      "metrics": {
+        "initial": {
+          "rms_difference_m_s": 616.1059170948441,
+          "mean_signed_difference_m_s": -523.2850342774942,
+          "mae_m_s": 533.0629195575593,
+          "pearson_vp": 0.7832816396067493
+        },
+        "hard": {
+          "rms_difference_m_s": 729.5867068454309,
+          "mean_signed_difference_m_s": -606.2811289715454,
+          "mae_m_s": 636.7124608808997,
+          "pearson_vp": 0.6971212307757827
+        },
+        "soft": {
+          "rms_difference_m_s": 734.6032618430977,
+          "mean_signed_difference_m_s": -601.341093380017,
+          "mae_m_s": 638.4095682156089,
+          "pearson_vp": 0.6707545913226488
+        }
+      }
+    }
+  ],
+  "convergence": {
+    "fine_spacing_m": 125.0,
+    "coarse_spacing_m": 250.0,
+    "difference_convention": "125 m minus 250 m; independently sampled same mask rule",
+    "shared_mask_volume_change_km3": 0.193359375,
+    "shared_mask_volume_relative_change": 0.0006845715550146595,
+    "metric_changes": {
+      "initial": {
+        "rms_difference_m_s": 0.7458852270311809,
+        "mean_signed_difference_m_s": -0.5719460723724978,
+        "mae_m_s": 0.5729592300364175,
+        "pearson_vp": -0.0016206074873305054
+      },
+      "hard": {
+        "rms_difference_m_s": 0.47325125203531115,
+        "mean_signed_difference_m_s": -0.010918122334715008,
+        "mae_m_s": 0.34420509123572174,
+        "pearson_vp": -0.0025129730528685723
+      },
+      "soft": {
+        "rms_difference_m_s": 0.5008521731298288,
+        "mean_signed_difference_m_s": 0.07064642429486412,
+        "mae_m_s": 0.217836529275246,
+        "pearson_vp": -0.002752242671238192
+      }
+    },
+    "caveat": "Two-grid sensitivity check only; no formal convergence order or uncertainty bound"
+  },
+  "source_sha256": {
+    "data/geysers_2011/initial_models/linear_vp_3p5_6p0/initial_velocity_m_s.npy": "c7035fe75e2b1736c7d765b2e0cffa3ffda7176bf7ce929286ec6c0d4a12a300",
+    "data/geysers_2011/initial_models/linear_vp_3p5_6p0/model.json": "8f5ab73939395391788e548234d3bb4262fe85bc236cb72b6385e8200f5333bb",
+    "data/geysers_2011/real_experiment_v1/geometry.json": "2fd23e5d4845a87194fff5291cef0fef3acb890eec2b040331247e68c52a0c99",
+    "data/geysers_2021/Geysers_Vpmodel_Guo-Thurber2021GJI.CSV": "11a56a7a433144bfafd05a5f944efde4509f72c2821cb4337951dd4e8ce626ad",
+    "paper/figures/real_picks/geysers_real_refine500_fmm125_with_emtomo_oracle.json": "1079711e7fc80b1b933eb6c23a84bb26974ac61c4176ccf26d3ef2ecefededd1",
+    "paper/paper_scripts/make_geysers_published_vp_sections.py": "7e06eaeb42a839518dc7e7081aa40254575868af16f620f60cff20d36411bc6e",
+    "paper/paper_scripts/make_geysers_real_published_comparison.py": "ae57e3aa2c21058335579c4cee47df64ea29c77b201980af4157c5f7ad73097b",
+    "paper/paper_scripts/make_geysers_real_structure_metrics.py": "1b7c8e0199b3fd3222e3ced717a253a7784e529cebce308513520ea60b2e23aa",
+    "runs/geysers_real_linear35_60_latest_20261110_063859/cases/hard/result.json": "7f5d1596d6a12c496738dd94211a2626868819ca37beff0045dff04865b2aa53",
+    "runs/geysers_real_linear35_60_latest_20261110_063859/cases/soft/result.json": "47eade4fe12b064df381655e44cdf1e4dcc7fcb4d24366e2c9fe6b18d78fcd89",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/cases/hard/result.json": "6519945ae33147e5924b1f7708db9712473a2effd9d33744b6e0da1140f30ef8",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/cases/soft/result.json": "7e9c40fd6551fcfc36dbf28dd5d53f0613cfa8c960185b56a6e8040bcde6a90e",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/inputs/hard/initial_velocity_m_s.npy": "55c8828a38daa6ab3872d0c4e91e91e8f3e0b4b83f1075b0de0449ff95f2c07c",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/inputs/hard/parent_final_model.npy": "37c29125dad6f97b3f73def578784b811d29cfc79cedfab8a0d36aebbe59c06d",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/inputs/soft/initial_velocity_m_s.npy": "eaea47da724da3eae2370b5cb0718024d695e2923a16827f6efd2f4cf48ad0ce",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/inputs/soft/parent_final_model.npy": "bd08baec8e13f107d6b574e376f11855c8bb42105863243e26ac79a0c31ef83f",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/manifest.json": "6d1433b80ab5d97c2c906d86d59d50e52bf71d41657b388044260fd900a912ac",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-hard_v1.5_20261110_072122_7681679e024a41ae9cee35929de13c79/control_mask.npy": "989d0d3a17a7947c5c60ce9d5e18c2945d49e24f4acbbc03a423d21e38bb1c67",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-hard_v1.5_20261110_072122_7681679e024a41ae9cee35929de13c79/control_split.json": "fe410f3eb4b4b0223de7c0e84eca7025b56ae419bb56669edb0e40b63b48b47a",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-hard_v1.5_20261110_072122_7681679e024a41ae9cee35929de13c79/final_model.npy": "37c29125dad6f97b3f73def578784b811d29cfc79cedfab8a0d36aebbe59c06d",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-hard_v1.5_20261110_072122_7681679e024a41ae9cee35929de13c79/initial_model.npy": "c7035fe75e2b1736c7d765b2e0cffa3ffda7176bf7ce929286ec6c0d4a12a300",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-hard_v1.5_20261110_072122_7681679e024a41ae9cee35929de13c79/iter_0/complete.json": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-hard_v1.5_20261110_072122_7681679e024a41ae9cee35929de13c79/iter_1/complete.json": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-hard_v1.5_20261110_072122_7681679e024a41ae9cee35929de13c79/iter_2/complete.json": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-hard_v1.5_20261110_072122_7681679e024a41ae9cee35929de13c79/iter_3/complete.json": "6cf8fd8fe3cf21998735ac795d39e9f89dc0a885ad236d9f3857776cd1adb110",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-hard_v1.5_20261110_072122_7681679e024a41ae9cee35929de13c79/meta.json": "2031ded6033538b0a6c6372c0054e319dee0c760010a40b3e103f54c03d5b404",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-hard_v1.5_20261110_072122_7681679e024a41ae9cee35929de13c79/stopping.json": "2e518c78ccaa6e2204c2ea223e5ea6f164f2a4e10697b46da1f121765e48f7a5",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-soft_v1.5_20261110_063942_e8532001930a4f91a3fd0d3bac1feb8e/control_mask.npy": "989d0d3a17a7947c5c60ce9d5e18c2945d49e24f4acbbc03a423d21e38bb1c67",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-soft_v1.5_20261110_063942_e8532001930a4f91a3fd0d3bac1feb8e/control_split.json": "fe410f3eb4b4b0223de7c0e84eca7025b56ae419bb56669edb0e40b63b48b47a",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-soft_v1.5_20261110_063942_e8532001930a4f91a3fd0d3bac1feb8e/final_model.npy": "bd08baec8e13f107d6b574e376f11855c8bb42105863243e26ac79a0c31ef83f",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-soft_v1.5_20261110_063942_e8532001930a4f91a3fd0d3bac1feb8e/initial_model.npy": "c7035fe75e2b1736c7d765b2e0cffa3ffda7176bf7ce929286ec6c0d4a12a300",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-soft_v1.5_20261110_063942_e8532001930a4f91a3fd0d3bac1feb8e/iter_0/complete.json": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-soft_v1.5_20261110_063942_e8532001930a4f91a3fd0d3bac1feb8e/iter_1/complete.json": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-soft_v1.5_20261110_063942_e8532001930a4f91a3fd0d3bac1feb8e/iter_2/complete.json": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-soft_v1.5_20261110_063942_e8532001930a4f91a3fd0d3bac1feb8e/iter_3/complete.json": "6cf8fd8fe3cf21998735ac795d39e9f89dc0a885ad236d9f3857776cd1adb110",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-soft_v1.5_20261110_063942_e8532001930a4f91a3fd0d3bac1feb8e/iter_4/complete.json": "072deec4a878a55eb5cb7f456a306186f45fd3225341c9fd6f54324db9ef34ed",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-soft_v1.5_20261110_063942_e8532001930a4f91a3fd0d3bac1feb8e/meta.json": "0022f6327301ae63de53bc229044b3bcf0806c774de7e039037985469bc05c2b",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-soft_v1.5_20261110_063942_e8532001930a4f91a3fd0d3bac1feb8e/stopping.json": "6e2be35a6b7e8d447bd6e8bac56747880cea0e17f79a3ae067a32ae8e5c2440a",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/control_mask.npy": "989d0d3a17a7947c5c60ce9d5e18c2945d49e24f4acbbc03a423d21e38bb1c67",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/control_split.json": "fe410f3eb4b4b0223de7c0e84eca7025b56ae419bb56669edb0e40b63b48b47a",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/final_model.npy": "8ae860b50d649900f75be2c5613fd74178af55261a06c5f35096ef071d5ef949",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/initial_model.npy": "55c8828a38daa6ab3872d0c4e91e91e8f3e0b4b83f1075b0de0449ff95f2c07c",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/iter_0/complete.json": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/iter_1/complete.json": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/iter_2/complete.json": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/meta.json": "972ef095809c353805b7d28c14e9cd95b010f14cb27ba870fa06e6e9694ddbf9",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/stopping.json": "5abd297bb7054fbcf498a499c43776e454bfd8d18a355d47bc9e5d92de60fbdb",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/control_mask.npy": "989d0d3a17a7947c5c60ce9d5e18c2945d49e24f4acbbc03a423d21e38bb1c67",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/control_split.json": "fe410f3eb4b4b0223de7c0e84eca7025b56ae419bb56669edb0e40b63b48b47a",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/final_model.npy": "ae035884c17fd1434b2318dd9cf344df5dc44b7a3926429518b911926cfe5c14",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/initial_model.npy": "eaea47da724da3eae2370b5cb0718024d695e2923a16827f6efd2f4cf48ad0ce",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/iter_0/complete.json": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/iter_1/complete.json": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/iter_2/complete.json": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/meta.json": "fa2f28c8f5067df3aabb31cd0796728863d2561dabfc1091d5cf315c4dc188d9",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/stopping.json": "9d7450b5cfbf11bb9a5a4e393c07597ed903b867882a73ac321e85688ddd85b6",
+    "studies/geysers_real_picks/evaluate_holdout.py": "24c798b3dc6415a9b58e9342f3a3b89b736bdddd517c8af2263c09bf35056187"
+  },
+  "checks_passed": [
+    "All figure source hashes and completed final artifacts verified",
+    "Parent final hashes, original parent starts and exact 2x2x2 continuation starts verified",
+    "Completion markers, stopping metadata, units, model shapes and domain checked",
+    "Published source nodes, vertical interpolation, outside NaN and coordinate mapping validated"
+  ],
+  "caveats": [
+    "Published Vp is an external structural reference, not truth; these are not error/accuracy metrics.",
+    "Published scaled resolvability is not EMTomo resolvability; no EMTomo resolution claim is made.",
+    "125/250 m are quadrature spacings, not model or tomographic resolution.",
+    "Volume is a midpoint approximation to the thresholded finite support, not exact boundary integration.",
+    "Pearson uses absolute Vp and can reflect the common depth trend; no anomaly-specific inference or p-value.",
+    "Original initial is 1 km piecewise constant; 500 m continuations start from their own parent finals.",
+    "Published geographic datum is unspecified; sea-level compatibility is assumed, not independently verified.",
+    "No geological interpretation, truth validation, holdout evaluation or seismic solver is performed."
+  ],
+  "manuscript_todo": {
+    "color": "red",
+    "text": "TODO: Describe coincident anomalies; no interpretation supplied here.",
+    "latex": "\\textcolor{red}{TODO: Describe coincident anomalies.}",
+    "manuscript_modified": false
+  }
+}

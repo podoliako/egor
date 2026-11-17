@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
 from uuid import uuid4
+from zipfile import ZIP_DEFLATED, ZipFile
 
 import numpy as np
 
@@ -98,9 +99,7 @@ class TomographyLogger:
             event_<j>/
               weights.npz / residuals.npy
               ray_status.npz          ← global reached masks; observed_mask for sparse events
-              weight_<w>/
-                G_stations_sparse.npz  ← compact fine-grid ray paths
-                ray_count.npy          ← station ray count (coarse grid)
+              rays.npz                ← all hypotheses' sparse G and coarse ray counts
     """
 
     def __init__(
@@ -154,6 +153,36 @@ class TomographyLogger:
         temporary.replace(path)
 
     @staticmethod
+    def _save_event_rays(path: Path, ray_counts: Mapping, sparse_rays: Mapping) -> None:
+        """Publish one indexed, lossless NPZ instead of two files per hypothesis.
+
+        Schema 1: ray_count_indices/g_indices retain the original hypothesis IDs;
+        ray_count_<id> and g_<id>_<field> are independent NPY members. Keeping
+        members separate preserves every dtype/shape and permits selective viewer
+        reads without concatenating/copying all rays or inflating the whole event.
+        Level-1 DEFLATE reduces sparse coordinates/counts without default zlib's
+        expensive search. Writes stream one array at a time; memory is bounded.
+        """
+        temporary = path.with_suffix(path.suffix + ".tmp")
+        try:
+            with ZipFile(temporary, "w", compression=ZIP_DEFLATED, compresslevel=1) as archive:
+                def save(name, array):
+                    with archive.open(name + ".npy", "w", force_zip64=True) as stream:
+                        np.lib.format.write_array(stream, np.asarray(array), allow_pickle=False)
+
+                save("schema_version", np.asarray(1, dtype=np.int32))
+                save("ray_count_indices", np.asarray(sorted(ray_counts), dtype=np.int64))
+                save("g_indices", np.asarray(sorted(sparse_rays), dtype=np.int64))
+                for index, counts in ray_counts.items():
+                    save(f"ray_count_{index}", counts)
+                for index, fields in sparse_rays.items():
+                    for name, array in fields.items():
+                        save(f"g_{index}_{name}", array)
+            temporary.replace(path)
+        finally:
+            temporary.unlink(missing_ok=True)
+
+    @staticmethod
     def _save_json(path: Path, values) -> None:
         temporary = path.with_suffix(path.suffix + ".tmp")
         with temporary.open("w") as stream:
@@ -164,6 +193,7 @@ class TomographyLogger:
         meta = {
             "viewer_completion_protocol": 1,
             "viewer_ray_status_schema": 1,
+            "viewer_event_rays_schema": 1,
             "viewer_saved_artifacts": {
                 "save_misfit": self.save_misfit,
                 "save_timefields": self.save_timefields,
@@ -252,15 +282,10 @@ class TomographyLogger:
                 **observation_metadata,
             )
 
-        for w_idx, ray_count in log.ray_count_per_weight.items():
-            w_dir = event_dir / f"weight_{w_idx}"
-            w_dir.mkdir(exist_ok=True)
-            self._save_npy(w_dir / "ray_count.npy", ray_count)
-        # Fine-grid G is optional because it is substantially larger than coverage.
-        for w_idx, sparse_g in (log.G_per_weight or {}).items():
-            w_dir = event_dir / f"weight_{w_idx}"
-            w_dir.mkdir(exist_ok=True)
-            self._save_npz(w_dir / "G_stations_sparse.npz", **sparse_g)
+        # Fine-grid G remains optional; coverage and hypothesis IDs are independent.
+        self._save_event_rays(
+            event_dir / "rays.npz", log.ray_count_per_weight, log.G_per_weight or {},
+        )
 
     def start_iteration(self, iteration: int):
         self._iter_start = time.perf_counter()

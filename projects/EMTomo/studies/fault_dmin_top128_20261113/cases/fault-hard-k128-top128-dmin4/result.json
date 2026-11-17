@@ -1,0 +1,9 @@
+{
+  "status": "completed",
+  "pid": 1836856,
+  "started_at": "2026-11-13T11:25:26.701708+00:00",
+  "run_id": "run_faultdmin13-fault-hard-k128-top128-dmin4_v1.4_20261113_112541_c7ee61aab7a740c4b41140d0801d9dae",
+  "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin13-fault-hard-k128-top128-dmin4_v1.4_20261113_112541_c7ee61aab7a740c4b41140d0801d9dae",
+  "completed_updates": 12,
+  "finished_at": "2026-11-13T14:25:20.583760+00:00"
+}

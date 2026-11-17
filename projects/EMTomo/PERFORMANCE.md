@@ -2,7 +2,8 @@
 
 These controls change execution and storage, not the inversion model, pick-noise
 parameters, candidate selection, or Powell method/bounds/options. Small floating
-point rounding differences are possible. The method version remains **1.4**.
+point rounding differences are possible. These execution changes retain the current
+method version (**1.5**, including held-out stopping).
 Configuration metadata uses `dataclasses.asdict`, so it records all controls below.
 
 ## Configuration and CLI
@@ -159,7 +160,8 @@ catalog size. Use saved per-stage timings to assess production behavior.
   rounding. Input fields retain fork's copy-on-write sharing.
 - The compact ray path uses the original tracing/deposition kernels, one touched
   row workspace, and CSR output. It does not allocate a dense station-by-voxel
-  array first. Optional fine-grid viewer artifacts retain their existing format.
+  array first. Optional fine-grid viewer artifacts retain their sparse array
+  representation; new runs pack them into event containers as described below.
 - Matrix-free mode stores compact hypotheses and packs a global-index CSR payload
   once for compiled CG matvecs. This adds linear ray storage and is not necessarily
   cheaper than a small dense Hessian. No large dense fallback occurs on CG failure.
@@ -167,3 +169,93 @@ catalog size. Use saved per-stage timings to assess production behavior.
   velocity-update clipping are unchanged. Existing runs are neither rewritten nor
   migrated. Only future processes use the new code; already running studies may
   also use frozen code snapshots.
+
+## Reusing control localizations (enabled by default)
+
+After update k, held-out scoring builds fields in the updated model and localizes
+only events with control picks, using **training picks only**. Previously, E-step
+k+1 repeated this exact search. It now reuses:
+
+- The station travel-time fields of that same model.
+- Every shortlisted cell, refined position and refined cost, in original order
+  (not just the MAP candidate and not the previous top-N subset).
+
+The next E-step still applies its own stable ranking, top-N, temperature and
+soft/hard weights. Events without control picks follow the original search path.
+Control scoring remains post-update on every cycle; the split, origin fit,
+RMSE reduction order, stopping rule, rays and normal equations are unchanged.
+
+`tomography_cache.py` fingerprints the model, cell size, training arrivals including
+missing-pick masks, station coordinates, noise and search settings. Reusing a
+stale cache raises an error. Temperature, top-N, candidate mode and worker count
+are deliberately not part of the search key. No held-out observations or full
+per-event cost volumes are stored. With optional misfit-volume logging, the
+likelihood volume is regenerated, but candidate refinement is still reused.
+
+The cache is in memory only, handed off for one model at a time; the EM loop
+releases its field references before the following M-step solve. It neither
+persists across restarts nor changes historical runs. No cache is retained on the
+last allowed update. `performance.json` reports `events.reused_localizations`;
+`station_fields_s` is zero for a reused field volume, and the console prints a
+`[Reuse]` line. `run_em(..., reuse_control_localization=False)` provides an
+uncached reference path for tests/benchmarks (not a change to the scientific
+configuration). This execution choice is recorded in run metadata.
+
+Validation covers genuine serial/fork calculations, soft/hard weighting, changing
+temperature/top-N, sparse picks, optional misfit and fine-ray output, dense and
+matrix-free updates, stale-cache rejection, and complete multi-update runs with
+identical stopping and saved outputs. An additional check on 8 events from the
+current realistic Geysers experiment, 26 stations, 100 m fine grid, 50 candidates
+and both initial models produced **exactly equal updates** with and without reuse
+for both methods. This is a correctness check, not a full-catalog speedup estimate.
+
+## Packed event ray diagnostics
+
+New output uses one `iter_N/event_M/rays.npz` instead of separate
+`weight_K/ray_count.npy` and `weight_K/G_stations_sparse.npz` files. All hypotheses,
+ray counts and fine-grid sparse ray arrays are retained **losslessly**. Weights,
+positions, residuals, station masks, aggregate counts and completion markers
+retain their existing roles. Fine-grid diagnostic tracing is unchanged.
+
+Event archive schema 1:
+
+- `schema_version`: integer 1.
+- `ray_count_indices`, `g_indices`: original hypothesis IDs for each payload type.
+- `ray_count_<id>`: original coarse-grid array.
+- `g_<id>_shape`, `g_<id>_offsets`, `g_<id>_coords`, `g_<id>_values`:
+  original sparse station-ray arrays.
+
+Each array is a separate NPY member in the NPZ, compressed with level-1 DEFLATE.
+Writing streams arrays rather than concatenating them and atomically publishes
+only the complete archive. The viewer reads just the requested hypothesis's G
+members. No parallel writer pool is needed for this first optimization.
+
+The server supports both this format and legacy per-weight sparse/dense files,
+with unchanged endpoint responses. Metadata declares `viewer_event_rays_schema=1`.
+**The Docker viewer must be rebuilt/recreated with the updated `server.py` before
+viewing new-format rays**; its source is baked into the image, not bind-mounted.
+Existing runs need no migration. Frozen inversion snapshots must include the new
+`tomography/tomography_cache.py` when preparing future studies.
+
+A temporary-directory synthetic benchmark of 4 events × 50 hypotheses (three
+repetitions, ray artifacts only) measured:
+
+| Output | Median save time | Files | Size |
+| --- | ---: | ---: | ---: |
+| Previous per-weight files | 3.044 s | 400 | 19.56 MB |
+| Packed event archives | 0.715 s | 4 | 19.71 MB |
+
+This is 4.25× faster artifact writing and 99% fewer ray files on that fixture,
+with 0.75% size growth. It is **not** a measured whole-iteration speedup; the
+benchmark did not call `fsync` or reproduce the full production I/O workload.
+
+Focused regression commands, from the repository root:
+
+```sh
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 NUMBA_NUM_THREADS=1 \
+  PYTHONPATH=projects/EMTomo venv/bin/python -m pytest \
+  projects/EMTomo/tests/test_localization_cache.py \
+  projects/EMTomo/tests/test_event_ray_container.py \
+  projects/EMTomo/tests/test_early_stopping.py \
+  projects/EMTomo/tests/test_viewer_api.py -q
+```

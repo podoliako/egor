@@ -71,6 +71,7 @@ def run_em(
     source_experiment: Optional[dict] = None,
     run_name: Optional[str] = None,
     logger: Optional[TomographyLogger] = None,
+    reuse_control_localization: bool = True,
 ) -> Optional[TomographyLogger]:
     """Alternate hypocentre hypotheses (E-step) and one damped slowness update (M-step).
 
@@ -81,6 +82,8 @@ def run_em(
     back. With no control picks, runs all requested cycles. ``reference_model``
     is used only for quality logging, never for stopping or fitting.
     Returns the run logger, or None when runs are not saved.
+    Control localizations/fields are reused by the next E-step by default; the
+    runtime-only ``reuse_control_localization=False`` path is a numerical reference.
     Arrivals are dense (events, global stations); NaN marks unobserved P picks.
     Each event must have at least two finite picks; infinities are rejected.
     """
@@ -143,6 +146,7 @@ def run_em(
             viewer_quality_expected=reference_model is not None,
             control_n_picks=n_control,
             control_actual_fraction=control_split["actual_fraction"],
+            reuse_control_localization=reuse_control_localization,
         )
         grid_info = {
             "coarse_cell_size": initial_model.cell_size,
@@ -168,6 +172,8 @@ def run_em(
     previous_rmse = None
     insufficient_steps = 0
     stop_reason = "max_cycles"
+    # Pop on entry to the next step so no caller reference pins fields during its solve.
+    pending_cache = []
     for iteration in range(config.n_cycles):
         print(f"{iteration + 1}/{config.n_cycles}", flush=True)
         if logger is not None:
@@ -178,6 +184,7 @@ def run_em(
                        if config.temperature_schedule is not None else config)
         delta_s, sensitivity, confidence = make_tomography_step(
             model, training_arrivals, stations_m, noise, step_config, iteration=iteration, logger=logger,
+            localization_cache=pending_cache.pop() if pending_cache else None,
         )
         model = VelocityModel(
             update_velocity(model.velocity, delta_s, config.max_velocity_step_fraction),
@@ -187,9 +194,19 @@ def run_em(
         control_score = None
         if n_control:
             started = perf_counter()
-            rmse = evaluate_control_rmse(
+            retain_localization = reuse_control_localization and iteration + 1 < config.n_cycles
+            evaluation = evaluate_control_rmse(
                 model, training_arrivals, arrivals, control_mask, stations_m, noise, step_config,
+                **({"return_cache": True} if retain_localization else {}),
             )
+            if retain_localization:
+                rmse, cache = evaluation
+                if cache is not None:
+                    pending_cache.append(cache)
+                del cache
+            else:
+                rmse = evaluation
+            del evaluation
             improvement = None
             if previous_rmse is not None:
                 # Zero is already a perfect score: it cannot improve relatively.
@@ -267,26 +284,38 @@ def make_tomography_step(
     iteration: int = 0,
     logger: Optional[TomographyLogger] = None,
     diagnostics: Optional[dict] = None,
+    *, localization_cache=None,
 ):
     """One EM cycle; returns ``(delta_s, sensitivity_diagonal, coverage_confidence)``."""
     arrivals = validate_arrivals(arrivals, len(stations_m))
     wall = {}
     started = perf_counter()
-    fine = model.refined(config.subdivision, config.slowness_interpolation)
-    wall["refine_model_s"] = perf_counter() - started
-    started = perf_counter()
-    times = station_travel_time_fields(fine, stations_m, config.n_workers)
-    wall["station_fields_s"] = perf_counter() - started
+    if localization_cache is not None:
+        localization_cache.validate(model, arrivals, stations_m, noise, config)
+        fine_cell_size = model.cell_size / config.subdivision
+        wall["refine_model_s"] = 0.0
+        times = localization_cache.times
+        wall["station_fields_s"] = 0.0
+        print(f"[Reuse] Fields and {len(localization_cache.candidates)}/{len(arrivals)} "
+              "training localizations from previous control", flush=True)
+    else:
+        fine = model.refined(config.subdivision, config.slowness_interpolation)
+        fine_cell_size = fine.cell_size
+        wall["refine_model_s"] = perf_counter() - started
+        started = perf_counter()
+        times = station_travel_time_fields(fine, stations_m, config.n_workers)
+        wall["station_fields_s"] = perf_counter() - started
+        del fine
     started = perf_counter()
     if logger is not None:
         logger.save_station_fields(iteration, times)
     wall["save_fields_s"] = perf_counter() - started
     started = perf_counter()
     fields = IterationFields.from_times(
-        times, metric_to_cell_coord(stations_m, fine.cell_size), fine.cell_size,
+        times, metric_to_cell_coord(stations_m, fine_cell_size), fine_cell_size,
         config.subdivision, noise, config.slowness_interpolation,
     )
-    del times, fine
+    del times
     wall["prepare_fields_s"] = perf_counter() - started
     settings = EventSettings(
         subdivision=config.subdivision,
@@ -310,8 +339,10 @@ def make_tomography_step(
     started = perf_counter()
     hessian, rhs, event_logs = run_events(
         arrivals, fields, settings, config.n_workers, diagnostics=event_diagnostics,
+        **({"candidates": localization_cache.candidates} if localization_cache is not None else {}),
     )
     wall["events_s"] = perf_counter() - started
+    del localization_cache
 
     started = perf_counter()
     if logger is not None:

@@ -1,0 +1,73 @@
+{
+  "section": "4.5",
+  "source": "Existing full-domain comparison, exact saved slice and mask arrays",
+  "title": false,
+  "bottom_notes": false,
+  "rows": [
+    "true",
+    "soft",
+    "hard"
+  ],
+  "columns": [
+    "xy",
+    "yz",
+    "xz"
+  ],
+  "native_cuts_xyz_m": [
+    10000.0,
+    3500.0,
+    1600.0
+  ],
+  "coordinate_offset_m": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "color_limits_km_s": [
+    3.4,
+    5.8
+  ],
+  "no_phase_reversal": true,
+  "fault_geometry": {
+    "source": "Exact interfaces in original source truth array, not fitted inversion features",
+    "fault_x_native_m": 6500.0,
+    "left_layer_depths_m": [
+      750.0,
+      1875.0
+    ],
+    "right_layer_depths_m": [
+      1125.0,
+      2875.0
+    ]
+  },
+  "sensitivity_envelopes": {
+    "xy": {
+      "native_cell_size_m": 1000.0,
+      "padding_m": 1000.0,
+      "raw_area_km2": 75.0,
+      "display_area_km2": 122.0,
+      "added_area_km2": 47.0
+    },
+    "xz": {
+      "native_cell_size_m": 1000.0,
+      "padding_m": 1000.0,
+      "raw_area_km2": 42.0,
+      "display_area_km2": 80.0,
+      "added_area_km2": 38.0
+    },
+    "yz": {
+      "native_cell_size_m": 1000.0,
+      "padding_m": 1000.0,
+      "raw_area_km2": 18.0,
+      "display_area_km2": 31.0,
+      "added_area_km2": 13.0
+    }
+  },
+  "mask_caveat": "Display sensitivity envelope, not a validated resolution region; pre-final-update diagnostics",
+  "source_sha256": {
+    "paper/figures/results/tomography/source/make_sections_45_46_final.py": "46f5fed9a8ba8c6defb10e4d8ebc2bb174681d03ffcfb0c66ae321e15b24732a",
+    "paper/figures/results/tomography/source/make_comparison.py": "65ff2e306eb0e5fda05dc010596169ed6cfae01a833d1dba0899014701f23933",
+    "paper/figures/results/tomography/source/selection_and_sections.json": "ad14d960e29e3146aff950e2c5b0bb3c4fc40425762d6ddb327a300dd69485ad",
+    "paper/figures/results/tomography/source/section_4_5_slices.npz": "fc3126654d58c7772b228f330ee8f2d48a18c70999f813d4fc7648ffcc8848ad"
+  }
+}

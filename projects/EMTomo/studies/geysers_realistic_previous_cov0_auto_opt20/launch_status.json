@@ -1,0 +1,61 @@
+{
+  "status": "launched",
+  "launcher_pid": 1531318,
+  "started_at": "2026-11-09T18:32:47.633733+00:00",
+  "manifest_sha256": "e7728010412fbdaa5c5443748a48e6e80359befca3487b4311ad7fc72aedb6b3",
+  "workers": {
+    "homogeneous-soft": {
+      "pid": 1531335,
+      "launched_at": "2026-11-09T18:32:52.049828+00:00",
+      "command": [
+        "/mnt/disk01/egor/venv/bin/python",
+        "/mnt/disk01/egor/projects/EMTomo/studies/geysers_realistic_previous_cov0_auto_opt20/runner/run.py",
+        "--manifest",
+        "/mnt/disk01/egor/projects/EMTomo/studies/geysers_realistic_previous_cov0_auto_opt20/manifest.json",
+        "--case-id",
+        "homogeneous-soft"
+      ],
+      "log": "/mnt/disk01/egor/projects/EMTomo/studies/geysers_realistic_previous_cov0_auto_opt20/cases/homogeneous-soft/worker.log"
+    },
+    "homogeneous-hard": {
+      "pid": 1531347,
+      "launched_at": "2026-11-09T18:32:52.252362+00:00",
+      "command": [
+        "/mnt/disk01/egor/venv/bin/python",
+        "/mnt/disk01/egor/projects/EMTomo/studies/geysers_realistic_previous_cov0_auto_opt20/runner/run.py",
+        "--manifest",
+        "/mnt/disk01/egor/projects/EMTomo/studies/geysers_realistic_previous_cov0_auto_opt20/manifest.json",
+        "--case-id",
+        "homogeneous-hard"
+      ],
+      "log": "/mnt/disk01/egor/projects/EMTomo/studies/geysers_realistic_previous_cov0_auto_opt20/cases/homogeneous-hard/worker.log"
+    },
+    "1d-soft": {
+      "pid": 1531359,
+      "launched_at": "2026-11-09T18:32:52.456282+00:00",
+      "command": [
+        "/mnt/disk01/egor/venv/bin/python",
+        "/mnt/disk01/egor/projects/EMTomo/studies/geysers_realistic_previous_cov0_auto_opt20/runner/run.py",
+        "--manifest",
+        "/mnt/disk01/egor/projects/EMTomo/studies/geysers_realistic_previous_cov0_auto_opt20/manifest.json",
+        "--case-id",
+        "1d-soft"
+      ],
+      "log": "/mnt/disk01/egor/projects/EMTomo/studies/geysers_realistic_previous_cov0_auto_opt20/cases/1d-soft/worker.log"
+    },
+    "1d-hard": {
+      "pid": 1531371,
+      "launched_at": "2026-11-09T18:32:52.659976+00:00",
+      "command": [
+        "/mnt/disk01/egor/venv/bin/python",
+        "/mnt/disk01/egor/projects/EMTomo/studies/geysers_realistic_previous_cov0_auto_opt20/runner/run.py",
+        "--manifest",
+        "/mnt/disk01/egor/projects/EMTomo/studies/geysers_realistic_previous_cov0_auto_opt20/manifest.json",
+        "--case-id",
+        "1d-hard"
+      ],
+      "log": "/mnt/disk01/egor/projects/EMTomo/studies/geysers_realistic_previous_cov0_auto_opt20/cases/1d-hard/worker.log"
+    }
+  },
+  "launch_finished_at": "2026-11-09T18:32:55.881472+00:00"
+}

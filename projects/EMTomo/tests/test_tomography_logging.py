@@ -86,9 +86,10 @@ def test_event_log_keeps_refined_positions_and_coverage_without_g(tmp_path):
         np.testing.assert_array_equal(saved["weight_indices"], weights["indices"])
         np.testing.assert_array_equal(saved["positions"], positions)
         np.testing.assert_array_equal(saved["weight_values"], [1.0])
-    np.testing.assert_array_equal(
-        np.load(event_dir / "weight_0" / "ray_count.npy"), ray_count
-    )
+    with np.load(event_dir / "rays.npz", allow_pickle=False) as saved:
+        np.testing.assert_array_equal(saved["ray_count_0"], ray_count)
+        assert saved["g_indices"].size == 0
+    assert not list(event_dir.glob("weight_*"))
     logger.save_ray_count(0, ray_count * 3)
     np.testing.assert_array_equal(
         np.load(logger.run_dir / "iter_0" / "ray_count.npy"), ray_count * 3
@@ -114,7 +115,8 @@ def test_sparse_g_log_round_trip(tmp_path):
     ))
 
     weight_dir = logger.run_dir / "iter_0" / "event_0" / "weight_0"
-    assert (weight_dir / "G_stations_sparse.npz").exists()
+    assert (weight_dir.parent / "rays.npz").exists()
+    assert not weight_dir.exists()
     for station in range(dense.shape[0]):
         for y in range(dense.shape[2]):
             restored = _load_G_station(weight_dir / f"G_station_{station}", y)
@@ -124,7 +126,7 @@ def test_sparse_g_log_round_trip(tmp_path):
 def _mock_em_cycle(monkeypatch):
     from tomography import tomography_em as em
 
-    def step(model, arrivals, stations, noise, config, *, iteration, logger):
+    def step(model, arrivals, stations, noise, config, *, iteration, logger, localization_cache=None):
         shape = model.shape
         logger.save_station_fields(iteration, np.ones((len(stations), *shape)))
         log = _event_log(shape, [[0, 0, 0]],
@@ -159,8 +161,7 @@ def test_em_publishes_marker_last_preserving_pre_update_model(tmp_path, monkeypa
             directory = path.parent
             expected = ["model.npy", "delta_s.npy", "sensitivity_diagonal.npy", "coverage_confidence.npy",
                         "ray_count.npy", "station_fields.npy", "event_0/weights.npz", "event_0/residuals.npy",
-                        "event_0/misfit.npy", "event_0/weight_0/ray_count.npy",
-                        "event_0/weight_0/G_stations_sparse.npz", "event_0/ray_status.npz",
+                        "event_0/misfit.npy", "event_0/rays.npz", "event_0/ray_status.npz",
                         "ray_status.json"]
             assert all((directory / name).is_file() for name in expected)
             assert json.loads((logger.run_dir / "timing.jsonl").read_text())["iter"] == 0
@@ -183,7 +184,7 @@ def test_em_publishes_marker_last_preserving_pre_update_model(tmp_path, monkeypa
     assert not list(logger.run_dir.rglob("*.tmp"))
 
 
-@pytest.mark.parametrize("failure", ["update_velocity", "save_station_fields", "save_event_data",
+@pytest.mark.parametrize("failure", ["update_velocity", "save_station_fields", "save_event_data", "_save_event_rays",
                                       "save_ray_count", "save_ray_status", "end_iteration", "save_delta_s",
                                       "save_inversion_diagnostics", "save_quality", "complete_iteration"])
 def test_failed_update_or_save_never_publishes_cycle(tmp_path, monkeypatch, failure):

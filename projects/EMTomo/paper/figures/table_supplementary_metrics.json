@@ -1,0 +1,832 @@
+{
+  "schema_version": 1,
+  "description": "Supplementary metrics for the hard/soft article tables (Sections 4.2--4.6) and Table 4.1.\n\npython3 -B paper/paper_scripts/make_table_supplementary_metrics.py [--skip-checkerboard41]\n\nReads saved artifacts only (no solves). For every hard/soft table row it reports, at the\narticle checkpoint (L-curve V_k for 4.2--4.4, final V_N for 4.5--4.6):\n  * velocity RMSE (recomputed and checked against the table JSON) and MAPE on the same\n    nested common grid (coarser field repeated onto the finer grid, equal volume weights);\n  * residual RMS in seconds: arrival-time residuals of the maximum-weight hypothesis, from\n    iter_i/event_j/residuals.npy (pairwise differences r_a - r_b), with the per-event mean\n    removed, pooled over all saved picks of all events;\n  * hypocentre P90 of the maximum-weight candidate (checked against the table) and of the\n    weight-averaged candidate position.\nResiduals and locations come from the same E-step: iter_k in V_k (L-curve) or iter_(N-1)\nin V_(N-1), before the final update (final models).\nFor Section 4.1 it adds whole-volume MAPE for EMTomo, tomoDD and the trilinear oracle on\nthe 31.25-m grid used for the RMSE table, reusing evaluate_checkerboard_velocity.py inputs.\n",
+  "sources_sha256": {
+    "figures/hard_soft_lcurve_comparison_metrics.json": "e09219a9ec4ccca6a3d1d731fdda283b7dce69ca7bde70fe8f1f0188fc1a5a38",
+    "figures/final_comparison_metrics.json": "94d3a923f5760139ed9a530452a97ec354403f43dee6da0a3dd9d5b2fc346815",
+    "figures/checkerboard_velocity_metrics.json": "cb9bb7fdade6147afb324d3907a4d735118c1d7f506eba77665e01fe21877da3"
+  },
+  "script_sha256": "4ba65a8d042c7df7cccdd89de9b4733bbf09146f5f242e2c80386f603d209972",
+  "residual_definition": "Maximum-weight hypothesis; r_a - mean(r) per event from saved pairwise differences; pooled RMS over all saved picks; seconds",
+  "location_definition": "P90 of 3-D errors, equal event weights, numpy linear percentile; MAP = largest saved weight; weighted mean = sum(w * position) / sum(w)",
+  "velocity_definition": "Nested common grid, coarser field repeated; equal volume weights; MAPE = 100 mean(|v - v_true| / v_true)",
+  "tables": {
+    "onesided": [
+      {
+        "pair_id": "section2_topnsweep_k50_top10",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76",
+          "model_path": "runs/run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76/iter_3/model.npy",
+          "weights_directory": "runs/run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76/iter_3",
+          "velocity_rmse_m_s": 256.4173356523359,
+          "velocity_mape_percent": 4.890187363872224,
+          "residual_rms_s": 0.04988016987596918,
+          "n_residual_picks": 21600,
+          "p90_map_m": 6160.839306547918,
+          "p90_weighted_mean_m": 6160.839306547918
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s2-soft-k50-top10_v1.4_20261111_185816_828820eb9962488083bf183507308514",
+          "model_path": "runs/run_topnsweep11-s2-soft-k50-top10_v1.4_20261111_185816_828820eb9962488083bf183507308514/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s2-soft-k50-top10_v1.4_20261111_185816_828820eb9962488083bf183507308514/iter_3",
+          "velocity_rmse_m_s": 251.48071367059592,
+          "velocity_mape_percent": 4.849595246848736,
+          "residual_rms_s": 0.04981465015413263,
+          "n_residual_picks": 21600,
+          "p90_map_m": 6019.07174199237,
+          "p90_weighted_mean_m": 5612.140737366245
+        }
+      },
+      {
+        "pair_id": "section2_topnsweep_k50_top25",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76",
+          "model_path": "runs/run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76/iter_3/model.npy",
+          "weights_directory": "runs/run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76/iter_3",
+          "velocity_rmse_m_s": 256.4173356523359,
+          "velocity_mape_percent": 4.890187363872224,
+          "residual_rms_s": 0.04988016987596918,
+          "n_residual_picks": 21600,
+          "p90_map_m": 6160.839306547918,
+          "p90_weighted_mean_m": 6160.839306547918
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s2-soft-k50-top25_v1.4_20261111_185816_03bb18ee713743c7b82be394f09a4105",
+          "model_path": "runs/run_topnsweep11-s2-soft-k50-top25_v1.4_20261111_185816_03bb18ee713743c7b82be394f09a4105/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s2-soft-k50-top25_v1.4_20261111_185816_03bb18ee713743c7b82be394f09a4105/iter_3",
+          "velocity_rmse_m_s": 248.40728278897535,
+          "velocity_mape_percent": 4.835914512273555,
+          "residual_rms_s": 0.05010913615735427,
+          "n_residual_picks": 21600,
+          "p90_map_m": 6112.111346868942,
+          "p90_weighted_mean_m": 5391.729304353752
+        }
+      },
+      {
+        "pair_id": "section2_pair01",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76",
+          "model_path": "runs/run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76/iter_3/model.npy",
+          "weights_directory": "runs/run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76/iter_3",
+          "velocity_rmse_m_s": 256.4173356523359,
+          "velocity_mape_percent": 4.890187363872224,
+          "residual_rms_s": 0.04988016987596918,
+          "n_residual_picks": 21600,
+          "p90_map_m": 6160.839306547918,
+          "p90_weighted_mean_m": 6160.839306547918
+        },
+        "soft": {
+          "run_id": "run_onesided-full-soft50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_094430_ee66281e11c44fc8aa6262245b4d3065",
+          "model_path": "runs/run_onesided-full-soft50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_094430_ee66281e11c44fc8aa6262245b4d3065/iter_3/model.npy",
+          "weights_directory": "runs/run_onesided-full-soft50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_094430_ee66281e11c44fc8aa6262245b4d3065/iter_3",
+          "velocity_rmse_m_s": 246.75203177007774,
+          "velocity_mape_percent": 4.82584814803093,
+          "residual_rms_s": 0.050424053445407624,
+          "n_residual_picks": 21600,
+          "p90_map_m": 6222.324808120663,
+          "p90_weighted_mean_m": 5247.9862981214665
+        }
+      },
+      {
+        "pair_id": "section2_topnsweep_k100_top100",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_topnsweep11-s2-hard-k100-top100_v1.4_20261111_185816_afd3e3edc15a406587c5e9fe15e83b8f",
+          "model_path": "runs/run_topnsweep11-s2-hard-k100-top100_v1.4_20261111_185816_afd3e3edc15a406587c5e9fe15e83b8f/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s2-hard-k100-top100_v1.4_20261111_185816_afd3e3edc15a406587c5e9fe15e83b8f/iter_3",
+          "velocity_rmse_m_s": 256.4173356528618,
+          "velocity_mape_percent": 4.890187363891279,
+          "residual_rms_s": 0.04988016955229854,
+          "n_residual_picks": 21600,
+          "p90_map_m": 6160.839306547918,
+          "p90_weighted_mean_m": 6160.839306547918
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s2-soft-k100-top100_v1.4_20261111_185816_0d44b3373e2c4a069b575f760b196695",
+          "model_path": "runs/run_topnsweep11-s2-soft-k100-top100_v1.4_20261111_185816_0d44b3373e2c4a069b575f760b196695/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s2-soft-k100-top100_v1.4_20261111_185816_0d44b3373e2c4a069b575f760b196695/iter_3",
+          "velocity_rmse_m_s": 245.79870643516915,
+          "velocity_mape_percent": 4.823608257939515,
+          "residual_rms_s": 0.05064675485777965,
+          "n_residual_picks": 21600,
+          "p90_map_m": 6390.288343145946,
+          "p90_weighted_mean_m": 5231.277163440604
+        }
+      }
+    ],
+    "two_clusters": [
+      {
+        "pair_id": "section3_topnsweep_k50_top10",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e",
+          "model_path": "runs/run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e/iter_3/model.npy",
+          "weights_directory": "runs/run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e/iter_3",
+          "velocity_rmse_m_s": 253.70160902940245,
+          "velocity_mape_percent": 4.764690860052084,
+          "residual_rms_s": 0.052342732140390695,
+          "n_residual_picks": 13200,
+          "p90_map_m": 1340.361676068838,
+          "p90_weighted_mean_m": 1340.361676068838
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s3-soft-k50-top10_v1.4_20261111_194336_241a6dcd8ce54188a944ec2f1ce5cf0b",
+          "model_path": "runs/run_topnsweep11-s3-soft-k50-top10_v1.4_20261111_194336_241a6dcd8ce54188a944ec2f1ce5cf0b/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s3-soft-k50-top10_v1.4_20261111_194336_241a6dcd8ce54188a944ec2f1ce5cf0b/iter_3",
+          "velocity_rmse_m_s": 251.2705451088479,
+          "velocity_mape_percent": 4.736113795031521,
+          "residual_rms_s": 0.052445202884160665,
+          "n_residual_picks": 13200,
+          "p90_map_m": 1467.2755230434723,
+          "p90_weighted_mean_m": 1412.617649908366
+        }
+      },
+      {
+        "pair_id": "section3_topnsweep_k50_top25",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e",
+          "model_path": "runs/run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e/iter_3/model.npy",
+          "weights_directory": "runs/run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e/iter_3",
+          "velocity_rmse_m_s": 253.70160902940245,
+          "velocity_mape_percent": 4.764690860052084,
+          "residual_rms_s": 0.052342732140390695,
+          "n_residual_picks": 13200,
+          "p90_map_m": 1340.361676068838,
+          "p90_weighted_mean_m": 1340.361676068838
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s3-soft-k50-top25_v1.4_20261111_195434_477ff0d69389450da1ea72caf1af7ab9",
+          "model_path": "runs/run_topnsweep11-s3-soft-k50-top25_v1.4_20261111_195434_477ff0d69389450da1ea72caf1af7ab9/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s3-soft-k50-top25_v1.4_20261111_195434_477ff0d69389450da1ea72caf1af7ab9/iter_3",
+          "velocity_rmse_m_s": 251.3391507792816,
+          "velocity_mape_percent": 4.735880197733749,
+          "residual_rms_s": 0.05244159396396688,
+          "n_residual_picks": 13200,
+          "p90_map_m": 1468.4182958870888,
+          "p90_weighted_mean_m": 1416.319584756311
+        }
+      },
+      {
+        "pair_id": "section3_pair01",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e",
+          "model_path": "runs/run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e/iter_3/model.npy",
+          "weights_directory": "runs/run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e/iter_3",
+          "velocity_rmse_m_s": 253.70160902940245,
+          "velocity_mape_percent": 4.764690860052084,
+          "residual_rms_s": 0.052342732140390695,
+          "n_residual_picks": 13200,
+          "p90_map_m": 1340.361676068838,
+          "p90_weighted_mean_m": 1340.361676068838
+        },
+        "soft": {
+          "run_id": "run_nx6-bottom-blobs-soft50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_9eb4d4f54aaa4fc192665ff3a55fb200",
+          "model_path": "runs/run_nx6-bottom-blobs-soft50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_9eb4d4f54aaa4fc192665ff3a55fb200/iter_3/model.npy",
+          "weights_directory": "runs/run_nx6-bottom-blobs-soft50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_9eb4d4f54aaa4fc192665ff3a55fb200/iter_3",
+          "velocity_rmse_m_s": 251.33806045401153,
+          "velocity_mape_percent": 4.73576864826174,
+          "residual_rms_s": 0.05244137420311629,
+          "n_residual_picks": 13200,
+          "p90_map_m": 1469.072630062639,
+          "p90_weighted_mean_m": 1414.6616154618823
+        }
+      },
+      {
+        "pair_id": "section3_topnsweep_k100_top100",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_topnsweep11-s3-hard-k100-top100_v1.4_20261111_202434_e4ed63466a54414dbc343c8bdeab2303",
+          "model_path": "runs/run_topnsweep11-s3-hard-k100-top100_v1.4_20261111_202434_e4ed63466a54414dbc343c8bdeab2303/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s3-hard-k100-top100_v1.4_20261111_202434_e4ed63466a54414dbc343c8bdeab2303/iter_3",
+          "velocity_rmse_m_s": 253.6947714006802,
+          "velocity_mape_percent": 4.764554078269229,
+          "residual_rms_s": 0.052342727204531994,
+          "n_residual_picks": 13200,
+          "p90_map_m": 1340.381024447726,
+          "p90_weighted_mean_m": 1340.381024447726
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s3-soft-k100-top100_v1.4_20261111_200826_d7cd2a4f6d034f96a94437b8f328f807",
+          "model_path": "runs/run_topnsweep11-s3-soft-k100-top100_v1.4_20261111_200826_d7cd2a4f6d034f96a94437b8f328f807/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s3-soft-k100-top100_v1.4_20261111_200826_d7cd2a4f6d034f96a94437b8f328f807/iter_3",
+          "velocity_rmse_m_s": 251.3406935043361,
+          "velocity_mape_percent": 4.735798253026863,
+          "residual_rms_s": 0.052441304155829156,
+          "n_residual_picks": 13200,
+          "p90_map_m": 1469.3171326033141,
+          "p90_weighted_mean_m": 1415.1687576708373
+        }
+      }
+    ],
+    "real_geometry_noise": [
+      {
+        "pair_id": "section4_pair01",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_geysers-crop800-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_604003c4a0004a8589c29a4d91f2ba18",
+          "model_path": "runs/run_geysers-crop800-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_604003c4a0004a8589c29a4d91f2ba18/iter_3/model.npy",
+          "weights_directory": "runs/run_geysers-crop800-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_604003c4a0004a8589c29a4d91f2ba18/iter_3",
+          "velocity_rmse_m_s": 230.77170595966564,
+          "velocity_mape_percent": 4.402277507485391,
+          "residual_rms_s": 0.024560576832653686,
+          "n_residual_picks": 90090,
+          "p90_map_m": 378.63655489775346,
+          "p90_weighted_mean_m": 378.63655489775346
+        },
+        "soft": {
+          "run_id": "run_geysers-crop800-noise-x0p5-soft_v1.4_level-x0p5_mode-soft_ncand-50_topn-50_dmin-7_20261107_204526_f7d275af26d3435b90c61153e8879748",
+          "model_path": "runs/run_geysers-crop800-noise-x0p5-soft_v1.4_level-x0p5_mode-soft_ncand-50_topn-50_dmin-7_20261107_204526_f7d275af26d3435b90c61153e8879748/iter_3/model.npy",
+          "weights_directory": "runs/run_geysers-crop800-noise-x0p5-soft_v1.4_level-x0p5_mode-soft_ncand-50_topn-50_dmin-7_20261107_204526_f7d275af26d3435b90c61153e8879748/iter_3",
+          "velocity_rmse_m_s": 228.16711730232046,
+          "velocity_mape_percent": 4.28695395573509,
+          "residual_rms_s": 0.024522748019985326,
+          "n_residual_picks": 90090,
+          "p90_map_m": 448.53692341937204,
+          "p90_weighted_mean_m": 472.18427471558505
+        }
+      },
+      {
+        "pair_id": "section4_pair02",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_geysers-crop800-noise-x0p75-hard_v1.4_level-x0p75_mode-hard_ncand-50_topn-50_dmin-7_20261108_013318_01a4730c3d0a4e3995435f048bb3e57c",
+          "model_path": "runs/run_geysers-crop800-noise-x0p75-hard_v1.4_level-x0p75_mode-hard_ncand-50_topn-50_dmin-7_20261108_013318_01a4730c3d0a4e3995435f048bb3e57c/iter_3/model.npy",
+          "weights_directory": "runs/run_geysers-crop800-noise-x0p75-hard_v1.4_level-x0p75_mode-hard_ncand-50_topn-50_dmin-7_20261108_013318_01a4730c3d0a4e3995435f048bb3e57c/iter_3",
+          "velocity_rmse_m_s": 231.0858771528581,
+          "velocity_mape_percent": 4.4008854936735196,
+          "residual_rms_s": 0.03637204688916001,
+          "n_residual_picks": 90090,
+          "p90_map_m": 514.5781118136059,
+          "p90_weighted_mean_m": 514.5781118136059
+        },
+        "soft": {
+          "run_id": "run_geysers-crop800-noise-x0p75-soft_v1.4_level-x0p75_mode-soft_ncand-50_topn-50_dmin-7_20261108_011124_f3b5b65a40114ad98f01fadaaa04d8b8",
+          "model_path": "runs/run_geysers-crop800-noise-x0p75-soft_v1.4_level-x0p75_mode-soft_ncand-50_topn-50_dmin-7_20261108_011124_f3b5b65a40114ad98f01fadaaa04d8b8/iter_3/model.npy",
+          "weights_directory": "runs/run_geysers-crop800-noise-x0p75-soft_v1.4_level-x0p75_mode-soft_ncand-50_topn-50_dmin-7_20261108_011124_f3b5b65a40114ad98f01fadaaa04d8b8/iter_3",
+          "velocity_rmse_m_s": 228.66477317493315,
+          "velocity_mape_percent": 4.295101558723336,
+          "residual_rms_s": 0.03634791351427567,
+          "n_residual_picks": 90090,
+          "p90_map_m": 593.8352850533903,
+          "p90_weighted_mean_m": 608.987660435149
+        }
+      },
+      {
+        "pair_id": "section4_pair07",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_geysers-crop800-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_6b62894a48ed4afdb0fd7d213b6eafa8",
+          "model_path": "runs/run_geysers-crop800-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_6b62894a48ed4afdb0fd7d213b6eafa8/iter_3/model.npy",
+          "weights_directory": "runs/run_geysers-crop800-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_6b62894a48ed4afdb0fd7d213b6eafa8/iter_3",
+          "velocity_rmse_m_s": 232.04515162861642,
+          "velocity_mape_percent": 4.414849940211578,
+          "residual_rms_s": 0.04826867358491142,
+          "n_residual_picks": 90090,
+          "p90_map_m": 665.2765692421815,
+          "p90_weighted_mean_m": 665.2765692421815
+        },
+        "soft": {
+          "run_id": "run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889",
+          "model_path": "runs/run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889/iter_3/model.npy",
+          "weights_directory": "runs/run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889/iter_3",
+          "velocity_rmse_m_s": 229.61817989050158,
+          "velocity_mape_percent": 4.3082293003549195,
+          "residual_rms_s": 0.048255964538863445,
+          "n_residual_picks": 90090,
+          "p90_map_m": 755.9105322381371,
+          "p90_weighted_mean_m": 765.6348827183266
+        }
+      },
+      {
+        "pair_id": "section4_pair03",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_geysers-crop800-noise-x1p5-hard_v1.4_level-x1p5_mode-hard_ncand-50_topn-50_dmin-7_20261108_034402_711ba93edc74495496f5035c761ec93f",
+          "model_path": "runs/run_geysers-crop800-noise-x1p5-hard_v1.4_level-x1p5_mode-hard_ncand-50_topn-50_dmin-7_20261108_034402_711ba93edc74495496f5035c761ec93f/iter_3/model.npy",
+          "weights_directory": "runs/run_geysers-crop800-noise-x1p5-hard_v1.4_level-x1p5_mode-hard_ncand-50_topn-50_dmin-7_20261108_034402_711ba93edc74495496f5035c761ec93f/iter_3",
+          "velocity_rmse_m_s": 235.31970850417477,
+          "velocity_mape_percent": 4.454760813313433,
+          "residual_rms_s": 0.07212984240918027,
+          "n_residual_picks": 90090,
+          "p90_map_m": 1005.6186673172846,
+          "p90_weighted_mean_m": 1005.6186673172846
+        },
+        "soft": {
+          "run_id": "run_geysers-crop800-noise-x1p5-soft_v1.4_level-x1p5_mode-soft_ncand-50_topn-50_dmin-7_20261108_014832_501405498a9442429c8b81e8cae9bc48",
+          "model_path": "runs/run_geysers-crop800-noise-x1p5-soft_v1.4_level-x1p5_mode-soft_ncand-50_topn-50_dmin-7_20261108_014832_501405498a9442429c8b81e8cae9bc48/iter_3/model.npy",
+          "weights_directory": "runs/run_geysers-crop800-noise-x1p5-soft_v1.4_level-x1p5_mode-soft_ncand-50_topn-50_dmin-7_20261108_014832_501405498a9442429c8b81e8cae9bc48/iter_3",
+          "velocity_rmse_m_s": 232.66744130495357,
+          "velocity_mape_percent": 4.341115360118832,
+          "residual_rms_s": 0.07212397398451777,
+          "n_residual_picks": 90090,
+          "p90_map_m": 1098.8447654560146,
+          "p90_weighted_mean_m": 1085.9494589250596
+        }
+      },
+      {
+        "pair_id": "section4_pair04",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_geysers-crop800-noise-x2-hard_v1.4_level-x2_mode-hard_ncand-50_topn-50_dmin-7_20261107_225611_264076196ac24f2683e7950e9304c30b",
+          "model_path": "runs/run_geysers-crop800-noise-x2-hard_v1.4_level-x2_mode-hard_ncand-50_topn-50_dmin-7_20261107_225611_264076196ac24f2683e7950e9304c30b/iter_3/model.npy",
+          "weights_directory": "runs/run_geysers-crop800-noise-x2-hard_v1.4_level-x2_mode-hard_ncand-50_topn-50_dmin-7_20261107_225611_264076196ac24f2683e7950e9304c30b/iter_3",
+          "velocity_rmse_m_s": 239.29031105280055,
+          "velocity_mape_percent": 4.490785286349959,
+          "residual_rms_s": 0.09601431693232494,
+          "n_residual_picks": 90090,
+          "p90_map_m": 1364.5190321434486,
+          "p90_weighted_mean_m": 1364.5190321434486
+        },
+        "soft": {
+          "run_id": "run_geysers-crop800-noise-x2-soft_v1.4_level-x2_mode-soft_ncand-50_topn-50_dmin-7_20261107_225515_a4e7056b2203486ab341dc040227d884",
+          "model_path": "runs/run_geysers-crop800-noise-x2-soft_v1.4_level-x2_mode-soft_ncand-50_topn-50_dmin-7_20261107_225515_a4e7056b2203486ab341dc040227d884/iter_3/model.npy",
+          "weights_directory": "runs/run_geysers-crop800-noise-x2-soft_v1.4_level-x2_mode-soft_ncand-50_topn-50_dmin-7_20261107_225515_a4e7056b2203486ab341dc040227d884/iter_3",
+          "velocity_rmse_m_s": 237.8429607001335,
+          "velocity_mape_percent": 4.414639056504569,
+          "residual_rms_s": 0.09601583006867197,
+          "n_residual_picks": 90090,
+          "p90_map_m": 1496.8513307076878,
+          "p90_weighted_mean_m": 1465.656007672448
+        }
+      }
+    ],
+    "real_geometry_candidates": [
+      {
+        "pair_id": "section4_topnsweep_k30_top30",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_topnsweep11-s4-hard-k30-top30_v1.4_20261111_212301_8cf8b6b0c1194310878224508e4f9f74",
+          "model_path": "runs/run_topnsweep11-s4-hard-k30-top30_v1.4_20261111_212301_8cf8b6b0c1194310878224508e4f9f74/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s4-hard-k30-top30_v1.4_20261111_212301_8cf8b6b0c1194310878224508e4f9f74/iter_3",
+          "velocity_rmse_m_s": 232.04515162962588,
+          "velocity_mape_percent": 4.41484994024919,
+          "residual_rms_s": 0.04826867364944394,
+          "n_residual_picks": 90090,
+          "p90_map_m": 665.2765692421815,
+          "p90_weighted_mean_m": 665.2765692421815
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s4-soft-k30-top30_v1.4_20261111_212104_95ef24d2ff494767adc5a67375e89596",
+          "model_path": "runs/run_topnsweep11-s4-soft-k30-top30_v1.4_20261111_212104_95ef24d2ff494767adc5a67375e89596/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s4-soft-k30-top30_v1.4_20261111_212104_95ef24d2ff494767adc5a67375e89596/iter_3",
+          "velocity_rmse_m_s": 229.78850058463794,
+          "velocity_mape_percent": 4.315853259794338,
+          "residual_rms_s": 0.04826051515761718,
+          "n_residual_picks": 90090,
+          "p90_map_m": 752.5127047409619,
+          "p90_weighted_mean_m": 762.7585180997436
+        }
+      },
+      {
+        "pair_id": "section4_pair07",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_geysers-crop800-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_6b62894a48ed4afdb0fd7d213b6eafa8",
+          "model_path": "runs/run_geysers-crop800-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_6b62894a48ed4afdb0fd7d213b6eafa8/iter_3/model.npy",
+          "weights_directory": "runs/run_geysers-crop800-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_6b62894a48ed4afdb0fd7d213b6eafa8/iter_3",
+          "velocity_rmse_m_s": 232.04515162861642,
+          "velocity_mape_percent": 4.414849940211578,
+          "residual_rms_s": 0.04826867358491142,
+          "n_residual_picks": 90090,
+          "p90_map_m": 665.2765692421815,
+          "p90_weighted_mean_m": 665.2765692421815
+        },
+        "soft": {
+          "run_id": "run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889",
+          "model_path": "runs/run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889/iter_3/model.npy",
+          "weights_directory": "runs/run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889/iter_3",
+          "velocity_rmse_m_s": 229.61817989050158,
+          "velocity_mape_percent": 4.3082293003549195,
+          "residual_rms_s": 0.048255964538863445,
+          "n_residual_picks": 90090,
+          "p90_map_m": 755.9105322381371,
+          "p90_weighted_mean_m": 765.6348827183266
+        }
+      },
+      {
+        "pair_id": "section4_topnsweep_k100_top100",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_topnsweep11-s4-hard-k100-top100_v1.4_20261111_220930_faab40b5c2ef41b69d58861eaa023728",
+          "model_path": "runs/run_topnsweep11-s4-hard-k100-top100_v1.4_20261111_220930_faab40b5c2ef41b69d58861eaa023728/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s4-hard-k100-top100_v1.4_20261111_220930_faab40b5c2ef41b69d58861eaa023728/iter_3",
+          "velocity_rmse_m_s": 232.04515162962588,
+          "velocity_mape_percent": 4.41484994024919,
+          "residual_rms_s": 0.04826867364944394,
+          "n_residual_picks": 90090,
+          "p90_map_m": 665.2765692421815,
+          "p90_weighted_mean_m": 665.2765692421815
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s4-soft-k100-top100_v1.4_20261111_213138_55279cef4fe34d06aaf15b93a02c4a26",
+          "model_path": "runs/run_topnsweep11-s4-soft-k100-top100_v1.4_20261111_213138_55279cef4fe34d06aaf15b93a02c4a26/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s4-soft-k100-top100_v1.4_20261111_213138_55279cef4fe34d06aaf15b93a02c4a26/iter_3",
+          "velocity_rmse_m_s": 229.44498557887914,
+          "velocity_mape_percent": 4.29979148041222,
+          "residual_rms_s": 0.04825117878701082,
+          "n_residual_picks": 90090,
+          "p90_map_m": 757.546541195885,
+          "p90_weighted_mean_m": 767.4321543499998
+        }
+      },
+      {
+        "pair_id": "section4_topnsweep_k150_top150",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_topnsweep11-s4-hard-k150-top150_v1.4_20261111_230914_472d0848cbea478f91481854ae55246b",
+          "model_path": "runs/run_topnsweep11-s4-hard-k150-top150_v1.4_20261111_230914_472d0848cbea478f91481854ae55246b/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s4-hard-k150-top150_v1.4_20261111_230914_472d0848cbea478f91481854ae55246b/iter_3",
+          "velocity_rmse_m_s": 232.04515162962588,
+          "velocity_mape_percent": 4.41484994024919,
+          "residual_rms_s": 0.04826867364944394,
+          "n_residual_picks": 90090,
+          "p90_map_m": 665.2765692421815,
+          "p90_weighted_mean_m": 665.2765692421815
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s4-soft-k150-top150_v1.4_20261111_222430_aad13d7b4ac24eed98f3cd38ad9b2f2c",
+          "model_path": "runs/run_topnsweep11-s4-soft-k150-top150_v1.4_20261111_222430_aad13d7b4ac24eed98f3cd38ad9b2f2c/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s4-soft-k150-top150_v1.4_20261111_222430_aad13d7b4ac24eed98f3cd38ad9b2f2c/iter_3",
+          "velocity_rmse_m_s": 229.42307197867208,
+          "velocity_mape_percent": 4.298331607921481,
+          "residual_rms_s": 0.04825017308835752,
+          "n_residual_picks": 90090,
+          "p90_map_m": 759.0289192116203,
+          "p90_weighted_mean_m": 768.0198420175909
+        }
+      },
+      {
+        "pair_id": "section4_topnsweep_k200_top200",
+        "checkpoint_policy": "lcurve",
+        "hard": {
+          "run_id": "run_topnsweep11-s4-hard-k200-top200_v1.4_20261112_054200_031a35b4e1334db593cd6f6f9a451bb4",
+          "model_path": "runs/run_topnsweep11-s4-hard-k200-top200_v1.4_20261112_054200_031a35b4e1334db593cd6f6f9a451bb4/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s4-hard-k200-top200_v1.4_20261112_054200_031a35b4e1334db593cd6f6f9a451bb4/iter_3",
+          "velocity_rmse_m_s": 232.04515162962588,
+          "velocity_mape_percent": 4.41484994024919,
+          "residual_rms_s": 0.04826867364944394,
+          "n_residual_picks": 90090,
+          "p90_map_m": 665.2765692421815,
+          "p90_weighted_mean_m": 665.2765692421815
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s4-soft-k200-top200_v1.4_20261112_034040_4b3fe4cf20914102b29e13dfce40f389",
+          "model_path": "runs/run_topnsweep11-s4-soft-k200-top200_v1.4_20261112_034040_4b3fe4cf20914102b29e13dfce40f389/iter_3/model.npy",
+          "weights_directory": "runs/run_topnsweep11-s4-soft-k200-top200_v1.4_20261112_034040_4b3fe4cf20914102b29e13dfce40f389/iter_3",
+          "velocity_rmse_m_s": 229.40681838219612,
+          "velocity_mape_percent": 4.2973612895317945,
+          "residual_rms_s": 0.048249471161067405,
+          "n_residual_picks": 90090,
+          "p90_map_m": 759.2347912523682,
+          "p90_weighted_mean_m": 767.7721053271265
+        }
+      }
+    ],
+    "fault_retention": [
+      {
+        "pair_id": "section5_pair22",
+        "checkpoint_policy": "final",
+        "hard": {
+          "run_id": "run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122",
+          "model_path": "runs/run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122/final_model.npy",
+          "weights_directory": "runs/run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122/iter_11",
+          "velocity_rmse_m_s": 260.44123343856984,
+          "velocity_mape_percent": 4.71417836249536,
+          "residual_rms_s": 0.036443162085665386,
+          "n_residual_picks": 98176,
+          "p90_map_m": 467.7931681859942,
+          "p90_weighted_mean_m": 467.7931681859942
+        },
+        "soft": {
+          "run_id": "run_gfss28-s21_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_094335_06a677e002d44d3eb293a3b01a76bab0",
+          "model_path": "runs/run_gfss28-s21_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_094335_06a677e002d44d3eb293a3b01a76bab0/final_model.npy",
+          "weights_directory": "runs/run_gfss28-s21_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_094335_06a677e002d44d3eb293a3b01a76bab0/iter_11",
+          "velocity_rmse_m_s": 265.4056189285039,
+          "velocity_mape_percent": 4.806061687993569,
+          "residual_rms_s": 0.03649590560683783,
+          "n_residual_picks": 98176,
+          "p90_map_m": 458.9166516520376,
+          "p90_weighted_mean_m": 469.28902928404904
+        }
+      },
+      {
+        "pair_id": "section5_topnsweep_k128_top50",
+        "checkpoint_policy": "final",
+        "hard": {
+          "run_id": "run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122",
+          "model_path": "runs/run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122/final_model.npy",
+          "weights_directory": "runs/run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122/iter_11",
+          "velocity_rmse_m_s": 260.44123343856984,
+          "velocity_mape_percent": 4.71417836249536,
+          "residual_rms_s": 0.036443162085665386,
+          "n_residual_picks": 98176,
+          "p90_map_m": 467.7931681859942,
+          "p90_weighted_mean_m": 467.7931681859942
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s5-soft-k128-top50_v1.4_20261112_123747_ca58ebc4dae14204b210bdefa6281369",
+          "model_path": "runs/run_topnsweep11-s5-soft-k128-top50_v1.4_20261112_123747_ca58ebc4dae14204b210bdefa6281369/final_model.npy",
+          "weights_directory": "runs/run_topnsweep11-s5-soft-k128-top50_v1.4_20261112_123747_ca58ebc4dae14204b210bdefa6281369/iter_11",
+          "velocity_rmse_m_s": 265.9513130281731,
+          "velocity_mape_percent": 4.813399886564786,
+          "residual_rms_s": 0.03649959273289826,
+          "n_residual_picks": 98176,
+          "p90_map_m": 459.87510070627707,
+          "p90_weighted_mean_m": 476.1856561604779
+        }
+      },
+      {
+        "pair_id": "section5_topnsweep_k128_top75",
+        "checkpoint_policy": "final",
+        "hard": {
+          "run_id": "run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122",
+          "model_path": "runs/run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122/final_model.npy",
+          "weights_directory": "runs/run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122/iter_11",
+          "velocity_rmse_m_s": 260.44123343856984,
+          "velocity_mape_percent": 4.71417836249536,
+          "residual_rms_s": 0.036443162085665386,
+          "n_residual_picks": 98176,
+          "p90_map_m": 467.7931681859942,
+          "p90_weighted_mean_m": 467.7931681859942
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s5-soft-k128-top75_v1.4_20261112_135522_27dd5e84bb0c4fd2bf8560165109f7f4",
+          "model_path": "runs/run_topnsweep11-s5-soft-k128-top75_v1.4_20261112_135522_27dd5e84bb0c4fd2bf8560165109f7f4/final_model.npy",
+          "weights_directory": "runs/run_topnsweep11-s5-soft-k128-top75_v1.4_20261112_135522_27dd5e84bb0c4fd2bf8560165109f7f4/iter_11",
+          "velocity_rmse_m_s": 266.43405490834624,
+          "velocity_mape_percent": 4.818809624501419,
+          "residual_rms_s": 0.03650182974817345,
+          "n_residual_picks": 98176,
+          "p90_map_m": 465.1128433147535,
+          "p90_weighted_mean_m": 485.11072025584264
+        }
+      },
+      {
+        "pair_id": "section5_topnsweep_k128_top100",
+        "checkpoint_policy": "final",
+        "hard": {
+          "run_id": "run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122",
+          "model_path": "runs/run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122/final_model.npy",
+          "weights_directory": "runs/run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122/iter_11",
+          "velocity_rmse_m_s": 260.44123343856984,
+          "velocity_mape_percent": 4.71417836249536,
+          "residual_rms_s": 0.036443162085665386,
+          "n_residual_picks": 98176,
+          "p90_map_m": 467.7931681859942,
+          "p90_weighted_mean_m": 467.7931681859942
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s5-soft-k128-top100_v1.4_20261112_152834_49aa5892dc3e46e6be97bd1b307a3555",
+          "model_path": "runs/run_topnsweep11-s5-soft-k128-top100_v1.4_20261112_152834_49aa5892dc3e46e6be97bd1b307a3555/final_model.npy",
+          "weights_directory": "runs/run_topnsweep11-s5-soft-k128-top100_v1.4_20261112_152834_49aa5892dc3e46e6be97bd1b307a3555/iter_11",
+          "velocity_rmse_m_s": 266.54244793192356,
+          "velocity_mape_percent": 4.82004912430281,
+          "residual_rms_s": 0.03650214183280863,
+          "n_residual_picks": 98176,
+          "p90_map_m": 465.6355541483497,
+          "p90_weighted_mean_m": 486.31303505693336
+        }
+      },
+      {
+        "pair_id": "section5_topnsweep_k128_top128",
+        "checkpoint_policy": "final",
+        "hard": {
+          "run_id": "run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122",
+          "model_path": "runs/run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122/final_model.npy",
+          "weights_directory": "runs/run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122/iter_11",
+          "velocity_rmse_m_s": 260.44123343856984,
+          "velocity_mape_percent": 4.71417836249536,
+          "residual_rms_s": 0.036443162085665386,
+          "n_residual_picks": 98176,
+          "p90_map_m": 467.7931681859942,
+          "p90_weighted_mean_m": 467.7931681859942
+        },
+        "soft": {
+          "run_id": "run_topnsweep11-s5-soft-k128-top128_v1.4_20261112_161656_1b81e7950f064deabef93fe1526c2b4a",
+          "model_path": "runs/run_topnsweep11-s5-soft-k128-top128_v1.4_20261112_161656_1b81e7950f064deabef93fe1526c2b4a/final_model.npy",
+          "weights_directory": "runs/run_topnsweep11-s5-soft-k128-top128_v1.4_20261112_161656_1b81e7950f064deabef93fe1526c2b4a/iter_11",
+          "velocity_rmse_m_s": 266.581366461706,
+          "velocity_mape_percent": 4.82050791807362,
+          "residual_rms_s": 0.03650234192915224,
+          "n_residual_picks": 98176,
+          "p90_map_m": 463.768290050024,
+          "p90_weighted_mean_m": 487.05461184941214
+        }
+      }
+    ],
+    "fault_separation": [
+      {
+        "pair_id": "section5_dminsweep_k128_top50_dmin4",
+        "checkpoint_policy": "final",
+        "hard": {
+          "run_id": "run_faultdmin12-fault-hard-k128-top50-dmin4_v1.4_20261112_214348_10ad2dfbf7a24e25ad0625982b4e8989",
+          "model_path": "runs/run_faultdmin12-fault-hard-k128-top50-dmin4_v1.4_20261112_214348_10ad2dfbf7a24e25ad0625982b4e8989/final_model.npy",
+          "weights_directory": "runs/run_faultdmin12-fault-hard-k128-top50-dmin4_v1.4_20261112_214348_10ad2dfbf7a24e25ad0625982b4e8989/iter_11",
+          "velocity_rmse_m_s": 260.2618741706503,
+          "velocity_mape_percent": 4.711119430865731,
+          "residual_rms_s": 0.03644155128763523,
+          "n_residual_picks": 98176,
+          "p90_map_m": 464.1054133925424,
+          "p90_weighted_mean_m": 464.1054133925424
+        },
+        "soft": {
+          "run_id": "run_faultdmin12-fault-soft-k128-top50-dmin4_v1.4_20261112_214348_cf1868d994bd43e8936f39d46f054c78",
+          "model_path": "runs/run_faultdmin12-fault-soft-k128-top50-dmin4_v1.4_20261112_214348_cf1868d994bd43e8936f39d46f054c78/final_model.npy",
+          "weights_directory": "runs/run_faultdmin12-fault-soft-k128-top50-dmin4_v1.4_20261112_214348_cf1868d994bd43e8936f39d46f054c78/iter_11",
+          "velocity_rmse_m_s": 262.99389938681793,
+          "velocity_mape_percent": 4.761222240334849,
+          "residual_rms_s": 0.03647968090657936,
+          "n_residual_picks": 98176,
+          "p90_map_m": 434.01137374787584,
+          "p90_weighted_mean_m": 423.5154914555652
+        }
+      },
+      {
+        "pair_id": "section5_dminsweep_k128_top128_dmin4",
+        "checkpoint_policy": "final",
+        "hard": {
+          "run_id": "run_faultdmin13-fault-hard-k128-top128-dmin4_v1.4_20261113_112541_c7ee61aab7a740c4b41140d0801d9dae",
+          "model_path": "runs/run_faultdmin13-fault-hard-k128-top128-dmin4_v1.4_20261113_112541_c7ee61aab7a740c4b41140d0801d9dae/final_model.npy",
+          "weights_directory": "runs/run_faultdmin13-fault-hard-k128-top128-dmin4_v1.4_20261113_112541_c7ee61aab7a740c4b41140d0801d9dae/iter_11",
+          "velocity_rmse_m_s": 260.2618741706503,
+          "velocity_mape_percent": 4.711119430865731,
+          "residual_rms_s": 0.03644155128763523,
+          "n_residual_picks": 98176,
+          "p90_map_m": 464.1054133925424,
+          "p90_weighted_mean_m": 464.1054133925424
+        },
+        "soft": {
+          "run_id": "run_faultdmin13-fault-soft-k128-top128-dmin4_v1.4_20261113_112541_2716064df0274640baea24a5fec11728",
+          "model_path": "runs/run_faultdmin13-fault-soft-k128-top128-dmin4_v1.4_20261113_112541_2716064df0274640baea24a5fec11728/final_model.npy",
+          "weights_directory": "runs/run_faultdmin13-fault-soft-k128-top128-dmin4_v1.4_20261113_112541_2716064df0274640baea24a5fec11728/iter_11",
+          "velocity_rmse_m_s": 262.99204492444676,
+          "velocity_mape_percent": 4.761182293731161,
+          "residual_rms_s": 0.03647996222727336,
+          "n_residual_picks": 98176,
+          "p90_map_m": 434.0154524220281,
+          "p90_weighted_mean_m": 423.48802208529145
+        }
+      },
+      {
+        "pair_id": "section5_dminsweep_k128_top50_dmin7",
+        "checkpoint_policy": "final",
+        "hard": {
+          "run_id": "run_faultdmin12-fault-hard-k128-top50-dmin7_v1.4_20261113_004349_ee789923ff1044aaa3e1d73b88acb0c1",
+          "model_path": "runs/run_faultdmin12-fault-hard-k128-top50-dmin7_v1.4_20261113_004349_ee789923ff1044aaa3e1d73b88acb0c1/final_model.npy",
+          "weights_directory": "runs/run_faultdmin12-fault-hard-k128-top50-dmin7_v1.4_20261113_004349_ee789923ff1044aaa3e1d73b88acb0c1/iter_11",
+          "velocity_rmse_m_s": 260.2533530636149,
+          "velocity_mape_percent": 4.710798806717741,
+          "residual_rms_s": 0.036441647287107075,
+          "n_residual_picks": 98176,
+          "p90_map_m": 463.8176638606442,
+          "p90_weighted_mean_m": 463.8176638606442
+        },
+        "soft": {
+          "run_id": "run_faultdmin12-fault-soft-k128-top50-dmin7_v1.4_20261113_005828_7ffd10ab6a12465f9f7d0196dbbf100a",
+          "model_path": "runs/run_faultdmin12-fault-soft-k128-top50-dmin7_v1.4_20261113_005828_7ffd10ab6a12465f9f7d0196dbbf100a/final_model.npy",
+          "weights_directory": "runs/run_faultdmin12-fault-soft-k128-top50-dmin7_v1.4_20261113_005828_7ffd10ab6a12465f9f7d0196dbbf100a/iter_11",
+          "velocity_rmse_m_s": 259.265008427285,
+          "velocity_mape_percent": 4.702307951073643,
+          "residual_rms_s": 0.036441035820424794,
+          "n_residual_picks": 98176,
+          "p90_map_m": 446.6241462082816,
+          "p90_weighted_mean_m": 441.2629593586438
+        }
+      },
+      {
+        "pair_id": "section5_dminsweep_k128_top128_dmin7",
+        "checkpoint_policy": "final",
+        "hard": {
+          "run_id": "run_faultdmin13-fault-hard-k128-top128-dmin7_v1.4_20261113_112541_f7305af7d020456aa214c42ea8d05743",
+          "model_path": "runs/run_faultdmin13-fault-hard-k128-top128-dmin7_v1.4_20261113_112541_f7305af7d020456aa214c42ea8d05743/final_model.npy",
+          "weights_directory": "runs/run_faultdmin13-fault-hard-k128-top128-dmin7_v1.4_20261113_112541_f7305af7d020456aa214c42ea8d05743/iter_11",
+          "velocity_rmse_m_s": 260.2533530636149,
+          "velocity_mape_percent": 4.710798806717741,
+          "residual_rms_s": 0.036441647287107075,
+          "n_residual_picks": 98176,
+          "p90_map_m": 463.8176638606442,
+          "p90_weighted_mean_m": 463.8176638606442
+        },
+        "soft": {
+          "run_id": "run_faultdmin13-fault-soft-k128-top128-dmin7_v1.4_20261113_112541_37407e2684b8421ead579122688890ed",
+          "model_path": "runs/run_faultdmin13-fault-soft-k128-top128-dmin7_v1.4_20261113_112541_37407e2684b8421ead579122688890ed/final_model.npy",
+          "weights_directory": "runs/run_faultdmin13-fault-soft-k128-top128-dmin7_v1.4_20261113_112541_37407e2684b8421ead579122688890ed/iter_11",
+          "velocity_rmse_m_s": 259.265008427285,
+          "velocity_mape_percent": 4.702307951073643,
+          "residual_rms_s": 0.036441035820424794,
+          "n_residual_picks": 98176,
+          "p90_map_m": 446.6241462082816,
+          "p90_weighted_mean_m": 441.2629593586438
+        }
+      }
+    ],
+    "heterogeneous": [
+      {
+        "pair_id": "section6_pair01",
+        "checkpoint_policy": "final",
+        "start": "supplied_1d",
+        "hard": {
+          "run_id": "run_geysers-realistic-prev-1d-cov0-auto-opt20-p12-hard_v1.5_20261109_183307_4d86e2755ffc428991393e09c375c7c5",
+          "model_path": "runs/run_geysers-realistic-prev-1d-cov0-auto-opt20-p12-hard_v1.5_20261109_183307_4d86e2755ffc428991393e09c375c7c5/final_model.npy",
+          "weights_directory": "runs/run_geysers-realistic-prev-1d-cov0-auto-opt20-p12-hard_v1.5_20261109_183307_4d86e2755ffc428991393e09c375c7c5/iter_8",
+          "velocity_rmse_m_s": 479.4965626016124,
+          "velocity_mape_percent": 7.376971681936374,
+          "residual_rms_s": 0.049421610744688,
+          "n_residual_picks": 81081,
+          "p90_map_m": 949.1327843138508,
+          "p90_weighted_mean_m": 949.1327843138508
+        },
+        "soft": {
+          "run_id": "run_geysers-realistic-prev-1d-cov0-auto-opt20-p12-soft_v1.5_20261109_183306_3ef8236710174c888d762baee45eb453",
+          "model_path": "runs/run_geysers-realistic-prev-1d-cov0-auto-opt20-p12-soft_v1.5_20261109_183306_3ef8236710174c888d762baee45eb453/final_model.npy",
+          "weights_directory": "runs/run_geysers-realistic-prev-1d-cov0-auto-opt20-p12-soft_v1.5_20261109_183306_3ef8236710174c888d762baee45eb453/iter_8",
+          "velocity_rmse_m_s": 477.41527056158037,
+          "velocity_mape_percent": 7.3458542762371195,
+          "residual_rms_s": 0.049487192712835866,
+          "n_residual_picks": 81081,
+          "p90_map_m": 987.2735375061636,
+          "p90_weighted_mean_m": 1035.5120052831774
+        }
+      },
+      {
+        "pair_id": "section6_pair05",
+        "checkpoint_policy": "final",
+        "start": "homogeneous_5000_m_s",
+        "hard": {
+          "run_id": "run_geysers-realistic-prev-hom-cov0-auto-opt20-p12-hard_v1.5_20261109_183306_2be65aacb3254ba9a5021b5bb8ac00df",
+          "model_path": "runs/run_geysers-realistic-prev-hom-cov0-auto-opt20-p12-hard_v1.5_20261109_183306_2be65aacb3254ba9a5021b5bb8ac00df/final_model.npy",
+          "weights_directory": "runs/run_geysers-realistic-prev-hom-cov0-auto-opt20-p12-hard_v1.5_20261109_183306_2be65aacb3254ba9a5021b5bb8ac00df/iter_19",
+          "velocity_rmse_m_s": 969.8846921424324,
+          "velocity_mape_percent": 17.398327328463953,
+          "residual_rms_s": 0.054766247690870636,
+          "n_residual_picks": 81081,
+          "p90_map_m": 1757.169716613216,
+          "p90_weighted_mean_m": 1757.169716613216
+        },
+        "soft": {
+          "run_id": "run_geysers-realistic-prev-hom-cov0-auto-opt20-p12-soft_v1.5_20261109_183306_624315085857461d909905ce730e1ba8",
+          "model_path": "runs/run_geysers-realistic-prev-hom-cov0-auto-opt20-p12-soft_v1.5_20261109_183306_624315085857461d909905ce730e1ba8/final_model.npy",
+          "weights_directory": "runs/run_geysers-realistic-prev-hom-cov0-auto-opt20-p12-soft_v1.5_20261109_183306_624315085857461d909905ce730e1ba8/iter_19",
+          "velocity_rmse_m_s": 976.097098675269,
+          "velocity_mape_percent": 17.51815172222965,
+          "residual_rms_s": 0.05563990648405899,
+          "n_residual_picks": 81081,
+          "p90_map_m": 1862.146260714256,
+          "p90_weighted_mean_m": 1844.9640849952414
+        }
+      }
+    ]
+  },
+  "checkerboard_4_1": [
+    {
+      "nx": 4,
+      "spacing_km": 0.03125,
+      "samples": 113246208,
+      "rmse_m_s": {
+        "em": 175.28917319914152,
+        "dd": 199.18925457439624,
+        "dd_oracle": 76.16839004537981
+      },
+      "mape_percent": {
+        "em": 2.8058602197075126,
+        "dd": 2.988730903854073,
+        "dd_oracle": 0.9733851627366081
+      }
+    },
+    {
+      "nx": 6,
+      "spacing_km": 0.03125,
+      "samples": 113246208,
+      "rmse_m_s": {
+        "em": 155.73592671582776,
+        "dd": 215.12521797173798,
+        "dd_oracle": 98.84350943044197
+      },
+      "mape_percent": {
+        "em": 2.403576554399068,
+        "dd": 3.4705829388826888,
+        "dd_oracle": 1.3129851625570075
+      }
+    },
+    {
+      "nx": 8,
+      "spacing_km": 0.03125,
+      "samples": 113246208,
+      "rmse_m_s": {
+        "em": 150.84141272719236,
+        "dd": 221.23536467726734,
+        "dd_oracle": 117.41161578773804
+      },
+      "mape_percent": {
+        "em": 2.339731571521569,
+        "dd": 3.690158386673492,
+        "dd_oracle": 1.811548207291341
+      }
+    }
+  ]
+}

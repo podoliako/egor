@@ -1,0 +1,62 @@
+{
+  "updated_utc": "2026-11-13T19:47:16.450657+00:00",
+  "source_csv_sha256": "c6302356d0cd7ccf1c0887d73eec3ded84fff93e782b34baec4bcf6245eca407",
+  "manifest_sha256": "1269d5ec848e6f96f38eef6d30af09d0cd8b950143074809652f0cf0e66d5910",
+  "csv_sha256": "7e8110e1ba9e64ff8f105fb9168120e0d9bf75215245c4ad2ce135e82dfc6746",
+  "historical_cache_sha256": "82eeba37859004356febe411cc71d83f793968a6aef3591ccbddd5713b6b8031",
+  "selection_sha256": "ae9a243a866f0e823ea66e68f3654566e681c20921a9ef6d358d698de541de01",
+  "residual_origins": {
+    "run_faultdmin13-fault-hard-k128-top128-dmin4_v1.4_20261113_112541_c7ee61aab7a740c4b41140d0801d9dae": "study_cache",
+    "run_faultdmin13-fault-soft-k128-top128-dmin4_v1.4_20261113_112541_2716064df0274640baea24a5fec11728": "study_cache",
+    "run_faultdmin13-fault-hard-k128-top128-dmin7_v1.4_20261113_112541_f7305af7d020456aa214c42ea8d05743": "study_cache",
+    "run_faultdmin13-fault-soft-k128-top128-dmin7_v1.4_20261113_112541_37407e2684b8421ead579122688890ed": "study_cache"
+  },
+  "quality_sha256_by_run": {
+    "run_faultdmin13-fault-hard-k128-top128-dmin4_v1.4_20261113_112541_c7ee61aab7a740c4b41140d0801d9dae": "7b2f248babda647357aed66a7d4bb74873655d71e15ff20c62d07a267b247f66",
+    "run_faultdmin13-fault-soft-k128-top128-dmin4_v1.4_20261113_112541_2716064df0274640baea24a5fec11728": "12a4c127eb54f85e573d123a219ed4ed464a03405237fee26e4cd78babef2cd4",
+    "run_faultdmin13-fault-hard-k128-top128-dmin7_v1.4_20261113_112541_f7305af7d020456aa214c42ea8d05743": "7d106da9e5802a14cbac6b726cb37932a75d5463baa4f2054d52ce2597ddaadd",
+    "run_faultdmin13-fault-soft-k128-top128-dmin7_v1.4_20261113_112541_37407e2684b8421ead579122688890ed": "914a9a4e841887c1f27260e51babda520dbfc04c1295834daad036d0b8bf2ac5"
+  },
+  "case_states": {
+    "fault-hard-k128-top128-dmin4": {
+      "status": "completed",
+      "pid": 1836856,
+      "started_at": "2026-11-13T11:25:26.701708+00:00",
+      "run_id": "run_faultdmin13-fault-hard-k128-top128-dmin4_v1.4_20261113_112541_c7ee61aab7a740c4b41140d0801d9dae",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin13-fault-hard-k128-top128-dmin4_v1.4_20261113_112541_c7ee61aab7a740c4b41140d0801d9dae",
+      "completed_updates": 12,
+      "finished_at": "2026-11-13T14:25:20.583760+00:00"
+    },
+    "fault-soft-k128-top128-dmin4": {
+      "status": "completed",
+      "pid": 1836859,
+      "started_at": "2026-11-13T11:25:26.700690+00:00",
+      "run_id": "run_faultdmin13-fault-soft-k128-top128-dmin4_v1.4_20261113_112541_2716064df0274640baea24a5fec11728",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin13-fault-soft-k128-top128-dmin4_v1.4_20261113_112541_2716064df0274640baea24a5fec11728",
+      "completed_updates": 12,
+      "finished_at": "2026-11-13T15:02:08.767427+00:00"
+    },
+    "fault-hard-k128-top128-dmin7": {
+      "status": "completed",
+      "pid": 1836860,
+      "started_at": "2026-11-13T11:25:26.706133+00:00",
+      "run_id": "run_faultdmin13-fault-hard-k128-top128-dmin7_v1.4_20261113_112541_f7305af7d020456aa214c42ea8d05743",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin13-fault-hard-k128-top128-dmin7_v1.4_20261113_112541_f7305af7d020456aa214c42ea8d05743",
+      "completed_updates": 12,
+      "finished_at": "2026-11-13T18:40:18.233165+00:00"
+    },
+    "fault-soft-k128-top128-dmin7": {
+      "status": "completed",
+      "pid": 1836861,
+      "started_at": "2026-11-13T11:25:26.703658+00:00",
+      "run_id": "run_faultdmin13-fault-soft-k128-top128-dmin7_v1.4_20261113_112541_37407e2684b8421ead579122688890ed",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin13-fault-soft-k128-top128-dmin7_v1.4_20261113_112541_37407e2684b8421ead579122688890ed",
+      "completed_updates": 12,
+      "finished_at": "2026-11-13T19:23:36.128824+00:00"
+    }
+  },
+  "errors": {},
+  "pair_status_counts": {
+    "completed": 40
+  }
+}

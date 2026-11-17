@@ -1,0 +1,230 @@
+{
+  "variant": "Explicit display-only phase reversal, not original velocity values in 4.4 XY",
+  "horizontal_z_m": 1500.0,
+  "anomaly_baseline_km_s": 5.0,
+  "transform": "4.4 XY: display_Vp_km_s = 10 - raw_Vp_km_s, for True/Hard/Soft equally",
+  "transform_scope": "4.4 XY only; all XZ/YZ and all 4.2/4.3 values unchanged",
+  "displayed_true_slices_equal": true,
+  "raw_true_xy_slices_equal": false,
+  "source_models_modified": false,
+  "previous_figures_unchanged": true,
+  "rows": [
+    "4.2",
+    "4.3",
+    "4.4"
+  ],
+  "columns": [
+    "XY Hard",
+    "XY Soft",
+    "XZ Hard",
+    "XZ Soft",
+    "YZ Hard",
+    "YZ Soft"
+  ],
+  "blocks": [
+    {
+      "section": "4.2",
+      "crop": {
+        "original_extent_m": [
+          24000.0,
+          12000.0,
+          12000.0
+        ],
+        "lower_native_xyz_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "upper_native_xyz_m": [
+          20000.0,
+          8000.0,
+          8000.0
+        ],
+        "section_native_xyz_m": [
+          12000.0,
+          6000.0,
+          1500.0
+        ],
+        "section_crop_local_xyz_m": [
+          12000.0,
+          6000.0,
+          1500.0
+        ],
+        "coordinate_policy": "Crop-local coordinates; not the fault-test geographic frame"
+      },
+      "records": {
+        "hard": {
+          "run_id": "run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76",
+          "model_update_number": 3,
+          "checkpoint_kind": "selected",
+          "checkpoint": "runs/run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76/iter_3/model.npy",
+          "checkpoint_sha256": "f5e067a5168da20f2d2b2aa62086810d9dbbc8229feda9060d5be6b6edc04281",
+          "meta_sha256": "b0d572fa8aaac98739bed861d10b994dcae1fd437f8ca8d570a600acda72c751",
+          "velocity_rmse_m_s": 256.4173356523359,
+          "coarse_cell_m": 1000.0,
+          "tested_candidates": 50,
+          "used_candidates": 1,
+          "seed_separation_m": 875.0
+        },
+        "soft": {
+          "run_id": "run_onesided-full-soft50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_094430_ee66281e11c44fc8aa6262245b4d3065",
+          "model_update_number": 3,
+          "checkpoint_kind": "selected",
+          "checkpoint": "runs/run_onesided-full-soft50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_094430_ee66281e11c44fc8aa6262245b4d3065/iter_3/model.npy",
+          "checkpoint_sha256": "c7c9e766db3f745454132fdcc372166366a5f49a9323293675b954376829ba2b",
+          "meta_sha256": "f5a53d1a5d74d449219771876868be674c8dbd2dedcf8b77722a15958d948d88",
+          "velocity_rmse_m_s": 246.75203177007774,
+          "coarse_cell_m": 1000.0,
+          "tested_candidates": 50,
+          "used_candidates": 50,
+          "seed_separation_m": 875.0
+        }
+      },
+      "source_directory": "/mnt/disk01/egor/projects/forward_modeling/experiments/input/onesided_nx6_24x12x12_18st_1200ev_noise01_pick005_seed42",
+      "input_sha256": {
+        "model.npz": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7",
+        "stations.csv": "da7b83e9820932d972d74b1d71879f6db087e923a10d07bbc4b40d0cd43c8e60",
+        "events.csv": "c2c84a2f8e180c4ef715e5b166cdc9466eb57755bc5ba3473cea88fe2540788a"
+      }
+    },
+    {
+      "section": "4.3",
+      "crop": {
+        "original_extent_m": [
+          24000.0,
+          8000.0,
+          8000.0
+        ],
+        "lower_native_xyz_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "upper_native_xyz_m": [
+          20000.0,
+          8000.0,
+          8000.0
+        ],
+        "section_native_xyz_m": [
+          6500.0,
+          4500.0,
+          1500.0
+        ],
+        "section_crop_local_xyz_m": [
+          6500.0,
+          4500.0,
+          1500.0
+        ],
+        "coordinate_policy": "Crop-local coordinates; not the fault-test geographic frame"
+      },
+      "records": {
+        "hard": {
+          "run_id": "run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e",
+          "model_update_number": 3,
+          "checkpoint_kind": "selected",
+          "checkpoint": "runs/run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e/iter_3/model.npy",
+          "checkpoint_sha256": "60df4fdba57a282fa5cc4d2fc26434c398f13f32093d777c90238e03e01cec88",
+          "meta_sha256": "1b732a4765a34206881ed2000a0eb29f60a868ce9b2cc3c4654dd2fe29d28df7",
+          "velocity_rmse_m_s": 253.70160902940245,
+          "coarse_cell_m": 1000.0,
+          "tested_candidates": 50,
+          "used_candidates": 1,
+          "seed_separation_m": 875.0
+        },
+        "soft": {
+          "run_id": "run_nx6-bottom-blobs-soft50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_9eb4d4f54aaa4fc192665ff3a55fb200",
+          "model_update_number": 3,
+          "checkpoint_kind": "selected",
+          "checkpoint": "runs/run_nx6-bottom-blobs-soft50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_9eb4d4f54aaa4fc192665ff3a55fb200/iter_3/model.npy",
+          "checkpoint_sha256": "97012e6db34b45db62d570bfa22549da0d7b3a8cf21bb6b8d79486e4cc31b6fe",
+          "meta_sha256": "2614a7554fb7fcc32eabcc20375ffd549f60d384338aee25a18dae74cd2310e3",
+          "velocity_rmse_m_s": 251.33806045401153,
+          "coarse_cell_m": 1000.0,
+          "tested_candidates": 50,
+          "used_candidates": 50,
+          "seed_separation_m": 875.0
+        }
+      },
+      "source_directory": "/mnt/disk01/egor/projects/forward_modeling/experiments/input/nx6_bottom_blobs_24x8x8_22st_600ev_noise01_pick005_seed42",
+      "input_sha256": {
+        "model.npz": "e5ade8b870babc6ff213dac34024f5f4a0a86d20884bd06a221de11229f11caa",
+        "stations.csv": "588918c7a3f8da5777519988f0a9acdaf5469b791f1896d4107d2d8be570f21a",
+        "events.csv": "a9918d5730808e553e6dbbfeeacf8887bde439063a319b5006f0d1838a64857a"
+      }
+    },
+    {
+      "section": "4.4",
+      "crop": {
+        "original_extent_m": [
+          20000.0,
+          8000.0,
+          8000.0
+        ],
+        "lower_native_xyz_m": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "upper_native_xyz_m": [
+          20000.0,
+          8000.0,
+          8000.0
+        ],
+        "section_native_xyz_m": [
+          9000.0,
+          3500.0,
+          1500.0
+        ],
+        "section_crop_local_xyz_m": [
+          9000.0,
+          3500.0,
+          1500.0
+        ],
+        "coordinate_policy": "Crop-local coordinates; not the fault-test geographic frame"
+      },
+      "records": {
+        "hard": {
+          "run_id": "run_geysers-crop800-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_6b62894a48ed4afdb0fd7d213b6eafa8",
+          "model_update_number": 3,
+          "checkpoint_kind": "selected",
+          "checkpoint": "runs/run_geysers-crop800-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_6b62894a48ed4afdb0fd7d213b6eafa8/iter_3/model.npy",
+          "checkpoint_sha256": "33722292cb811fb757eac60a6b0c1f7d01d83e263787a817733c07543e735673",
+          "meta_sha256": "607ae94c88c0b4893a40cf19811e8675a2040ad6a1f9d4c69e846472d02ef644",
+          "velocity_rmse_m_s": 232.04515162861642,
+          "coarse_cell_m": 800.0,
+          "tested_candidates": 50,
+          "used_candidates": 1,
+          "seed_separation_m": 700.0
+        },
+        "soft": {
+          "run_id": "run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889",
+          "model_update_number": 3,
+          "checkpoint_kind": "selected",
+          "checkpoint": "runs/run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889/iter_3/model.npy",
+          "checkpoint_sha256": "342854643d38d45636ae8f8e1d6600e95ba6b04d760d10d00d944dc5faaf40be",
+          "meta_sha256": "b8efd1c60f2257d6269a94b2659a092a74b7abe6fe34dbf0f948e188e7f24e17",
+          "velocity_rmse_m_s": 229.61817989050158,
+          "coarse_cell_m": 800.0,
+          "tested_candidates": 50,
+          "used_candidates": 50,
+          "seed_separation_m": 700.0
+        }
+      },
+      "source_directory": "/mnt/disk01/egor/projects/forward_modeling/experiments/input/geysers_realgeom_cb5x2x2_20x8x8_26st_3465ev_noise01_pick005_seed42",
+      "input_sha256": {
+        "model.npz": "fd84c46f480accd3d08417c7aa105a2113d99d42663820c24efb3fb454ef0b26",
+        "stations.csv": "d4371f7005d08ceb7d631ea3438ecbf1c59152deff188253157ec368e63c4512",
+        "events.csv": "9cfecb427bb17761a991d80f594f1e16eb4f93f48b895d503d2dcdd2f1ef1183"
+      }
+    }
+  ],
+  "data_sha256": "cac7d4b6c2117facd9176bf097afd6506ee0d5f32947b2dc02fa57c06e4b64ae",
+  "source_sha256": {
+    "paper/figures/results/tomography/source/make_phase_flipped_checkerboards.py": "b07026999a92387646f8821daee8f358326332fe04b85dbdea370e5d2586991f",
+    "paper/figures/results/tomography/source/make_checkerboard_pairs.py": "3bc4579acb4927207f1d3050c558044776d438949d9c6fdd8eb2530607300d5e",
+    "paper/figures/results/tomography/source/make_matched_checkerboards.py": "02c5e86f3f00b5abbf634cd751d3c5eba638a24e18d19248549631b340eb416d",
+    "paper/figures/results/tomography/source/make_right_cropped_checkerboards.py": "f194032a117d9942e3c8de113b7cf212d4e1eca35ca72c98fdb97a6a48f7f630",
+    "paper/figures/results/tomography/source/make_comparison.py": "65ff2e306eb0e5fda05dc010596169ed6cfae01a833d1dba0899014701f23933",
+    "paper/figures/article_comparison_metrics.json": "ca679519f6753698d1338c4e19a7e56ac8eec363b658667d64801fb1cd3d7514"
+  }
+}

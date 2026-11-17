@@ -1,0 +1,21 @@
+{
+  "status": "completed",
+  "pid": 1836853,
+  "started_at": "2026-11-13T11:25:26.619739+00:00",
+  "cases": {
+    "fault-hard-k128-top128-dmin4": {
+      "returncode": 0
+    },
+    "fault-soft-k128-top128-dmin4": {
+      "returncode": 0
+    },
+    "fault-hard-k128-top128-dmin7": {
+      "returncode": 0
+    },
+    "fault-soft-k128-top128-dmin7": {
+      "returncode": 0
+    }
+  },
+  "export_returncode": 0,
+  "finished_at": "2026-11-13T19:24:00.169240+00:00"
+}

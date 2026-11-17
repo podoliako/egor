@@ -1,0 +1,49 @@
+{
+  "purpose": "2-D numerical illustration, not an experimental result or production 3-D run",
+  "coarse_shape": [
+    8,
+    6
+  ],
+  "coarse_cell_km": 1.0,
+  "subdivision": 8,
+  "fine_cell_km": 0.125,
+  "solver": "scikit-fmm, second order; 2-D analogue of eikonal.py homogeneous source sphere (circle here)",
+  "source_radius_km": 0.375,
+  "station_km": [
+    1.35,
+    0.3
+  ],
+  "candidates_km": [
+    [
+      6.55,
+      4.85
+    ],
+    [
+      7.2,
+      3.85
+    ],
+    [
+      5.15,
+      5.35
+    ]
+  ],
+  "tracing": "Bilinearly interpolated gradient, normalized negative-gradient steps of 0.2 fine cells; all three rays reached the exact station",
+  "length_accumulation": "Each traced polyline segment split at exact coarse-cell faces; sum of cell lengths checked against full path length",
+  "ray_lengths_km": [
+    7.271536029370694,
+    6.9078404387487495,
+    6.60728099737151
+  ],
+  "ray_linear_times_s": [
+    1.5717922725832372,
+    1.504368506106943,
+    1.509732045248445
+  ],
+  "candidate_interpolated_times_s": [
+    1.575266086232524,
+    1.509846799635026,
+    1.5139072424673208
+  ],
+  "illustration_parameters": "q, velocities, station and candidate positions chosen only for this schematic; not paper experiment settings",
+  "script_sha256": "3625c801f1a300fec3c1f76760cd328d757682a95f990d7593af542446be37b8"
+}

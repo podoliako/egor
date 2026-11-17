@@ -1,0 +1,105 @@
+{
+  "event_id": "3259971",
+  "positions_m": {
+    "catalog": [
+      22758.286405020048,
+      4594.155975921693,
+      6166.0
+    ],
+    "soft": [
+      10553.657557901859,
+      3079.9581731682615,
+      937.5450778655679
+    ]
+  },
+  "distance": "Euclidean 3-D distance using stations.csv x_m,y_m,z_m in the same local frame",
+  "time": "Observed pick minus catalog origin; same reference for both locations",
+  "linear_fits": {
+    "catalog": {
+      "slope_s_per_km": 0.1415831184558661,
+      "intercept_s": 0.8091043854756627,
+      "r_squared": 0.33174961856479157,
+      "n_picks": 6,
+      "selection": "Six fit picks only; STY holdout excluded; free intercept"
+    },
+    "soft": {
+      "slope_s_per_km": 0.28361179488164684,
+      "intercept_s": 2.160441757464563,
+      "r_squared": 0.9706221218861497,
+      "n_picks": 6,
+      "selection": "Six fit picks only; STY holdout excluded; free intercept"
+    }
+  },
+  "picks": [
+    {
+      "event_id": "3259971",
+      "station_id": "BG.SQK",
+      "split": "fit",
+      "phase": "P",
+      "pick_time_utc": "2011-04-03T05:26:49.640Z",
+      "arrival_from_catalog_origin_s": 2.7,
+      "catalog_distance_km": 14.899250066354234,
+      "soft_distance_km": 2.04114899560819
+    },
+    {
+      "event_id": "3259971",
+      "station_id": "BG.STY",
+      "split": "holdout",
+      "phase": "P",
+      "pick_time_utc": "2011-04-03T05:26:49.670Z",
+      "arrival_from_catalog_origin_s": 2.73,
+      "catalog_distance_km": 12.818995076479903,
+      "soft_distance_km": 1.3599933085272395
+    },
+    {
+      "event_id": "3259971",
+      "station_id": "BG.CLV",
+      "split": "fit",
+      "phase": "P",
+      "pick_time_utc": "2011-04-03T05:26:49.700Z",
+      "arrival_from_catalog_origin_s": 2.76,
+      "catalog_distance_km": 15.236037113776016,
+      "soft_distance_km": 2.079320367881268
+    },
+    {
+      "event_id": "3259971",
+      "station_id": "BG.NEG",
+      "split": "fit",
+      "phase": "P",
+      "pick_time_utc": "2011-04-03T05:26:49.720Z",
+      "arrival_from_catalog_origin_s": 2.78,
+      "catalog_distance_km": 13.67841798741964,
+      "soft_distance_km": 1.9525621209022268
+    },
+    {
+      "event_id": "3259971",
+      "station_id": "BG.HVC",
+      "split": "fit",
+      "phase": "P",
+      "pick_time_utc": "2011-04-03T05:26:49.790Z",
+      "arrival_from_catalog_origin_s": 2.85,
+      "catalog_distance_km": 14.938821654705656,
+      "soft_distance_km": 2.6166978672939702
+    },
+    {
+      "event_id": "3259971",
+      "station_id": "BG.ACR",
+      "split": "fit",
+      "phase": "P",
+      "pick_time_utc": "2011-04-03T05:26:49.940Z",
+      "arrival_from_catalog_origin_s": 3.0,
+      "catalog_distance_km": 13.839816972697529,
+      "soft_distance_km": 2.961567001261065
+    },
+    {
+      "event_id": "3259971",
+      "station_id": "BG.BUC",
+      "split": "fit",
+      "phase": "P",
+      "pick_time_utc": "2011-04-03T05:26:50.310Z",
+      "arrival_from_catalog_origin_s": 3.37,
+      "catalog_distance_km": 16.43927116467465,
+      "soft_distance_km": 4.206116971803752
+    }
+  ]
+}

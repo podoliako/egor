@@ -1,0 +1,76 @@
+{
+  "validated_at": "2026-11-09T18:32:52.015277+00:00",
+  "manifest_sha256": "e7728010412fbdaa5c5443748a48e6e80359befca3487b4311ad7fc72aedb6b3",
+  "python": "/mnt/disk01/egor/venv/bin/python",
+  "fresh_interpreters": true,
+  "cases": {
+    "homogeneous-soft": {
+      "case_id": "homogeneous-soft",
+      "validated": true,
+      "n_workers": 12,
+      "control_split": {
+        "requested_fraction": 0.1,
+        "seed": 42,
+        "n_control": 9009,
+        "n_training": 81081,
+        "scored_events": 3244,
+        "mask_sha256": "f5da0c11e6245130c14cae34432ba5c7be6651cdbee864f966f6592f7919b1bf"
+      },
+      "updates": "3..20",
+      "solver_calls": 0,
+      "reuse_control_localization": true,
+      "ray_container": "rays.npz"
+    },
+    "homogeneous-hard": {
+      "case_id": "homogeneous-hard",
+      "validated": true,
+      "n_workers": 12,
+      "control_split": {
+        "requested_fraction": 0.1,
+        "seed": 42,
+        "n_control": 9009,
+        "n_training": 81081,
+        "scored_events": 3244,
+        "mask_sha256": "f5da0c11e6245130c14cae34432ba5c7be6651cdbee864f966f6592f7919b1bf"
+      },
+      "updates": "3..20",
+      "solver_calls": 0,
+      "reuse_control_localization": true,
+      "ray_container": "rays.npz"
+    },
+    "1d-soft": {
+      "case_id": "1d-soft",
+      "validated": true,
+      "n_workers": 12,
+      "control_split": {
+        "requested_fraction": 0.1,
+        "seed": 42,
+        "n_control": 9009,
+        "n_training": 81081,
+        "scored_events": 3244,
+        "mask_sha256": "f5da0c11e6245130c14cae34432ba5c7be6651cdbee864f966f6592f7919b1bf"
+      },
+      "updates": "3..20",
+      "solver_calls": 0,
+      "reuse_control_localization": true,
+      "ray_container": "rays.npz"
+    },
+    "1d-hard": {
+      "case_id": "1d-hard",
+      "validated": true,
+      "n_workers": 12,
+      "control_split": {
+        "requested_fraction": 0.1,
+        "seed": 42,
+        "n_control": 9009,
+        "n_training": 81081,
+        "scored_events": 3244,
+        "mask_sha256": "f5da0c11e6245130c14cae34432ba5c7be6651cdbee864f966f6592f7919b1bf"
+      },
+      "updates": "3..20",
+      "solver_calls": 0,
+      "reuse_control_localization": true,
+      "ray_container": "rays.npz"
+    }
+  }
+}

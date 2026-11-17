@@ -191,9 +191,9 @@ def test_sparse_tracing_uses_views_and_logs_global_ids(tmp_path):
             np.testing.assert_array_equal(saved["observed_mask"], mask)
     with np.load(directory / "ray_status.npz") as saved:
         np.testing.assert_array_equal(saved["reached"][:, ~mask], False)
-    with np.load(directory / "weight_0/G_stations_sparse.npz") as saved:
-        assert len(saved["offsets"]) == len(mask) + 1
-        assert not np.diff(saved["offsets"])[~mask].any()
+    with np.load(directory / "rays.npz") as saved:
+        assert len(saved["g_0_offsets"]) == len(mask) + 1
+        assert not np.diff(saved["g_0_offsets"])[~mask].any()
 
 
 def test_unobserved_fields_do_not_affect_sparse_scores_or_refinement():

@@ -1,0 +1,26 @@
+[Control] Early stopping disabled; running up to 12 updates
+1/12
+[Rays] 13513500/13513500 reached, 0 failed, 13513500 used
+2/12
+[Rays] 13513500/13513500 reached, 0 failed, 13513500 used
+3/12
+[Rays] 13513500/13513500 reached, 0 failed, 13513500 used
+4/12
+[Rays] 13513500/13513500 reached, 0 failed, 13513500 used
+5/12
+[Rays] 13513500/13513500 reached, 0 failed, 13513500 used
+6/12
+[Rays] 13513500/13513500 reached, 0 failed, 13513500 used
+7/12
+[Rays] 13513500/13513500 reached, 0 failed, 13513500 used
+8/12
+[Rays] 13513500/13513500 reached, 0 failed, 13513500 used
+9/12
+[Rays] 13513500/13513500 reached, 0 failed, 13513500 used
+10/12
+[Rays] 13513500/13513500 reached, 0 failed, 13513500 used
+11/12
+[Rays] 13513500/13513500 reached, 0 failed, 13513500 used
+12/12
+[Rays] 13513500/13513500 reached, 0 failed, 13513500 used
+[TomographyLogger] Run saved to: /mnt/disk01/egor/projects/EMTomo/runs/run_topnsweep11-s4-soft-k150-top150_v1.4_20261111_222430_aad13d7b4ac24eed98f3cd38ad9b2f2c

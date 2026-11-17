@@ -1,3 +1,13 @@
+# Figure inventory
+
+**Current layout (2026-11-17):** the 11 PDFs actually included by `main.tex` and
+`results.tex` are in [`used/`](used/README.md), listed in article order. All other
+197 image files are archived outside `paper` in
+[`archive/unused_paper_figures/`](../../archive/unused_paper_figures/README.md).
+Data and generators remain in their original locations. Generators still target
+the old output paths; update each generator or move its final PDF into `used/`
+when revising a figure. The notes below are historical, not the current inventory.
+
 # Accepted checkerboard illustrations
 
 Three illustrations are currently accepted. Each has a canonical PNG preview,

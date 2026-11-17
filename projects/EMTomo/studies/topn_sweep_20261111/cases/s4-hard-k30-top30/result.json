@@ -1,0 +1,9 @@
+{
+  "status": "completed",
+  "pid": 1708491,
+  "started_at": "2026-11-11T21:22:59.738174+00:00",
+  "run_id": "run_topnsweep11-s4-hard-k30-top30_v1.4_20261111_212301_8cf8b6b0c1194310878224508e4f9f74",
+  "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_topnsweep11-s4-hard-k30-top30_v1.4_20261111_212301_8cf8b6b0c1194310878224508e4f9f74",
+  "completed_updates": 12,
+  "finished_at": "2026-11-11T22:09:28.949707+00:00"
+}

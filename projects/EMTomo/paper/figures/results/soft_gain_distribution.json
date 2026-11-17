@@ -1,0 +1,345 @@
+{
+  "source": "EMTomo/paper/exp_data/hard_soft_min_residual_rmse.csv",
+  "source_sha256": "f77335239ba68bed9d910fd08180471263d5a76d6180860ce798309869a4182f",
+  "n_comparisons": 38,
+  "soft_wins": 2,
+  "hard_wins": 36,
+  "ties": 0,
+  "median_gain_percent": -3.408600312549969,
+  "mean_gain_percent": -6.162981850072786,
+  "min_gain_percent": -35.572718287165685,
+  "max_gain_percent": 0.13367837893987347,
+  "overflow_threshold_percent": -15.0,
+  "overflow_rule": "gain < -15",
+  "overflow_count": 5,
+  "overflow_display_position": -16.5,
+  "regular_histogram_edges_percent": [
+    -15.0,
+    -14.0,
+    -13.0,
+    -12.0,
+    -11.0,
+    -10.0,
+    -9.0,
+    -8.0,
+    -7.0,
+    -6.0,
+    -5.0,
+    -4.0,
+    -3.0,
+    -2.0,
+    -1.0,
+    0.0,
+    1.0
+  ],
+  "stacked_series": {
+    "2": {
+      "label": "Checkerboard: one-sided stations",
+      "color": "#4477AA",
+      "counts_overflow_then_regular": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "3": {
+      "label": "Checkerboard: two station clusters",
+      "color": "#EE9944",
+      "counts_overflow_then_regular": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    "4": {
+      "label": "Checkerboard: real geometry / noise",
+      "color": "#228833",
+      "counts_overflow_then_regular": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        4,
+        2
+      ]
+    },
+    "5": {
+      "label": "Vertical fault: real geometry",
+      "color": "#AA3377",
+      "counts_overflow_then_regular": [
+        5,
+        0,
+        1,
+        2,
+        0,
+        1,
+        1,
+        0,
+        0,
+        2,
+        2,
+        4,
+        3,
+        0,
+        1,
+        4,
+        0
+      ]
+    },
+    "6": {
+      "label": "Complex anomalies: real geometry",
+      "color": "#66CCEE",
+      "counts_overflow_then_regular": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        3,
+        0
+      ]
+    }
+  },
+  "comparisons": [
+    {
+      "pair_id": "section2_pair01",
+      "section": "2",
+      "gain_percent": -1.4514477145154383
+    },
+    {
+      "pair_id": "section3_pair01",
+      "section": "3",
+      "gain_percent": -0.2620124061656256
+    },
+    {
+      "pair_id": "section4_pair01",
+      "section": "4",
+      "gain_percent": -0.5797519109451351
+    },
+    {
+      "pair_id": "section4_pair02",
+      "section": "4",
+      "gain_percent": -0.22713268058568944
+    },
+    {
+      "pair_id": "section4_pair03",
+      "section": "4",
+      "gain_percent": 0.10719835391739667
+    },
+    {
+      "pair_id": "section4_pair04",
+      "section": "4",
+      "gain_percent": 0.13367837893987347
+    },
+    {
+      "pair_id": "section4_pair06",
+      "section": "4",
+      "gain_percent": -0.09256248533000827
+    },
+    {
+      "pair_id": "section4_pair07",
+      "section": "4",
+      "gain_percent": -0.0774242350678679
+    },
+    {
+      "pair_id": "section5_pair01",
+      "section": "5",
+      "gain_percent": -0.09024294520676965
+    },
+    {
+      "pair_id": "section5_pair02",
+      "section": "5",
+      "gain_percent": -35.572718287165685
+    },
+    {
+      "pair_id": "section5_pair03",
+      "section": "5",
+      "gain_percent": -4.9173317092117435
+    },
+    {
+      "pair_id": "section5_pair04",
+      "section": "5",
+      "gain_percent": -12.660513506730604
+    },
+    {
+      "pair_id": "section5_pair05",
+      "section": "5",
+      "gain_percent": -5.173408166399124
+    },
+    {
+      "pair_id": "section5_pair06",
+      "section": "5",
+      "gain_percent": -15.548431917835172
+    },
+    {
+      "pair_id": "section5_pair07",
+      "section": "5",
+      "gain_percent": -3.281265618911196
+    },
+    {
+      "pair_id": "section5_pair08",
+      "section": "5",
+      "gain_percent": -13.616697532362451
+    },
+    {
+      "pair_id": "section5_pair09",
+      "section": "5",
+      "gain_percent": -4.756443688725315
+    },
+    {
+      "pair_id": "section5_pair10",
+      "section": "5",
+      "gain_percent": -5.567476875217835
+    },
+    {
+      "pair_id": "section5_pair11",
+      "section": "5",
+      "gain_percent": -4.418313195724276
+    },
+    {
+      "pair_id": "section5_pair12",
+      "section": "5",
+      "gain_percent": -6.971547184513856
+    },
+    {
+      "pair_id": "section5_pair13",
+      "section": "5",
+      "gain_percent": -9.123123611915457
+    },
+    {
+      "pair_id": "section5_pair14",
+      "section": "5",
+      "gain_percent": -10.020852390920377
+    },
+    {
+      "pair_id": "section5_pair15",
+      "section": "5",
+      "gain_percent": -6.338814544658385
+    },
+    {
+      "pair_id": "section5_pair16",
+      "section": "5",
+      "gain_percent": -3.502554347081017
+    },
+    {
+      "pair_id": "section5_pair17",
+      "section": "5",
+      "gain_percent": -4.139062289485714
+    },
+    {
+      "pair_id": "section5_pair18",
+      "section": "5",
+      "gain_percent": -3.3146462780189205
+    },
+    {
+      "pair_id": "section5_pair19",
+      "section": "5",
+      "gain_percent": -12.07355723429597
+    },
+    {
+      "pair_id": "section5_pair20",
+      "section": "5",
+      "gain_percent": -27.600470883260677
+    },
+    {
+      "pair_id": "section5_pair21",
+      "section": "5",
+      "gain_percent": -0.4917754368447845
+    },
+    {
+      "pair_id": "section5_pair22",
+      "section": "5",
+      "gain_percent": -0.1447281688907116
+    },
+    {
+      "pair_id": "section5_pair23",
+      "section": "5",
+      "gain_percent": -0.1719896624252724
+    },
+    {
+      "pair_id": "section5_pair24",
+      "section": "5",
+      "gain_percent": -16.70590394263342
+    },
+    {
+      "pair_id": "section5_pair25",
+      "section": "5",
+      "gain_percent": -22.137143909349867
+    },
+    {
+      "pair_id": "section5_pair26",
+      "section": "5",
+      "gain_percent": -1.2330526753686124
+    },
+    {
+      "pair_id": "section6_pair01",
+      "section": "6",
+      "gain_percent": -0.1315157826224614
+    },
+    {
+      "pair_id": "section6_pair02",
+      "section": "6",
+      "gain_percent": -0.10511608615060501
+    },
+    {
+      "pair_id": "section6_pair05",
+      "section": "6",
+      "gain_percent": -1.5949273201847538
+    },
+    {
+      "pair_id": "section6_pair06",
+      "section": "6",
+      "gain_percent": -0.34023041090230216
+    }
+  ],
+  "note": "Tail is pooled into an open-ended category; statistics use original gains. Comparison rows are not independent replications."
+}

@@ -1,0 +1,9 @@
+{
+  "status": "completed",
+  "pid": 1692680,
+  "started_at": "2026-11-11T19:54:33.677335+00:00",
+  "run_id": "run_topnsweep11-s3-soft-k50-top25_v1.4_20261111_195434_477ff0d69389450da1ea72caf1af7ab9",
+  "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_topnsweep11-s3-soft-k50-top25_v1.4_20261111_195434_477ff0d69389450da1ea72caf1af7ab9",
+  "completed_updates": 12,
+  "finished_at": "2026-11-11T20:24:32.838508+00:00"
+}

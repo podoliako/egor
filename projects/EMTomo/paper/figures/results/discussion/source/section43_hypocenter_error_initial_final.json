@@ -1,0 +1,79 @@
+{
+  "experiment_id": "nx6_bottom_blobs_24x8x8_22st_600ev_noise01_pick005_seed42",
+  "pair_id": "section3_pair01",
+  "n_events": 600,
+  "n_stations": 22,
+  "relative_noise_sigma": 0.01,
+  "absolute_noise_sigma_s": 0.05,
+  "source_events_sha256": "a9918d5730808e553e6dbbfeeacf8887bde439063a319b5006f0d1838a64857a",
+  "mapping_sha256": "e09219a9ec4ccca6a3d1d731fdda283b7dce69ca7bde70fe8f1f0188fc1a5a38",
+  "estimator": "Largest saved candidate weight in both modes; first argmax on exact ties.",
+  "coordinate_conversion": "(positions+0.5)*fine_cell_size_m",
+  "event_order": "Original events.csv row order; all 600 events equal weight.",
+  "checkpoints": "iter_0 E-step in the initial V0 model and iter_11 E-step in V11 before update 12. Not selected V3 and not a post-final relocation in V12.",
+  "density": {
+    "method": "Gaussian KDE with reflection at zero",
+    "bandwidth_m": 150.0,
+    "common_x_limits_m": [
+      0,
+      5500.0
+    ],
+    "normalization": "Each density integrates to one on nonnegative errors; numerical area checked."
+  },
+  "initial_estimates_identical": true,
+  "records": {
+    "initial_hard": {
+      "mode": "hard",
+      "stage": "initial",
+      "run_id": "run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e",
+      "location_iteration_index": 0,
+      "velocity_updates_before_location": 0,
+      "meta_sha256": "1b732a4765a34206881ed2000a0eb29f60a868ce9b2cc3c4654dd2fe29d28df7",
+      "row_id_weights_sha256": "de36cc47e7f236469dadfee05c9aef3dbc5cac638ea093cdd1a5ef2a7ebaae5c",
+      "median_m": 762.8761336444497,
+      "p90_m": 1250.5807902227664,
+      "rmse_m": 906.6462263294602,
+      "max_m": 2768.948843052742
+    },
+    "final_hard": {
+      "mode": "hard",
+      "stage": "final",
+      "run_id": "run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e",
+      "location_iteration_index": 11,
+      "velocity_updates_before_location": 11,
+      "meta_sha256": "1b732a4765a34206881ed2000a0eb29f60a868ce9b2cc3c4654dd2fe29d28df7",
+      "row_id_weights_sha256": "16d81f1f3eed29649452b220ab7c28813e71f0dce741d3f5a943f6240156d930",
+      "median_m": 806.299866801143,
+      "p90_m": 1565.2758620475806,
+      "rmse_m": 1039.0583041121952,
+      "max_m": 4056.7992562835893
+    },
+    "initial_soft": {
+      "mode": "soft",
+      "stage": "initial",
+      "run_id": "run_nx6-bottom-blobs-soft50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_9eb4d4f54aaa4fc192665ff3a55fb200",
+      "location_iteration_index": 0,
+      "velocity_updates_before_location": 0,
+      "meta_sha256": "2614a7554fb7fcc32eabcc20375ffd549f60d384338aee25a18dae74cd2310e3",
+      "row_id_weights_sha256": "6af79849a0cc0ea031de368f0480c548740298249ae1a2064bdd3e4400ec7cf8",
+      "median_m": 762.8761336444497,
+      "p90_m": 1250.5807902227664,
+      "rmse_m": 906.6462263294602,
+      "max_m": 2768.948843052742
+    },
+    "final_soft": {
+      "mode": "soft",
+      "stage": "final",
+      "run_id": "run_nx6-bottom-blobs-soft50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_9eb4d4f54aaa4fc192665ff3a55fb200",
+      "location_iteration_index": 11,
+      "velocity_updates_before_location": 11,
+      "meta_sha256": "2614a7554fb7fcc32eabcc20375ffd549f60d384338aee25a18dae74cd2310e3",
+      "row_id_weights_sha256": "d1ce093caa9367c36d32ae99bd76542cd9d9a0cf05b6eb4583fd61072a9149c6",
+      "median_m": 993.013726732029,
+      "p90_m": 2130.5476279337054,
+      "rmse_m": 1362.6102080817038,
+      "max_m": 4599.2316894466585
+    }
+  },
+  "script_sha256": "0ab771293efc06cebf841c50201008335727b89f70634ba4b1619e3e4fda2bad"
+}

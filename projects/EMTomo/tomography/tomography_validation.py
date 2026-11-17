@@ -9,6 +9,7 @@ import numpy as np
 from eikonal import station_travel_time_fields
 from instruments.instruments_coords import sample_cell_centered_trilinear_batch
 from instruments.likelihood import negative_log_likelihood
+from .tomography_cache import LocalizationCache, RefinedCandidates
 from .tomography_math import refine_hypocentre_in_cell, select_candidate_cells
 
 
@@ -57,7 +58,8 @@ def split_control_arrivals(arrivals, *, fraction, seed, min_training_picks):
     return training, control_mask
 
 
-def _control_event_squared_error(event, times, training, observed, mask, noise, config):
+def _control_event_squared_error(event, times, training, observed, mask, noise, config,
+                                 *, return_candidates=False):
     """Score one event without using held-out values to fit location or origin."""
     training_indices = np.flatnonzero(np.isfinite(training[event]))
     picks = training[event, training_indices]
@@ -91,20 +93,24 @@ def _control_event_squared_error(event, times, training, observed, mask, noise, 
     residual = observed[event, control_indices] - (predicted_control + origin)
     if not np.isfinite(origin) or not np.all(np.isfinite(residual)):
         raise ValueError(f"Nonfinite control residual for event {event}")
-    return float(np.dot(residual, residual))
+    squared_error = float(np.dot(residual, residual))
+    if return_candidates:
+        return squared_error, RefinedCandidates(cells, positions, costs)
+    return squared_error
 
 
 _CONTROL_WORKER = {}
 
 
-def _init_control_worker(times, training, observed, mask, noise, config):
+def _init_control_worker(times, training, observed, mask, noise, config, return_candidates=False):
     # Fork shares the large field volume copy-on-write; only event indices travel
     # through the pool's pipes. These flags change in children, not in the caller.
     for array in (times, training, observed, mask):
         array.flags.writeable = False
     _CONTROL_WORKER.clear()
     _CONTROL_WORKER.update(times=times, training=training, observed=observed,
-                           mask=mask, noise=noise, config=config)
+                           mask=mask, noise=noise, config=config,
+                           return_candidates=return_candidates)
     try:
         from numba import set_num_threads
 
@@ -125,6 +131,7 @@ def _score_control_event(event):
         return _control_event_squared_error(
             event, state["times"], state["training"], state["observed"],
             state["mask"], state["noise"], state["config"],
+            **({"return_candidates": True} if state["return_candidates"] else {}),
         )
     except Exception as error:
         raise RuntimeError(f"Failed to score control event {event}: {error}") from error
@@ -147,7 +154,8 @@ def _sum_control_errors(errors, n_events, started):
     return squared_error
 
 
-def evaluate_control_rmse(model, training_arrivals, arrivals, control_mask, stations_m, noise, config) -> float:
+def evaluate_control_rmse(model, training_arrivals, arrivals, control_mask, stations_m, noise, config,
+                          *, return_cache=False):
     """Global held-out absolute-arrival RMSE in seconds for the supplied model.
 
     Recompute FMM fields (using ``config.n_workers``) after refining this model.
@@ -157,6 +165,9 @@ def evaluate_control_rmse(model, training_arrivals, arrivals, control_mask, stat
     Temperature, candidate weights and ray tracing play no role. Fit origin time
     from training residuals with precision ``1 / noise.sigmas(predicted)**2``.
     Station-indexed APIs share the full field volume without subset copies.
+    With ``return_cache=True``, return ``(rmse, LocalizationCache)`` retaining the
+    fields and all refined training-only candidates for the next E-step. No
+    per-event likelihood volumes or held-out observations are retained.
 
     Control entries must be finite in ``arrivals`` and NaN in ``training_arrivals``.
     At least two training picks are required for each scored event. An empty
@@ -201,21 +212,35 @@ def evaluate_control_rmse(model, training_arrivals, arrivals, control_mask, stat
     scoring_started = perf_counter()
     print(f"[Control] Scoring {n_events} events, {n_control} held-out picks with {workers} worker(s); "
           f"fields ready in {scoring_started-started:.1f}s", flush=True)
+    candidates = {}
+
+    def contributions(results):
+        for event, result in zip(event_indices, results):
+            if return_cache:
+                squared_error, refined = result
+                candidates[int(event)] = refined
+                yield squared_error
+            else:
+                yield result
+
     if workers == 1:
         errors = (_control_event_squared_error(
             event, times, training, observed, mask, noise, config,
+            **({"return_candidates": True} if return_cache else {}),
         ) for event in event_indices)
-        squared_error = _sum_control_errors(errors, n_events, scoring_started)
+        squared_error = _sum_control_errors(contributions(errors), n_events, scoring_started)
     else:
         context = mp.get_context("fork")
         with context.Pool(processes=workers, initializer=_init_control_worker,
-                          initargs=(times, training, observed, mask, noise, config)) as pool:
+                          initargs=(times, training, observed, mask, noise, config, return_cache)) as pool:
             errors = pool.imap(_score_control_event, map(int, event_indices), chunksize=1)
-            squared_error = _sum_control_errors(errors, n_events, scoring_started)
+            squared_error = _sum_control_errors(contributions(errors), n_events, scoring_started)
 
     rmse = float(np.sqrt(squared_error / n_control))
     if not np.isfinite(rmse):
         raise ValueError("Nonfinite control RMSE")
     print(f"[Control] Complete: {n_events}/{n_events} events, {n_control} held-out picks; "
           f"RMSE={rmse:.6g}s; elapsed={perf_counter()-started:.1f}s", flush=True)
+    if return_cache:
+        return rmse, LocalizationCache.create(model, training, stations, noise, config, times, candidates)
     return rmse

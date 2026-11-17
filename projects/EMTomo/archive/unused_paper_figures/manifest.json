@@ -1,0 +1,1250 @@
+[
+  {
+    "old": "paper/figures/checkerboard_comparison_sections_restored.png",
+    "new": "archive/unused_paper_figures/checkerboard_comparison_sections_restored.png",
+    "status": "unused",
+    "sha256": "ab850613b141a7feef1cf3473b552224aaae57a39097d46015561b4b7d818f2f"
+  },
+  {
+    "old": "paper/figures/checkerboard_geometry_with_initial.png",
+    "new": "archive/unused_paper_figures/checkerboard_geometry_with_initial.png",
+    "status": "unused",
+    "sha256": "0d0d31d27a5aa1812edce000c56aae8243495f00149a0945f050f03365263f84"
+  },
+  {
+    "old": "paper/figures/checkerboard_location_error_ecdf.pdf",
+    "new": "archive/unused_paper_figures/checkerboard_location_error_ecdf.pdf",
+    "status": "unused",
+    "sha256": "af90e29610ab0cad19ce5e3cc45fcc66b3f5d6e0686ff7200d43df7d95d036ce"
+  },
+  {
+    "old": "paper/figures/checkerboard_location_error_ecdf.png",
+    "new": "archive/unused_paper_figures/checkerboard_location_error_ecdf.png",
+    "status": "unused",
+    "sha256": "fa8fd22e95758af44d9fa9b838c419b6f824b113cbdb8a1a289ebea07e784a95"
+  },
+  {
+    "old": "paper/figures/checkerboard_location_error_ecdf.svg",
+    "new": "archive/unused_paper_figures/checkerboard_location_error_ecdf.svg",
+    "status": "unused",
+    "sha256": "cee64443e409d867c14512d8a53e1e686c134121980daf2c1c1794d40072d76a"
+  },
+  {
+    "old": "paper/figures/checkerboard_nx4_nx6_nx8_comparison.pdf",
+    "new": "paper/figures/used/checkerboard_nx4_nx6_nx8_comparison.pdf",
+    "status": "used",
+    "sha256": "1782ccc30ed177b8c6d5d0126895a932334d73e6e2cd21d8326e1b672e7709d7"
+  },
+  {
+    "old": "paper/figures/checkerboard_nx4_nx6_nx8_comparison.png",
+    "new": "archive/unused_paper_figures/checkerboard_nx4_nx6_nx8_comparison.png",
+    "status": "unused",
+    "sha256": "ab850613b141a7feef1cf3473b552224aaae57a39097d46015561b4b7d818f2f"
+  },
+  {
+    "old": "paper/figures/checkerboard_nx4_nx6_nx8_comparison.svg",
+    "new": "archive/unused_paper_figures/checkerboard_nx4_nx6_nx8_comparison.svg",
+    "status": "unused",
+    "sha256": "9df473fa14dfc1a5d4dc41772c51cc9f9bc55ee2fddde5b5f0fe24c0d97fae73"
+  },
+  {
+    "old": "paper/figures/checkerboard_nx6_geometry.pdf",
+    "new": "paper/figures/used/checkerboard_nx6_geometry.pdf",
+    "status": "used",
+    "sha256": "033e7d1fd3b078295e24f785e7d71fbc4dbc26de7095f6d58cb299103058bfaf"
+  },
+  {
+    "old": "paper/figures/checkerboard_nx6_geometry.png",
+    "new": "archive/unused_paper_figures/checkerboard_nx6_geometry.png",
+    "status": "unused",
+    "sha256": "0d0d31d27a5aa1812edce000c56aae8243495f00149a0945f050f03365263f84"
+  },
+  {
+    "old": "paper/figures/checkerboard_nx6_geometry.svg",
+    "new": "archive/unused_paper_figures/checkerboard_nx6_geometry.svg",
+    "status": "unused",
+    "sha256": "499e8ac0646b82a6c6990a066f115acf6ce651727ab118236ef4a3ffe9d4107a"
+  },
+  {
+    "old": "paper/figures/checkerboard_nx6_locations_blue_preview.png",
+    "new": "archive/unused_paper_figures/checkerboard_nx6_locations_blue_preview.png",
+    "status": "unused",
+    "sha256": "b53faaf38aeb334a39dfd6d3231397f22f0232d9d94a9c225391b1118511ce68"
+  },
+  {
+    "old": "paper/figures/checkerboard_nx6_locations_y10p2km.pdf",
+    "new": "paper/figures/used/checkerboard_nx6_locations_y10p2km.pdf",
+    "status": "used",
+    "sha256": "75bb27e86cb3527608e69f05464ba3d2a16fc3bd45b7f59f156c1c80b0f771b6"
+  },
+  {
+    "old": "paper/figures/checkerboard_nx6_locations_y10p2km.png",
+    "new": "archive/unused_paper_figures/checkerboard_nx6_locations_y10p2km.png",
+    "status": "unused",
+    "sha256": "b53faaf38aeb334a39dfd6d3231397f22f0232d9d94a9c225391b1118511ce68"
+  },
+  {
+    "old": "paper/figures/checkerboard_nx6_locations_y10p2km.svg",
+    "new": "archive/unused_paper_figures/checkerboard_nx6_locations_y10p2km.svg",
+    "status": "unused",
+    "sha256": "9ddb39765c963fcb581953b8fed44258606f869b8aba2ce38692d0a6ba354746"
+  },
+  {
+    "old": "paper/figures/checkerboard_y25km.png",
+    "new": "archive/unused_paper_figures/checkerboard_y25km.png",
+    "status": "unused",
+    "sha256": "612948ce125cd95ca146c0aeedf95c0bf9380ab2c6b3cbc4177f428762cd2e1d"
+  },
+  {
+    "old": "paper/figures/faulted_layers_truth_initial_preview.pdf",
+    "new": "archive/unused_paper_figures/faulted_layers_truth_initial_preview.pdf",
+    "status": "unused",
+    "sha256": "ebd8120ced4b5d1ebf966ca5f8319a3432bc6e5fa25845ceb4b4204ecac5ac87"
+  },
+  {
+    "old": "paper/figures/faulted_layers_truth_initial_preview.png",
+    "new": "archive/unused_paper_figures/faulted_layers_truth_initial_preview.png",
+    "status": "unused",
+    "sha256": "f29828c5bce7990dc9861ae863472949c70eec3a1f4386f42aed21be628b4fbd"
+  },
+  {
+    "old": "paper/figures/faulted_layers_x6p5_3layers_oracle_1km.pdf",
+    "new": "archive/unused_paper_figures/faulted_layers_x6p5_3layers_oracle_1km.pdf",
+    "status": "unused",
+    "sha256": "73883ef133c148a1e6f15f0f292ccc2279eb818b4a1bc89447fc507d101e645b"
+  },
+  {
+    "old": "paper/figures/faulted_layers_x6p5_3layers_oracle_1km.png",
+    "new": "archive/unused_paper_figures/faulted_layers_x6p5_3layers_oracle_1km.png",
+    "status": "unused",
+    "sha256": "37470e1edc43de469a3b9d0d1785b23487a3eefc8321bbe20eff68c430ccde92"
+  },
+  {
+    "old": "paper/figures/faulted_layers_x6p5_3layers_preview.pdf",
+    "new": "archive/unused_paper_figures/faulted_layers_x6p5_3layers_preview.pdf",
+    "status": "unused",
+    "sha256": "ae7d20349b3ecdca9cec9c3fc2a7286628c4ecdf7faa85c58c3ac98612464eb8"
+  },
+  {
+    "old": "paper/figures/faulted_layers_x6p5_3layers_preview.png",
+    "new": "archive/unused_paper_figures/faulted_layers_x6p5_3layers_preview.png",
+    "status": "unused",
+    "sha256": "f29828c5bce7990dc9861ae863472949c70eec3a1f4386f42aed21be628b4fbd"
+  },
+  {
+    "old": "paper/figures/flat4_geysers_z1p4375km.png",
+    "new": "archive/unused_paper_figures/flat4_geysers_z1p4375km.png",
+    "status": "unused",
+    "sha256": "df641a13bac45f46c4c4672a94d316da4f56c8ccc3e6b255e03d18b6eae02dbf"
+  },
+  {
+    "old": "paper/figures/flat4_synthetic_z1p4375km.png",
+    "new": "archive/unused_paper_figures/flat4_synthetic_z1p4375km.png",
+    "status": "unused",
+    "sha256": "3e44a44781d95f43d4f254565e7d68d7778f3f3fab28801995a5efb5bddb3191"
+  },
+  {
+    "old": "paper/figures/geom_1.pdf",
+    "new": "archive/unused_paper_figures/geom_1.pdf",
+    "status": "unused",
+    "sha256": "d99bae4b9057ebff999df160afffc62232db51066df5b269b46a8697303eecc2"
+  },
+  {
+    "old": "paper/figures/geom_1.png",
+    "new": "archive/unused_paper_figures/geom_1.png",
+    "status": "unused",
+    "sha256": "28191334453180618e8ac7f17a82f4fb3ee9299e1dc9a97c86ef82e93d618bac"
+  },
+  {
+    "old": "paper/figures/geysers_emtomo_pick_noise_hypocentre_p90.pdf",
+    "new": "archive/unused_paper_figures/geysers_emtomo_pick_noise_hypocentre_p90.pdf",
+    "status": "unused",
+    "sha256": "25ec2b4c68a0ef5225f553336a276bd8b1f26b3d439459c41e5c4b317216aeec"
+  },
+  {
+    "old": "paper/figures/geysers_emtomo_pick_noise_hypocentre_p90.png",
+    "new": "archive/unused_paper_figures/geysers_emtomo_pick_noise_hypocentre_p90.png",
+    "status": "unused",
+    "sha256": "65cc01d529a6864299ffd1ec7cac62dffef19817a55c57e06b991a32ea3d137d"
+  },
+  {
+    "old": "paper/figures/geysers_emtomo_pick_noise_quality_amplitude_anomalies.pdf",
+    "new": "archive/unused_paper_figures/geysers_emtomo_pick_noise_quality_amplitude_anomalies.pdf",
+    "status": "unused",
+    "sha256": "f46c588d4ecaeb6e5d9ed18654a2294b3bf3d780f6cb82ff93268ef867347aba"
+  },
+  {
+    "old": "paper/figures/geysers_emtomo_pick_noise_quality_amplitude_anomalies.png",
+    "new": "archive/unused_paper_figures/geysers_emtomo_pick_noise_quality_amplitude_anomalies.png",
+    "status": "unused",
+    "sha256": "eaf4841421ec257b016cd34592914cff498800406798e50cc1684f738f86f221"
+  },
+  {
+    "old": "paper/figures/geysers_emtomo_pick_noise_quality_anomalies.pdf",
+    "new": "archive/unused_paper_figures/geysers_emtomo_pick_noise_quality_anomalies.pdf",
+    "status": "unused",
+    "sha256": "a27d926518034c49d8756142b5d04dcb5209af01aee81ca45102a0b5f385157c"
+  },
+  {
+    "old": "paper/figures/geysers_emtomo_pick_noise_quality_anomalies.png",
+    "new": "archive/unused_paper_figures/geysers_emtomo_pick_noise_quality_anomalies.png",
+    "status": "unused",
+    "sha256": "bcd2ce493833538c67ecaefcb689ed2cefc66f2a6937e3ad434cee115a622d06"
+  },
+  {
+    "old": "paper/figures/geysers_emtomo_pick_noise_quality_volume.pdf",
+    "new": "archive/unused_paper_figures/geysers_emtomo_pick_noise_quality_volume.pdf",
+    "status": "unused",
+    "sha256": "62d8045a656ab83704c690c7b5ed13d84b9653d826a5986cff9ea3f45e713dd8"
+  },
+  {
+    "old": "paper/figures/geysers_emtomo_pick_noise_quality_volume.png",
+    "new": "archive/unused_paper_figures/geysers_emtomo_pick_noise_quality_volume.png",
+    "status": "unused",
+    "sha256": "e9c305130dcd31d0b7f952ecb11a65c8c45335a0b3f16d1569baa9c86ab9b826"
+  },
+  {
+    "old": "paper/figures/geysers_tomodd_sigma0_0p5_1_z1p5km.pdf",
+    "new": "archive/unused_paper_figures/geysers_tomodd_sigma0_0p5_1_z1p5km.pdf",
+    "status": "unused",
+    "sha256": "39dcb4234ecfc4b0ce233081d5b680d26baaa106decc78cb48bedab50eb1275b"
+  },
+  {
+    "old": "paper/figures/geysers_tomodd_sigma0_0p5_1_z1p5km.png",
+    "new": "archive/unused_paper_figures/geysers_tomodd_sigma0_0p5_1_z1p5km.png",
+    "status": "unused",
+    "sha256": "2c88a97e7bd5e4a7554d8adb72102bc719ba381378399c1b8cf24d942aac4c78"
+  },
+  {
+    "old": "paper/figures/geysers_tomodd_sigma0_0p5_1_z1p5km_with_oracle_synthetic.pdf",
+    "new": "archive/unused_paper_figures/geysers_tomodd_sigma0_0p5_1_z1p5km_with_oracle_synthetic.pdf",
+    "status": "unused",
+    "sha256": "017d70333a3c5ae5d66653e04350be206491e3d2cdf0f492fd874c0761b53c49"
+  },
+  {
+    "old": "paper/figures/geysers_tomodd_sigma0_0p5_1_z1p5km_with_oracle_synthetic.png",
+    "new": "archive/unused_paper_figures/geysers_tomodd_sigma0_0p5_1_z1p5km_with_oracle_synthetic.png",
+    "status": "unused",
+    "sha256": "523757dfdbe6d4802dbe2711e0de26f7b5a76e8b31c83a53a4e07bee8926ed35"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_gji2021_vp_domain_middle_sections.pdf",
+    "new": "archive/unused_paper_figures/real_picks/geysers_gji2021_vp_domain_middle_sections.pdf",
+    "status": "unused",
+    "sha256": "5c6b2e5231a470d2be8b7744381fe10ceb8b949fbc91b2733b7def74e79b5042"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_gji2021_vp_domain_middle_sections.png",
+    "new": "archive/unused_paper_figures/real_picks/geysers_gji2021_vp_domain_middle_sections.png",
+    "status": "unused",
+    "sha256": "a0de67ea9669e5beb71486e9dd0774124e1dc84d2b41d36aab0268e6a170f5fc"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_initial_hard_soft_gji2021_middle_sections.pdf",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_initial_hard_soft_gji2021_middle_sections.pdf",
+    "status": "unused",
+    "sha256": "633ad8728bd07976569861214302634c7629a1e26efb2cfc2f3fb62f059dc7b3"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_initial_hard_soft_gji2021_middle_sections.png",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_initial_hard_soft_gji2021_middle_sections.png",
+    "status": "unused",
+    "sha256": "8606107fa9c3c90839e55f58b0f8e958837a1c6ea1579a01f1dda4040ba520a2"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_initial_hard_soft_gji2021_middle_sections_linear35_60_latest.pdf",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_initial_hard_soft_gji2021_middle_sections_linear35_60_latest.pdf",
+    "status": "unused",
+    "sha256": "372f01747159f131f9c90272540669708dd00d87f79d3e338a3275e3e3f04715"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_initial_hard_soft_gji2021_middle_sections_linear35_60_latest.png",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_initial_hard_soft_gji2021_middle_sections_linear35_60_latest.png",
+    "status": "unused",
+    "sha256": "68adbd0e2baab1fef746adbbd5eeede7fdbaaa0388277bd71810adb11bfa5f7f"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_linear35_60_with_emtomo_oracle.pdf",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_linear35_60_with_emtomo_oracle.pdf",
+    "status": "unused",
+    "sha256": "372f01747159f131f9c90272540669708dd00d87f79d3e338a3275e3e3f04715"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_linear35_60_with_emtomo_oracle.png",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_linear35_60_with_emtomo_oracle.png",
+    "status": "unused",
+    "sha256": "68adbd0e2baab1fef746adbbd5eeede7fdbaaa0388277bd71810adb11bfa5f7f"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_location_shifts_latest.pdf",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_location_shifts_latest.pdf",
+    "status": "unused",
+    "sha256": "bbbd47731bc7118d127b6c13640e78f3bfaaaeb973b4e7fd269c724101d93865"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_location_shifts_latest.png",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_location_shifts_latest.png",
+    "status": "unused",
+    "sha256": "0f886a31661bd1de9c12d1e5482ed390135e10b2062b7b53c24c385638377f62"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_pick01_vertical_y5p5km_side_by_side.pdf",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_pick01_vertical_y5p5km_side_by_side.pdf",
+    "status": "unused",
+    "sha256": "15836307e7693043cee2a9e31c5fe3a5553c5508193bda41eef41a47cf14f716"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_pick01_vertical_y5p5km_side_by_side.png",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_pick01_vertical_y5p5km_side_by_side.png",
+    "status": "unused",
+    "sha256": "77e7274c9e6d51032392d2c3f1b40ff0a0c180cc6be82a90f02a413e455e56d8"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_pick01_vertical_y5p5km_stacked.pdf",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_pick01_vertical_y5p5km_stacked.pdf",
+    "status": "unused",
+    "sha256": "e6858c01ca50047c4108eb1e98b54ddbe13c7950da021dc8c4d5358ae497eef8"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_pick01_vertical_y5p5km_stacked.png",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_pick01_vertical_y5p5km_stacked.png",
+    "status": "unused",
+    "sha256": "c0a269c9103c1ac6e34d0cfd7a9dc9cbd0b1f722f1774e8c7a365f742b680849"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_refine500_fmm125_with_emtomo_oracle.pdf",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_refine500_fmm125_with_emtomo_oracle.pdf",
+    "status": "unused",
+    "sha256": "cb024e0dbeafad7107bd21671a6e6cf7b12d41d19a7125609d7ef2e6bc31ff69"
+  },
+  {
+    "old": "paper/figures/real_picks/geysers_real_refine500_fmm125_with_emtomo_oracle.png",
+    "new": "archive/unused_paper_figures/real_picks/geysers_real_refine500_fmm125_with_emtomo_oracle.png",
+    "status": "unused",
+    "sha256": "fc986865206e2cb1f6681f0f2f24f13c5fe2cb1d7f793d9416190591d075e161"
+  },
+  {
+    "old": "paper/figures/realistic_anomalies/realistic_anomalies_previous_1d_oracle_800m.pdf",
+    "new": "archive/unused_paper_figures/realistic_anomalies/realistic_anomalies_previous_1d_oracle_800m.pdf",
+    "status": "unused",
+    "sha256": "509e63877de2818f747c4c0cb2321bc0749949b5894fbea0174125c85c4f771f"
+  },
+  {
+    "old": "paper/figures/realistic_anomalies/realistic_anomalies_previous_1d_oracle_800m.png",
+    "new": "archive/unused_paper_figures/realistic_anomalies/realistic_anomalies_previous_1d_oracle_800m.png",
+    "status": "unused",
+    "sha256": "aa8d24716d9598d1c6b5b9a93626c6bdad2d779656bff913de2eb1944832e4be"
+  },
+  {
+    "old": "paper/figures/realistic_anomalies/realistic_anomalies_previous_with_initial_1d.pdf",
+    "new": "archive/unused_paper_figures/realistic_anomalies/realistic_anomalies_previous_with_initial_1d.pdf",
+    "status": "unused",
+    "sha256": "7d8d6ba1f1ffd7271c4834933242c8c1e583550e43884e883fc36d26f0093bf5"
+  },
+  {
+    "old": "paper/figures/realistic_anomalies/realistic_anomalies_previous_with_initial_1d.png",
+    "new": "archive/unused_paper_figures/realistic_anomalies/realistic_anomalies_previous_with_initial_1d.png",
+    "status": "unused",
+    "sha256": "d39f46c34641a86f7d0a887b68b812f6e8fa10d5f0ac26c7d2f7ae3582f8da53"
+  },
+  {
+    "old": "paper/figures/realistic_anomalies/realistic_anomalies_sections.pdf",
+    "new": "archive/unused_paper_figures/realistic_anomalies/realistic_anomalies_sections.pdf",
+    "status": "unused",
+    "sha256": "2d5a11698578674f634e476ca82501161c5fa90e6e85f1c6f91b530ef3e3e82e"
+  },
+  {
+    "old": "paper/figures/realistic_anomalies/realistic_anomalies_sections.png",
+    "new": "archive/unused_paper_figures/realistic_anomalies/realistic_anomalies_sections.png",
+    "status": "unused",
+    "sha256": "0ffe8103f72d838048e6d1f593d54ef3936ef648d6704ec617d36252b1f1c9de"
+  },
+  {
+    "old": "paper/figures/realistic_anomalies/realistic_anomalies_sections_previous.pdf",
+    "new": "archive/unused_paper_figures/realistic_anomalies/realistic_anomalies_sections_previous.pdf",
+    "status": "unused",
+    "sha256": "b6da5657a72f13ed3d4861ae591cc333b4e550281e391f1a3e101150c6b55aa4"
+  },
+  {
+    "old": "paper/figures/realistic_anomalies/realistic_anomalies_sections_previous.png",
+    "new": "archive/unused_paper_figures/realistic_anomalies/realistic_anomalies_sections_previous.png",
+    "status": "unused",
+    "sha256": "f380171936446526cb7aed671fe97abd51eee6aa191be68b3ac2c69130153ee2"
+  },
+  {
+    "old": "paper/figures/results/discussion/png/section43_hypocenter_error_initial_final.png",
+    "new": "archive/unused_paper_figures/results/discussion/png/section43_hypocenter_error_initial_final.png",
+    "status": "unused",
+    "sha256": "c93d87129796e9367ad7bb3849cc26d941ae6a6f28d08a93f09bfe05d29b4d9b"
+  },
+  {
+    "old": "paper/figures/results/discussion/png/section45_k128_dmin7_hypocenter_error_initial_final.png",
+    "new": "archive/unused_paper_figures/results/discussion/png/section45_k128_dmin7_hypocenter_error_initial_final.png",
+    "status": "unused",
+    "sha256": "e94c9f46a75b00b5b6152f26aa37e2347f3a03068ce2395a9dfa783415bd8ad9"
+  },
+  {
+    "old": "paper/figures/results/discussion/png/soft_gain_vs_top_n_lcurve.png",
+    "new": "archive/unused_paper_figures/results/discussion/png/soft_gain_vs_top_n_lcurve.png",
+    "status": "unused",
+    "sha256": "a80cd1ab7085b213952c0fad1d63c2a47ea07e0ed5c76d71d2e3c4676aca73f4"
+  },
+  {
+    "old": "paper/figures/results/discussion/png/soft_p90_gain_vs_top_n.png",
+    "new": "archive/unused_paper_figures/results/discussion/png/soft_p90_gain_vs_top_n.png",
+    "status": "unused",
+    "sha256": "b60c8d1fe8f195adb3aa6423404a88449e6f576044b5d420f1022f0a019f8e82"
+  },
+  {
+    "old": "paper/figures/results/discussion/png/soft_velocity_gain_vs_hypocenter_gain.png",
+    "new": "archive/unused_paper_figures/results/discussion/png/soft_velocity_gain_vs_hypocenter_gain.png",
+    "status": "unused",
+    "sha256": "49ee340015d9881a70e8b30128a349a26e3ecfba0d3b6fabf5e3730d282d1606"
+  },
+  {
+    "old": "paper/figures/results/discussion/png/soft_velocity_gain_vs_weighted_mean_hypocenter_gain.png",
+    "new": "archive/unused_paper_figures/results/discussion/png/soft_velocity_gain_vs_weighted_mean_hypocenter_gain.png",
+    "status": "unused",
+    "sha256": "a532916634621f0cfbf25938d06151255e688b7786301cac2873ac99ce35ce39"
+  },
+  {
+    "old": "paper/figures/results/discussion/source/section43_hypocenter_error_initial_final.pdf",
+    "new": "archive/unused_paper_figures/results/discussion/source/section43_hypocenter_error_initial_final.pdf",
+    "status": "unused",
+    "sha256": "fae30be0ad8d3c2fb51dda1787fbb367ae670e543bed8a17254f5cc30857d5d7"
+  },
+  {
+    "old": "paper/figures/results/discussion/source/section45_k128_dmin7_hypocenter_error_initial_final.pdf",
+    "new": "archive/unused_paper_figures/results/discussion/source/section45_k128_dmin7_hypocenter_error_initial_final.pdf",
+    "status": "unused",
+    "sha256": "12e5d3df9197598ae9f6bbb2f9f570c33d29817fe8148a0113181029dca6d693"
+  },
+  {
+    "old": "paper/figures/results/discussion/source/soft_gain_vs_top_n_lcurve.pdf",
+    "new": "archive/unused_paper_figures/results/discussion/source/soft_gain_vs_top_n_lcurve.pdf",
+    "status": "unused",
+    "sha256": "eac26efe5ba263e97715a85314cfe5de24e436cbaa86ff6dcbca239399788f0f"
+  },
+  {
+    "old": "paper/figures/results/discussion/source/soft_p90_gain_vs_top_n.pdf",
+    "new": "archive/unused_paper_figures/results/discussion/source/soft_p90_gain_vs_top_n.pdf",
+    "status": "unused",
+    "sha256": "5b70fb8a1cedec0fd02b8d56c2a099754f4e23e4956a592be62b279008859466"
+  },
+  {
+    "old": "paper/figures/results/discussion/source/soft_velocity_gain_vs_hypocenter_gain.pdf",
+    "new": "paper/figures/used/soft_velocity_gain_vs_hypocenter_gain.pdf",
+    "status": "used",
+    "sha256": "1913858721ce453626eabf9cbe03beb8cc8b851e7181b422db559656f8c7db49"
+  },
+  {
+    "old": "paper/figures/results/discussion/source/soft_velocity_gain_vs_weighted_mean_hypocenter_gain.pdf",
+    "new": "archive/unused_paper_figures/results/discussion/source/soft_velocity_gain_vs_weighted_mean_hypocenter_gain.pdf",
+    "status": "unused",
+    "sha256": "8790d78453b072cf90d77bf3e94986582e366076131a93791985c4ab9c277c24"
+  },
+  {
+    "old": "paper/figures/results/geoms/png/fault.png",
+    "new": "archive/unused_paper_figures/results/geoms/png/fault.png",
+    "status": "unused",
+    "sha256": "381a989f35ceddc6f13bd41620459e8fb607cb1dad033cb30356041d22ef4640"
+  },
+  {
+    "old": "paper/figures/results/geoms/png/geometry_overview.png",
+    "new": "archive/unused_paper_figures/results/geoms/png/geometry_overview.png",
+    "status": "unused",
+    "sha256": "cc22ac6c0a7860f9cdaf48c10198a3aec5633c7872ffbf3e4172e66d55d50101"
+  },
+  {
+    "old": "paper/figures/results/geoms/png/one_sided.png",
+    "new": "archive/unused_paper_figures/results/geoms/png/one_sided.png",
+    "status": "unused",
+    "sha256": "0e86648d310d7dfcc623af2a6e3f63717d8e5ab649b92a405032654defcf405c"
+  },
+  {
+    "old": "paper/figures/results/geoms/png/two_clusters.png",
+    "new": "archive/unused_paper_figures/results/geoms/png/two_clusters.png",
+    "status": "unused",
+    "sha256": "32cf704217f217087e3ab0114ebc2ae0aa0ffb544b578f5e7523f1d779d5a888"
+  },
+  {
+    "old": "paper/figures/results/geoms/source/all_geometries.pdf",
+    "new": "paper/figures/used/all_geometries.pdf",
+    "status": "used",
+    "sha256": "d80a20f75b25b93be299e1ee403638db86666c19d4d02c63b81448a031070a2b"
+  },
+  {
+    "old": "paper/figures/results/hard_vs_soft_residual_rmse_scatter.pdf",
+    "new": "archive/unused_paper_figures/results/hard_vs_soft_residual_rmse_scatter.pdf",
+    "status": "unused",
+    "sha256": "52d94eb58248d5f47aeceaff965aefe2cecf476893f7baf0ef54b5290f8ee4ad"
+  },
+  {
+    "old": "paper/figures/results/hard_vs_soft_residual_rmse_scatter.png",
+    "new": "archive/unused_paper_figures/results/hard_vs_soft_residual_rmse_scatter.png",
+    "status": "unused",
+    "sha256": "27361e2780821ddde9d31d22ff4be1b223594005d1a7affd05a476460b2f5695"
+  },
+  {
+    "old": "paper/figures/results/methode/png/method_2d.png",
+    "new": "archive/unused_paper_figures/results/methode/png/method_2d.png",
+    "status": "unused",
+    "sha256": "209914493baac8e14cde10603a0b8417d6be9c6e5736723589eb71862599ea29"
+  },
+  {
+    "old": "paper/figures/results/methode/source/method_2d.pdf",
+    "new": "archive/unused_paper_figures/results/methode/source/method_2d.pdf",
+    "status": "unused",
+    "sha256": "81806f740f368dfd287d235e0659d39d11a6be7f6870418f68d0db3c554662a7"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/event3157652_SP_distance_catalog_soft.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/event3157652_SP_distance_catalog_soft.png",
+    "status": "unused",
+    "sha256": "5faa2a48d11d0c90f4c1e3c455e4409a7a3a16df135743d9a1ba6b430f7e3e29"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/event3157652_arrival_vs_distance_catalog_soft_PS_linear.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/event3157652_arrival_vs_distance_catalog_soft_PS_linear.png",
+    "status": "unused",
+    "sha256": "1473cac722bdeaf9c6fecc2ed5ec59df30a95a0a7e90cd30537b0888a4b394f6"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/event3259971_arrival_vs_distance_catalog_soft.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/event3259971_arrival_vs_distance_catalog_soft.png",
+    "status": "unused",
+    "sha256": "726e26e041130f53d96528b7392ad1171303e1dced315904d89b6ceaab12520a"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/event3259971_arrival_vs_distance_catalog_soft_linear.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/event3259971_arrival_vs_distance_catalog_soft_linear.png",
+    "status": "unused",
+    "sha256": "726e26e041130f53d96528b7392ad1171303e1dced315904d89b6ceaab12520a"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/real_picks_comparison.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/real_picks_comparison.png",
+    "status": "unused",
+    "sha256": "697cc0152ca09c191093f5dd3312f1c163ea38a78ce0d3e4adbb7b29bfc97f04"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/real_picks_comparison_final.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/real_picks_comparison_final.png",
+    "status": "unused",
+    "sha256": "8a9e99bfa69808738b2867cd120ad365b1978de86719af9f6cf02d3203423590"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/real_picks_hard_soft_hypocentres_projection.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/real_picks_hard_soft_hypocentres_projection.png",
+    "status": "unused",
+    "sha256": "3a70d882357e448b2b4a24f0e707f7d8e49323f216775721b0c96d086054551f"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/real_picks_hard_soft_hypocentres_projection_1000m_max1.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/real_picks_hard_soft_hypocentres_projection_1000m_max1.png",
+    "status": "unused",
+    "sha256": "cecd7ca808b396ddff03549b78bdf05ef0187e2a50b6e4281feb3fb2f2b4cc77"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/real_picks_hard_soft_hypocentres_projection_1000m_max1_side_by_side.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/real_picks_hard_soft_hypocentres_projection_1000m_max1_side_by_side.png",
+    "status": "unused",
+    "sha256": "cbb439d39cd9cd7a03fe0a0befd6c29e479f44158dfe930bc14b4b271d57870f"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/real_picks_hard_soft_hypocentres_projection_side_by_side.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/real_picks_hard_soft_hypocentres_projection_side_by_side.png",
+    "status": "unused",
+    "sha256": "87c40f1ab9334692613375a49e3775f8941d3946f987426683dfb1af3b174b7e"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/real_picks_hard_soft_hypocentres_xz.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/real_picks_hard_soft_hypocentres_xz.png",
+    "status": "unused",
+    "sha256": "d1cb1465e20efdfca1f685b31438cae0ca72aebbbe023e99f619fd612688d514"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/real_picks_hard_soft_hypocentres_xz_side_by_side.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/real_picks_hard_soft_hypocentres_xz_side_by_side.png",
+    "status": "unused",
+    "sha256": "6731ee7a526218d9ab8eb1aeaafb3bb64364f7e8e1e17c6a361f04b0b036ee59"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/real_picks_hard_soft_sensitivity.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/real_picks_hard_soft_sensitivity.png",
+    "status": "unused",
+    "sha256": "af2406830727a27d8fed3f0b80b2958119c11d053e715a3047878fc85702c401"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/real_picks_hard_soft_sensitivity_xy.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/real_picks_hard_soft_sensitivity_xy.png",
+    "status": "unused",
+    "sha256": "5275dcc60645d3188ad1408ea219a8592da37af733dc992a76496c3a0b69c246"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/real_picks_hard_soft_sensitivity_xz.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/real_picks_hard_soft_sensitivity_xz.png",
+    "status": "unused",
+    "sha256": "64248fcde8c332b337310fd71953947d9c2ed9ea3a84684b2213555137f6c7f2"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/real_picks_xy.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/real_picks_xy.png",
+    "status": "unused",
+    "sha256": "8ac1e19da9e35d1ae50d440224cf5bc2da27d886fd0cb0411abcc66628f626ed"
+  },
+  {
+    "old": "paper/figures/results/real_picks/png/real_picks_xz.png",
+    "new": "archive/unused_paper_figures/results/real_picks/png/real_picks_xz.png",
+    "status": "unused",
+    "sha256": "f36fd1c68aca49e0d5a5e51e971a1439a8e979bedbd1d81a2a5c1e90956cd8f1"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/event3157652_SP_distance_catalog_soft.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/event3157652_SP_distance_catalog_soft.pdf",
+    "status": "unused",
+    "sha256": "166f9db4f8b59e09f379b471edfaddf9274db3f9ae6aff5a0187a965074fb6dc"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/event3157652_arrival_vs_distance_catalog_soft_PS_linear.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/event3157652_arrival_vs_distance_catalog_soft_PS_linear.pdf",
+    "status": "unused",
+    "sha256": "b537a00aa575f7260911dc7b96cb15346d4f6cec16a0380c69a400a6ce66ff5e"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/event3259971_arrival_vs_distance_catalog_soft.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/event3259971_arrival_vs_distance_catalog_soft.pdf",
+    "status": "unused",
+    "sha256": "481d86b084044e199c253791857eb0e0449d6f900d35450108831c88c0108717"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/real_picks_comparison.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/real_picks_comparison.pdf",
+    "status": "unused",
+    "sha256": "cfd6ed73d9e38724ed2adb7612daa5edbf50468d1d5c18158eae96776a58a68f"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/real_picks_comparison_final.pdf",
+    "new": "paper/figures/used/real_picks_comparison_final.pdf",
+    "status": "used",
+    "sha256": "2bbec37b9d480372572ad55338d486cd5f79a6402779dac737b9711a41a8115a"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/real_picks_hard_soft_hypocentres_projection.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/real_picks_hard_soft_hypocentres_projection.pdf",
+    "status": "unused",
+    "sha256": "da03d6284d6ca3d4c3328d05c96736658ec21434f26a3c9a7e877780fc4d95b1"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/real_picks_hard_soft_hypocentres_projection_1000m_max1.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/real_picks_hard_soft_hypocentres_projection_1000m_max1.pdf",
+    "status": "unused",
+    "sha256": "219792e2219417431a3ccbc3742fc8632ece3e583d71cc62f88ecf72983ff088"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/real_picks_hard_soft_hypocentres_projection_1000m_max1_side_by_side.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/real_picks_hard_soft_hypocentres_projection_1000m_max1_side_by_side.pdf",
+    "status": "unused",
+    "sha256": "5ba58b3564b28f5d111c6b996a77896bfc1eefb64230122d84937cd2c7afea3a"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/real_picks_hard_soft_hypocentres_projection_side_by_side.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/real_picks_hard_soft_hypocentres_projection_side_by_side.pdf",
+    "status": "unused",
+    "sha256": "845cbc073f204d7645c28909e3ab056067083c4a4f4bfc5e58980d44b078a711"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/real_picks_hard_soft_hypocentres_xz.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/real_picks_hard_soft_hypocentres_xz.pdf",
+    "status": "unused",
+    "sha256": "9fe4559e512f9f1dce2482d5b04b44585be163803d06f1593c9e66d50063c6da"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/real_picks_hard_soft_hypocentres_xz_side_by_side.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/real_picks_hard_soft_hypocentres_xz_side_by_side.pdf",
+    "status": "unused",
+    "sha256": "dc161ddca2a799804d67f3fe1084ef88c214ed9f8715b6270c8624c497d2df23"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/real_picks_hard_soft_sensitivity.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/real_picks_hard_soft_sensitivity.pdf",
+    "status": "unused",
+    "sha256": "708508589670cde9c5e7042d561789acc1efde3db8ab6fa5cf48da6882418630"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/real_picks_hard_soft_sensitivity_xy.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/real_picks_hard_soft_sensitivity_xy.pdf",
+    "status": "unused",
+    "sha256": "6a2e8ab32f44bcd64293d4fde0975dd8a0940f2d9e2a3ccb385919f4138fbea0"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/real_picks_hard_soft_sensitivity_xz.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/real_picks_hard_soft_sensitivity_xz.pdf",
+    "status": "unused",
+    "sha256": "5ec77b6ffd3db60f58feb229237e6a51fcfe9e351777c5cb349c878cf47203db"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/real_picks_xy.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/real_picks_xy.pdf",
+    "status": "unused",
+    "sha256": "3a65a4f2b703adad6301c222e8eb0dc7967acb4af8ac801245dc67fbf9a307df"
+  },
+  {
+    "old": "paper/figures/results/real_picks/source/real_picks_xz.pdf",
+    "new": "archive/unused_paper_figures/results/real_picks/source/real_picks_xz.pdf",
+    "status": "unused",
+    "sha256": "b38179c0f2e75496b4253dcfb1b7eff780aad88c4d6577ff0e92c02bda379da1"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_distribution.pdf",
+    "new": "archive/unused_paper_figures/results/soft_gain_distribution.pdf",
+    "status": "unused",
+    "sha256": "da05deafe430e6735eb6f4dbcb989618b30bd943b28d20d9e545e0eb0caec1e4"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_distribution.png",
+    "new": "archive/unused_paper_figures/results/soft_gain_distribution.png",
+    "status": "unused",
+    "sha256": "ec97f7cb97ddba124e79bff04d1b305ff331341e3d34c71e30669c412f42296a"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_distribution_stacked.pdf",
+    "new": "archive/unused_paper_figures/results/soft_gain_distribution_stacked.pdf",
+    "status": "unused",
+    "sha256": "da05deafe430e6735eb6f4dbcb989618b30bd943b28d20d9e545e0eb0caec1e4"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_distribution_stacked.png",
+    "new": "archive/unused_paper_figures/results/soft_gain_distribution_stacked.png",
+    "status": "unused",
+    "sha256": "ec97f7cb97ddba124e79bff04d1b305ff331341e3d34c71e30669c412f42296a"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_candidates_lcurve.pdf",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_candidates_lcurve.pdf",
+    "status": "unused",
+    "sha256": "8f19e9d5264a203e89bef051efc9cf57662d9b469a0a7684d719d4097fdf7ef8"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_candidates_lcurve.png",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_candidates_lcurve.png",
+    "status": "unused",
+    "sha256": "03e674694b5add0076d334ae7f0d0a75830204641df4b121d73223257fc6ce7b"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_hard_avg_abs_pct_dev.pdf",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_hard_avg_abs_pct_dev.pdf",
+    "status": "unused",
+    "sha256": "162d8afe562919f8f205d724a9b14c60b6919edaf589b4dc141b07aecbafdae9"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_hard_avg_abs_pct_dev.png",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_hard_avg_abs_pct_dev.png",
+    "status": "unused",
+    "sha256": "b68553170cc11d136bbff4b0352e7718a247ee7dca275404f93c3747d2050c14"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_hard_avg_abs_pct_dev_lcurve.pdf",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_hard_avg_abs_pct_dev_lcurve.pdf",
+    "status": "unused",
+    "sha256": "d887628a98cfbfabead91d100a2dd156dda393ca7f06738fcd3a65c9e896373b"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_hard_avg_abs_pct_dev_lcurve.png",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_hard_avg_abs_pct_dev_lcurve.png",
+    "status": "unused",
+    "sha256": "440be1adef80b9c18c40f2e596968b68536ea724ea81d2fdf2d19bc7754f54f8"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_hard_avg_abs_pct_dev_noise_gradient.pdf",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_hard_avg_abs_pct_dev_noise_gradient.pdf",
+    "status": "unused",
+    "sha256": "41ed635c473e6ac95b17978516337ebc4fdb3087888b81bb2f036961801f444f"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_hard_avg_abs_pct_dev_noise_gradient.png",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_hard_avg_abs_pct_dev_noise_gradient.png",
+    "status": "unused",
+    "sha256": "b68553170cc11d136bbff4b0352e7718a247ee7dca275404f93c3747d2050c14"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_hard_rmse.pdf",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_hard_rmse.pdf",
+    "status": "unused",
+    "sha256": "3410221355c66047e0f364d31b5fe1493da1f75e4d6212b736cb95e136266c03"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_hard_rmse.png",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_hard_rmse.png",
+    "status": "unused",
+    "sha256": "203ee720b9c89ce102a1dc00988a18e45a92b0e623cba9b5874d4d88bc44482b"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_top_n_lcurve.pdf",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_top_n_lcurve.pdf",
+    "status": "unused",
+    "sha256": "60961fba7b61830fe2666a8bc4e85f69b4bcee7c511017033cfcf05231a7ceed"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_top_n_lcurve.png",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_top_n_lcurve.png",
+    "status": "unused",
+    "sha256": "603690f99a832beeec0e19fb62d769c84df295091fe4ed1a38c414fe2798d8be"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_top_n_lcurve_topn_sweep.pdf",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_top_n_lcurve_topn_sweep.pdf",
+    "status": "unused",
+    "sha256": "4a472196c79a79f56396b70135f0746bb68ce4f2512353e67f77cecc63c29a3b"
+  },
+  {
+    "old": "paper/figures/results/soft_gain_vs_top_n_lcurve_topn_sweep.png",
+    "new": "archive/unused_paper_figures/results/soft_gain_vs_top_n_lcurve_topn_sweep.png",
+    "status": "unused",
+    "sha256": "7be85ac3c96f98d94a71b8dc5e856c4b9c9f42f72f056f2fd1fcf4b322b83863"
+  },
+  {
+    "old": "paper/figures/results/soft_rmse_gain_vs_top_n_last_topn_sweep.pdf",
+    "new": "archive/unused_paper_figures/results/soft_rmse_gain_vs_top_n_last_topn_sweep.pdf",
+    "status": "unused",
+    "sha256": "5ed8e7a0132f979741b3c54c7d80cb079177cb3b441f277ec361c11ede1c9b6d"
+  },
+  {
+    "old": "paper/figures/results/soft_rmse_gain_vs_top_n_last_topn_sweep.png",
+    "new": "archive/unused_paper_figures/results/soft_rmse_gain_vs_top_n_last_topn_sweep.png",
+    "status": "unused",
+    "sha256": "462af0b1a91c1b8a7bfe7f19674b31f38ccf3b9893c66997a701900fc6f324e4"
+  },
+  {
+    "old": "paper/figures/results/soft_rmse_gain_vs_top_n_lcurve_topn_sweep.pdf",
+    "new": "archive/unused_paper_figures/results/soft_rmse_gain_vs_top_n_lcurve_topn_sweep.pdf",
+    "status": "unused",
+    "sha256": "49ea8371e4a1e17a01dd1bc323c30a06e28c397dd40ef6ed1f9d3479bf5f80e2"
+  },
+  {
+    "old": "paper/figures/results/soft_rmse_gain_vs_top_n_lcurve_topn_sweep.png",
+    "new": "archive/unused_paper_figures/results/soft_rmse_gain_vs_top_n_lcurve_topn_sweep.png",
+    "status": "unused",
+    "sha256": "db874aa895286504da4aa8ece162ee2290420fd86e579fe33e30dd5cba0ac396"
+  },
+  {
+    "old": "paper/figures/results/sparse_sampling/png/dense_vs_sparse_EVT_0905.png",
+    "new": "archive/unused_paper_figures/results/sparse_sampling/png/dense_vs_sparse_EVT_0905.png",
+    "status": "unused",
+    "sha256": "9f834f9d53f884365ad63b8ad37b2d47cd2a067f323d95b8ee6dc962dc31885b"
+  },
+  {
+    "old": "paper/figures/results/sparse_sampling/png/dense_vs_sparse_EVT_0905_all_candidates_final.png",
+    "new": "archive/unused_paper_figures/results/sparse_sampling/png/dense_vs_sparse_EVT_0905_all_candidates_final.png",
+    "status": "unused",
+    "sha256": "9f834f9d53f884365ad63b8ad37b2d47cd2a067f323d95b8ee6dc962dc31885b"
+  },
+  {
+    "old": "paper/figures/results/sparse_sampling/png/dense_vs_sparse_EVT_0905_final.png",
+    "new": "archive/unused_paper_figures/results/sparse_sampling/png/dense_vs_sparse_EVT_0905_final.png",
+    "status": "unused",
+    "sha256": "9f834f9d53f884365ad63b8ad37b2d47cd2a067f323d95b8ee6dc962dc31885b"
+  },
+  {
+    "old": "paper/figures/results/sparse_sampling/png/dense_vs_sparse_event.png",
+    "new": "archive/unused_paper_figures/results/sparse_sampling/png/dense_vs_sparse_event.png",
+    "status": "unused",
+    "sha256": "b40bd43c8062bbeda4cf5144959853ef84378d686c28aa01151a8f721215f145"
+  },
+  {
+    "old": "paper/figures/results/sparse_sampling/png/dense_vs_sparse_event_final.png",
+    "new": "archive/unused_paper_figures/results/sparse_sampling/png/dense_vs_sparse_event_final.png",
+    "status": "unused",
+    "sha256": "b40bd43c8062bbeda4cf5144959853ef84378d686c28aa01151a8f721215f145"
+  },
+  {
+    "old": "paper/figures/results/sparse_sampling/source/dense_vs_sparse_EVT_0905.pdf",
+    "new": "archive/unused_paper_figures/results/sparse_sampling/source/dense_vs_sparse_EVT_0905.pdf",
+    "status": "unused",
+    "sha256": "9b15d0c4c1e1a60c2af8c930d80d91775ab5adf8eafa0ed528468bab52905b97"
+  },
+  {
+    "old": "paper/figures/results/sparse_sampling/source/dense_vs_sparse_EVT_0905_all_candidates_final.pdf",
+    "new": "paper/figures/used/dense_vs_sparse_EVT_0905_all_candidates_final.pdf",
+    "status": "used",
+    "sha256": "3a37e0b71b73e10b119da9587fdacadc129cb81df3c815909f2e4561514e54d9"
+  },
+  {
+    "old": "paper/figures/results/sparse_sampling/source/dense_vs_sparse_EVT_0905_final.pdf",
+    "new": "archive/unused_paper_figures/results/sparse_sampling/source/dense_vs_sparse_EVT_0905_final.pdf",
+    "status": "unused",
+    "sha256": "b37cb10146333ba9c890b2e8fce44e61930c513a7b61267e7ecee8efc73ca6d9"
+  },
+  {
+    "old": "paper/figures/results/sparse_sampling/source/dense_vs_sparse_event.pdf",
+    "new": "archive/unused_paper_figures/results/sparse_sampling/source/dense_vs_sparse_event.pdf",
+    "status": "unused",
+    "sha256": "e6c38580acd1b7c6678f028907fcad7a4cb0b62e8c69b215cd3532e3c3bdf03f"
+  },
+  {
+    "old": "paper/figures/results/sparse_sampling/source/dense_vs_sparse_event_final.pdf",
+    "new": "archive/unused_paper_figures/results/sparse_sampling/source/dense_vs_sparse_event_final.pdf",
+    "status": "unused",
+    "sha256": "c5986a1bb04baf810b09218cebc195d8aaef9273735250c1f33ef87e011ca1a5"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/checkerboards_4_2-4_4_results_final.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/checkerboards_4_2-4_4_results_final.png",
+    "status": "unused",
+    "sha256": "31245d589c2ac3815a6c54102b2a7bc219a6b2519216979e3f556c1cb00123e2"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/checkerboards_4_2-4_4_true_final.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/checkerboards_4_2-4_4_true_final.png",
+    "status": "unused",
+    "sha256": "151074cf50bdbb8ce7973bf96ce9d2f9226dcec5dd7e0be87b5ae0c4f1aa54d1"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/checkerboards_aligned45_phase_flipped_results.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/checkerboards_aligned45_phase_flipped_results.png",
+    "status": "unused",
+    "sha256": "d1ab13dd279164216e694789e06d751f3021cf07bf3f5c1bc91ede41abee9388"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/checkerboards_aligned45_phase_flipped_true.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/checkerboards_aligned45_phase_flipped_true.png",
+    "status": "unused",
+    "sha256": "5f8bb9d74db2a223f4fbfa4474379a0cb7924028054fd5caf12fd408d7c7b07c"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/checkerboards_matched_results_pairs.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/checkerboards_matched_results_pairs.png",
+    "status": "unused",
+    "sha256": "eabbb3284e63f95e1a772f765cf638541f1fee2b430c87ecd11a8d145bd34710"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/checkerboards_matched_true.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/checkerboards_matched_true.png",
+    "status": "unused",
+    "sha256": "5608bd23573eed98a38b576e2cc186549e5fef3eb4c315dadb9910c7d5bc281e"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/checkerboards_matched_true_only.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/checkerboards_matched_true_only.png",
+    "status": "unused",
+    "sha256": "151387d32e63fb453c73dc8d22b31e7cfb71cd93b21aad894e4f305825fdfc4e"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/checkerboards_right_crop_results_pairs.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/checkerboards_right_crop_results_pairs.png",
+    "status": "unused",
+    "sha256": "9b32b5bebb2d430ab233d3cfdf7de2ad3dcde68e0e0b65f61d952895e0470bc8"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/checkerboards_right_crop_results_pairs_z16_42.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/checkerboards_right_crop_results_pairs_z16_42.png",
+    "status": "unused",
+    "sha256": "c5a50f283816864daf3fe3ed23bbbb96ddd39afda2982788009a573ab156199b"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/checkerboards_right_crop_true_only.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/checkerboards_right_crop_true_only.png",
+    "status": "unused",
+    "sha256": "fa4649dbed3b82801739fa32f4c74a9447ae0681bc120f9b6922f74124dc9737"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/checkerboards_right_crop_true_only_z16_42.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/checkerboards_right_crop_true_only_z16_42.png",
+    "status": "unused",
+    "sha256": "cd7910e508a33724ba1eac4c9b581dda5090050389e008080d8997d3382eb690"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/checkerboards_z15_phase_flipped_results.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/checkerboards_z15_phase_flipped_results.png",
+    "status": "unused",
+    "sha256": "a6c7902e4f5def25f8a66ebf40d10f406079abd0f1eb8594b76a636b37fa015b"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/checkerboards_z15_phase_flipped_true.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/checkerboards_z15_phase_flipped_true.png",
+    "status": "unused",
+    "sha256": "1054d8adf7d92ebf1f78b4d179df02d240b56fac2c382a46bffff0a0902f0534"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/section_4_2.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/section_4_2.png",
+    "status": "unused",
+    "sha256": "bdf934724367680199856dbfc41a3065a6f1f8f33d92027aa986ac21a68c5023"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/section_4_3.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/section_4_3.png",
+    "status": "unused",
+    "sha256": "0bc4f11371a707bde78e7ccce19c8b5196c915dc5d8c120c0b6b58b4bdc6b7f6"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/section_4_4.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/section_4_4.png",
+    "status": "unused",
+    "sha256": "757abef64b82bd3130d9920535f486438380a3c8937f76052312ed50344f7dda"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/section_4_5.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/section_4_5.png",
+    "status": "unused",
+    "sha256": "ada2300ef027656354615e5b1f255ba67554cf49caf5bb94415acb870170643e"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/section_4_5_final.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/section_4_5_final.png",
+    "status": "unused",
+    "sha256": "a84e32a1ec37891455ce7ecc1a4e8222810e3a65badce4a67f3f6fd380be48d4"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/section_4_6.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/section_4_6.png",
+    "status": "unused",
+    "sha256": "e52c69bbe45e54e394f19689f7461710b6c01ecfe1c8911f9284e1c9cbb3f817"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/section_4_6_final.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/section_4_6_final.png",
+    "status": "unused",
+    "sha256": "ddd30d700bc804777275cacf9dc0bff7f7d2a400e2fdc8a7bdef446d8e9778f2"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/synthetic_tomography_comparison.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/synthetic_tomography_comparison.png",
+    "status": "unused",
+    "sha256": "b9d6fec1b5fb79d4a22230c45b2cf4f4be7629bd7644789ba519eb8fc1d030be"
+  },
+  {
+    "old": "paper/figures/results/tomography/png/synthetic_tomography_comparison_three_planes.png",
+    "new": "archive/unused_paper_figures/results/tomography/png/synthetic_tomography_comparison_three_planes.png",
+    "status": "unused",
+    "sha256": "b9d6fec1b5fb79d4a22230c45b2cf4f4be7629bd7644789ba519eb8fc1d030be"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/checkerboards_4_2-4_4_results_final.pdf",
+    "new": "paper/figures/used/checkerboards_4_2-4_4_results_final.pdf",
+    "status": "used",
+    "sha256": "4b98291c95b66ad7540466291c5ff2f32a9119086cb4ed9a73f7d59eb0673100"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/checkerboards_4_2-4_4_true_final.pdf",
+    "new": "paper/figures/used/checkerboards_4_2-4_4_true_final.pdf",
+    "status": "used",
+    "sha256": "a16d239a3a34d8ba7162ca0b5152270470eb63a78c74bf75f3c0cd3813600bc4"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/checkerboards_aligned45_phase_flipped_results.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/checkerboards_aligned45_phase_flipped_results.pdf",
+    "status": "unused",
+    "sha256": "4c67ef5d4a75091a73a32da0cbaae53bbbf886ddd74615e177c2470b77a13934"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/checkerboards_aligned45_phase_flipped_true.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/checkerboards_aligned45_phase_flipped_true.pdf",
+    "status": "unused",
+    "sha256": "f8f4d253fae6772cfe7e97856ae30a6a3f7170d109e680de0a72efa7c314bb82"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/checkerboards_matched_results_pairs.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/checkerboards_matched_results_pairs.pdf",
+    "status": "unused",
+    "sha256": "01412babcb9c3ee2819321a31f2508687fa52ac0c968ce9dd944ddc90cd7cccc"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/checkerboards_matched_true.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/checkerboards_matched_true.pdf",
+    "status": "unused",
+    "sha256": "2684a8db3c84e7eed314dfb28918e29586c900e41402480efb7e1f5a147650eb"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/checkerboards_matched_true_only.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/checkerboards_matched_true_only.pdf",
+    "status": "unused",
+    "sha256": "297ec80b42848f3827623a26a09fd90e044e4e3b19c4101158d6199dc1e7e13e"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/checkerboards_right_crop_results_pairs.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/checkerboards_right_crop_results_pairs.pdf",
+    "status": "unused",
+    "sha256": "a2d66f1fcb88ed4a11c58855e99b37eab2f1303979802d9ca39de8e918f37afe"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/checkerboards_right_crop_results_pairs_z16_42.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/checkerboards_right_crop_results_pairs_z16_42.pdf",
+    "status": "unused",
+    "sha256": "7892b034d235b4403d0accc22fbc57bf22e2c23db9ffa974fec6fadc413b0c80"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/checkerboards_right_crop_true_only.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/checkerboards_right_crop_true_only.pdf",
+    "status": "unused",
+    "sha256": "bfc943db5cbb41bcee660c0dc8882dfda1ecb3ecbd077e9bda906c7c0a14d9f7"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/checkerboards_right_crop_true_only_z16_42.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/checkerboards_right_crop_true_only_z16_42.pdf",
+    "status": "unused",
+    "sha256": "f363d06c20cd0cfdef032d82845ae0dcf70f90bac3872309d35ea0da246f7842"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/checkerboards_z15_phase_flipped_results.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/checkerboards_z15_phase_flipped_results.pdf",
+    "status": "unused",
+    "sha256": "dbd2f9c21244d648d29374ba197af28b21dbcf1f73c8406f8480f97ae2c06e16"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/checkerboards_z15_phase_flipped_true.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/checkerboards_z15_phase_flipped_true.pdf",
+    "status": "unused",
+    "sha256": "0d4eda3aa7b27ed8f8650283f036797d20146ead8b7f60109758c5dd1720021d"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/section_4_2.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/section_4_2.pdf",
+    "status": "unused",
+    "sha256": "cd0e4b238df4c178b3348cf413517e07ff6206f2735c78e3e2e03890052ffb94"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/section_4_3.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/section_4_3.pdf",
+    "status": "unused",
+    "sha256": "eb11a137709d39b0ce2e641b51acc0d5f87b38e1468f6d6adcccbf56bdf08f5f"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/section_4_4.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/section_4_4.pdf",
+    "status": "unused",
+    "sha256": "5b6746cd3b7682a03b6fa69d2c699d7733d0e9b95f0d9f88c80ebf2615b2b650"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/section_4_5.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/section_4_5.pdf",
+    "status": "unused",
+    "sha256": "32f9618b177c98a40bb704ed169495f774ecbb63dcff7bc434ddbe6bd37a34fe"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/section_4_5_final.pdf",
+    "new": "paper/figures/used/section_4_5_final.pdf",
+    "status": "used",
+    "sha256": "dc7054d1fe2e79af87b63b30c1511319e28ca4b5247c44d1cca0c75f73c4864a"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/section_4_6.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/section_4_6.pdf",
+    "status": "unused",
+    "sha256": "4cd721e12566bd4b3c60cfd0b89e75917d0ef599113a5d1c3da0282baaa921d5"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/section_4_6_final.pdf",
+    "new": "paper/figures/used/section_4_6_final.pdf",
+    "status": "used",
+    "sha256": "d1f3f8b7deb7bcaf726a6c6ef784e7437d44eed3da44ce7e291cbed9fb4b04c3"
+  },
+  {
+    "old": "paper/figures/results/tomography/source/synthetic_tomography_comparison.pdf",
+    "new": "archive/unused_paper_figures/results/tomography/source/synthetic_tomography_comparison.pdf",
+    "status": "unused",
+    "sha256": "43668b479f56d1018431623be1a487649eb82f7137754d1b22d2102985455304"
+  },
+  {
+    "old": "paper/figures/spherical_anomalies_comparison.pdf",
+    "new": "archive/unused_paper_figures/spherical_anomalies_comparison.pdf",
+    "status": "unused",
+    "sha256": "223aaecced52328549bd0b3dcb966fada66f4b507400d4a7d7c117f1ee75a041"
+  },
+  {
+    "old": "paper/figures/spherical_anomalies_comparison.png",
+    "new": "archive/unused_paper_figures/spherical_anomalies_comparison.png",
+    "status": "unused",
+    "sha256": "910e122ce39ed2a24ac7af61d4c6e1f290dccdddb86de2ca33c9501dfb6a13ef"
+  },
+  {
+    "old": "paper/figures/spherical_anomalies_comparison.svg",
+    "new": "archive/unused_paper_figures/spherical_anomalies_comparison.svg",
+    "status": "unused",
+    "sha256": "9230a9eec79340e49b82e6e1f5665114302daf2369005ffc5cfd76c977227fb4"
+  },
+  {
+    "old": "paper/figures/spherical_anomalies_geometry.pdf",
+    "new": "archive/unused_paper_figures/spherical_anomalies_geometry.pdf",
+    "status": "unused",
+    "sha256": "909ecdaf36e4131fc0791d4cde692b66d1ac8a09875d58cf55532c4fb2f31e10"
+  },
+  {
+    "old": "paper/figures/spherical_anomalies_geometry.png",
+    "new": "archive/unused_paper_figures/spherical_anomalies_geometry.png",
+    "status": "unused",
+    "sha256": "63aa5f48d74901236cea32a00a6f99b2e6df169ad0cd5f3683e1662059bc8e41"
+  },
+  {
+    "old": "paper/figures/spherical_anomalies_geometry.svg",
+    "new": "archive/unused_paper_figures/spherical_anomalies_geometry.svg",
+    "status": "unused",
+    "sha256": "42419d172e27aedbcb260a08a1d07fa8b96cdc4b6a247741fd0f68efa574be61"
+  },
+  {
+    "old": "paper/figures/spherical_anomalies_truth.pdf",
+    "new": "archive/unused_paper_figures/spherical_anomalies_truth.pdf",
+    "status": "unused",
+    "sha256": "ddf88084fa598d0104f0316b714d2fa55a54d7957e1472bb66de67d05093f40f"
+  },
+  {
+    "old": "paper/figures/spherical_anomalies_truth.png",
+    "new": "archive/unused_paper_figures/spherical_anomalies_truth.png",
+    "status": "unused",
+    "sha256": "23984dd6cb9049ce8d89a08fe3caa61378b32fd5102def6f9bc01f4174c208a6"
+  },
+  {
+    "old": "paper/figures/spherical_anomalies_truth.svg",
+    "new": "archive/unused_paper_figures/spherical_anomalies_truth.svg",
+    "status": "unused",
+    "sha256": "78899443268d23d28b3fc5d13773c6c1bc30f05e6a5e6823816e7096957291bb"
+  },
+  {
+    "old": "paper/figures/tomodd_dd1_artificial_geysers_z1p5km.pdf",
+    "new": "archive/unused_paper_figures/tomodd_dd1_artificial_geysers_z1p5km.pdf",
+    "status": "unused",
+    "sha256": "5ab6b123f15dc3ad719f4a09f8449ff70c33a90b04743ffcd84d4dd5c0183e85"
+  },
+  {
+    "old": "paper/figures/tomodd_dd1_artificial_geysers_z1p5km.png",
+    "new": "archive/unused_paper_figures/tomodd_dd1_artificial_geysers_z1p5km.png",
+    "status": "unused",
+    "sha256": "0a514d4bacdc8ac03199e662875d44ff06d944fbbd40f6ee57323b61964def17"
+  },
+  {
+    "old": "paper/figures/tomodd_dd1_artificial_geysers_z1p5km_guard_fixed.pdf",
+    "new": "archive/unused_paper_figures/tomodd_dd1_artificial_geysers_z1p5km_guard_fixed.pdf",
+    "status": "unused",
+    "sha256": "c765e86412b9bf1292b3e6a528a7055e14d4ed1ccfd58fc6e1e690dd2d50ee36"
+  },
+  {
+    "old": "paper/figures/tomodd_dd1_artificial_geysers_z1p5km_guard_fixed.png",
+    "new": "archive/unused_paper_figures/tomodd_dd1_artificial_geysers_z1p5km_guard_fixed.png",
+    "status": "unused",
+    "sha256": "e5da8ec78dd1dafa01a478b87605cd5739d78f4309ec9f01dde06c769e467ede"
+  },
+  {
+    "old": "paper/figures/tomodd_dd1_artificial_geysers_z1p5km_guard_fixed_before_after.pdf",
+    "new": "archive/unused_paper_figures/tomodd_dd1_artificial_geysers_z1p5km_guard_fixed_before_after.pdf",
+    "status": "unused",
+    "sha256": "6ec7800bf5969abd0400650f4fb590ef786157a949da058862b32f0a3156b122"
+  },
+  {
+    "old": "paper/figures/tomodd_dd1_artificial_geysers_z1p5km_guard_fixed_before_after.png",
+    "new": "archive/unused_paper_figures/tomodd_dd1_artificial_geysers_z1p5km_guard_fixed_before_after.png",
+    "status": "unused",
+    "sha256": "41dc01708be59e30f61e9e269ea87d07f85b5573893936c2bcc81cea55129953"
+  },
+  {
+    "old": "paper/figures/tomodd_synthetic_parameter_comparison_z1p5km.pdf",
+    "new": "archive/unused_paper_figures/tomodd_synthetic_parameter_comparison_z1p5km.pdf",
+    "status": "unused",
+    "sha256": "3fb565da4ea315ed9428ea6befe4bb29ea242cbb28323b9e7908fa80e9030e46"
+  },
+  {
+    "old": "paper/figures/tomodd_synthetic_parameter_comparison_z1p5km.png",
+    "new": "archive/unused_paper_figures/tomodd_synthetic_parameter_comparison_z1p5km.png",
+    "status": "unused",
+    "sha256": "37365ef0829acd491635312cfa9df9dab0a5d742abdb801d91f7447e4ecb9972"
+  }
+]

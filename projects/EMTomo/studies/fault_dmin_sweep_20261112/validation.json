@@ -1,0 +1,10 @@
+{
+  "validated_at": "2026-11-12T21:43:27.471519+00:00",
+  "manifest_sha256": "d54effbfd06684c486a5cd50e4c754886737e464606cd72cb8b334d0beabc405",
+  "cases": [
+    "fault-hard-k128-top50-dmin4",
+    "fault-soft-k128-top50-dmin4",
+    "fault-hard-k128-top50-dmin7",
+    "fault-soft-k128-top50-dmin7"
+  ]
+}

@@ -1,0 +1,412 @@
+{
+  "source": "exp_data/hard_soft_min_avg_abs_pct_dev.csv",
+  "source_sha256": "625243ca95d8075bf2f8a45fa32c49c6abe78c09c9c2ffaf45945117a08de7ea",
+  "pairing_source": "exp_data/hard_soft_min_residual_rmse.csv",
+  "pairing_source_sha256": "f77335239ba68bed9d910fd08180471263d5a76d6180860ce798309869a4182f",
+  "metric": "avg_abs_pct_dev",
+  "metric_units": "percent",
+  "oracle_iteration_selection": true,
+  "includes_initial_model": false,
+  "quality_timing": "post-update; index k corresponds to update k+1",
+  "n_comparisons": 38,
+  "soft_better": 10,
+  "hard_better": 28,
+  "median_soft_gain_percent": -2.0698946083669933,
+  "x_limits": [
+    0,
+    22.0
+  ],
+  "y_limits": [
+    -14.0,
+    4.0
+  ],
+  "quality_sha256_by_run": {
+    "run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76": "0b0d52d6d1406a2f7a4b1c7b16c9df5f4187d00d84ab0a371227604f7e100da4",
+    "run_onesided-full-soft50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_094430_ee66281e11c44fc8aa6262245b4d3065": "b4f3d6718fffcbb2e22cf53b73b5bf678bd0fd3880fb9542286b671c45046a52",
+    "run_nx6-bottom-blobs-hard50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_e8047839791e40f6968369d882bc652e": "b69ba58536096ffa8e6885219e70eb72779d9cb6aec681576f120ee0199abcd8",
+    "run_nx6-bottom-blobs-soft50-dmin7-12iter-nx6-bottom-blobs-24x8x8-22st-600ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261107_190644_9eb4d4f54aaa4fc192665ff3a55fb200": "8a0b99bb048bca22d15547b7e48c980696cd02f99a3ef9b8602a8c8a193e31f6",
+    "run_geysers-crop800-noise-x0p5-hard_v1.4_level-x0p5_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_604003c4a0004a8589c29a4d91f2ba18": "967ea9886f62692aee4bae230c1187faf3c182dedfbf325552c2df576ef555b2",
+    "run_geysers-crop800-noise-x0p5-soft_v1.4_level-x0p5_mode-soft_ncand-50_topn-50_dmin-7_20261107_204526_f7d275af26d3435b90c61153e8879748": "932c7caae19f080fe9c4ec249ef3486b9b44fcc4f969c8f84b8a46a15c67183e",
+    "run_geysers-crop800-noise-x0p75-hard_v1.4_level-x0p75_mode-hard_ncand-50_topn-50_dmin-7_20261108_013318_01a4730c3d0a4e3995435f048bb3e57c": "8325b59ca24d77d1ad99e39ba2409cfe88c728f77b949c213f7827dfeada1306",
+    "run_geysers-crop800-noise-x0p75-soft_v1.4_level-x0p75_mode-soft_ncand-50_topn-50_dmin-7_20261108_011124_f3b5b65a40114ad98f01fadaaa04d8b8": "14753943c21e8b98ecca30ad8c038e95039aee29105801253c8434efae42ec72",
+    "run_geysers-crop800-noise-x1p5-hard_v1.4_level-x1p5_mode-hard_ncand-50_topn-50_dmin-7_20261108_034402_711ba93edc74495496f5035c761ec93f": "5d522a3a2655bb0fde925f67e34442e63569d1ff21ae6fca95174894a94f7b52",
+    "run_geysers-crop800-noise-x1p5-soft_v1.4_level-x1p5_mode-soft_ncand-50_topn-50_dmin-7_20261108_014832_501405498a9442429c8b81e8cae9bc48": "08c59f9ddbcc2c7dd42cc395d63843b9d965fe8aa572d06dfef8e5e624d92788",
+    "run_geysers-crop800-noise-x2-hard_v1.4_level-x2_mode-hard_ncand-50_topn-50_dmin-7_20261107_225611_264076196ac24f2683e7950e9304c30b": "2539c6e388b9224c20b92398a2829926ad001d3db66f348974d8262cbbd37f7a",
+    "run_geysers-crop800-noise-x2-soft_v1.4_level-x2_mode-soft_ncand-50_topn-50_dmin-7_20261107_225515_a4e7056b2203486ab341dc040227d884": "2591e32b496374c7a78878bc05f85031bd24fe3775c74bd1bd23381c69b0d10f",
+    "run_geysers-crop800-cov0-hard-3iter_v1.4_mode-hard_ncand-50_topn-50_dmin-7_cov-0_cycles-3_20261108_095438_be475bf7797e4ef18bc3efd181ea98f4": "d7ef939071d14fff84ea525af22a2fa3066996c320c6837ba6ea3386a44ca814",
+    "run_geysers-crop800-cov0-soft-3iter_v1.4_mode-soft_ncand-50_topn-50_dmin-7_cov-0_cycles-3_20261108_095438_40b1656c931a460dac54f8ef000369be": "5f20a5e8ddcb23a98abb7bbf49186c346ce9cbfe4b89a715d1308f91aec998ba",
+    "run_geysers-crop800-noise-x1-hard_v1.4_level-x1_mode-hard_ncand-50_topn-50_dmin-7_20261107_204526_6b62894a48ed4afdb0fd7d213b6eafa8": "87a6a749130ab0602f3bac7ee4be1eae2a775c9a0a2af5b635d1b3c244b19554",
+    "run_geysers-crop800-noise-x1-soft_v1.4_level-x1_mode-soft_ncand-50_topn-50_dmin-7_20261107_204527_7cf71f0279784479addc3d35f9313889": "b352d99daac9d3ea8c522c16da9f08bf72c93d13431af4a40b991521787073a7",
+    "run_gfault28-hard-k64-top20-dmin4-cov0-geysers11-20110401-20110420-fault3-x6p5-elev1166-26st-3776ev-clean_v1.4_ncand-64_topn-20_mode-hard_dmin-4_lam-1.0_temp-1.0_sub-8_cov-0.0_20261028_192218_d763b4d5d28341d6a61b9291c2dafd23": "77a01ce25d859cec4658ca7c9f366e7f0d19b126d740a7299ee87bf304054101",
+    "run_gfault28-soft-k64-top20-dmin4-cov0-geysers11-20110401-20110420-fault3-x6p5-elev1166-26st-3776ev-clean_v1.4_ncand-64_topn-20_mode-soft_dmin-4_lam-1.0_temp-1.0_sub-8_cov-0.0_20261028_192218_f20cb232467948d4b040bb6b0bcf88d6": "4b4e32200cc1acde3249a92865f9d3f6765b4955ec70574820ed01228bfd7c24",
+    "run_gfault28-soft-k64-top20-dmin4-cov0-t8-geysers11-20110401-20110420-fault3-x6p5-elev1166-26st-3776ev-clean_v1.4_ncand-64_topn-20_mode-soft_dmin-4_lam-1.0_temp-8.0_sub-8_cov-0.0_20261028_194221_0a8b39f0d8564bfd9453c8277995a621": "71aa83bbd87c6ddeb8b6db736f08c290c5d15c7af4998cd0e7c986321f1adedb",
+    "run_gfss28-h01_v1.4_mode-hard_ncand-64_topn-20_dmin-2_cov-0.0_20261029_003600_9553aea423414674bf90cf5280f0bdc6": "1e7620b9496f1c5319a637fe805ccab1c06189ec824f6dd29136c48bfacc4003",
+    "run_gfss28-s01_v1.4_mode-soft_ncand-64_topn-20_dmin-2_cov-0.0_20261029_004359_82ce5689013a4dd9bde60a5e26327c0d": "2213d4eeb2e3a6b751b468c1af70fe5d9eefd765b2db300c4cad53e5cbf663c5",
+    "run_gfss28-s02_v1.4_mode-soft_ncand-64_topn-20_dmin-2_cov-0.0_20261029_005508_5fa7cc73c9d74a678b631b64a2a93d33": "e16cc3ce16d3e16cda7b38ff1d3ed3f51b0aa72232c31a878cf3b2d2a21e1cdc",
+    "run_gfss28-h02_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261028_220005_55d0fcb4321041dea6b1caf6ca50d6d8": "1e7620b9496f1c5319a637fe805ccab1c06189ec824f6dd29136c48bfacc4003",
+    "run_gfss28-s03_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261028_221637_17bcf1a3904d4d208189f36bd6ecf818": "626e72db610b26b322a75db887f187e26ceaeb102ccc191d1efb4496d29b7faf",
+    "run_gfss28-s04_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_010617_60dcf9eb5eda43d48ceba00eeb4f4dda": "017ec7b6988fcaf77b1562c803a6460bc5453435213364931d636e9d2cd3f2e7",
+    "run_gfss28-h03_v1.4_mode-hard_ncand-128_topn-40_dmin-3_cov-0.0_20261029_012852_03c7bff1fe814967a3449a54bbc63e16": "1376a52a9f851262a8fe0ed2cc099444a1315c267932fd3203830263f0731d26",
+    "run_gfss28-s05_v1.4_mode-soft_ncand-128_topn-40_dmin-3_cov-0.0_20261029_015406_5e2246a224a249acb9d41490c69df069": "28180c0767da2bb8420b5b49d9e277e1b24b4143a092fdefc1e9b907ca5f42d3",
+    "run_gfss28-s06_v1.4_mode-soft_ncand-128_topn-40_dmin-3_cov-0.0_20261029_022543_33352830884544c98557303eb85ae918": "5b5f7c214e0b477a7e4f47d32c076ed18c6a8f234e25c9e82b08c6c94bad1676",
+    "run_gfss28-s07_v1.4_mode-soft_ncand-64_topn-20_dmin-2_cov-0.0_20261029_025714_342d59d9a1424d2da5711cfd8fd8107b": "42b47c991897b34ddf7a83f82cf267ae5e677ca0d8eaaca3189ef06d0196e325",
+    "run_gfss28-s08_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261028_223954_e4a281255cdd401bbabc8bde3d5bc495": "a3d3278f30eb9b101ff94c983865efa2866421186880a200232f91845d81fef1",
+    "run_gfss28-s09_v1.4_mode-soft_ncand-128_topn-40_dmin-3_cov-0.0_20261029_030824_18f9c5fd82d14ce5a7ce1a74b1f7eff3": "5b6461b6bab7203fa8bcfad85b7c7eb7411bcd199dc5439fedbb6ad28f424675",
+    "run_gfss28-s10_v1.4_mode-soft_ncand-64_topn-20_dmin-2_cov-0.0_20261029_033956_e7c2bf25c96743ab98d1b4a7028b740a": "741dc9faaf9c114718cd9047d4b5b520ab334465d86110289a0760243b894a76",
+    "run_gfss28-s11_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_035107_0ced1bae4f1a4ed19a693f01c68cde86": "5a9d093d9b73c9e5ea03c7c143a9d6fbe868898119aae251943a42c94d36e6d0",
+    "run_gfss28-s12_v1.4_mode-soft_ncand-128_topn-40_dmin-3_cov-0.0_20261029_041350_20da4503d85446ee8c248f918fe482c2": "67e14c470b8d194f92dddf28075ce2d83cdd0b6fc4705b6ad824385a2ab0af84",
+    "run_gfss28-h04_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_044602_4f9ad245134a4492ae3cee9133f9b0a6": "51a853beedd6ed205186869c2d90ee588c6cac8126f5a07740e6b4da1f346da4",
+    "run_gfss28-s13_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_050211_becaeace8e38415d92b1ee0e97c6323f": "0376709bea23a758294e27e33c28d225e540507cf2c42a09ab0c2042fe881d27",
+    "run_gfss28-h05_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_052446_4cd8c68d7b1a4bb0bc618c935dcfad0f": "923a1407376d650edf3c1a06ea97b90f90850be5ddd7d4db8b73d389a57ff74b",
+    "run_gfss28-s14_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_054049_18d6e87559714472a827e81ae902c7a5": "65dd281ccf8aacc69cfdcfd0f7ba7745b5d1e9f249e1a345259e8f354194f44e",
+    "run_gfss28-h06_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.5_20261029_060339_54a3e219660b456d9119cbbeb404f4a4": "3165e786ec09b68d10141ca851b573bff0c0fb63160b0980b623f4fd18534af7",
+    "run_gfss28-s15_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.5_20261029_061938_83215aea30da4f8ebfd54b36b0511d62": "341ddcdbc0e91d9f95e10eaeaf9292778feda07a2080063f3b528b7a7add7fcc",
+    "run_gfss28-h07_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_064454_8a19774ae61a4c9d927ce784982c74d5": "305cf1fe192fb1c52a062bb0f47eefdfcfda99ad52681ae51de99cf71cfce32f",
+    "run_gfss28-s16_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_072206_60281a5a7c3b43f7b6f2d6db4e612cd3": "0c9a53cb5f56ad57e26f716237d81c416d7b60a438b42f0fb625eb2ef96cb557",
+    "run_gfss28-h08_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_081442_7ebf9b5fa7424652a51bea990127868d": "b4bf2235a5afcc0c78072802e5e70d22ae24ff2dce53581ba31e21a2ebbe6a1d",
+    "run_gfss28-s17_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_083602_77fa0b7bfa5942269a4eb8701c34c9e3": "f38576668f334fba04409e4ecb2d60ae8c1f76f1b8c2031efe27b760654908d4",
+    "run_gfss28-s18_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_090030_1d7a2ddbb1ff495c8b62841cb0b43389": "227b14d322bf003f8582b766babf4f7fd23b879fc629f961300b48afc46f4643",
+    "run_gfss28-h12_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261028_235936_b7dd2991b78e4b098b3859b9f1013f20": "9b3673b25d37da5fdff0b252feab533fd02bd305c2fc9a92eed39b0b20f61d2a",
+    "run_gfss28-s23_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_001505_3a71cb8a0399479a813f02ab1d33b671": "1dab9839d3dabb3d0bd31ecc8702ea933fc4048da2451509352a7aacfce90b51",
+    "run_gfss28-h10_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_092211_3c502305ddcb48fa9228dc008b517122": "2b8f97abde3a2f994c02fbab92d5db1d57f61e888d9170772092f22f8f152b39",
+    "run_gfss28-s21_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_094335_06a677e002d44d3eb293a3b01a76bab0": "05c45c9ec946adf9862d7e095560bd754ba5fdcced21f1e90412cccff707eda1",
+    "run_gfss28-h11_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_100750_f769d81166d94beda70b3af913957269": "d9eb04c2422d78b110e452a7f9eb7bf561dcad2c331a587868e8398ae7315344",
+    "run_gfss28-s22_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_102741_974a24df67b84376b057b042af7c1a5a": "e73e4633eb2d24e235b65e636ad217988e52342a7bc3b70ddb033e27eff8ecf5",
+    "run_gfss28-h09_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261028_230225_58b6c8c400954a1b86b22a0ecf8e88c2": "d1b6c87d1650455a2facec0b6764e9c76f4b764bb6679e713611d06f1f323ba9",
+    "run_gfss28-s19_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261028_231828_9b2d4697025542379cc558ac264a69d3": "9cdbdc5cb727e1a572c7e243f43fd3f178e69aabd79013f037c2121d882d7bf1",
+    "run_gfss28-s20_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261028_233903_7f96ee8e89204528b20f214314e9309a": "667f0582d35ac184a436c03ed3983a550ad536e51386b101c95b3a4107153623",
+    "run_gfss28-h13_v1.4_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261029_105711_7e0076ada16e41c5aa3803490eef4c54": "2908f1c89b9a7085b9227b2e85325a004dbbe2ed7e3a14db8c9d3ce863ff2794",
+    "run_gfss28-s24_v1.4_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261029_111318_c0393307ff6c41ee997d6d52e5c4d4f4": "d22ddabece24e4dfe1f4b97c8256d170c29170e88498ebaad680c57e2a41e65c",
+    "run_geysers-realistic-prev-1d-cov0-auto-opt20-p12-hard_v1.5_20261109_183307_4d86e2755ffc428991393e09c375c7c5": "cde3db7ff63355faf2f1eb5d5b10a31d4db219b8a210aef7657c17c57cb4f4a0",
+    "run_geysers-realistic-prev-1d-cov0-auto-opt20-p12-soft_v1.5_20261109_183306_3ef8236710174c888d762baee45eb453": "e7d7cf723e3098d28bfde74a3dc2355b9c4c11bca7258e9ea10d23f6d14b0f14",
+    "run_geysers-realistic-prev-1d-cov0-auto-p12-hard_v1.5_20261108_190904_28c9e678014f4609b490aee208eda4e3": "1e4fcd6a2181770405361a62ad55b44ca9a085a55e07ec7674d3d90a71665522",
+    "run_geysers-realistic-prev-1d-cov0-auto-p12-soft_v1.5_20261108_190904_1a8768a2a6b34c2a9cb89d65228eacc0": "eb60e3911a53e3d9cd9977279724c35dcc0e5c9b4eca8dbde94d0b2535f2f353",
+    "run_geysers-realistic-prev-hom-cov0-auto-opt20-p12-hard_v1.5_20261109_183306_2be65aacb3254ba9a5021b5bb8ac00df": "2cc452e71fcfd949de691c949e91e6b5c467856f0ed8b3320127e7fee3ef54ca",
+    "run_geysers-realistic-prev-hom-cov0-auto-opt20-p12-soft_v1.5_20261109_183306_624315085857461d909905ce730e1ba8": "f3d41036f0b0392d4393f7583a4a3685f4aa0a7cf1f74008f725b04d11e6b190",
+    "run_geysers-realistic-prev-hom-cov0-auto-p12-hard_v1.5_20261108_190904_b53c1f9a61274885adddaa845c132ed0": "716163d43a1a3d7c06df262778dbeb8930d08c80b3d1db1455c885c1bc5122b8",
+    "run_geysers-realistic-prev-hom-cov0-auto-p12-soft_v1.5_20261108_190904_0c2b9729de604692a62b63740a07b6af": "a8494953e77f418e2caa71995d2a368205d465fd621ccabae7872b0d0348ce26"
+  },
+  "noise_color_scale": {
+    "series": "4",
+    "actual_noise_baseline_relative_sigma": 0.01,
+    "actual_noise_baseline_absolute_sigma_s": 0.05,
+    "multiplier_limits": [
+      0.5,
+      2.0
+    ],
+    "darker_is_noisier": true
+  },
+  "noise_metadata_sha256": {
+    "geysers_cb5x2x2_real26_noisegrid_x0p5_seed42": "4f8f70ddc8c3af8fc2ba1f0094ec7310fbea7b3702c342ad662fed013ab3457d",
+    "geysers_cb5x2x2_real26_noisegrid_x0p75_seed42": "18d3da619a5263cbb6827fccb609e8b807d668611404d2e7df9162433f883bf6",
+    "geysers_cb5x2x2_real26_noisegrid_x1p5_seed42": "15d460facb044220953df32ff1d91a8fbaa61c0e91d5fa26273b6cafd344b440",
+    "geysers_cb5x2x2_real26_noisegrid_x2_seed42": "663b45d31ee5c7c2a3321fb8ba92825841e53987753cf5fee5c9ffd8b0ead717",
+    "geysers_realgeom_cb5x2x2_20x8x8_26st_3465ev_noise01_pick005_seed42": "b6bce07dccfd0bccec1c7f53ddadbab5484314adf6ee29ce6d687cdb46d95f8d"
+  },
+  "points": [
+    {
+      "pair_id": "section2_pair01",
+      "section": "2",
+      "hard_min_avg_abs_pct_dev": 4.886673913288639,
+      "soft_min_avg_abs_pct_dev": 4.82584814803093,
+      "soft_gain_percent": 1.2447273204029796,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section3_pair01",
+      "section": "3",
+      "hard_min_avg_abs_pct_dev": 4.764690860052084,
+      "soft_min_avg_abs_pct_dev": 4.73576864826174,
+      "soft_gain_percent": 0.607011297056697,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section4_pair01",
+      "section": "4",
+      "hard_min_avg_abs_pct_dev": 4.339921393109703,
+      "soft_min_avg_abs_pct_dev": 4.2843063037990285,
+      "soft_gain_percent": 1.281476881101404,
+      "actual_noise_multiplier": 0.5
+    },
+    {
+      "pair_id": "section4_pair02",
+      "section": "4",
+      "hard_min_avg_abs_pct_dev": 4.384057146138341,
+      "soft_min_avg_abs_pct_dev": 4.295101558723336,
+      "soft_gain_percent": 2.029069979011582,
+      "actual_noise_multiplier": 0.75
+    },
+    {
+      "pair_id": "section4_pair03",
+      "section": "4",
+      "hard_min_avg_abs_pct_dev": 4.454760813313433,
+      "soft_min_avg_abs_pct_dev": 4.341115360118832,
+      "soft_gain_percent": 2.5511011243288713,
+      "actual_noise_multiplier": 1.5
+    },
+    {
+      "pair_id": "section4_pair04",
+      "section": "4",
+      "hard_min_avg_abs_pct_dev": 4.490785286349959,
+      "soft_min_avg_abs_pct_dev": 4.414639056504569,
+      "soft_gain_percent": 1.6956105667496724,
+      "actual_noise_multiplier": 2.0
+    },
+    {
+      "pair_id": "section4_pair06",
+      "section": "4",
+      "hard_min_avg_abs_pct_dev": 4.236429911853597,
+      "soft_min_avg_abs_pct_dev": 4.2056683819159115,
+      "soft_gain_percent": 0.7261191752898951,
+      "actual_noise_multiplier": 1.0
+    },
+    {
+      "pair_id": "section4_pair07",
+      "section": "4",
+      "hard_min_avg_abs_pct_dev": 4.414849940211578,
+      "soft_min_avg_abs_pct_dev": 4.3082293003549195,
+      "soft_gain_percent": 2.4150456142468344,
+      "actual_noise_multiplier": 1.0
+    },
+    {
+      "pair_id": "section5_pair01",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.7253787938725003,
+      "soft_min_avg_abs_pct_dev": 3.725657803142924,
+      "soft_gain_percent": -0.007489420159979877,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair02",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.7253787938725003,
+      "soft_min_avg_abs_pct_dev": 4.17688261779732,
+      "soft_gain_percent": -12.119675579499535,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair03",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.729051169713851,
+      "soft_min_avg_abs_pct_dev": 3.8049115019399795,
+      "soft_gain_percent": -2.0343065507451743,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair04",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.729051169713851,
+      "soft_min_avg_abs_pct_dev": 3.9427310023604787,
+      "soft_gain_percent": -5.730139462340077,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair05",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.729051169713851,
+      "soft_min_avg_abs_pct_dev": 3.8075656956980293,
+      "soft_gain_percent": -2.1054826659888124,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair06",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.729051169713851,
+      "soft_min_avg_abs_pct_dev": 3.9869533449015457,
+      "soft_gain_percent": -6.916026716991518,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair07",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.72525189244525,
+      "soft_min_avg_abs_pct_dev": 3.7764736036594124,
+      "soft_gain_percent": -1.374986516161214,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair08",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.72525189244525,
+      "soft_min_avg_abs_pct_dev": 3.9599440996016604,
+      "soft_gain_percent": -6.30003591521858,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair09",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.729051169713851,
+      "soft_min_avg_abs_pct_dev": 3.812725438787944,
+      "soft_gain_percent": -2.2438487772350353,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair10",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.729051169713851,
+      "soft_min_avg_abs_pct_dev": 3.824016382972786,
+      "soft_gain_percent": -2.5466320770873696,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair11",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.72525189244525,
+      "soft_min_avg_abs_pct_dev": 3.796965986075034,
+      "soft_gain_percent": -1.9250803892005113,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair12",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.729051169713851,
+      "soft_min_avg_abs_pct_dev": 3.8628177011354925,
+      "soft_gain_percent": -3.587146577876162,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair13",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.729051169713851,
+      "soft_min_avg_abs_pct_dev": 3.90500681367151,
+      "soft_gain_percent": -4.718509774998899,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair14",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.72525189244525,
+      "soft_min_avg_abs_pct_dev": 3.914151941022291,
+      "soft_gain_percent": -5.070799345411449,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair15",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.7005634429853864,
+      "soft_min_avg_abs_pct_dev": 3.8522656816536216,
+      "soft_gain_percent": -4.099436234657584,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair16",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.8106695535914907,
+      "soft_min_avg_abs_pct_dev": 3.87866774135094,
+      "soft_gain_percent": -1.7844157516980703,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair17",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.7706909398145325,
+      "soft_min_avg_abs_pct_dev": 3.8688345486152875,
+      "soft_gain_percent": -2.602801724332845,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair18",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.542737447953584,
+      "soft_min_avg_abs_pct_dev": 3.6305055097915937,
+      "soft_gain_percent": -2.477408024935858,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair19",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.832210681632986,
+      "soft_min_avg_abs_pct_dev": 3.9521060573742925,
+      "soft_gain_percent": -3.1286217199889608,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair20",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.832210681632986,
+      "soft_min_avg_abs_pct_dev": 4.158733457819886,
+      "soft_gain_percent": -8.520480821992845,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair21",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 4.094483206576917,
+      "soft_min_avg_abs_pct_dev": 4.16628136531147,
+      "soft_gain_percent": -1.7535340875064376,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair22",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.851842241621375,
+      "soft_min_avg_abs_pct_dev": 3.976512656790295,
+      "soft_gain_percent": -3.2366438537327546,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair23",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 3.99049969821169,
+      "soft_min_avg_abs_pct_dev": 4.103387893188943,
+      "soft_gain_percent": -2.8289237818472412,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair24",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 4.049256869713226,
+      "soft_min_avg_abs_pct_dev": 4.197813622365796,
+      "soft_gain_percent": -3.668741140225358,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair25",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 4.049256869713226,
+      "soft_min_avg_abs_pct_dev": 4.240203729287852,
+      "soft_gain_percent": -4.715602534450948,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section5_pair26",
+      "section": "5",
+      "hard_min_avg_abs_pct_dev": 4.135933324351277,
+      "soft_min_avg_abs_pct_dev": 4.213048973804595,
+      "soft_gain_percent": -1.8645283520235052,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section6_pair01",
+      "section": "6",
+      "hard_min_avg_abs_pct_dev": 7.117752703663205,
+      "soft_min_avg_abs_pct_dev": 7.092680219475539,
+      "soft_gain_percent": 0.35225281393610186,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section6_pair02",
+      "section": "6",
+      "hard_min_avg_abs_pct_dev": 7.1937319265160795,
+      "soft_min_avg_abs_pct_dev": 7.159219158052619,
+      "soft_gain_percent": 0.4797616705210589,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section6_pair05",
+      "section": "6",
+      "hard_min_avg_abs_pct_dev": 17.208576042292126,
+      "soft_min_avg_abs_pct_dev": 17.325852315999416,
+      "soft_gain_percent": -0.681499000376729,
+      "actual_noise_multiplier": null
+    },
+    {
+      "pair_id": "section6_pair06",
+      "section": "6",
+      "hard_min_avg_abs_pct_dev": 20.380662912442503,
+      "soft_min_avg_abs_pct_dev": 20.41840112550709,
+      "soft_gain_percent": -0.18516675942638844,
+      "actual_noise_multiplier": null
+    }
+  ]
+}

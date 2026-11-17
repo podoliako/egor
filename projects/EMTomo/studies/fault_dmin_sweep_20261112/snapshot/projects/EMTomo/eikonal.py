@@ -1,0 +1,107 @@
+"""Station travel-time fields by fast marching (scikit-fmm) and reciprocity."""
+from __future__ import annotations
+
+import multiprocessing as mp
+
+import numpy as np
+import skfmm
+
+from velocity_model import VelocityModel
+
+# Radius, in cells, of the homogeneous sphere that seeds fast marching.
+SOURCE_RADIUS_CELLS = 3.0
+
+
+def travel_time_field(velocity: np.ndarray, cell_size: float, source_m) -> np.ndarray:
+    """First-arrival times in seconds from an exact source point to every cell centre.
+
+    Within ``SOURCE_RADIUS_CELLS`` of the source the medium is taken as
+    homogeneous with the source cell velocity, and fast marching continues from
+    that sphere. Seeding a single node instead would move the source to a cell
+    centre and keep the large first-order FMM error of a point source.
+    """
+    velocity = np.asarray(velocity, dtype=np.float64)
+    source = np.asarray(source_m, dtype=np.float64)
+    extent = np.asarray(velocity.shape) * cell_size
+    if source.shape != (3,) or np.any(source < 0) or np.any(source > extent):
+        raise ValueError(f"source {source_m} is outside the model domain")
+
+    offsets = [(np.arange(n) + 0.5) * cell_size - s for n, s in zip(velocity.shape, source)]
+    distance = np.sqrt(
+        offsets[0][:, None, None] ** 2
+        + offsets[1][None, :, None] ** 2
+        + offsets[2][None, None, :] ** 2
+    )
+    source_cell = tuple(min(int(s // cell_size), n - 1) for s, n in zip(source, velocity.shape))
+    source_velocity = velocity[source_cell]
+    radius = SOURCE_RADIUS_CELLS * cell_size
+    phi = distance - radius
+    inside = phi <= 0.0
+    if inside.all():
+        return (distance / source_velocity).astype(np.float32)
+    # FMM initializes nodes on both sides of phi=0; overwriting the returned
+    # inner times alone would leave sensitivity to the original inner medium.
+    # Keep the caller's model unchanged (it can be read-only/shared by workers).
+    seeded_velocity = velocity.copy()
+    seeded_velocity[inside] = source_velocity
+    times = np.asarray(skfmm.travel_time(phi, seeded_velocity, dx=cell_size, order=2), dtype=np.float64)
+    times += radius / source_velocity
+    times[inside] = distance[inside] / source_velocity
+    return times.astype(np.float32)
+
+
+_WORKER: dict = {}
+
+
+def _init_worker(velocity: np.ndarray, cell_size: float) -> None:
+    _WORKER["velocity"] = velocity
+    _WORKER["cell_size"] = cell_size
+
+
+def _solve_in_worker(source_m) -> np.ndarray:
+    return travel_time_field(_WORKER["velocity"], _WORKER["cell_size"], source_m)
+
+
+def _init_shared_worker(velocity: np.ndarray, cell_size: float, buffer, shape) -> None:
+    _init_worker(velocity, cell_size)
+    _WORKER["fields"] = np.frombuffer(buffer, dtype=np.float32).reshape(shape)
+
+
+def _solve_into_shared_worker(task) -> int:
+    index, source_m = task
+    _WORKER["fields"][index] = _solve_in_worker(source_m)
+    return index
+
+
+def station_travel_time_fields(model: VelocityModel, stations_m, n_workers: int = 1) -> np.ndarray:
+    """Travel-time fields ``(n_stations, nx, ny, nz)``, one fast-marching solve per station.
+
+    Parallel workers write disjoint slices of a RawArray rather than sending
+    fields through the pool's result pipe. The returned ndarray retains the
+    buffer through its base chain, including after the worker pool exits.
+    """
+    stations = np.asarray(stations_m, dtype=np.float64).reshape(-1, 3)
+    if len(stations) == 0:
+        raise ValueError("At least one station is required")
+    if n_workers <= 1 or len(stations) == 1:
+        fields = np.empty((len(stations),) + model.shape, dtype=np.float32)
+        for index, station in enumerate(stations):
+            fields[index] = travel_time_field(model.velocity, model.cell_size, station)
+        return fields
+
+    context = mp.get_context("fork")
+    shape = (len(stations),) + model.shape
+    # RawArray's mmap-backed heap can fall back to temporary-file storage when
+    # /dev/shm is too small; unlike named SharedMemory it need not fit there.
+    buffer = context.RawArray("f", int(np.prod(shape)))
+    fields = np.frombuffer(buffer, dtype=np.float32).reshape(shape)
+    with context.Pool(
+        min(n_workers, len(stations)),
+        initializer=_init_shared_worker,
+        initargs=(model.velocity, model.cell_size, buffer, shape),
+    ) as pool:
+        # Exhaust the results so every write completes and worker exceptions
+        # propagate instead of returning a partially populated output.
+        for _ in pool.imap(_solve_into_shared_worker, enumerate(stations)):
+            pass
+    return fields

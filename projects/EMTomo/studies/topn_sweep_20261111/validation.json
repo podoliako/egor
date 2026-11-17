@@ -1,0 +1,26 @@
+{
+  "validated_at": "2026-11-11T18:57:39.243778+00:00",
+  "manifest_sha256": "78bcf27ea581f05e9080b5a2344b593866c5c96c94232d0a768abcdfa22cbfef",
+  "cases": [
+    "s2-soft-k50-top10",
+    "s2-soft-k50-top25",
+    "s2-soft-k100-top100",
+    "s2-hard-k100-top100",
+    "s3-soft-k50-top10",
+    "s3-soft-k50-top25",
+    "s3-soft-k100-top100",
+    "s3-hard-k100-top100",
+    "s4-soft-k30-top30",
+    "s4-hard-k30-top30",
+    "s4-soft-k100-top100",
+    "s4-hard-k100-top100",
+    "s4-soft-k150-top150",
+    "s4-hard-k150-top150",
+    "s4-soft-k200-top200",
+    "s4-hard-k200-top200",
+    "s5-soft-k128-top50",
+    "s5-soft-k128-top75",
+    "s5-soft-k128-top100",
+    "s5-soft-k128-top128"
+  ]
+}

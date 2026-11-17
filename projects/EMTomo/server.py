@@ -312,8 +312,32 @@ def _load_weights(path: Path, y: int | None = None) -> np.ndarray | None:
         return result
 
 
+def _event_ray_indices(data, kind: str) -> np.ndarray:
+    if int(data["schema_version"]) != 1:
+        raise ValueError("Unsupported event ray archive schema")
+    return data[f"{kind}_indices"]
+
+
+def _event_sparse_g(data, weight: int) -> dict:
+    """Read only the requested hypothesis, not all rays in the event archive."""
+    if weight not in _event_ray_indices(data, "g"):
+        return {}
+    return {name: data[f"g_{weight}_{name}"] for name in ("shape", "offsets", "coords", "values")}
+
+
 def _load_G_station(path_stem: Path, y: int) -> np.ndarray | None:
-    """Load one station's requested plane from the compact sparse event log."""
+    """Accept the historical virtual weight/station path for either disk layout."""
+    event_path = path_stem.parent.parent / "rays.npz"
+    if event_path.exists():
+        weight = int(path_stem.parent.name.removeprefix("weight_"))
+        station = int(path_stem.name.rsplit("_", 1)[1])
+        with np.load(event_path, allow_pickle=False) as archive:
+            data = _event_sparse_g(archive, weight)
+        if not data or station < 0 or station + 1 >= len(data["offsets"]):
+            return None
+        start, stop = int(data["offsets"][station]), int(data["offsets"][station + 1])
+        return _sparse_plane(data["shape"], data["coords"][start:stop],
+                             data["values"][start:stop], y, np.float32)
     sparse_path = path_stem.parent / "G_stations_sparse.npz"
     if sparse_path.exists():
         station = int(path_stem.name.rsplit("_", 1)[1])
@@ -514,8 +538,16 @@ def _arr_resp(arr, y: int):
 def _sum_ray_counts(file_signature: tuple[tuple[str, int, int], ...]):
     total = None
     for filename, _mtime_ns, _size in file_signature:
-        ray_count = np.load(filename).astype(np.float32)
-        total = ray_count if total is None else total + ray_count
+        if Path(filename).name == "rays.npz":
+            with np.load(filename, allow_pickle=False) as data:
+                # Match the old glob's lexical weight order, including float32
+                # accumulation order, rather than regrouping event subtotals.
+                for index in sorted(_event_ray_indices(data, "ray_count"), key=lambda i: f"weight_{i}"):
+                    ray_count = data[f"ray_count_{index}"].astype(np.float32)
+                    total = ray_count if total is None else total + ray_count
+        else:
+            ray_count = np.load(filename, allow_pickle=False).astype(np.float32)
+            total = ray_count if total is None else total + ray_count
     return total
 
 
@@ -523,7 +555,17 @@ def _cached_ray_count(iter_dir: Path):
     aggregate = iter_dir / "ray_count.npy"
     if aggregate.exists():
         return np.load(aggregate, mmap_mode="r")
-    files = sorted(iter_dir.glob("event_*/weight_*/ray_count.npy"))
+    files = []
+    for event in sorted(iter_dir.glob("event_*")):
+        if not _contained(event, iter_dir):
+            continue
+        compact = event / "rays.npz"
+        if compact.exists():
+            if _contained(compact, iter_dir):
+                files.append(compact)
+        else:
+            files.extend(path for path in sorted(event.glob("weight_*/ray_count.npy"))
+                         if _contained(path, iter_dir))
     signature = tuple(
         (str(path), path.stat().st_mtime_ns, path.stat().st_size) for path in files
     )
@@ -699,6 +741,24 @@ def _legacy_iteration_ready(rd: Path, iteration: int, meta: dict, quality: dict,
         except (OSError, ValueError, KeyError, EOFError, BadZipFile):
             pending.add(weights_path)
             return False
+        compact = event / "rays.npz"
+        if compact.exists() or meta.get("viewer_event_rays_schema") == 1:
+            required.append(compact)
+            try:
+                if not _saved_file(compact, rd):
+                    pending.add(compact)
+                    return False
+                with np.load(compact, allow_pickle=False) as data:
+                    if not weight_indices.issubset(_event_ray_indices(data, "ray_count")):
+                        pending.add(compact)
+                        return False
+                    if features["g"] and not weight_indices.issubset(_event_ray_indices(data, "g")):
+                        pending.add(compact)
+                        return False
+            except (OSError, ValueError, KeyError, EOFError, BadZipFile):
+                pending.add(compact)
+                return False
+            continue
         weight_indices.update(int(w.name[7:]) for w in event.glob("weight_*")
                               if w.is_dir() and re.fullmatch(r"weight_\d+", w.name))
         for index in weight_indices:
@@ -842,7 +902,14 @@ def api_info(rid):
     # Try to infer station count from G files or weights
     for i in iters:
         iter_d = rd / f"iter_{i}"
-        # check first event's weight_0 for G files
+        compact = _child(rd, f"iter_{i}", "event_0", "rays.npz")
+        if compact.exists():
+            with np.load(compact, allow_pickle=False) as data:
+                indices = _event_ray_indices(data, "g")
+                if len(indices):
+                    n_stations = max(0, len(data[f"g_{indices[0]}_offsets"]) - 1)
+                    break
+        # check first event's weight_0 for old G files
         ev0 = iter_d / "event_0" / "weight_0"
         if ev0.exists():
             sparse_g = ev0 / "G_stations_sparse.npz"
@@ -1162,6 +1229,11 @@ def api_weights_list(rid):
     d   = _child(rd, f"iter_{itr}", f"event_{ev}")
     if not d.exists():
         return jsonify([])
+    compact = _child(rd, f"iter_{itr}", f"event_{ev}", "rays.npz")
+    if compact.exists():
+        with np.load(compact, allow_pickle=False) as data:
+            indices = set(_event_ray_indices(data, "ray_count")) | set(_event_ray_indices(data, "g"))
+        return jsonify([f"weight_{index}" for index in sorted(indices)])
     ws = sorted(
         [x.name for x in d.iterdir() if x.is_dir() and re.fullmatch(r"weight_\d+", x.name) and _contained(x, rd)],
         key=lambda x: int(x.split("_")[1]),
@@ -1324,9 +1396,13 @@ def api_slice(rid):
         ev = _index("event")
         wt = _index("weight")
         sta = _index("station")
+        compact = _child(rd, f"iter_{it}", f"event_{ev}", "rays.npz")
         path = _child(rd, f"iter_{it}", f"event_{ev}", f"weight_{wt}", "G_stations_sparse.npz")
         response = _arr_resp(None, 0)
-        if path.exists():
+        if compact.exists():
+            with np.load(compact, allow_pickle=False) as data:
+                response = _sparse_slice_response(_event_sparse_g(data, wt), meta, sta)
+        elif path.exists():
             with np.load(path, allow_pickle=False) as data:
                 response = _sparse_slice_response(data, meta, sta)
         else:

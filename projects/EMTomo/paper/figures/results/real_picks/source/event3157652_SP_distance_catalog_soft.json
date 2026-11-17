@@ -1,0 +1,37 @@
+{
+  "event_id": "3157652",
+  "assumed_vp_km_s": 5.0,
+  "assumed_vs_km_s": 2.8901734104046244,
+  "assumed_vp_vs": 1.73,
+  "assumption": "Illustrative constant speeds, not estimated from these picks or extracted from the recovered model",
+  "stations": [
+    {
+      "station_id": "BG.BRP",
+      "s_minus_p_s": 0.5899999999999999,
+      "sp_distance_km": 4.041095890410959,
+      "catalog_distance_km": 7.916429213090027,
+      "soft_distance_km": 15.69213650072648
+    },
+    {
+      "station_id": "BG.BUC",
+      "s_minus_p_s": 0.71,
+      "sp_distance_km": 4.863013698630138,
+      "catalog_distance_km": 9.481428039078365,
+      "soft_distance_km": 16.549202077532414
+    },
+    {
+      "station_id": "BG.HVC",
+      "s_minus_p_s": 0.5999999999999999,
+      "sp_distance_km": 4.109589041095891,
+      "catalog_distance_km": 6.745260733431907,
+      "soft_distance_km": 13.4436123831355
+    },
+    {
+      "station_id": "BG.SB4",
+      "s_minus_p_s": 0.46999999999999975,
+      "sp_distance_km": 3.21917808219178,
+      "catalog_distance_km": 8.99863650334196,
+      "soft_distance_km": 15.461662632408297
+    }
+  ]
+}

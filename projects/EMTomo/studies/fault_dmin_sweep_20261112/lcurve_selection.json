@@ -1,0 +1,439 @@
+{
+  "selection_uses_truth": false,
+  "residual_timing": "residual/model V_k -> quality index k-1",
+  "runs": {
+    "run_faultdmin12-fault-hard-k128-top50-dmin4_v1.4_20261112_214348_10ad2dfbf7a24e25ad0625982b4e8989": {
+      "run_id": "run_faultdmin12-fault-hard-k128-top50-dmin4_v1.4_20261112_214348_10ad2dfbf7a24e25ad0625982b4e8989",
+      "selected": {
+        "residual_iteration_index": 5,
+        "completed_velocity_updates": 5,
+        "residual_rmse_s": 0.05275036011167461,
+        "relative_slowness_change": 0.0174077291829885,
+        "model_sha256": "5e0f17c6934c5b64e8cc1d8e68e7c3ccd5041534fe0aa91d15808866103f33d9",
+        "normalized_chord_distance": 0.05178809144734267
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "57bb74c4d643b6a069b260c5a61ac24378449cca9ffaa6ff1c58bc0c8b6091c1",
+      "residual_cache_signature": "74a8b3e5d26d16634d9c6877acdabd00d17b013e9dc222f7ef61083da6bcd197",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.05395365627082179,
+          "relative_slowness_change": 0.006345376245506998,
+          "model_sha256": "52cf174c2a8dc1468364070c6638a0418a41a33de3d907d453bf38d9e102a295",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.05331958557267937,
+          "relative_slowness_change": 0.01071127116472017,
+          "model_sha256": "37c34fea19da6ddc1682647714b5ead996d5a4181ef1ab496e461dcabedef20b",
+          "normalized_chord_distance": 0.03010790007079406
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.05301165941071061,
+          "relative_slowness_change": 0.013714843870273137,
+          "model_sha256": "7b4660dd2a46b67c9866da65ee71e2ad6e9d86c452c490f81202f4697b0e6225",
+          "normalized_chord_distance": 0.05000163500523779
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.05285322751490862,
+          "relative_slowness_change": 0.01584479708865877,
+          "model_sha256": "229d2ee69a08eec82031d11bf2a19b8afa1ec54bac25a9f655a5d43be10306ef",
+          "normalized_chord_distance": 0.05112011227087795
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.05275036011167461,
+          "relative_slowness_change": 0.0174077291829885,
+          "model_sha256": "5e0f17c6934c5b64e8cc1d8e68e7c3ccd5041534fe0aa91d15808866103f33d9",
+          "normalized_chord_distance": 0.05178809144734267
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.05268994776785837,
+          "relative_slowness_change": 0.018632163326067926,
+          "model_sha256": "12ede022322b0b9512fd0671d3ac58425ec8dfb9974ee2020a073b454bfdbd72",
+          "normalized_chord_distance": 0.04521360538509483
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.05264886443562564,
+          "relative_slowness_change": 0.019724663982228413,
+          "model_sha256": "2ac3f35a11af2b5d3fd14d43c3737382cb048d0a685528000bd884ea96eb9843",
+          "normalized_chord_distance": 0.03483581187843561
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.052616837760099865,
+          "relative_slowness_change": 0.020669024199711013,
+          "model_sha256": "924d91f235518150a3ad13627926489940cdb475d6625f4b746929dacf4c7118",
+          "normalized_chord_distance": 0.025463664142100776
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.052591161192830846,
+          "relative_slowness_change": 0.021499822213585092,
+          "model_sha256": "47f91218f922076a596e6ea049f8d8dbeffe59e40958e48811c9a2438e482173",
+          "normalized_chord_distance": 0.016901683651314402
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.05257196786003994,
+          "relative_slowness_change": 0.02223204328948233,
+          "model_sha256": "f3ea6caece3f5bf5917c626247de005130e484a80ebd53d94dbf2c1056fa7f86",
+          "normalized_chord_distance": 0.008283599097788526
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.05255675269000781,
+          "relative_slowness_change": 0.02289049998946482,
+          "model_sha256": "1bf89edbf7892129d2217b1d12e5cb28401454b878bcbe67fe4f19691bf6b8bf",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_faultdmin12-fault-soft-k128-top50-dmin4_v1.4_20261112_214348_cf1868d994bd43e8936f39d46f054c78": {
+      "run_id": "run_faultdmin12-fault-soft-k128-top50-dmin4_v1.4_20261112_214348_cf1868d994bd43e8936f39d46f054c78",
+      "selected": {
+        "residual_iteration_index": 5,
+        "completed_velocity_updates": 5,
+        "residual_rmse_s": 0.052818852578895174,
+        "relative_slowness_change": 0.017777881129409,
+        "model_sha256": "a5af00c7d068df98243189fc76d9a38a0efc4ab4cd67713d25827a8fffc5130c",
+        "normalized_chord_distance": 0.049367588798504704
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "57bb74c4d643b6a069b260c5a61ac24378449cca9ffaa6ff1c58bc0c8b6091c1",
+      "residual_cache_signature": "920509e12442646d859ed6c541a0d2730ba9af95b1179162a0295c0c204cbb2c",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.053990657762260676,
+          "relative_slowness_change": 0.006411481595267418,
+          "model_sha256": "f48a59d25572901c95d4e69bdf80c19d5f900601aa4d6f74088d87fbbea0ccca",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.05338668982373017,
+          "relative_slowness_change": 0.01080369932525332,
+          "model_sha256": "b506a0dfba687f88f9440d40c6acc44b06ad6f30cddd449636f65386a5bc92b6",
+          "normalized_chord_distance": 0.025882551914184627
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.05308187294885224,
+          "relative_slowness_change": 0.013904281342213992,
+          "model_sha256": "03382a9a29e9d946dee1b9e692aaf2db43f51925e666aa4dd1405d586ece68ce",
+          "normalized_chord_distance": 0.046225295159992144
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.052921704906042276,
+          "relative_slowness_change": 0.01612241218442784,
+          "model_sha256": "0d70ce7aea2b4d1c26b1672b0940db0395085189ba96b562f5d10fcc9aa179ff",
+          "normalized_chord_distance": 0.048944902068730714
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.052818852578895174,
+          "relative_slowness_change": 0.017777881129409,
+          "model_sha256": "a5af00c7d068df98243189fc76d9a38a0efc4ab4cd67713d25827a8fffc5130c",
+          "normalized_chord_distance": 0.049367588798504704
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.05275127577370145,
+          "relative_slowness_change": 0.01911118640917071,
+          "model_sha256": "c4d8cc1a9f9658a74518089d6c2f36ee3793075102083afdb7608c090fe796f0",
+          "normalized_chord_distance": 0.04533177844592988
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.05270478460277558,
+          "relative_slowness_change": 0.02028038748187948,
+          "model_sha256": "4b7062d27f2c93d6ee90a4446d8f52a9cbe5f513b04035d7b4b193f10b0b15cb",
+          "normalized_chord_distance": 0.037386216422717354
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.05267133609611723,
+          "relative_slowness_change": 0.021302055724026107,
+          "model_sha256": "f1906adf98033ee1c9d1e5baf28fadd2882fd0b28340073c2a23b77dd7c9dcea",
+          "normalized_chord_distance": 0.02821433693532282
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.05264722293726596,
+          "relative_slowness_change": 0.022206210690904074,
+          "model_sha256": "2f553d239d849e8bec85f5ae003987c4875602f5ffafd98a3ef54a568e5b3deb",
+          "normalized_chord_distance": 0.018297625185544987
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.05262870034620788,
+          "relative_slowness_change": 0.023014839925787057,
+          "model_sha256": "78227f236a4b0f9d8bfcb5b7288f45232d9594ab746067eaedcf0ad8b3e20b3e",
+          "normalized_chord_distance": 0.00861374635222101
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.05261174400849463,
+          "relative_slowness_change": 0.023769942460181336,
+          "model_sha256": "2cc36f95a6024d7382a26a45aad75747410cdaf3b26afc57b2c65e1607130baa",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_faultdmin12-fault-hard-k128-top50-dmin7_v1.4_20261113_004349_ee789923ff1044aaa3e1d73b88acb0c1": {
+      "run_id": "run_faultdmin12-fault-hard-k128-top50-dmin7_v1.4_20261113_004349_ee789923ff1044aaa3e1d73b88acb0c1",
+      "selected": {
+        "residual_iteration_index": 4,
+        "completed_velocity_updates": 4,
+        "residual_rmse_s": 0.05284995737432718,
+        "relative_slowness_change": 0.01583320409254782,
+        "model_sha256": "fd3537a6e86877a879fb15c91009530b5d3475d8a6a50b624bc9ef2ea9842257",
+        "normalized_chord_distance": 0.053476267743303704
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "57bb74c4d643b6a069b260c5a61ac24378449cca9ffaa6ff1c58bc0c8b6091c1",
+      "residual_cache_signature": "eacb8b4df94d9a72dbb43733451232716b34db7a94d9c550983092c59d454aea",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.05395365627082179,
+          "relative_slowness_change": 0.006345376245506998,
+          "model_sha256": "52cf174c2a8dc1468364070c6638a0418a41a33de3d907d453bf38d9e102a295",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.05331987040784515,
+          "relative_slowness_change": 0.01071127116472017,
+          "model_sha256": "37c34fea19da6ddc1682647714b5ead996d5a4181ef1ab496e461dcabedef20b",
+          "normalized_chord_distance": 0.03012697481600084
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.053011757046265325,
+          "relative_slowness_change": 0.013706862333004593,
+          "model_sha256": "b7faad7b9850664e932b9e65d46ca6ff90c3da17b208fd586f2b8c5e78eccf96",
+          "normalized_chord_distance": 0.05051332751267675
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.05284995737432718,
+          "relative_slowness_change": 0.01583320409254782,
+          "model_sha256": "fd3537a6e86877a879fb15c91009530b5d3475d8a6a50b624bc9ef2ea9842257",
+          "normalized_chord_distance": 0.053476267743303704
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.052749950438204574,
+          "relative_slowness_change": 0.017407442620984537,
+          "model_sha256": "43262ac8bd370b844dc78d158a302883773ff5bc06e38ecb2dca749b96b367f0",
+          "normalized_chord_distance": 0.052320258116675934
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.052688660634164795,
+          "relative_slowness_change": 0.018630808853889666,
+          "model_sha256": "952b4ae95fa4c8704ccc572355dd160c8ddef2155222d92e76defbf36050530d",
+          "normalized_chord_distance": 0.046246071040246625
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.052648358795668364,
+          "relative_slowness_change": 0.019720331103727423,
+          "model_sha256": "d6092a6d024f22ec17c56148e640dde16267b6f51d754682e5a2f06eb3d2d470",
+          "normalized_chord_distance": 0.035565977497507006
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.05261625979338301,
+          "relative_slowness_change": 0.020668154316172523,
+          "model_sha256": "08291f7e5c368b244beba49652989cd4b54cdd375a7e4d699cd87dee2ebe275b",
+          "normalized_chord_distance": 0.026146560792284123
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.05259080815368353,
+          "relative_slowness_change": 0.02150790473476922,
+          "model_sha256": "a70de1b97b57f5ddff3b7000f3541f71c04207ef96547c8e9276322f51780b65",
+          "normalized_chord_distance": 0.01725036813104171
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.052570870080177814,
+          "relative_slowness_change": 0.022234288814815616,
+          "model_sha256": "e5be651de4f65c4d4fd9bfe544e8d299bd1c7e80ed6ef8457954651058b25ab9",
+          "normalized_chord_distance": 0.00917504776579445
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.052556891142415095,
+          "relative_slowness_change": 0.02290385110707057,
+          "model_sha256": "bdae812f2626e9b1c43ac6d3f6769dab312dde3caa0c810d6d94dbbf2eb83904",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    },
+    "run_faultdmin12-fault-soft-k128-top50-dmin7_v1.4_20261113_005828_7ffd10ab6a12465f9f7d0196dbbf100a": {
+      "run_id": "run_faultdmin12-fault-soft-k128-top50-dmin7_v1.4_20261113_005828_7ffd10ab6a12465f9f7d0196dbbf100a",
+      "selected": {
+        "residual_iteration_index": 5,
+        "completed_velocity_updates": 5,
+        "residual_rmse_s": 0.052755119336069176,
+        "relative_slowness_change": 0.01731013402009898,
+        "model_sha256": "31c980313418c5c39e5ae649e8a1a3bdc820512ba366b8f8e6d4c3771ab613e7",
+        "normalized_chord_distance": 0.04840295306440733
+      },
+      "selection_reason": "maximum_log_chord_distance",
+      "n_positive_norm_checkpoints": 11,
+      "skipped_zero_norm_or_initial_indices": [
+        0
+      ],
+      "initial_model_sha256": "57bb74c4d643b6a069b260c5a61ac24378449cca9ffaa6ff1c58bc0c8b6091c1",
+      "residual_cache_signature": "3899ea6a7a727aaf56624840c943bb4df91c1783e121fca27c0181e51613f24b",
+      "trajectory": [
+        {
+          "residual_iteration_index": 1,
+          "completed_velocity_updates": 1,
+          "residual_rmse_s": 0.053956886658107314,
+          "relative_slowness_change": 0.006340052265313427,
+          "model_sha256": "6bfdfa4a3c1e7946f74a6d76649dd63d4b45eaf9a08ac21e3285bfb57e97c4f4",
+          "normalized_chord_distance": 0.0
+        },
+        {
+          "residual_iteration_index": 2,
+          "completed_velocity_updates": 2,
+          "residual_rmse_s": 0.05332724534576335,
+          "relative_slowness_change": 0.010679454504880065,
+          "model_sha256": "a7bd5c7a52dda524b0b07ed3f68d81488d41fc3a92cc8799820a4bda1979beb9",
+          "normalized_chord_distance": 0.026321992170996292
+        },
+        {
+          "residual_iteration_index": 3,
+          "completed_velocity_updates": 3,
+          "residual_rmse_s": 0.05301834450818858,
+          "relative_slowness_change": 0.013658099275410033,
+          "model_sha256": "929c69a2bb98b87572d3879a8ac4f54b71d9036cce6d5f2edf88aec61f057b32",
+          "normalized_chord_distance": 0.046037703957866966
+        },
+        {
+          "residual_iteration_index": 4,
+          "completed_velocity_updates": 4,
+          "residual_rmse_s": 0.05285973631118531,
+          "relative_slowness_change": 0.015757544128580186,
+          "model_sha256": "a698955af74d351cda46c9c14b8ad6daec9c489cfcabf661907576814ecb615c",
+          "normalized_chord_distance": 0.04726946350920836
+        },
+        {
+          "residual_iteration_index": 5,
+          "completed_velocity_updates": 5,
+          "residual_rmse_s": 0.052755119336069176,
+          "relative_slowness_change": 0.01731013402009898,
+          "model_sha256": "31c980313418c5c39e5ae649e8a1a3bdc820512ba366b8f8e6d4c3771ab613e7",
+          "normalized_chord_distance": 0.04840295306440733
+        },
+        {
+          "residual_iteration_index": 6,
+          "completed_velocity_updates": 6,
+          "residual_rmse_s": 0.05269298678379209,
+          "relative_slowness_change": 0.01851082290728747,
+          "model_sha256": "99835e52e5217086979d7b0d860a42b78864415eb5e876919357e59de55b1000",
+          "normalized_chord_distance": 0.042885315046752234
+        },
+        {
+          "residual_iteration_index": 7,
+          "completed_velocity_updates": 7,
+          "residual_rmse_s": 0.0526504149868128,
+          "relative_slowness_change": 0.019581962748237543,
+          "model_sha256": "24754c0d6fd23792ce0a26810b15ec4934be8ff0fe0a46da783bb5c4cccec8ce",
+          "normalized_chord_distance": 0.03341214337391975
+        },
+        {
+          "residual_iteration_index": 8,
+          "completed_velocity_updates": 8,
+          "residual_rmse_s": 0.05261677480774812,
+          "relative_slowness_change": 0.020511995505816765,
+          "model_sha256": "7f0106091740a4a7910c6c99a6d32e08e183b10dba4054042450f5747ea3911c",
+          "normalized_chord_distance": 0.024857543127034247
+        },
+        {
+          "residual_iteration_index": 9,
+          "completed_velocity_updates": 9,
+          "residual_rmse_s": 0.05259140113392359,
+          "relative_slowness_change": 0.02131623335339657,
+          "model_sha256": "4456e072f806d3896adbaa287b1162d00f9b8908ee9dfb86c421b0a35a7b833e",
+          "normalized_chord_distance": 0.016493207752309363
+        },
+        {
+          "residual_iteration_index": 10,
+          "completed_velocity_updates": 10,
+          "residual_rmse_s": 0.05257261517111032,
+          "relative_slowness_change": 0.0220428639187644,
+          "model_sha256": "cdab365b945ff82dcb986b8b75b84c2169c7084cd09f6ce896a24eca50baae94",
+          "normalized_chord_distance": 0.007505924209969824
+        },
+        {
+          "residual_iteration_index": 11,
+          "completed_velocity_updates": 11,
+          "residual_rmse_s": 0.05255600927262461,
+          "relative_slowness_change": 0.022687944269845977,
+          "model_sha256": "02069cde77ddfb9ba08af6b58247265782a97c427d14f805c23ad662607aec66",
+          "normalized_chord_distance": 0.0
+        }
+      ]
+    }
+  },
+  "errors": {}
+}

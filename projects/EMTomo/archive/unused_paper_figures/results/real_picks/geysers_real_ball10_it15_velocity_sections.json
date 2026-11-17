@@ -1,0 +1,61 @@
+{
+  "created_utc": "2026-11-17T16:12:49.204059+00:00",
+  "evaluation": "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_linear35_60_ball10_it15_20261117_105529/evaluation_pick20_seed42",
+  "protocol": {
+    "velocity": "Fixed saved initial/final models; no inversion updates",
+    "location": "MAP K50/dmin7; same protocol for all models, no catalog start or ball constraint",
+    "pick_split": "Per event, random 20% rounded, at least 1 validation and 5 fitting picks; seed42",
+    "origin": "Precision-weighted on fitting picks only",
+    "grid_m": 125,
+    "noise": [
+      0.01,
+      0.05,
+      0.02
+    ],
+    "catalog": "Reference only, not ground truth; not used for location fitting",
+    "external_holdout": "4775 external holdout picks not opened",
+    "n_events": 345,
+    "n_fit_picks": 3054,
+    "n_validation_picks": 759,
+    "caveat": "Single spatial block and one pick split; bootstrap intervals are conditional on this block"
+  },
+  "catalog_is_ground_truth": false,
+  "location_fit_policy": "Non-validation picks only (supplied evaluator protocol)",
+  "residual_definition": "predicted_relative_s - observed_s on validation_mask; no recentering",
+  "solver_calls": 0,
+  "external_holdout_opened": false,
+  "n_events": 345,
+  "n_validation_picks": 759,
+  "n_events_without_validation": 0,
+  "velocity_sections_skipped": null,
+  "figure": "velocity_sections",
+  "outputs": [
+    "/mnt/disk01/egor/projects/EMTomo/archive/unused_paper_figures/results/real_picks/png/geysers_real_ball10_it15_velocity_sections.png",
+    "/mnt/disk01/egor/projects/EMTomo/archive/unused_paper_figures/results/real_picks/source/geysers_real_ball10_it15_velocity_sections.pdf"
+  ],
+  "source_sha256": {
+    "/mnt/disk01/egor/projects/EMTomo/studies/geysers_real_picks/plot_ball.py": "176de51ff2357eefb813113c33f2e991642a056efa184c9b5a207c1d8a893f31",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_linear35_60_ball10_it15_20261117_105529/evaluation_pick20_seed42/summary.json": "fa30dbc92b645a1dae9472d74005c243bcd358b702dc332716c26bde820b7d84",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_linear35_60_ball10_it15_20261117_105529/evaluation_pick20_seed42/observations.npz": "27f0c6fb56c446e2979714e7c681582e0f0a7b113d24df0ad7163be4e8203400",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_linear35_60_ball10_it15_20261117_105529/evaluation_pick20_seed42/initial_predictions.npz": "5b61464be758488bd36270cc155ecc0b3bcb3cd8b3ecc2c90bf6ee626a2502eb",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_linear35_60_ball10_it15_20261117_105529/evaluation_pick20_seed42/soft_predictions.npz": "822c80099a1f87b5ce2d13d507b9d954ec08dfe86796e3065ade15904638a7d9",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_linear35_60_ball10_it15_20261117_105529/evaluation_pick20_seed42/hard_predictions.npz": "47ae9e37d69224f1b1231592ad5d9c99de9740e350c737470760c288f2755255",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_linear35_60_ball10_it15_20261117_105529/manifest.json": "7508cfe1d1f307120565e53e10b9947ea7db962c7352ffe8d2be7e1a4ebe6c6a",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_linear35_60_ball10_it15_20261117_105529/inputs/initial_velocity_m_s.npy": "c7035fe75e2b1736c7d765b2e0cffa3ffda7176bf7ce929286ec6c0d4a12a300",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_linear35_60_ball10_it15_20261117_105529/cases/soft/result.json": "ee05a1ce6154c149fe50c84ce6c23136ce545744cf96a05dc5b18620c8501fc7",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-linear35-60-ball10-it15-soft_v1.5_20261117_105547_936227d334ec42af895c9fa442346cdf/final_model.npy": "53ed6e47110a3d5bd33befc1d71c7b3d8dd561075ef42b43c9ea96b9f32054ff",
+    "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_linear35_60_ball10_it15_20261117_105529/cases/hard/result.json": "a67bd153ca7836884054e9a96c22c4f930764f839b19e70ade4e2c0d497dc7cb",
+    "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-linear35-60-ball10-it15-hard_v1.5_20261117_123435_675b08ce3ca140a791e9e47d8c7a5267/final_model.npy": "7340e1446d1928b0542c5c622c10060780ba49d80ce56da4c189ef0493269654"
+  },
+  "section_y_km": 3.0,
+  "sampled_y_cell_km": [
+    3,
+    4
+  ],
+  "velocity_limits_km_s": [
+    2.9408698340727364,
+    7.21785467797801
+  ],
+  "catalog_overlay": "All held-out catalog events projected into XZ, not a Y slab",
+  "sphere_intersects_section": true
+}

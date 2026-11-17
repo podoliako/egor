@@ -1,0 +1,9 @@
+{
+  "status": "completed",
+  "pid": 1764917,
+  "started_at": "2026-11-12T16:16:54.408650+00:00",
+  "run_id": "run_topnsweep11-s5-soft-k128-top128_v1.4_20261112_161656_1b81e7950f064deabef93fe1526c2b4a",
+  "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_topnsweep11-s5-soft-k128-top128_v1.4_20261112_161656_1b81e7950f064deabef93fe1526c2b4a",
+  "completed_updates": 12,
+  "finished_at": "2026-11-12T17:52:31.115958+00:00"
+}

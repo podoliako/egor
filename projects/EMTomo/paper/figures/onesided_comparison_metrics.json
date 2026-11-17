@@ -1,0 +1,112 @@
+{
+  "experiment_id": "onesided_nx6_24x12x12_18st_1200ev_noise01_pick005_seed42",
+  "source_input_directory": "../forward_modeling/experiments/input/onesided_nx6_24x12x12_18st_1200ev_noise01_pick005_seed42",
+  "source_model_sha256": "b767821a2c1bf6acefe9946dcad2d8c04f9d87ad2639bbab0f6d20275d1df4d7",
+  "n_events": 1200,
+  "n_stations": 18,
+  "n_observed_arrivals": 21600,
+  "velocity_metric": {
+    "name": "whole-volume velocity RMSE",
+    "units": "m/s",
+    "checkpoint": "final_model.npy, after 12 velocity updates",
+    "evaluation": "Truth consists of aligned 4000-m constant cubes; each truth cube is repeated four times per axis to match the 1000-m inversion cells. Equal-volume cellwise RMSE is therefore exactly the whole-volume RMSE of the piecewise-constant fields.",
+    "initial_rmse_m_s": 250.0,
+    "verification": "Recomputed from final_model.npy and source model.npz, and checked against quality.jsonl iteration 11."
+  },
+  "hypocenter_metric": {
+    "name": "90th percentile of Euclidean 3D location error",
+    "units": "m",
+    "checkpoint": "iter_11, E-step before the twelfth velocity update",
+    "estimator": "Candidate with largest saved weight for each event, in both modes",
+    "position_conversion": "(positions + 0.5) * fine_cell_size_m",
+    "fine_cell_size_m": 125.0,
+    "event_order": "Source events.csv order, as returned by load_tomography_experiment",
+    "quantile": "numpy.percentile(errors, 90), default linear interpolation; equal event weights",
+    "verification": "All 1200 weights.npz files loaded for each run; positions and weights finite, weights sum to one."
+  },
+  "shared_settings": {
+    "cell_size_m": 1000.0,
+    "subdivision": 8,
+    "n_cycles": 12,
+
+    "weights_min_distance_fine_cells": 7,
+    "relative_pick_sigma": 0.01,
+    "absolute_pick_sigma_s": 0.05,
+    "model_sigma_s": 0.02,
+    "lambda_reg": 1.0,
+    "coverage_damping_power": 2.0,
+    "coverage_floor": 0.05,
+    "coverage_reference_percentile": 75.0,
+    "max_velocity_step_fraction": 0.02
+  },
+  "pair_verification": "The hard/soft pairs with configured top-N equal to the full tested set (50 or 100) differ only in candidate_mode and run_name. The top-10 and top-25 soft comparisons additionally change weights_top_n and reuse the historical hard-50 control, as specified by the top-N study. Numerical setup is unchanged apart from tested/retained candidate counts and assignment; new runs use 12 workers instead of 4 and explicitly disable held-out picks. Initial arrays and station coordinates agree, all runs have 12 complete iteration markers, and source inputs were validated by load_tomography_experiment. No inversions or forward solves were rerun.",
+  "comparisons": [
+    {"hard": "hard_50", "soft": "soft_50_10"},
+    {"hard": "hard_50", "soft": "soft_50_25"},
+    {"hard": "hard_50", "soft": "soft_50_50"},
+    {"hard": "hard_100", "soft": "soft_100_100"}
+  ],
+  "control_reuse": "hard_50 is one run reused in three comparisons, not three independent replicates.",
+  "rows": [
+    {
+      "id": "hard_50",
+      "mode": "hard",
+      "tested_candidates": 50,
+      "used_locations": 1,
+      "status_file": "studies/onesided_full_hard50_dmin7_12iter/status.json",
+      "run_dir": "runs/run_onesided-full-hard50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-hard_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_105224_88f7753de55a4de796ebf3968f823d76",
+      "velocity_rmse_m_s": 331.9818558091315,
+      "hypocenter_p90_m": 7046.723787903861
+    },
+    {
+      "id": "soft_50_50",
+      "mode": "soft",
+      "tested_candidates": 50,
+      "used_locations": 50,
+      "status_file": "studies/onesided_full_soft50_dmin7_12iter/status.json",
+      "run_dir": "runs/run_onesided-full-soft50-dmin7-12iter-onesided-nx6-24x12x12-18st-1200ev-noise01-pick005-seed42_v1.4_ncand-50_topn-50_mode-soft_dmin-7_lam-1.0_temp-1.0_sub-8_cov-2.0_20261105_094430_ee66281e11c44fc8aa6262245b4d3065",
+      "velocity_rmse_m_s": 282.2771324958084,
+      "hypocenter_p90_m": 6698.509830233205
+    },
+    {
+      "id": "soft_50_10",
+      "mode": "soft",
+      "tested_candidates": 50,
+      "used_locations": 10,
+      "status_file": "studies/topn_sweep_20261111/cases/s2-soft-k50-top10/result.json",
+      "run_dir": "runs/run_topnsweep11-s2-soft-k50-top10_v1.4_20261111_185816_828820eb9962488083bf183507308514",
+      "velocity_rmse_m_s": 308.02821486327,
+      "hypocenter_p90_m": 6875.502872397572
+    },
+    {
+      "id": "soft_50_25",
+      "mode": "soft",
+      "tested_candidates": 50,
+      "used_locations": 25,
+      "status_file": "studies/topn_sweep_20261111/cases/s2-soft-k50-top25/result.json",
+      "run_dir": "runs/run_topnsweep11-s2-soft-k50-top25_v1.4_20261111_185816_03bb18ee713743c7b82be394f09a4105",
+      "velocity_rmse_m_s": 291.7242777870599,
+      "hypocenter_p90_m": 6848.337298510278
+    },
+    {
+      "id": "hard_100",
+      "mode": "hard",
+      "tested_candidates": 100,
+      "used_locations": 1,
+      "status_file": "studies/topn_sweep_20261111/cases/s2-hard-k100-top100/result.json",
+      "run_dir": "runs/run_topnsweep11-s2-hard-k100-top100_v1.4_20261111_185816_afd3e3edc15a406587c5e9fe15e83b8f",
+      "velocity_rmse_m_s": 330.69556219951005,
+      "hypocenter_p90_m": 6999.974572656027
+    },
+    {
+      "id": "soft_100_100",
+      "mode": "soft",
+      "tested_candidates": 100,
+      "used_locations": 100,
+      "status_file": "studies/topn_sweep_20261111/cases/s2-soft-k100-top100/result.json",
+      "run_dir": "runs/run_topnsweep11-s2-soft-k100-top100_v1.4_20261111_185816_0d44b3373e2c4a069b575f760b196695",
+      "velocity_rmse_m_s": 273.22939674974225,
+      "hypocenter_p90_m": 6867.729133171724
+    }
+  ]
+}

@@ -1,0 +1,237 @@
+{
+  "truth_available": false,
+  "no_solver_calls": true,
+  "initial_policy": "New proposed linear 3.5\u20136.0 km/s across box boundaries, sampled at cell centres",
+  "start_mismatch": "Existing hard/soft used NCSN GEY, not the proposed initial shown in column 1",
+  "hard": {
+    "note": "hard: last valid model after 21 updates; run failed, not final",
+    "source_sha256": {
+      "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_20261031_pick01/cases/hard/result.json": "e3bfdfd38266e1ffac0682a7b3d98aec27cbe6edf8abe06c22ecba030a6eb88a",
+      "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-hard-pick01_v1.5-sparse-real_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261031_205113_e54bf29d173e4b6eb65267c4b23c9cff/meta.json": "d975c2c129950f93d8be877e0dc8e6b34e0307983cc28a05e33b0b1f5079c2b1",
+      "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-hard-pick01_v1.5-sparse-real_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261031_205113_e54bf29d173e4b6eb65267c4b23c9cff/iter_20/model.npy": "932c30aad6958973e2fe74c383a0a33817ad1643af0335e0e659c590977bf1f8",
+      "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-hard-pick01_v1.5-sparse-real_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261031_205113_e54bf29d173e4b6eb65267c4b23c9cff/iter_20/delta_s.npy": "8148e8fe211f41ce4fc784324f48a2bdd2a664987584fed5d022041b909c4067",
+      "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-hard-pick01_v1.5-sparse-real_mode-hard_ncand-128_topn-40_dmin-2_cov-0.0_20261031_205113_e54bf29d173e4b6eb65267c4b23c9cff/iter_21/model.npy": "5e48bb6fb976efaa8c831922d88c535106a58fbe0eea53fb6cacb188243dd63a"
+    }
+  },
+  "soft": {
+    "note": "soft: completed 24 velocity updates",
+    "source_sha256": {
+      "/mnt/disk01/egor/projects/EMTomo/runs/geysers_real_20261031_pick01/cases/soft/result.json": "b6cf3e0dd27db9747657ebef01c59453dce67438c424b40af2f1d7a0a863c9e6",
+      "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-soft-pick01_v1.5-sparse-real_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261031_212721_a465dc2b9e7744f0b7a82a48f4a8f923/meta.json": "64046802649c8beb0d56e009b17790f7195039e82e2c89c53a238d43ada4019f",
+      "/mnt/disk01/egor/projects/EMTomo/runs/run_geysers-real-soft-pick01_v1.5-sparse-real_mode-soft_ncand-128_topn-40_dmin-2_cov-0.0_20261031_212721_a465dc2b9e7744f0b7a82a48f4a8f923/final_model.npy": "f8723086f49929f61b94ee8cdc90d208c7bf5af1efa72833611e08e32adcbd6d"
+    }
+  },
+  "source_article_doi": "10.1093/gji/ggab017",
+  "domain_extent_km": [
+    23.0,
+    11.0,
+    7.0
+  ],
+  "geometry": {
+    "catalog_z_formula_for_tomoDD_only": "1166 + 1000*depth_km",
+    "datum_caveat": "Station elevations and catalog depths are assumed to share a sea-level vertical datum; compatibility has not been independently established.",
+    "domain_bounds_in_old_coordinates_m": [
+      [
+        -3000,
+        20000
+      ],
+      [
+        0,
+        11000
+      ],
+      [
+        0,
+        7000
+      ]
+    ],
+    "domain_extent_m": [
+      23000,
+      11000,
+      7000
+    ],
+    "domain_origin_m": [
+      0,
+      0,
+      0
+    ],
+    "east_km_per_longitude_degree": "111.320*cos(radians(38.80275))",
+    "geographic_reference_in_new_xy_m": [
+      13000,
+      3500
+    ],
+    "local_xy_to_old_xy_offset_m": [
+      10000,
+      3500
+    ],
+    "north_km_per_latitude_degree": 110.574,
+    "old_to_new_translation_m": [
+      3000,
+      0,
+      0
+    ],
+    "projection": "prepare_geysers_geometry.local_xy_km",
+    "reference_latitude": 38.80275,
+    "reference_longitude": -122.7707,
+    "station_z_formula": "1166 - elevation_m",
+    "top_elevation_m": 1166,
+    "x_azimuth_degrees": 135.0,
+    "y_azimuth_degrees": 225.0,
+    "z_direction": "positive_down"
+  },
+  "color_limits_km_s": [
+    2.6,
+    7.6
+  ],
+  "sections": [
+    {
+      "plane": "XZ",
+      "fixed_axis": "Y",
+      "fixed_coordinate_km": 5.5,
+      "models": [
+        {
+          "model": "proposed_initial",
+          "covered_samples": 16100,
+          "blank_samples": 0,
+          "vp_range_km_s": [
+            3.6785714285714284,
+            5.821428571428571
+          ]
+        },
+        {
+          "model": "hard",
+          "covered_samples": 16100,
+          "blank_samples": 0,
+          "vp_range_km_s": [
+            2.8547865340210845,
+            6.400708151460486
+          ]
+        },
+        {
+          "model": "soft",
+          "covered_samples": 16100,
+          "blank_samples": 0,
+          "vp_range_km_s": [
+            2.7650208310047173,
+            7.402843842756409
+          ]
+        },
+        {
+          "model": "published_gji2021",
+          "covered_samples": 16100,
+          "blank_samples": 0,
+          "vp_range_km_s": [
+            3.2553320028338746,
+            6.113040006834161
+          ]
+        }
+      ]
+    },
+    {
+      "plane": "YZ",
+      "fixed_axis": "X",
+      "fixed_coordinate_km": 11.5,
+      "models": [
+        {
+          "model": "proposed_initial",
+          "covered_samples": 7700,
+          "blank_samples": 0,
+          "vp_range_km_s": [
+            3.6785714285714284,
+            5.821428571428571
+          ]
+        },
+        {
+          "model": "hard",
+          "covered_samples": 7700,
+          "blank_samples": 0,
+          "vp_range_km_s": [
+            2.9031097291900876,
+            6.858337171947474
+          ]
+        },
+        {
+          "model": "soft",
+          "covered_samples": 7700,
+          "blank_samples": 0,
+          "vp_range_km_s": [
+            2.941697537986589,
+            6.255190669220436
+          ]
+        },
+        {
+          "model": "published_gji2021",
+          "covered_samples": 7700,
+          "blank_samples": 0,
+          "vp_range_km_s": [
+            3.5365931026644537,
+            5.807967546979253
+          ]
+        }
+      ]
+    },
+    {
+      "plane": "XY",
+      "fixed_axis": "Z",
+      "fixed_coordinate_km": 3.5,
+      "models": [
+        {
+          "model": "proposed_initial",
+          "covered_samples": 25300,
+          "blank_samples": 0,
+          "vp_range_km_s": [
+            4.75,
+            4.75
+          ]
+        },
+        {
+          "model": "hard",
+          "covered_samples": 25300,
+          "blank_samples": 0,
+          "vp_range_km_s": [
+            3.5522410535462936,
+            6.762787883934062
+          ]
+        },
+        {
+          "model": "soft",
+          "covered_samples": 25300,
+          "blank_samples": 0,
+          "vp_range_km_s": [
+            3.6357975656902695,
+            7.300161885848201
+          ]
+        },
+        {
+          "model": "published_gji2021",
+          "covered_samples": 24205,
+          "blank_samples": 1095,
+          "vp_range_km_s": [
+            4.468077331238089,
+            6.003191294487246
+          ]
+        }
+      ]
+    }
+  ],
+  "published_outside_policy": "NaN / white; no extrapolation or background substitution",
+  "published_resolution_policy": "Interpolate scaled resolvability; hatch <= 0.4",
+  "cell_sampling": "Nearest containing cell; no smoothing",
+  "checks_passed": [
+    "initial hash and linear profile",
+    "domain extents match all arrays",
+    "hard last valid checkpoint verified by existing evaluator",
+    "all published source nodes reproduced",
+    "published outside support is NaN",
+    "published vertical interpolation and geographic reference mapping"
+  ],
+  "source_sha256": {
+    "data/geysers_2011/real_experiment_v1/geometry.json": "2fd23e5d4845a87194fff5291cef0fef3acb890eec2b040331247e68c52a0c99",
+    "data/geysers_2021/Geysers_Vpmodel_Guo-Thurber2021GJI.CSV": "11a56a7a433144bfafd05a5f944efde4509f72c2821cb4337951dd4e8ce626ad",
+    "data/geysers_2011/initial_models/linear_vp_3p5_6p0/initial_velocity_m_s.npy": "c7035fe75e2b1736c7d765b2e0cffa3ffda7176bf7ce929286ec6c0d4a12a300",
+    "data/geysers_2011/initial_models/linear_vp_3p5_6p0/model.json": "8f5ab73939395391788e548234d3bb4262fe85bc236cb72b6385e8200f5333bb",
+    "runs/geysers_real_20261031_pick01/inputs/initial_velocity_m_s.npy": "2397e5d9af94a7cb5e5ed41c61101beef91d2ecc5035d046abd5328549ebf2d5",
+    "paper/paper_scripts/make_geysers_real_published_comparison.py": "44d1f5705977e1db6b9f0f93bdb29c72e9cb574e87a599e6a83fcaa6147f5147",
+    "paper/paper_scripts/make_geysers_published_vp_sections.py": "7e06eaeb42a839518dc7e7081aa40254575868af16f620f60cff20d36411bc6e",
+    "studies/geysers_real_picks/evaluate_holdout.py": "24c798b3dc6415a9b58e9342f3a3b89b736bdddd517c8af2263c09bf35056187"
+  }
+}

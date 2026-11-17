@@ -23,7 +23,8 @@ def _run(monkeypatch, tmp_path, scores, *, save_runs=True, with_reference=False,
     updates, evaluations = [], []
     training_tables = []
 
-    def step(model, training, current_stations, noise, config, *, iteration, logger):
+    def step(model, training, current_stations, noise, config, *, iteration, logger,
+             localization_cache=None):
         assert iteration == len(updates)
         training_tables.append(training.copy())
         # Deliberately worsen velocity RMSE against truth at EVERY update.
@@ -31,7 +32,7 @@ def _run(monkeypatch, tmp_path, scores, *, save_runs=True, with_reference=False,
         updates.append(target)
         return 1. / target - 1. / model.velocity, np.ones(model.shape), np.ones(model.shape)
 
-    def evaluate(model, training, observed, mask, current_stations, noise, config):
+    def evaluate(model, training, observed, mask, current_stations, noise, config, *, return_cache=False):
         index = len(evaluations)
         assert len(updates) == index + 1  # Always score after the full velocity update.
         np.testing.assert_allclose(model.velocity, updates[-1])
@@ -40,7 +41,7 @@ def _run(monkeypatch, tmp_path, scores, *, save_runs=True, with_reference=False,
         assert np.isnan(training[mask]).all()
         np.testing.assert_array_equal(training[~mask], observed[~mask])
         evaluations.append(mask.copy())
-        return scores[index]
+        return (scores[index], None) if return_cache else scores[index]
 
     monkeypatch.setattr(em, "make_tomography_step", step)
     monkeypatch.setattr(em, "evaluate_control_rmse", evaluate)

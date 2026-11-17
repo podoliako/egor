@@ -6,7 +6,8 @@ import json
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from matplotlib.colors import LinearSegmentedColormap, Normalize
+from matplotlib.colors import ListedColormap, TwoSlopeNorm
+from cmcrameri import cm
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 
@@ -14,7 +15,7 @@ from make_checkerboard_geometry import map_frame
 
 ROOT = Path(__file__).resolve().parents[2]
 STUDY = ROOT / "runs/checkerboard_scaled_20261021"
-OUTPUT = Path(__file__).resolve().parents[1] / "figures"
+OUTPUT = Path(__file__).resolve().parents[1] / "figures" / "used"
 STEM = "checkerboard_nx4_nx6_nx8_comparison"
 EM_RUNS = {
     4: "run_cbscale21-nx4-hard-k15-cov0-fast_v1.4_cov-0_ncand-15_20261022_092857_a566dffe817b4c7e89a91063cfbcde17",
@@ -92,13 +93,16 @@ def main():
             hashes[str(path)] = sha(path)
 
     rows.extend(horizontal_rows)
-    colors = ["#7a7a7a", "#ffffff", "#e32400", "#61177c"]
-    low, high = 4.0, 6.0
-    assert all(low <= float(a.min()) <= float(a.max()) <= high for row in rows for a in row), "Velocity scale would clip displayed data"
-    anchors = [low, 4.75, 5.25, high]
-    cmap = LinearSegmentedColormap.from_list("checkerboard_velocity", list(zip(
-        [(v - low) / (high - low) for v in anchors], colors)), N=1024)
-    norm = Normalize(low, high)
+
+    reference_velocity = 5.0
+    low, high = -1.0, 1.0
+    assert all(low <= float(a.min()) - reference_velocity <= float(a.max()) - reference_velocity <= high
+               for row in rows for a in row), "Perturbation scale would clip displayed data"
+    colors = cm.vik_r(np.linspace(0, 1, 257))
+    # An odd LUT gives zero its own bin; pin that bin to pure white.
+    colors[128] = (1, 1, 1, 1)
+    cmap = ListedColormap(colors, name="vik_r_white_center")
+    norm = TwoSlopeNorm(vmin=low, vcenter=0.0, vmax=high)
     plt.rcParams.update({
         "font.family": "STIXGeneral", "mathtext.fontset": "stix", "font.size": 9,
         "axes.titlesize": 11, "axes.labelsize": 9, "axes.linewidth": .6,
@@ -111,15 +115,15 @@ def main():
         "savefig.facecolor": "white",
     })
     fig = plt.figure(figsize=(13.8, 12.8))
-    grid = fig.add_gridspec(7, 4, height_ratios=(1, 1, 1, .8, 1, 1, 1),
-                           left=.072, right=.97, bottom=.05, top=.93, wspace=.09, hspace=.23)
+    grid = fig.add_gridspec(7, 4, height_ratios=(1, 1, 1, .35, 1, 1, 1),
+                           left=.072, right=.97, bottom=.05, top=.90, wspace=.09, hspace=.23)
     axes = np.array([[fig.add_subplot(grid[r if r < 3 else r + 1, c])
                       for c in range(4)] for r in range(6)])
-    for r, (nx, fields) in enumerate(zip(list(EM_RUNS) * 2, rows)):
+    for r, fields in enumerate(rows):
         for c, field in enumerate(fields):
             ax = axes[r, c]
             horizontal = r >= 3
-            image = ax.imshow(field, extent=(0, 24, 0, 12) if horizontal else (0, 24, 12, 0),
+            image = ax.imshow(field - reference_velocity, extent=(0, 24, 0, 12) if horizontal else (0, 24, 12, 0),
                               origin="lower" if horizontal else "upper", aspect="equal",
                               cmap=cmap, norm=norm, interpolation="nearest", rasterized=True)
             ax.set(xlim=(0, 24), ylim=(0, 12) if horizontal else (12, 0),
@@ -128,24 +132,19 @@ def main():
             ax.tick_params(direction="out", pad=3)
             map_frame(ax)
             if r == 0:
-                ax.set_title(("True model", "EMTomo", "tomoDD", "tomoDD oracle")[c], pad=10)
+                ax.set_title(("(a)", "(b)", "(c)", "(d)")[c], pad=10)
             if r in (2, 5):
-                ax.set_xlabel("$X$ (km)")
+                ax.set_xlabel("$X$, km")
             if c == 0:
-                ax.set_ylabel("$Y$ (km)" if horizontal else "Depth (km)")
-                ax.text(-.23, .5, f"$n_x = {nx}$", transform=ax.transAxes,
-                        rotation=90, ha="center", va="center", fontsize=11)
-    fig.canvas.draw()
-    fig.text(.521, .978, "Vertical sections · $Y = 10$ km", ha="center", va="top", fontsize=12)
-    separator = grid[3, :].get_position(fig)
-    fig.text(.521, separator.y0 + .003,
-             "Horizontal sections · depth $Z = 5$ km", ha="center", va="center", fontsize=12)
-    color_ax = fig.add_axes([.271, separator.y1 - .027, .50, .012])
+                ax.set_ylabel("$Y$, km" if horizontal else "$Z$, km",
+                              rotation=0, ha="right", va="center", labelpad=18)
+    color_ax = fig.add_axes([.381, .953, .28, .012])
     colorbar = fig.colorbar(image, cax=color_ax, orientation="horizontal",
                            ticks=np.arange(low, high + .01, .5), format="%.1f")
-    color_ax.set_title("$V$ (km/s)", fontsize=9, pad=6)
+    color_ax.set_title("$\\Delta V$, km/s", fontsize=9, pad=6)
     colorbar.outline.set_linewidth(.45)
     color_ax.tick_params(labelsize=8, width=.45, length=2)
+    OUTPUT.mkdir(parents=True, exist_ok=True)
     for suffix in ("png", "pdf", "svg"):
         path = OUTPUT / f"{STEM}.{suffix}"
         fig.savefig(path, dpi=300)
@@ -161,12 +160,18 @@ def main():
                                      "em": "piecewise constant 1 km cells, final model after 12 updates",
                                      "dd": "native trilinear Vp interpolation, final model after 3 iterations",
                                      "dd_oracle": "saved oracle_vp with native trilinear interpolation; not an inversion"},
-                  "color_anchors_km_s": dict(zip(colors, anchors)),
-                  "colorbar": {"orientation": "horizontal", "tick_spacing_km_s": .5},
-                  "normalization": "One shared linear velocity scale; nonlinear placement of colormap color anchors; no data clipping.",
+                  "colormap": "vik_r",
+                  "colormap_modification": "257 colors; central bin pinned to pure white",
+                  "reference_velocity_km_s": reference_velocity,
+                  "perturbation_limits_km_s": [low, high],
+                  "zero_perturbation_rgba": list(cmap(norm(0.0))),
+                  "column_labels": {"(a)": "truth", "(b)": "EMTomo", "(c)": "tomoDD", "(d)": "trilinear oracle"},
+                  "colorbar": {"orientation": "horizontal", "position": "top", "figure_width_fraction": .28, "tick_spacing_km_s": .5},
+                  "normalization": "Shared symmetric perturbation scale centered on V=5 km/s (pure white); no data clipping.",
+                  "script_sha256": sha(Path(__file__)),
                   "rows": records, "sha256": hashes}
     (OUTPUT / f"{STEM}.json").write_text(json.dumps(provenance, indent=2) + "\n")
-    print(json.dumps({"color_anchors": dict(zip(colors, anchors)), "rows": records}, indent=2))
+    print(json.dumps({"colormap": "vik_r", "perturbation_limits_km_s": [low, high], "rows": records}, indent=2))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,126 @@
+{
+  "plane": "XZ",
+  "y_m": 5500.0,
+  "slab_half_width_m": 1000.0,
+  "selection": "abs(catalog_y - plane_y) <= 1000 m; same IDs in both panels",
+  "selected_event_count": 938,
+  "total_event_count": 3471,
+  "projection": "Orthogonal XZ projection; exact unscaled catalog-to-MAP segments; no Y displacement shown",
+  "endpoint_policy": "Keep every selected event's fitted endpoint, regardless of fitted Y",
+  "fitted_outside_slab_counts": {
+    "hard": 61,
+    "soft": 81
+  },
+  "fitting": "Saved TRAIN-only 50-candidate MAP relocation in each verified final velocity model",
+  "soft_location": "MAP, not posterior mean; not pre-final-update iteration weights",
+  "source_input_dir": "paper/exp_data/geysers_real_holdout_latest",
+  "model_sources": {
+    "hard": "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/final_model.npy",
+    "soft": "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/final_model.npy"
+  },
+  "resolution_mask": false,
+  "sensitivity_mask": false,
+  "velocity_fading": false,
+  "events_subsampled": false,
+  "smoothing": false,
+  "stations_plotted": false,
+  "no_solver_calls": true,
+  "color_limits_km_s": [
+    3.0,
+    7.0
+  ],
+  "geometry": {
+    "catalog_z_formula_for_tomoDD_only": "1166 + 1000*depth_km",
+    "datum_caveat": "Station elevations and catalog depths are assumed to share a sea-level vertical datum; compatibility has not been independently established.",
+    "domain_bounds_in_old_coordinates_m": [
+      [
+        -3000,
+        20000
+      ],
+      [
+        0,
+        11000
+      ],
+      [
+        0,
+        7000
+      ]
+    ],
+    "domain_extent_m": [
+      23000,
+      11000,
+      7000
+    ],
+    "domain_origin_m": [
+      0,
+      0,
+      0
+    ],
+    "east_km_per_longitude_degree": "111.320*cos(radians(38.80275))",
+    "geographic_reference_in_new_xy_m": [
+      13000,
+      3500
+    ],
+    "local_xy_to_old_xy_offset_m": [
+      10000,
+      3500
+    ],
+    "north_km_per_latitude_degree": 110.574,
+    "old_to_new_translation_m": [
+      3000,
+      0,
+      0
+    ],
+    "projection": "prepare_geysers_geometry.local_xy_km",
+    "reference_latitude": 38.80275,
+    "reference_longitude": -122.7707,
+    "station_z_formula": "1166 - elevation_m",
+    "top_elevation_m": 1166,
+    "x_azimuth_degrees": 135.0,
+    "y_azimuth_degrees": 225.0,
+    "z_direction": "positive_down"
+  },
+  "caveats": [
+    "Catalog is a diagnostic baseline, not truth; shifts are not errors",
+    "Selection is based on catalog, not final fitted proximity to plane",
+    "Catalog sea-level datum compatibility is assumed"
+  ],
+  "source_sha256": {
+    "data/geysers_2011/real_experiment_v1/manifest.json": "8be5c92ff7932495efcf898141200004fd6f530368c37e4e10f9ddb7e8a39a43",
+    "data/geysers_2011/real_experiment_v1/geometry.json": "2fd23e5d4845a87194fff5291cef0fef3acb890eec2b040331247e68c52a0c99",
+    "data/geysers_2011/real_experiment_v1/emtomo/arrivals.npz": "41293e1624554fcdaab7513f8f2b83ac092048e8a1147fe8c24fae79e544b154",
+    "data/geysers_2011/initial_models/linear_vp_3p5_6p0/model.json": "8f5ab73939395391788e548234d3bb4262fe85bc236cb72b6385e8200f5333bb",
+    "data/geysers_2011/initial_models/linear_vp_3p5_6p0/initial_velocity_m_s.npy": "c7035fe75e2b1736c7d765b2e0cffa3ffda7176bf7ce929286ec6c0d4a12a300",
+    "runs/geysers_real_linear35_60_latest_20261110_063859/cases/hard/result.json": "7f5d1596d6a12c496738dd94211a2626868819ca37beff0045dff04865b2aa53",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-hard_v1.5_20261110_072122_7681679e024a41ae9cee35929de13c79/control_mask.npy": "989d0d3a17a7947c5c60ce9d5e18c2945d49e24f4acbbc03a423d21e38bb1c67",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/cases/hard/result.json": "6519945ae33147e5924b1f7708db9712473a2effd9d33744b6e0da1140f30ef8",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/control_mask.npy": "989d0d3a17a7947c5c60ce9d5e18c2945d49e24f4acbbc03a423d21e38bb1c67",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/final_model.npy": "8ae860b50d649900f75be2c5613fd74178af55261a06c5f35096ef071d5ef949",
+    "runs/geysers_real_linear35_60_latest_20261110_063859/cases/soft/result.json": "47eade4fe12b064df381655e44cdf1e4dcc7fcb4d24366e2c9fe6b18d78fcd89",
+    "runs/run_geysers-real-linear35-60-cov0-auto-p12-soft_v1.5_20261110_063942_e8532001930a4f91a3fd0d3bac1feb8e/control_mask.npy": "989d0d3a17a7947c5c60ce9d5e18c2945d49e24f4acbbc03a423d21e38bb1c67",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/cases/soft/result.json": "7e9c40fd6551fcfc36dbf28dd5d53f0613cfa8c960185b56a6e8040bcde6a90e",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/control_mask.npy": "989d0d3a17a7947c5c60ce9d5e18c2945d49e24f4acbbc03a423d21e38bb1c67",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/final_model.npy": "ae035884c17fd1434b2318dd9cf344df5dc44b7a3926429518b911926cfe5c14",
+    "paper/exp_data/geysers_real_holdout_latest/initial_fit.json": "dc98efb4dc1794008ca9d89311ef35a66621e2f1293341b8ca261580e832b961",
+    "paper/exp_data/geysers_real_holdout_latest/initial_predictions.npz": "f418700956d80cbcebce77a867744bfbb696ba2fd80a8c8dcaf31e28ef5d4871",
+    "runs/geysers_real_refine500_fmm125_20261110_110138/manifest.json": "6d1433b80ab5d97c2c906d86d59d50e52bf71d41657b388044260fd900a912ac",
+    "paper/exp_data/geysers_real_holdout_latest/hard_fit.json": "332294c5cf30482d2a992187484e493c09c7cf26233f07759adcb47bc827d162",
+    "paper/exp_data/geysers_real_holdout_latest/hard_predictions.npz": "d08783418c904fddfafd6d70516d47a62fd2f0105b801483bc70644d347b9758",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/initial_model.npy": "55c8828a38daa6ab3872d0c4e91e91e8f3e0b4b83f1075b0de0449ff95f2c07c",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/stopping.json": "5abd297bb7054fbcf498a499c43776e454bfd8d18a355d47bc9e5d92de60fbdb",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/control_split.json": "fe410f3eb4b4b0223de7c0e84eca7025b56ae419bb56669edb0e40b63b48b47a",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-hard_v1.5_20261110_113228_3f55c1eed62e4d2a8f9a8dd7d1c4d2e6/meta.json": "972ef095809c353805b7d28c14e9cd95b010f14cb27ba870fa06e6e9694ddbf9",
+    "paper/exp_data/geysers_real_holdout_latest/soft_fit.json": "eb69724cb7394d36f20bc35fe221712fa700c6ffc62ca1efb62924618ec6aeb7",
+    "paper/exp_data/geysers_real_holdout_latest/soft_predictions.npz": "690f34a968d1866dd05418573b61dca3a055f038ca2ef1c513576634d8db3511",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/initial_model.npy": "eaea47da724da3eae2370b5cb0718024d695e2923a16827f6efd2f4cf48ad0ce",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/stopping.json": "9d7450b5cfbf11bb9a5a4e393c07597ed903b867882a73ac321e85688ddd85b6",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/control_split.json": "fe410f3eb4b4b0223de7c0e84eca7025b56ae419bb56669edb0e40b63b48b47a",
+    "runs/run_geysers-real-refine500-from-linear35-60-cov0-auto-p12-soft_v1.5_20261110_110439_65385d92a98142a08e73e7a5834f69b1/meta.json": "fa2f28c8f5067df3aabb31cd0796728863d2561dabfc1091d5cf315c4dc188d9",
+    "data/geysers_2011/real_experiment_v1/catalog.csv": "90b2ead26ddc599accd611e5c9db269c92e327e31795a8fa101694b35f5bcdf4",
+    "data/geysers_2011/real_experiment_v1/stations.csv": "c5f92142357eb0407b7ef34a62c016c8fe2b37e2cdfaddb59cd5fb553bfb1748",
+    "paper/paper_scripts/make_geysers_real_location_shifts.py": "910ef269b707a25b936fdabce2798d0a1cb478392e87e3ff746bd6a503387ca3",
+    "paper/figures/results/real_picks/source/make_hypocentre_sections.py": "d779d1de8b126b2c06c690142119e7cfdbacf1b3fde6781e64e7f9433d91802c"
+  },
+  "data_sha256": "4bd1329fb62a0f12f317bef50e09668d15e79c69ee87c376fdf9542331809140",
+  "csv_sha256": "7b711c81d6043e487aa9a1394267f684af6ed51df2ebbdb2a21c5ebf256a9cf0"
+}

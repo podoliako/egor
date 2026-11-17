@@ -1,0 +1,757 @@
+{
+  "schema_version": 1,
+  "runs": {
+    "run_faultdmin12-fault-hard-k128-top50-dmin4_v1.4_20261112_214348_10ad2dfbf7a24e25ad0625982b4e8989": {
+      "run_id": "run_faultdmin12-fault-hard-k128-top50-dmin4_v1.4_20261112_214348_10ad2dfbf7a24e25ad0625982b4e8989",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin12-fault-hard-k128-top50-dmin4_v1.4_20261112_214348_10ad2dfbf7a24e25ad0625982b4e8989",
+      "section": "5",
+      "mode": "hard",
+      "source_id": "gfsoftscreen28_26st_noise02_3776ev",
+      "status": "ok",
+      "reason": null,
+      "n_complete_iterations": 12,
+      "n_extracted_iterations": 12,
+      "expected_n_events": 3776,
+      "trajectory": [
+        {
+          "iteration": 0,
+          "rmse_s": 0.055427606824084895,
+          "mean_event_rms_s": 0.054386666661619,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 1,
+          "rmse_s": 0.05395365627082179,
+          "mean_event_rms_s": 0.05297463077490342,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 2,
+          "rmse_s": 0.05331958557267937,
+          "mean_event_rms_s": 0.052370391732388354,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 3,
+          "rmse_s": 0.05301165941071061,
+          "mean_event_rms_s": 0.05207205052694789,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 4,
+          "rmse_s": 0.05285322751490862,
+          "mean_event_rms_s": 0.051919270574350515,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 5,
+          "rmse_s": 0.05275036011167461,
+          "mean_event_rms_s": 0.05182187205113987,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 6,
+          "rmse_s": 0.05268994776785837,
+          "mean_event_rms_s": 0.05176428586472765,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 7,
+          "rmse_s": 0.05264886443562564,
+          "mean_event_rms_s": 0.05172523226741093,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 8,
+          "rmse_s": 0.052616837760099865,
+          "mean_event_rms_s": 0.051694998853820326,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 9,
+          "rmse_s": 0.052591161192830846,
+          "mean_event_rms_s": 0.051670351903690626,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 10,
+          "rmse_s": 0.05257196786003994,
+          "mean_event_rms_s": 0.05165200394995115,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 11,
+          "rmse_s": 0.05255675269000781,
+          "mean_event_rms_s": 0.05163715212693904,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        }
+      ],
+      "best": {
+        "iteration": 11,
+        "rmse_s": 0.05255675269000781,
+        "mean_event_rms_s": 0.05163715212693904,
+        "n_events": 3776,
+        "n_pairs": 1227200
+      },
+      "signature": {
+        "meta_sha256": "c48d9eae0526737af1b6d217e9790bd6281b5dd62be7a35fedd686be3f491185",
+        "complete_markers": [
+          {
+            "iteration": 0,
+            "size": 50,
+            "mtime_ns": 1794520717325739289,
+            "sha256": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee"
+          },
+          {
+            "iteration": 1,
+            "size": 50,
+            "mtime_ns": 1794521744545653124,
+            "sha256": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a"
+          },
+          {
+            "iteration": 2,
+            "size": 50,
+            "mtime_ns": 1794522675810882817,
+            "sha256": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4"
+          },
+          {
+            "iteration": 3,
+            "size": 50,
+            "mtime_ns": 1794523593490586660,
+            "sha256": "6cf8fd8fe3cf21998735ac795d39e9f89dc0a885ad236d9f3857776cd1adb110"
+          },
+          {
+            "iteration": 4,
+            "size": 50,
+            "mtime_ns": 1794524515521465022,
+            "sha256": "072deec4a878a55eb5cb7f456a306186f45fd3225341c9fd6f54324db9ef34ed"
+          },
+          {
+            "iteration": 5,
+            "size": 50,
+            "mtime_ns": 1794525436889319453,
+            "sha256": "4bc033e329ed02355bafd75ae77694d5bc61a0caa67e47eb2f3c156d912547b9"
+          },
+          {
+            "iteration": 6,
+            "size": 50,
+            "mtime_ns": 1794526352255940653,
+            "sha256": "5f90ae222dba2e5a9ab56f0e30717cf445168801e92e5917e4c08db4ca1be77a"
+          },
+          {
+            "iteration": 7,
+            "size": 50,
+            "mtime_ns": 1794527233060900956,
+            "sha256": "c1a041fce104543676af55b9dbc9a2ac1a149d6cc5773aa6aa9ac39cce188ab1"
+          },
+          {
+            "iteration": 8,
+            "size": 50,
+            "mtime_ns": 1794527938709781943,
+            "sha256": "722c37313d088726ea5288db4cd3917e52f6554034f29c7de0cba48fb822b5e9"
+          },
+          {
+            "iteration": 9,
+            "size": 50,
+            "mtime_ns": 1794528764464603377,
+            "sha256": "4bff94acedec71e460b69808d86e6ce75db5c72a932b99aac30c902b4ad187a8"
+          },
+          {
+            "iteration": 10,
+            "size": 51,
+            "mtime_ns": 1794529689434479535,
+            "sha256": "8a5c226eda5b5d1cd91b7d56060583e7d51679ce69db7cda22b714a49f6d60e1"
+          },
+          {
+            "iteration": 11,
+            "size": 51,
+            "mtime_ns": 1794530627146808540,
+            "sha256": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a"
+          }
+        ],
+        "n_events": 3776,
+        "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin12-fault-hard-k128-top50-dmin4_v1.4_20261112_214348_10ad2dfbf7a24e25ad0625982b4e8989",
+        "schema_version": 1,
+        "sha256": "74a8b3e5d26d16634d9c6877acdabd00d17b013e9dc222f7ef61083da6bcd197"
+      },
+      "residual_completeness_verified": true,
+      "extracted_utc": "2026-11-13T08:32:16.798098+00:00"
+    },
+    "run_faultdmin12-fault-soft-k128-top50-dmin4_v1.4_20261112_214348_cf1868d994bd43e8936f39d46f054c78": {
+      "run_id": "run_faultdmin12-fault-soft-k128-top50-dmin4_v1.4_20261112_214348_cf1868d994bd43e8936f39d46f054c78",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin12-fault-soft-k128-top50-dmin4_v1.4_20261112_214348_cf1868d994bd43e8936f39d46f054c78",
+      "section": "5",
+      "mode": "soft",
+      "source_id": "gfsoftscreen28_26st_noise02_3776ev",
+      "status": "ok",
+      "reason": null,
+      "n_complete_iterations": 12,
+      "n_extracted_iterations": 12,
+      "expected_n_events": 3776,
+      "trajectory": [
+        {
+          "iteration": 0,
+          "rmse_s": 0.055427606824084895,
+          "mean_event_rms_s": 0.054386666661619,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 1,
+          "rmse_s": 0.053990657762260676,
+          "mean_event_rms_s": 0.053009932717141856,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 2,
+          "rmse_s": 0.05338668982373017,
+          "mean_event_rms_s": 0.05243423933234073,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 3,
+          "rmse_s": 0.05308187294885224,
+          "mean_event_rms_s": 0.0521392419131811,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 4,
+          "rmse_s": 0.052921704906042276,
+          "mean_event_rms_s": 0.05198399448429612,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 5,
+          "rmse_s": 0.052818852578895174,
+          "mean_event_rms_s": 0.05188664026860463,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 6,
+          "rmse_s": 0.05275127577370145,
+          "mean_event_rms_s": 0.051821832356314226,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 7,
+          "rmse_s": 0.05270478460277558,
+          "mean_event_rms_s": 0.05177714199232381,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 8,
+          "rmse_s": 0.05267133609611723,
+          "mean_event_rms_s": 0.05174566540320508,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 9,
+          "rmse_s": 0.05264722293726596,
+          "mean_event_rms_s": 0.0517223552031219,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 10,
+          "rmse_s": 0.05262870034620788,
+          "mean_event_rms_s": 0.05170436770412389,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 11,
+          "rmse_s": 0.05261174400849463,
+          "mean_event_rms_s": 0.051687767218614185,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        }
+      ],
+      "best": {
+        "iteration": 11,
+        "rmse_s": 0.05261174400849463,
+        "mean_event_rms_s": 0.051687767218614185,
+        "n_events": 3776,
+        "n_pairs": 1227200
+      },
+      "signature": {
+        "meta_sha256": "0470363e07c70278e94d48b4f9d4fdb94b8f0a3d4aa1fa6a40bc86abfcd109da",
+        "complete_markers": [
+          {
+            "iteration": 0,
+            "size": 50,
+            "mtime_ns": 1794520791772637685,
+            "sha256": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee"
+          },
+          {
+            "iteration": 1,
+            "size": 50,
+            "mtime_ns": 1794521915857315844,
+            "sha256": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a"
+          },
+          {
+            "iteration": 2,
+            "size": 50,
+            "mtime_ns": 1794522925146585318,
+            "sha256": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4"
+          },
+          {
+            "iteration": 3,
+            "size": 50,
+            "mtime_ns": 1794523934143841792,
+            "sha256": "6cf8fd8fe3cf21998735ac795d39e9f89dc0a885ad236d9f3857776cd1adb110"
+          },
+          {
+            "iteration": 4,
+            "size": 50,
+            "mtime_ns": 1794524950712400115,
+            "sha256": "072deec4a878a55eb5cb7f456a306186f45fd3225341c9fd6f54324db9ef34ed"
+          },
+          {
+            "iteration": 5,
+            "size": 50,
+            "mtime_ns": 1794525912413824325,
+            "sha256": "4bc033e329ed02355bafd75ae77694d5bc61a0caa67e47eb2f3c156d912547b9"
+          },
+          {
+            "iteration": 6,
+            "size": 50,
+            "mtime_ns": 1794526866504952518,
+            "sha256": "5f90ae222dba2e5a9ab56f0e30717cf445168801e92e5917e4c08db4ca1be77a"
+          },
+          {
+            "iteration": 7,
+            "size": 50,
+            "mtime_ns": 1794527733944931128,
+            "sha256": "c1a041fce104543676af55b9dbc9a2ac1a149d6cc5773aa6aa9ac39cce188ab1"
+          },
+          {
+            "iteration": 8,
+            "size": 50,
+            "mtime_ns": 1794528506780656915,
+            "sha256": "722c37313d088726ea5288db4cd3917e52f6554034f29c7de0cba48fb822b5e9"
+          },
+          {
+            "iteration": 9,
+            "size": 50,
+            "mtime_ns": 1794529500672154481,
+            "sha256": "4bff94acedec71e460b69808d86e6ce75db5c72a932b99aac30c902b4ad187a8"
+          },
+          {
+            "iteration": 10,
+            "size": 51,
+            "mtime_ns": 1794530508096199064,
+            "sha256": "8a5c226eda5b5d1cd91b7d56060583e7d51679ce69db7cda22b714a49f6d60e1"
+          },
+          {
+            "iteration": 11,
+            "size": 51,
+            "mtime_ns": 1794531506111833147,
+            "sha256": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a"
+          }
+        ],
+        "n_events": 3776,
+        "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin12-fault-soft-k128-top50-dmin4_v1.4_20261112_214348_cf1868d994bd43e8936f39d46f054c78",
+        "schema_version": 1,
+        "sha256": "920509e12442646d859ed6c541a0d2730ba9af95b1179162a0295c0c204cbb2c"
+      },
+      "residual_completeness_verified": true,
+      "extracted_utc": "2026-11-13T08:32:25.409719+00:00"
+    },
+    "run_faultdmin12-fault-hard-k128-top50-dmin7_v1.4_20261113_004349_ee789923ff1044aaa3e1d73b88acb0c1": {
+      "run_id": "run_faultdmin12-fault-hard-k128-top50-dmin7_v1.4_20261113_004349_ee789923ff1044aaa3e1d73b88acb0c1",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin12-fault-hard-k128-top50-dmin7_v1.4_20261113_004349_ee789923ff1044aaa3e1d73b88acb0c1",
+      "section": "5",
+      "mode": "hard",
+      "source_id": "gfsoftscreen28_26st_noise02_3776ev",
+      "status": "ok",
+      "reason": null,
+      "n_complete_iterations": 12,
+      "n_extracted_iterations": 12,
+      "expected_n_events": 3776,
+      "trajectory": [
+        {
+          "iteration": 0,
+          "rmse_s": 0.055427606824084895,
+          "mean_event_rms_s": 0.054386666661619,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 1,
+          "rmse_s": 0.05395365627082179,
+          "mean_event_rms_s": 0.05297463077490342,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 2,
+          "rmse_s": 0.05331987040784515,
+          "mean_event_rms_s": 0.05237061017779825,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 3,
+          "rmse_s": 0.053011757046265325,
+          "mean_event_rms_s": 0.05207217898443885,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 4,
+          "rmse_s": 0.05284995737432718,
+          "mean_event_rms_s": 0.05191746376663095,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 5,
+          "rmse_s": 0.052749950438204574,
+          "mean_event_rms_s": 0.05182150940146434,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 6,
+          "rmse_s": 0.052688660634164795,
+          "mean_event_rms_s": 0.051763041106616274,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 7,
+          "rmse_s": 0.052648358795668364,
+          "mean_event_rms_s": 0.05172476625451973,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 8,
+          "rmse_s": 0.05261625979338301,
+          "mean_event_rms_s": 0.051694464616905224,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 9,
+          "rmse_s": 0.05259080815368353,
+          "mean_event_rms_s": 0.05167007980370657,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 10,
+          "rmse_s": 0.052570870080177814,
+          "mean_event_rms_s": 0.05165085834732568,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 11,
+          "rmse_s": 0.052556891142415095,
+          "mean_event_rms_s": 0.05163756440664418,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        }
+      ],
+      "best": {
+        "iteration": 11,
+        "rmse_s": 0.052556891142415095,
+        "mean_event_rms_s": 0.05163756440664418,
+        "n_events": 3776,
+        "n_pairs": 1227200
+      },
+      "signature": {
+        "meta_sha256": "8d1ae347a2523d92e391f9da6eef09c571c52fc2f7e7f4427ba85a7f12d3660a",
+        "complete_markers": [
+          {
+            "iteration": 0,
+            "size": 50,
+            "mtime_ns": 1794534087476291954,
+            "sha256": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee"
+          },
+          {
+            "iteration": 1,
+            "size": 50,
+            "mtime_ns": 1794537031529053805,
+            "sha256": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a"
+          },
+          {
+            "iteration": 2,
+            "size": 50,
+            "mtime_ns": 1794539389036383960,
+            "sha256": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4"
+          },
+          {
+            "iteration": 3,
+            "size": 50,
+            "mtime_ns": 1794541800464250810,
+            "sha256": "6cf8fd8fe3cf21998735ac795d39e9f89dc0a885ad236d9f3857776cd1adb110"
+          },
+          {
+            "iteration": 4,
+            "size": 50,
+            "mtime_ns": 1794544254168870151,
+            "sha256": "072deec4a878a55eb5cb7f456a306186f45fd3225341c9fd6f54324db9ef34ed"
+          },
+          {
+            "iteration": 5,
+            "size": 50,
+            "mtime_ns": 1794546380858995220,
+            "sha256": "4bc033e329ed02355bafd75ae77694d5bc61a0caa67e47eb2f3c156d912547b9"
+          },
+          {
+            "iteration": 6,
+            "size": 50,
+            "mtime_ns": 1794548992559474325,
+            "sha256": "5f90ae222dba2e5a9ab56f0e30717cf445168801e92e5917e4c08db4ca1be77a"
+          },
+          {
+            "iteration": 7,
+            "size": 50,
+            "mtime_ns": 1794551456392404547,
+            "sha256": "c1a041fce104543676af55b9dbc9a2ac1a149d6cc5773aa6aa9ac39cce188ab1"
+          },
+          {
+            "iteration": 8,
+            "size": 50,
+            "mtime_ns": 1794553115740934076,
+            "sha256": "722c37313d088726ea5288db4cd3917e52f6554034f29c7de0cba48fb822b5e9"
+          },
+          {
+            "iteration": 9,
+            "size": 50,
+            "mtime_ns": 1794554703013540422,
+            "sha256": "4bff94acedec71e460b69808d86e6ce75db5c72a932b99aac30c902b4ad187a8"
+          },
+          {
+            "iteration": 10,
+            "size": 51,
+            "mtime_ns": 1794556355468704035,
+            "sha256": "8a5c226eda5b5d1cd91b7d56060583e7d51679ce69db7cda22b714a49f6d60e1"
+          },
+          {
+            "iteration": 11,
+            "size": 51,
+            "mtime_ns": 1794557925266601127,
+            "sha256": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a"
+          }
+        ],
+        "n_events": 3776,
+        "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin12-fault-hard-k128-top50-dmin7_v1.4_20261113_004349_ee789923ff1044aaa3e1d73b88acb0c1",
+        "schema_version": 1,
+        "sha256": "eacb8b4df94d9a72dbb43733451232716b34db7a94d9c550983092c59d454aea"
+      },
+      "residual_completeness_verified": true,
+      "extracted_utc": "2026-11-13T08:32:33.160712+00:00"
+    },
+    "run_faultdmin12-fault-soft-k128-top50-dmin7_v1.4_20261113_005828_7ffd10ab6a12465f9f7d0196dbbf100a": {
+      "run_id": "run_faultdmin12-fault-soft-k128-top50-dmin7_v1.4_20261113_005828_7ffd10ab6a12465f9f7d0196dbbf100a",
+      "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin12-fault-soft-k128-top50-dmin7_v1.4_20261113_005828_7ffd10ab6a12465f9f7d0196dbbf100a",
+      "section": "5",
+      "mode": "soft",
+      "source_id": "gfsoftscreen28_26st_noise02_3776ev",
+      "status": "ok",
+      "reason": null,
+      "n_complete_iterations": 12,
+      "n_extracted_iterations": 12,
+      "expected_n_events": 3776,
+      "trajectory": [
+        {
+          "iteration": 0,
+          "rmse_s": 0.055427606824084895,
+          "mean_event_rms_s": 0.054386666661619,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 1,
+          "rmse_s": 0.053956886658107314,
+          "mean_event_rms_s": 0.052977596051085,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 2,
+          "rmse_s": 0.05332724534576335,
+          "mean_event_rms_s": 0.0523771761599415,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 3,
+          "rmse_s": 0.05301834450818858,
+          "mean_event_rms_s": 0.05207839830414274,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 4,
+          "rmse_s": 0.05285973631118531,
+          "mean_event_rms_s": 0.05192456166683283,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 5,
+          "rmse_s": 0.052755119336069176,
+          "mean_event_rms_s": 0.051825700700001774,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 6,
+          "rmse_s": 0.05269298678379209,
+          "mean_event_rms_s": 0.051766728390706375,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 7,
+          "rmse_s": 0.0526504149868128,
+          "mean_event_rms_s": 0.051726212116619964,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 8,
+          "rmse_s": 0.05261677480774812,
+          "mean_event_rms_s": 0.051694139845940804,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 9,
+          "rmse_s": 0.05259140113392359,
+          "mean_event_rms_s": 0.05167002637209146,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 10,
+          "rmse_s": 0.05257261517111032,
+          "mean_event_rms_s": 0.051652541149837354,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        },
+        {
+          "iteration": 11,
+          "rmse_s": 0.05255600927262461,
+          "mean_event_rms_s": 0.05163638561357588,
+          "n_events": 3776,
+          "n_pairs": 1227200
+        }
+      ],
+      "best": {
+        "iteration": 11,
+        "rmse_s": 0.05255600927262461,
+        "mean_event_rms_s": 0.05163638561357588,
+        "n_events": 3776,
+        "n_pairs": 1227200
+      },
+      "signature": {
+        "meta_sha256": "2da62a3848557fac556862f2d3b40f867098ee7db830a95725706288c1c7b8ed",
+        "complete_markers": [
+          {
+            "iteration": 0,
+            "size": 50,
+            "mtime_ns": 1794535002576916769,
+            "sha256": "92b0fea11bae8fdb960c2e9263c4c3c2dc4dd62f3bc51a538af1ac79b7fbb0ee"
+          },
+          {
+            "iteration": 1,
+            "size": 50,
+            "mtime_ns": 1794537502598290288,
+            "sha256": "ccf7beecbc5a7c5b293a9efafb11e7284e028773b3880f95e56289968636572a"
+          },
+          {
+            "iteration": 2,
+            "size": 50,
+            "mtime_ns": 1794539997807716303,
+            "sha256": "8540b44102a22ae33358fed7a8ac0171aa6690216421fc4d9239cffacecc43b4"
+          },
+          {
+            "iteration": 3,
+            "size": 50,
+            "mtime_ns": 1794542520473980219,
+            "sha256": "6cf8fd8fe3cf21998735ac795d39e9f89dc0a885ad236d9f3857776cd1adb110"
+          },
+          {
+            "iteration": 4,
+            "size": 50,
+            "mtime_ns": 1794544774453955616,
+            "sha256": "072deec4a878a55eb5cb7f456a306186f45fd3225341c9fd6f54324db9ef34ed"
+          },
+          {
+            "iteration": 5,
+            "size": 50,
+            "mtime_ns": 1794547309279853830,
+            "sha256": "4bc033e329ed02355bafd75ae77694d5bc61a0caa67e47eb2f3c156d912547b9"
+          },
+          {
+            "iteration": 6,
+            "size": 50,
+            "mtime_ns": 1794549772400820475,
+            "sha256": "5f90ae222dba2e5a9ab56f0e30717cf445168801e92e5917e4c08db4ca1be77a"
+          },
+          {
+            "iteration": 7,
+            "size": 50,
+            "mtime_ns": 1794552070295289957,
+            "sha256": "c1a041fce104543676af55b9dbc9a2ac1a149d6cc5773aa6aa9ac39cce188ab1"
+          },
+          {
+            "iteration": 8,
+            "size": 50,
+            "mtime_ns": 1794553787304015386,
+            "sha256": "722c37313d088726ea5288db4cd3917e52f6554034f29c7de0cba48fb822b5e9"
+          },
+          {
+            "iteration": 9,
+            "size": 50,
+            "mtime_ns": 1794555449573532956,
+            "sha256": "4bff94acedec71e460b69808d86e6ce75db5c72a932b99aac30c902b4ad187a8"
+          },
+          {
+            "iteration": 10,
+            "size": 51,
+            "mtime_ns": 1794557123944547045,
+            "sha256": "8a5c226eda5b5d1cd91b7d56060583e7d51679ce69db7cda22b714a49f6d60e1"
+          },
+          {
+            "iteration": 11,
+            "size": 51,
+            "mtime_ns": 1794558726416550364,
+            "sha256": "56bab237a1cc46d63370d09b16792b44deb672f61f7d89bf994a43583ced164a"
+          }
+        ],
+        "n_events": 3776,
+        "run_dir": "/mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin12-fault-soft-k128-top50-dmin7_v1.4_20261113_005828_7ffd10ab6a12465f9f7d0196dbbf100a",
+        "schema_version": 1,
+        "sha256": "3899ea6a7a727aaf56624840c943bb4df91c1783e121fca27c0181e51613f24b"
+      },
+      "residual_completeness_verified": true,
+      "extracted_utc": "2026-11-13T08:32:40.947558+00:00"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+[Control] Early stopping disabled; running up to 12 updates
+1/12
+[Rays] 98176/98176 reached, 0 failed, 98176 used
+2/12
+[Rays] 98176/98176 reached, 0 failed, 98176 used
+3/12
+[Rays] 98176/98176 reached, 0 failed, 98176 used
+4/12
+[Rays] 98176/98176 reached, 0 failed, 98176 used
+5/12
+[Rays] 98176/98176 reached, 0 failed, 98176 used
+6/12
+[Rays] 98176/98176 reached, 0 failed, 98176 used
+7/12
+[Rays] 98176/98176 reached, 0 failed, 98176 used
+8/12
+[Rays] 98176/98176 reached, 0 failed, 98176 used
+9/12
+[Rays] 98176/98176 reached, 0 failed, 98176 used
+10/12
+[Rays] 98176/98176 reached, 0 failed, 98176 used
+11/12
+[Rays] 98176/98176 reached, 0 failed, 98176 used
+12/12
+[Rays] 98176/98176 reached, 0 failed, 98176 used
+[TomographyLogger] Run saved to: /mnt/disk01/egor/projects/EMTomo/runs/run_faultdmin13-fault-hard-k128-top128-dmin4_v1.4_20261113_112541_c7ee61aab7a740c4b41140d0801d9dae

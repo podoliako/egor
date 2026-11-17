@@ -22,6 +22,7 @@ from instruments.likelihood import (
 from raytracing import (
     compute_G_all_stations_serial, compute_G_all_stations_compact,
 )
+from .tomography_cache import RefinedCandidates
 from .tomography_math import (
     MatrixFreeNormalEquations,
     accumulate_normal_equations,
@@ -169,6 +170,7 @@ def process_event(
     *,
     cost: Optional[np.ndarray] = None,
     timings: Optional[dict] = None,
+    candidates: Optional[RefinedCandidates] = None,
 ) -> EventLog:
     """Add one event's normal equations using only its finite picks.
 
@@ -192,7 +194,7 @@ def process_event(
 
     if compute_G is None:
         compute_G = compute_G_all_stations_compact if settings.compact_rays else compute_G_all_stations_serial
-    if cost is None:
+    if cost is None and (candidates is None or settings.log_misfit):
         started = perf_counter()
         cost = negative_log_likelihood(
             fields.times, observed, noise,
@@ -202,19 +204,24 @@ def process_event(
     started = perf_counter()
     if settings.weights_top_n > settings.n_candidates:
         raise ValueError("weights_top_n must not exceed n_candidates")
-    cells = select_candidate_cells(cost, settings.n_candidates, settings.weights_min_distance)
-    if settings.fast_refinement:
-        refined = [refine_hypocentre_in_cell(fields.times, observed, cell, noise, **subset_kwargs)
-                   for cell in cells]
-    else:
-        refined = [refine_hypocentre_in_cell(fields.times, observed, cell, noise,
-                                             accelerated=False, **subset_kwargs)
-                   for cell in cells]
-    # Rank by the refined likelihood: the best grid cell need not hold the best position.
-    best = np.argsort([value for _, value in refined], kind="stable")[:settings.weights_top_n]
-    cells = cells[best]
-    positions = np.asarray([refined[i][0] for i in best], dtype=np.float64)
-    costs = np.asarray([refined[i][1] for i in best], dtype=np.float64)
+    if candidates is None:
+        cells = select_candidate_cells(cost, settings.n_candidates, settings.weights_min_distance)
+        if settings.fast_refinement:
+            refined = [refine_hypocentre_in_cell(fields.times, observed, cell, noise, **subset_kwargs)
+                       for cell in cells]
+        else:
+            refined = [refine_hypocentre_in_cell(fields.times, observed, cell, noise,
+                                                 accelerated=False, **subset_kwargs)
+                       for cell in cells]
+        candidates = RefinedCandidates(
+            cells, np.asarray([p for p, _ in refined], dtype=np.float64),
+            np.asarray([value for _, value in refined], dtype=np.float64),
+        )
+    # Cached candidates are unweighted: current top-N, mode and temperature still apply.
+    best = np.argsort(candidates.costs, kind="stable")[:settings.weights_top_n]
+    cells = candidates.cells[best]
+    positions = candidates.positions[best]
+    costs = candidates.costs[best]
     predicted = np.stack([sample_cell_centered_trilinear_batch(fields.times, p, **subset_kwargs)
                           for p in positions])
 
@@ -289,7 +296,7 @@ def process_event(
             misfit[tuple(cell)] = value
     return EventLog(
         candidate_cells=cells.astype(np.int32),
-        misfit_shape=np.asarray(cost.shape, dtype=np.int32),
+        misfit_shape=np.asarray(fields.times.shape[1:], dtype=np.int32),
         positions=positions,
         weights=weights,
         misfit=misfit,
@@ -329,7 +336,7 @@ def _effective_batch_size(fields, settings):
 
 
 def _process_events(event_indices, arrivals, fields, settings, compute_G=None,
-                    *, hessian=None, rhs=None, timings=None):
+                    *, hessian=None, rhs=None, timings=None, candidates=None):
     """Sum in event order, batching only the observation likelihood evaluation."""
     if hessian is None:
         hessian = (MatrixFreeNormalEquations(fields.n_vox) if settings.normal_solver == "matrix_free"
@@ -344,7 +351,10 @@ def _process_events(event_indices, arrivals, fields, settings, compute_G=None,
         full_offsets = []
         if batch_size > 1:
             batch_arrivals = arrivals[list(batch)]
-            full_offsets = np.flatnonzero(np.all(np.isfinite(batch_arrivals), axis=1))
+            needs_cost = np.asarray([
+                candidates is None or event not in candidates or settings.log_misfit for event in batch
+            ])
+            full_offsets = np.flatnonzero(np.all(np.isfinite(batch_arrivals), axis=1) & needs_cost)
             if len(full_offsets):
                 started = perf_counter()
                 costs = negative_log_likelihood_batch(
@@ -358,6 +368,7 @@ def _process_events(event_indices, arrivals, fields, settings, compute_G=None,
                 log = process_event(
                     arrivals[event], fields, settings, hessian, rhs, compute_G,
                     cost=cost_rows.get(offset), timings=timings,
+                    candidates=None if candidates is None else candidates.get(event),
                 )
             except Exception as error:
                 raise RuntimeError(f"Failed to process event {event}") from error
@@ -369,9 +380,9 @@ def _process_events(event_indices, arrivals, fields, settings, compute_G=None,
 _WORKER: dict = {}
 
 
-def _init_worker(arrivals, fields, settings, buffer=None, n_chunks=0) -> None:
+def _init_worker(arrivals, fields, settings, buffer=None, n_chunks=0, candidates=None) -> None:
     _WORKER.clear()
-    _WORKER.update(arrivals=arrivals, fields=fields, settings=settings)
+    _WORKER.update(arrivals=arrivals, fields=fields, settings=settings, candidates=candidates)
     if buffer is not None:
         stride = fields.n_vox * (fields.n_vox + 1)
         _WORKER["normal_buffers"] = np.frombuffer(buffer, dtype=np.float64).reshape(n_chunks, stride)
@@ -403,7 +414,7 @@ def _process_chunk(task):
     started = perf_counter()
     hessian, rhs, logs = _process_events(
         event_indices, _WORKER["arrivals"], fields, _WORKER["settings"],
-        hessian=hessian, rhs=rhs, timings=timings,
+        hessian=hessian, rhs=rhs, timings=timings, candidates=_WORKER["candidates"],
     )
     timings["chunk_elapsed_s"] = perf_counter() - started
     # Shared dense slots have one writer each; only compact results cross the pipe.
@@ -411,7 +422,7 @@ def _process_chunk(task):
 
 
 def run_events(arrivals, fields: IterationFields, settings: EventSettings, n_workers: int = 1,
-               *, diagnostics: Optional[dict] = None):
+               *, diagnostics: Optional[dict] = None, candidates=None):
     """Return ordered normal equations/logs for an event/global-station arrival table.
 
     NaN denotes missing picks; each event needs at least two finite observations.
@@ -427,7 +438,7 @@ def run_events(arrivals, fields: IterationFields, settings: EventSettings, n_wor
     chunk_times = []
     if len(chunks) == 1:
         started = perf_counter()
-        result = _process_events(chunks[0], arrivals, fields, settings, timings=totals)
+        result = _process_events(chunks[0], arrivals, fields, settings, timings=totals, candidates=candidates)
         chunk_times.append(perf_counter() - started)
     else:
         context = mp.get_context("fork")
@@ -440,7 +451,7 @@ def run_events(arrivals, fields: IterationFields, settings: EventSettings, n_wor
         hessian = rhs = None
         logs = []
         with context.Pool(len(chunks), initializer=_init_worker,
-                          initargs=(arrivals, fields, settings, buffer, len(chunks))) as pool:
+                          initargs=(arrivals, fields, settings, buffer, len(chunks), candidates)) as pool:
             for index, chunk_hessian, chunk_rhs, chunk_logs, times in pool.imap(_process_chunk, enumerate(chunks)):
                 if shared is not None:
                     chunk_hessian = shared[index, :n*n].reshape(n, n)
@@ -463,5 +474,6 @@ def run_events(arrivals, fields: IterationFields, settings: EventSettings, n_wor
     if diagnostics is not None:
         diagnostics.update(worker_time_s=totals, chunk_elapsed_s=chunk_times,
                            workers=len(chunks), likelihood_batch_size=_effective_batch_size(fields, settings),
-                           normal_solver=settings.normal_solver)
+                           normal_solver=settings.normal_solver,
+                           reused_localizations=0 if candidates is None else len(candidates))
     return result
